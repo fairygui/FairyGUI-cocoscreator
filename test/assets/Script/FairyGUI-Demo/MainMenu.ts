@@ -10,7 +10,7 @@ import JoystickDemo from "./JoystickDemo";
 import BagDemo from "./BagDemo";
 import ListEffectDemo from "./ListEffectDemo";
 import GuideDemo from "./GuideDemo";
-import CooldownDemo from "./CoolDownDemo";
+import CooldownDemo from "./CooldownDemo";
 import HitTestDemo from "./HitTestDemo";
 import ChatDemo from "./ChatDemo";
 import ScrollPaneDemo from "./ScrollPaneDemo";
