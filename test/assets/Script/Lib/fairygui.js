@@ -745,6 +745,18 @@ var __extends = (this && this.__extends) || (function () {
             this._sizePercentInGroup = 0;
             this._touchDisabled = false;
             this._node = new cc.Node();
+            if (GObject._defaultGroupIndex == -1) {
+                GObject._defaultGroupIndex = 0;
+                var groups = cc.game.groupList;
+                var cnt = groups.length;
+                for (var i = 0; i < cnt; i++) {
+                    if (groups[i].toLowerCase() == fgui.UIConfig.defaultUIGroup.toLowerCase()) {
+                        GObject._defaultGroupIndex = i;
+                        break;
+                    }
+                }
+            }
+            this._node.groupIndex = GObject._defaultGroupIndex;
             this._node.setAnchorPoint(0, 1);
             this._node.on(cc.Node.EventType.ANCHOR_CHANGED, this.handleAnchorChanged, this);
             this._id = this._node.uuid;
@@ -1816,6 +1828,7 @@ var __extends = (this && this.__extends) || (function () {
                 this._node.emit(fgui.Event.DRAG_END, evt);
             }
         };
+        GObject._defaultGroupIndex = -1;
         //drag support
         //-------------------------------------------------------------------
         GObject.sGlobalDragStart = new cc.Vec2();
@@ -12673,6 +12686,11 @@ var __extends = (this && this.__extends) || (function () {
         UIConfig.bringWindowToFrontOnClick = true;
         UIConfig.frameTimeForAsyncUIConstruction = 0.002;
         UIConfig.linkUnderline = true;
+        /** !#en
+        Default group name of UI node.<br/>
+        !#zh
+        UI节点默认的分组。<br/>*/
+        UIConfig.defaultUIGroup = "UI";
         return UIConfig;
     }());
     fgui.UIConfig = UIConfig;

@@ -275,6 +275,7 @@ declare namespace fgui {
         _sizePercentInGroup: number;
         _touchDisabled: boolean;
         _partner: GObjectPartner;
+        static _defaultGroupIndex: number;
         constructor();
         readonly id: string;
         name: string;
@@ -1483,6 +1484,11 @@ declare namespace fgui {
         static bringWindowToFrontOnClick: boolean;
         static frameTimeForAsyncUIConstruction: number;
         static linkUnderline: boolean;
+        /** !#en
+        Default group name of UI node.<br/>
+        !#zh
+        UI节点默认的分组。<br/>*/
+        static defaultUIGroup: string;
     }
     var addLoadHandler: Function;
     var registerFont: Function;
