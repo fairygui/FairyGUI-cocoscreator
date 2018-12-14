@@ -53,8 +53,22 @@ namespace fgui {
         public _touchDisabled: boolean = false;
         public _partner: GObjectPartner;
 
+        public static _defaultGroupIndex: number = -1;
+
         public constructor() {
             this._node = new cc.Node();
+            if (GObject._defaultGroupIndex == -1) {
+                GObject._defaultGroupIndex = 0;
+                let groups: Array<string> = (<any>cc.game).groupList;
+                let cnt = groups.length;
+                for (let i = 0; i < cnt; i++) {
+                    if (groups[i].toLowerCase() == UIConfig.defaultUIGroup.toLowerCase()) {
+                        GObject._defaultGroupIndex = i;
+                        break;
+                    }
+                }
+            }
+            this._node.groupIndex = GObject._defaultGroupIndex;
             this._node.setAnchorPoint(0, 1);
             this._node.on(cc.Node.EventType.ANCHOR_CHANGED, this.handleAnchorChanged, this);
 

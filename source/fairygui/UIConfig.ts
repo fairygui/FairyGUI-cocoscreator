@@ -61,6 +61,12 @@ namespace fgui {
         public static frameTimeForAsyncUIConstruction: number = 0.002;
 
         public static linkUnderline: boolean = true;
+
+        /** !#en
+		Default group name of UI node.<br/>
+		!#zh
+		UI节点默认的分组。<br/>*/
+        public static defaultUIGroup: string = "UI";
     }
 
     let _flag: boolean = false;
