@@ -159,11 +159,9 @@ namespace fgui {
                 tag = tag.toLowerCase();
                 func = this._handlers[tag];
                 if (func != null) {
-                    if (!remove) {
-                        repl = func.call(this, tag, end, attr);
-                        if (repl != null)
-                            result += repl;
-                    }
+                    repl = func.call(this, tag, end, attr);
+                    if (repl != null && !remove)
+                        result += repl;
                 }
                 else
                     result += this._text.substring(pos1, this._readPos);

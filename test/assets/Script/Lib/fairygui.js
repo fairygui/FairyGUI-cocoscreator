@@ -1,4 +1,4 @@
-window.fgui = {};
+window.fgui={};
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1091,7 +1091,7 @@ var __extends = (this && this.__extends) || (function () {
                     return this._node.rotation;
             },
             set: function (value) {
-                var x = this._node.angle;
+                var x = this._node.angle; //2.1才开始加的接口，兼容一下
                 if (x != undefined) {
                     value = -value;
                     if (x != value) {
@@ -17174,11 +17174,9 @@ var __extends = (this && this.__extends) || (function () {
                 tag = tag.toLowerCase();
                 func = this._handlers[tag];
                 if (func != null) {
-                    if (!remove) {
-                        repl = func.call(this, tag, end, attr);
-                        if (repl != null)
-                            result += repl;
-                    }
+                    repl = func.call(this, tag, end, attr);
+                    if (repl != null && !remove)
+                        result += repl;
                 }
                 else
                     result += this._text.substring(pos1, this._readPos);
