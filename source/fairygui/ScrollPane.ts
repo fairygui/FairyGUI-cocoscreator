@@ -75,7 +75,7 @@ namespace fgui {
 		private static sOldChange: cc.Vec2 = new cc.Vec2();
 
 		public setup(buffer: ByteBuffer): void {
-			this._owner = <GComponent>(this.node.getComponent(GObjectPartner).gOwner);
+			this._owner = <GComponent>(this.node["$gobj"]);
 
 			this._maskContainer = new cc.Node("ScrollPane");
 			this._maskContainer.setAnchorPoint(0, 1);

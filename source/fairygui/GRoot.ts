@@ -395,22 +395,7 @@ namespace fgui {
                         }
                         return;
                     }
-                    if (mc._parent == null) {
-                        //可能有些不直接在children里，但node挂着的
-                        let pn: cc.Node = mc.node.parent;
-                        mc = null;
-
-                        while (pn) {
-                            let partner = pn.getComponent(GObjectPartner);
-                            if (partner) {
-                                mc = partner.gOwner;
-                                break;
-                            }
-                            pn = pn.parent;
-                        }
-                    }
-                    else
-                        mc = mc._parent;
+                    mc = mc.findParent();
                 }
 
                 let cnt: number = this._popupStack.length;

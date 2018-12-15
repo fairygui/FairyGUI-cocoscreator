@@ -406,7 +406,7 @@ namespace fgui {
 
                 this._container.setContentSize(this._width, this._height);
                 if (this._content2 != null)
-                    this._content2.setPosition(0, -this._height);
+                    this._content2.setPosition(-this._width / 2, -this._height / 2);
 
                 if (this._contentWidth == this._width && this._contentHeight == this._height)
                     return;
@@ -446,16 +446,18 @@ namespace fgui {
             }
 
             this._container.setContentSize(this._contentWidth, this._contentHeight);
-            if (this._content2 != null)
+            if (this._content2 != null) {
+                this._content2.setPosition(-this._width / 2, -this._height / 2);
                 this._content2.setScale(sx, sy);
+            }
 
             var nx: number, ny: number;
             if (this._align == AlignType.Center)
                 nx = 0;
             else if (this._align == AlignType.Right)
-                nx = Math.floor((this.width - this._contentWidth) / 2);
+                nx = Math.floor((this._width - this._contentWidth) / 2);
             else
-                nx = -Math.floor((this.width - this._contentWidth) / 2);
+                nx = -Math.floor((this._width - this._contentWidth) / 2);
 
             if (this._verticalAlign == VertAlignType.Middle)
                 ny = 0;
@@ -492,6 +494,23 @@ namespace fgui {
 
         protected handleGrayedChanged(): void {
             this._content.setState(this._grayed ? cc.Sprite.State.GRAY : cc.Sprite.State.NORMAL);
+        }
+
+        public hitTest(globalPt: cc.Vec2): GObject {
+            if (this._touchDisabled || !this._touchable || !this._node.activeInHierarchy)
+                return null;
+
+            if (this._content2) {
+                let obj: GObject = this._content2.hitTest(globalPt);
+                if (obj)
+                    return obj;
+            }
+
+            let pt: cc.Vec2 = this._node.convertToNodeSpace(globalPt);
+            if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
+                return this;
+            else
+                return null;
         }
 
         public setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void {

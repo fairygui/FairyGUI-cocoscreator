@@ -385,7 +385,7 @@ namespace fgui {
 
         private buildNativeDisplayList(dt?: number): void {
             if (!isNaN(dt)) {
-                let _t = <GComponent>(<any>this).gOwner;
+                let _t = <GComponent>(this.node["$gobj"]);
                 _t.buildNativeDisplayList();
                 return;
             }
@@ -805,7 +805,7 @@ namespace fgui {
 
         private refresh(dt?: number): void {
             if (!isNaN(dt)) {
-                let _t = <GComponent>(<any>this).gOwner;
+                let _t = <GComponent>(this.node["$gobj"]);
                 _t.refresh();
                 return;
             }

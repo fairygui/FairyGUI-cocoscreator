@@ -756,6 +756,7 @@ var __extends = (this && this.__extends) || (function () {
                     }
                 }
             }
+            this._node["$gobj"] = this;
             this._node.groupIndex = GObject._defaultGroupIndex;
             this._node.setAnchorPoint(0, 1);
             this._node.on(cc.Node.EventType.ANCHOR_CHANGED, this.handleAnchorChanged, this);
@@ -765,7 +766,6 @@ var __extends = (this && this.__extends) || (function () {
             this._gears = [];
             this._blendMode = fgui.BlendMode.Normal;
             this._partner = this._node.addComponent(GObjectPartner);
-            this._partner.gOwner = this;
         }
         Object.defineProperty(GObject.prototype, "id", {
             get: function () {
@@ -1084,10 +1084,22 @@ var __extends = (this && this.__extends) || (function () {
         });
         Object.defineProperty(GObject.prototype, "rotation", {
             get: function () {
-                return this._node.rotation;
+                var x = this._node.angle;
+                if (x != undefined)
+                    return -x;
+                else
+                    return this._node.rotation;
             },
             set: function (value) {
-                if (this._node.rotation != value) {
+                var x = this._node.angle;
+                if (x != undefined) {
+                    value = -value;
+                    if (x != value) {
+                        this._node.angle = value;
+                        this.updateGear(3);
+                    }
+                }
+                else if (this._node.rotation != value) {
                     this._node.rotation = value;
                     this.updateGear(3);
                 }
@@ -1333,6 +1345,19 @@ var __extends = (this && this.__extends) || (function () {
             if (this._parent)
                 this._parent.removeChild(this);
         };
+        GObject.prototype.findParent = function () {
+            if (this._parent)
+                return this._parent;
+            //可能有些不直接在children里，但node挂着的
+            var pn = this._node.parent;
+            while (pn) {
+                var gobj = pn["$gobj"];
+                if (gobj)
+                    return gobj;
+                pn = pn.parent;
+            }
+            return null;
+        };
         Object.defineProperty(GObject.prototype, "root", {
             get: function () {
                 if (this instanceof fgui.GRoot)
@@ -1454,8 +1479,7 @@ var __extends = (this && this.__extends) || (function () {
             configurable: true
         });
         GObject.cast = function (obj) {
-            var info = obj.getComponent(GObjectPartner);
-            return info ? info.gOwner : null;
+            return obj["$gobj"];
         };
         Object.defineProperty(GObject.prototype, "text", {
             get: function () {
@@ -1851,23 +1875,23 @@ var __extends = (this && this.__extends) || (function () {
                 this.scheduleOnce(callback, delay);
         };
         GObjectPartner.prototype.onClickLink = function (evt, text) {
-            this.gOwner.node.emit(fgui.Event.LINK, text, evt);
+            this.node.emit(fgui.Event.LINK, text, evt);
         };
         GObjectPartner.prototype.onEnable = function () {
-            this.gOwner.onEnable();
+            this.node["$gobj"].onEnable();
             if (this._emitDisplayEvents)
-                this.gOwner.node.emit(fgui.Event.DISPLAY);
+                this.node.emit(fgui.Event.DISPLAY);
         };
         GObjectPartner.prototype.onDisable = function () {
-            this.gOwner.onDisable();
+            this.node["$gobj"].onDisable();
             if (this._emitDisplayEvents)
-                this.gOwner.node.emit(fgui.Event.UNDISPLAY);
+                this.node.emit(fgui.Event.UNDISPLAY);
         };
         GObjectPartner.prototype.update = function (dt) {
-            this.gOwner.onUpdate(dt);
+            this.node["$gobj"].onUpdate(dt);
         };
         GObjectPartner.prototype.onDestroy = function () {
-            this.gOwner.onDestroy();
+            this.node["$gobj"].onDestroy();
         };
         return GObjectPartner;
     }(cc.Component));
@@ -2184,7 +2208,7 @@ var __extends = (this && this.__extends) || (function () {
         };
         GComponent.prototype.buildNativeDisplayList = function (dt) {
             if (!isNaN(dt)) {
-                var _t = this.gOwner;
+                var _t = (this.node["$gobj"]);
                 _t.buildNativeDisplayList();
                 return;
             }
@@ -2569,7 +2593,7 @@ var __extends = (this && this.__extends) || (function () {
         };
         GComponent.prototype.refresh = function (dt) {
             if (!isNaN(dt)) {
-                var _t = this.gOwner;
+                var _t = (this.node["$gobj"]);
                 _t.refresh();
                 return;
             }
@@ -3958,7 +3982,7 @@ var __extends = (this && this.__extends) || (function () {
             }
         };
         GGroup.prototype._ensureBoundsCorrect = function () {
-            var _t = (this.gOwner);
+            var _t = (this.node["$gobj"]);
             _t.ensureBoundsCorrect();
         };
         GGroup.prototype.ensureBoundsCorrect = function () {
@@ -5510,7 +5534,7 @@ var __extends = (this && this.__extends) || (function () {
         };
         GList.prototype._refreshVirtualList = function (dt) {
             if (!isNaN(dt)) {
-                var _t = (this.gOwner);
+                var _t = (this.node["$gobj"]);
                 _t._refreshVirtualList();
                 return;
             }
@@ -7042,7 +7066,7 @@ var __extends = (this && this.__extends) || (function () {
                 this._updatingLayout = false;
                 this._container.setContentSize(this._width, this._height);
                 if (this._content2 != null)
-                    this._content2.setPosition(0, -this._height);
+                    this._content2.setPosition(-this._width / 2, -this._height / 2);
                 if (this._contentWidth == this._width && this._contentHeight == this._height)
                     return;
             }
@@ -7078,15 +7102,17 @@ var __extends = (this && this.__extends) || (function () {
                 }
             }
             this._container.setContentSize(this._contentWidth, this._contentHeight);
-            if (this._content2 != null)
+            if (this._content2 != null) {
+                this._content2.setPosition(-this._width / 2, -this._height / 2);
                 this._content2.setScale(sx, sy);
+            }
             var nx, ny;
             if (this._align == fgui.AlignType.Center)
                 nx = 0;
             else if (this._align == fgui.AlignType.Right)
-                nx = Math.floor((this.width - this._contentWidth) / 2);
+                nx = Math.floor((this._width - this._contentWidth) / 2);
             else
-                nx = -Math.floor((this.width - this._contentWidth) / 2);
+                nx = -Math.floor((this._width - this._contentWidth) / 2);
             if (this._verticalAlign == fgui.VertAlignType.Middle)
                 ny = 0;
             else if (this._verticalAlign == fgui.VertAlignType.Bottom)
@@ -7116,6 +7142,20 @@ var __extends = (this && this.__extends) || (function () {
         };
         GLoader.prototype.handleGrayedChanged = function () {
             this._content.setState(this._grayed ? cc.Sprite.State.GRAY : cc.Sprite.State.NORMAL);
+        };
+        GLoader.prototype.hitTest = function (globalPt) {
+            if (this._touchDisabled || !this._touchable || !this._node.activeInHierarchy)
+                return null;
+            if (this._content2) {
+                var obj = this._content2.hitTest(globalPt);
+                if (obj)
+                    return obj;
+            }
+            var pt = this._node.convertToNodeSpace(globalPt);
+            if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
+                return this;
+            else
+                return null;
         };
         GLoader.prototype.setup_beforeAdd = function (buffer, beginPos) {
             _super.prototype.setup_beforeAdd.call(this, buffer, beginPos);
@@ -8408,21 +8448,7 @@ var __extends = (this && this.__extends) || (function () {
                         }
                         return;
                     }
-                    if (mc._parent == null) {
-                        //可能有些不直接在children里，但node挂着的
-                        var pn = mc.node.parent;
-                        mc = null;
-                        while (pn) {
-                            var partner = pn.getComponent(fgui.GObjectPartner);
-                            if (partner) {
-                                mc = partner.gOwner;
-                                break;
-                            }
-                            pn = pn.parent;
-                        }
-                    }
-                    else
-                        mc = mc._parent;
+                    mc = mc.findParent();
                 }
                 var cnt = this._popupStack.length;
                 for (var i = cnt - 1; i >= 0; i--) {
@@ -8800,14 +8826,15 @@ var __extends = (this && this.__extends) || (function () {
         function GTextInput() {
             var _this = _super.call(this) || this;
             _this._node.name = "GTextInput";
+            _this._touchDisabled = false;
             return _this;
         }
         GTextInput.prototype.createRenderer = function () {
-            this._editBox = this._node.addComponent(cc.EditBox);
+            this._editBox = this._node.addComponent(MyEditBox);
             this._editBox.placeholder = "";
             this._editBox.maxLength = -1;
             this._node.on('text-changed', this.onTextChanged, this);
-            this._node.on('editing-did-began', this.onEditingBegan, this);
+            this.on(fgui.Event.TOUCH_END, this.onTouchEnd1, this);
             this.autoSize = fgui.AutoSizeType.None;
         };
         Object.defineProperty(GTextInput.prototype, "editable", {
@@ -8943,9 +8970,8 @@ var __extends = (this && this.__extends) || (function () {
         GTextInput.prototype.onTextChanged = function () {
             this._text = this._editBox.string;
         };
-        GTextInput.prototype.onEditingBegan = function () {
-            //点击输入框时，竟然不会产生点击事件，这里模拟一个
-            fgui.GRoot.inst.inputProcessor.simulateClick(this);
+        GTextInput.prototype.onTouchEnd1 = function (evt) {
+            this._editBox.openKeyboard(evt.touch);
         };
         GTextInput.prototype.setup_beforeAdd = function (buffer, beginPos) {
             _super.prototype.setup_beforeAdd.call(this, buffer, beginPos);
@@ -8968,6 +8994,22 @@ var __extends = (this && this.__extends) || (function () {
         return GTextInput;
     }(fgui.GTextField));
     fgui.GTextInput = GTextInput;
+    var MyEditBox = /** @class */ (function (_super) {
+        __extends(MyEditBox, _super);
+        function MyEditBox() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        MyEditBox.prototype._registerEvent = function () {
+            //取消掉原来的事件处理
+        };
+        MyEditBox.prototype.openKeyboard = function (touch) {
+            var impl = this["_impl"];
+            if (impl) {
+                impl._onTouchEnded(touch);
+            }
+        };
+        return MyEditBox;
+    }(cc.EditBox));
 })(fgui || (fgui = {}));
 
 (function (fgui) {
@@ -9883,7 +9925,7 @@ var __extends = (this && this.__extends) || (function () {
             return _super !== null && _super.apply(this, arguments) || this;
         }
         ScrollPane.prototype.setup = function (buffer) {
-            this._owner = (this.node.getComponent(fgui.GObjectPartner).gOwner);
+            this._owner = (this.node["$gobj"]);
             this._maskContainer = new cc.Node("ScrollPane");
             this._maskContainer.setAnchorPoint(0, 1);
             this._maskContainer.parent = this._owner.node;
@@ -14292,7 +14334,7 @@ var __extends = (this && this.__extends) || (function () {
             return _this;
         }
         InputProcessor.prototype.onLoad = function () {
-            this._owner = this.node.getComponent(fgui.GObjectPartner).gOwner;
+            this._owner = this.node["$gobj"];
         };
         InputProcessor.prototype.onEnable = function () {
             var node = this.node;
@@ -14412,7 +14454,7 @@ var __extends = (this && this.__extends) || (function () {
                 var cnt = ti.touchMonitors.length;
                 for (var i = 0; i < cnt; i++) {
                     var mm = ti.touchMonitors[i];
-                    if (!cc.isValid(mm.node) || !mm.node.activeInHierarchy)
+                    if (mm.node == null || !mm.node.activeInHierarchy)
                         continue;
                     evt2.unuse();
                     evt2.type = fgui.Event.TOUCH_MOVE;
@@ -14420,7 +14462,7 @@ var __extends = (this && this.__extends) || (function () {
                     if (mm == this._owner)
                         done = true;
                 }
-                if (!done) {
+                if (!done && this.node != null) {
                     evt2.unuse();
                     evt2.type = fgui.Event.TOUCH_MOVE;
                     this.node.dispatchEvent(evt2);
@@ -14435,7 +14477,7 @@ var __extends = (this && this.__extends) || (function () {
             var cnt = ti.touchMonitors.length;
             for (var i = 0; i < cnt; i++) {
                 var mm = ti.touchMonitors[i];
-                if (mm == ti.target || !cc.isValid(mm.node) || !mm.node.activeInHierarchy
+                if (mm == ti.target || mm.node == null || !mm.node.activeInHierarchy
                     || (mm instanceof fgui.GComponent) && mm.isAncestorOf(ti.target))
                     continue;
                 evt2.unuse();
@@ -14443,7 +14485,7 @@ var __extends = (this && this.__extends) || (function () {
                 mm.node.dispatchEvent(evt2);
             }
             ti.touchMonitors.length = 0;
-            if (ti.target) {
+            if (ti.target && ti.target.node != null) {
                 if (ti.target instanceof fgui.GRichTextField)
                     ti.target.node.getComponent(cc.RichText)["_onTouchEnded"](evt2);
                 evt2.unuse();
@@ -14472,14 +14514,14 @@ var __extends = (this && this.__extends) || (function () {
             var cnt = ti.touchMonitors.length;
             for (var i = 0; i < cnt; i++) {
                 var mm = ti.touchMonitors[i];
-                if (mm == ti.target || !cc.isValid(mm.node) || !mm.node.activeInHierarchy
+                if (mm == ti.target || mm.node == null || !mm.node.activeInHierarchy
                     || (mm instanceof fgui.GComponent) && mm.isAncestorOf(ti.target))
                     continue;
                 evt2.initiator = mm;
                 mm.node.dispatchEvent(evt2);
             }
             ti.touchMonitors.length = 0;
-            if (ti.target) {
+            if (ti.target && ti.target.node != null) {
                 evt2.bubbles = true;
                 ti.target.node.dispatchEvent(evt2);
             }
@@ -14511,14 +14553,14 @@ var __extends = (this && this.__extends) || (function () {
                 var cnt = ti.touchMonitors.length;
                 for (var i = 0; i < cnt; i++) {
                     var mm = ti.touchMonitors[i];
-                    if (!cc.isValid(mm.node) || !mm.node.activeInHierarchy)
+                    if (mm.node == null || !mm.node.activeInHierarchy)
                         continue;
                     evt2.initiator = mm;
                     mm.node.dispatchEvent(evt2);
                     if (mm == this._owner)
                         done = true;
                 }
-                if (!done) {
+                if (!done && this.node != null) {
                     evt2.initiator = this._owner;
                     this.node.dispatchEvent(evt2);
                     fgui.Event._return(evt2);
@@ -14579,7 +14621,7 @@ var __extends = (this && this.__extends) || (function () {
             var obj = ti.target;
             while (obj != null) {
                 ti.downTargets.push(obj);
-                obj = obj.parent;
+                obj = obj.findParent();
             }
         };
         InputProcessor.prototype.setEnd = function (ti) {
@@ -14602,14 +14644,14 @@ var __extends = (this && this.__extends) || (function () {
                 || Math.abs(ti.pos.x - ti.downPos.x) > 50 || Math.abs(ti.pos.y - ti.downPos.y) > 50)
                 return null;
             var obj = ti.downTargets[0];
-            if (obj && cc.isValid(obj.node) && obj.node.activeInHierarchy)
+            if (obj && obj.node != null && obj.node.activeInHierarchy)
                 return obj;
             obj = ti.target;
             while (obj != null) {
                 var index = ti.downTargets.indexOf(obj);
-                if (index != -1 && cc.isValid(obj.node) && obj.node.activeInHierarchy)
+                if (index != -1 && obj.node != null && obj.node.activeInHierarchy)
                     break;
-                obj = obj.parent;
+                obj = obj.findParent();
             }
             return obj;
         };
@@ -14617,25 +14659,25 @@ var __extends = (this && this.__extends) || (function () {
             if (ti.lastRollOver == target)
                 return;
             var element = ti.lastRollOver;
-            while (element != null) {
+            while (element != null && element.node != null) {
                 this._rollOutChain.push(element);
-                element = element.parent;
+                element = element.findParent();
             }
             element = target;
-            while (element != null) {
+            while (element != null && element.node != null) {
                 var i = this._rollOutChain.indexOf(element);
                 if (i != -1) {
                     this._rollOutChain.length = i;
                     break;
                 }
                 this._rollOverChain.push(element);
-                element = element.parent;
+                element = element.findParent();
             }
             ti.lastRollOver = target;
             var cnt = this._rollOutChain.length;
             for (var i = 0; i < cnt; i++) {
                 element = this._rollOutChain[i];
-                if (cc.isValid(element.node) && element.node.activeInHierarchy) {
+                if (element.node != null && element.node.activeInHierarchy) {
                     var evt = this.getEvent(ti, element, fgui.Event.ROLL_OUT, false);
                     element.node.dispatchEvent(evt);
                     fgui.Event._return(evt);
@@ -14644,7 +14686,7 @@ var __extends = (this && this.__extends) || (function () {
             cnt = this._rollOverChain.length;
             for (var i = 0; i < cnt; i++) {
                 element = this._rollOverChain[i];
-                if (cc.isValid(element.node) && element.node.activeInHierarchy) {
+                if (element.node != null && element.node.activeInHierarchy) {
                     var evt = this.getEvent(ti, element, fgui.Event.ROLL_OVER, false);
                     element.node.dispatchEvent(evt);
                     fgui.Event._return(evt);

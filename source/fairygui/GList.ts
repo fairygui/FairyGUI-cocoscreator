@@ -1072,7 +1072,7 @@ namespace fgui {
 
         private _refreshVirtualList(dt?: number): void {
             if (!isNaN(dt)) {
-                let _t = <GList>((<any>this).gOwner);
+                let _t = <GList>(this.node["$gobj"]);
                 _t._refreshVirtualList();
                 return;
             }

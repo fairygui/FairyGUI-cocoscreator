@@ -63,7 +63,7 @@ namespace fgui {
         }
 
         private _ensureBoundsCorrect(): void {
-            let _t = <GGroup>((<any>this).gOwner);
+            let _t = <GGroup>(this.node["$gobj"]);
             _t.ensureBoundsCorrect();
         }
 

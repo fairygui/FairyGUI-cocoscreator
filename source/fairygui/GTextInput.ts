@@ -10,15 +10,16 @@ namespace fgui {
             super();
 
             this._node.name = "GTextInput";
+            this._touchDisabled = false;
         }
 
         protected createRenderer() {
-            this._editBox = this._node.addComponent(cc.EditBox);
+            this._editBox = this._node.addComponent(MyEditBox);
             this._editBox.placeholder = "";
             this._editBox.maxLength = -1;
 
             this._node.on('text-changed', this.onTextChanged, this);
-            this._node.on('editing-did-began', this.onEditingBegan, this);
+            this.on(Event.TOUCH_END, this.onTouchEnd1, this);
 
             this.autoSize = AutoSizeType.None;
         }
@@ -149,9 +150,8 @@ namespace fgui {
             this._text = this._editBox.string;
         }
 
-        private onEditingBegan() {
-            //点击输入框时，竟然不会产生点击事件，这里模拟一个
-            GRoot.inst.inputProcessor.simulateClick(this);
+        private onTouchEnd1(evt: Event) {
+            (<MyEditBox>this._editBox).openKeyboard(evt.touch);
         }
 
         public setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void {
@@ -175,6 +175,19 @@ namespace fgui {
             }
             if (buffer.readBool())
                 this.password = true;
+        }
+    }
+
+    class MyEditBox extends cc.EditBox {
+        _registerEvent() {
+            //取消掉原来的事件处理
+        }
+
+        public openKeyboard(touch: any) {
+            let impl = this["_impl"];
+            if (impl) {
+                impl._onTouchEnded(touch);
+            }
         }
     }
 }

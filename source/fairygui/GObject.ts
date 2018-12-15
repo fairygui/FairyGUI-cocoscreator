@@ -68,6 +68,7 @@ namespace fgui {
                     }
                 }
             }
+            this._node["$gobj"] = this;
             this._node.groupIndex = GObject._defaultGroupIndex;
             this._node.setAnchorPoint(0, 1);
             this._node.on(cc.Node.EventType.ANCHOR_CHANGED, this.handleAnchorChanged, this);
@@ -80,7 +81,6 @@ namespace fgui {
             this._blendMode = BlendMode.Normal;
 
             this._partner = this._node.addComponent(GObjectPartner);
-            this._partner.gOwner = this;
         }
 
         public get id(): string {
@@ -372,13 +372,24 @@ namespace fgui {
         }
 
         public get rotation(): number {
-            return this._node.rotation;
+            let x = this._node.angle;
+            if (x != undefined)
+                return -x;
+            else
+                return this._node.rotation;
         }
 
         public set rotation(value: number) {
-            if (this._node.rotation != value) {
+            let x = this._node.angle; //2.1才开始加的接口，兼容一下
+            if (x != undefined) {
+                value = -value;
+                if (x != value) {
+                    this._node.angle = value;
+                    this.updateGear(3);
+                }
+            }
+            else if (this._node.rotation != value) {
                 this._node.rotation = value;
-
                 this.updateGear(3);
             }
         }
@@ -601,6 +612,23 @@ namespace fgui {
                 this._parent.removeChild(this);
         }
 
+        public findParent(): GObject {
+            if (this._parent)
+                return this._parent;
+
+            //可能有些不直接在children里，但node挂着的
+            let pn: cc.Node = this._node.parent;
+            while (pn) {
+                let gobj = pn["$gobj"];
+                if (gobj)
+                    return gobj;
+
+                pn = pn.parent;
+            }
+
+            return null;
+        }
+
         public get root(): GRoot {
             if (this instanceof GRoot)
                 return <GRoot>this;
@@ -675,8 +703,7 @@ namespace fgui {
         }
 
         public static cast(obj: cc.Node): GObject {
-            let info = obj.getComponent(GObjectPartner);
-            return info ? info.gOwner : null;
+            return obj["$gobj"];
         }
 
         public get text(): string {
@@ -1115,7 +1142,6 @@ namespace fgui {
     }
 
     export class GObjectPartner extends cc.Component {
-        public gOwner: GObject;
         public _emitDisplayEvents: boolean = false;
 
         public callLater(callback: Function, delay?: number): void {
@@ -1124,29 +1150,29 @@ namespace fgui {
         }
 
         public onClickLink(evt: Event, text: string) {
-            (<GRichTextField>this.gOwner).node.emit(Event.LINK, text, evt);
+            this.node.emit(Event.LINK, text, evt);
         }
 
         protected onEnable() {
-            (<any>this.gOwner).onEnable();
+            this.node["$gobj"].onEnable();
 
             if (this._emitDisplayEvents)
-                this.gOwner.node.emit(Event.DISPLAY);
+                this.node.emit(Event.DISPLAY);
         }
 
         protected onDisable() {
-            (<any>this.gOwner).onDisable();
+            this.node["$gobj"].onDisable();
 
             if (this._emitDisplayEvents)
-                this.gOwner.node.emit(Event.UNDISPLAY);
+                this.node.emit(Event.UNDISPLAY);
         }
 
         protected update(dt) {
-            (<any>this.gOwner).onUpdate(dt);
+            this.node["$gobj"].onUpdate(dt);
         }
 
         protected onDestroy() {
-            (<any>this.gOwner).onDestroy();
+            this.node["$gobj"].onDestroy();
         }
     }
 }

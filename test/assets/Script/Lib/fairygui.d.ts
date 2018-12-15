@@ -333,6 +333,7 @@ declare namespace fgui {
         readonly node: cc.Node;
         readonly parent: GComponent;
         removeFromParent(): void;
+        findParent(): GObject;
         readonly root: GRoot;
         readonly asCom: GComponent;
         readonly asButton: GButton;
@@ -395,7 +396,6 @@ declare namespace fgui {
         private onTouchEnd_0(evt);
     }
     class GObjectPartner extends cc.Component {
-        gOwner: GObject;
         _emitDisplayEvents: boolean;
         callLater(callback: Function, delay?: number): void;
         onClickLink(evt: Event, text: string): void;
@@ -852,6 +852,7 @@ declare namespace fgui {
         private clearContent();
         protected handleSizeChanged(): void;
         protected handleGrayedChanged(): void;
+        hitTest(globalPt: cc.Vec2): GObject;
         setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void;
     }
 }
@@ -1112,7 +1113,7 @@ declare namespace fgui {
         protected updateFontSize(): void;
         protected updateOverflow(): void;
         private onTextChanged();
-        private onEditingBegan();
+        private onTouchEnd1(evt);
         setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void;
     }
 }

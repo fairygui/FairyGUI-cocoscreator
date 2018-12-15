@@ -21,7 +21,7 @@ namespace fgui {
         }
 
         onLoad() {
-            this._owner = <GComponent>this.node.getComponent(GObjectPartner).gOwner;
+            this._owner = <GComponent>this.node["$gobj"];
         }
 
         onEnable() {
@@ -173,7 +173,7 @@ namespace fgui {
                 let cnt = ti.touchMonitors.length;
                 for (let i = 0; i < cnt; i++) {
                     let mm = ti.touchMonitors[i];
-                    if (!cc.isValid(mm.node) || !mm.node.activeInHierarchy)
+                    if (mm.node == null || !mm.node.activeInHierarchy)
                         continue;
 
                     evt2.unuse();
@@ -183,7 +183,7 @@ namespace fgui {
                         done = true;
                 }
 
-                if (!done) {
+                if (!done && this.node != null) {
                     evt2.unuse();
                     evt2.type = Event.TOUCH_MOVE;
                     this.node.dispatchEvent(evt2);
@@ -202,7 +202,7 @@ namespace fgui {
             let cnt = ti.touchMonitors.length;
             for (let i = 0; i < cnt; i++) {
                 let mm = ti.touchMonitors[i];
-                if (mm == ti.target || !cc.isValid(mm.node) || !mm.node.activeInHierarchy
+                if (mm == ti.target || mm.node == null || !mm.node.activeInHierarchy
                     || (mm instanceof GComponent) && (<GComponent>mm).isAncestorOf(ti.target))
                     continue;
 
@@ -212,7 +212,7 @@ namespace fgui {
             }
             ti.touchMonitors.length = 0;
 
-            if (ti.target) {
+            if (ti.target && ti.target.node != null) {
                 if (ti.target instanceof GRichTextField)
                     ti.target.node.getComponent(cc.RichText)["_onTouchEnded"](evt2);
 
@@ -249,7 +249,7 @@ namespace fgui {
             let cnt = ti.touchMonitors.length;
             for (let i = 0; i < cnt; i++) {
                 let mm = ti.touchMonitors[i];
-                if (mm == ti.target || !cc.isValid(mm.node) || !mm.node.activeInHierarchy
+                if (mm == ti.target || mm.node == null || !mm.node.activeInHierarchy
                     || (mm instanceof GComponent) && (<GComponent>mm).isAncestorOf(ti.target))
                     continue;
 
@@ -258,7 +258,7 @@ namespace fgui {
             }
             ti.touchMonitors.length = 0;
 
-            if (ti.target) {
+            if (ti.target && ti.target.node != null) {
                 evt2.bubbles = true;
                 ti.target.node.dispatchEvent(evt2);
             }
@@ -299,7 +299,7 @@ namespace fgui {
                 let cnt = ti.touchMonitors.length;
                 for (let i = 0; i < cnt; i++) {
                     let mm = ti.touchMonitors[i];
-                    if (!cc.isValid(mm.node) || !mm.node.activeInHierarchy)
+                    if (mm.node == null || !mm.node.activeInHierarchy)
                         continue;
 
                     evt2.initiator = mm;
@@ -308,7 +308,7 @@ namespace fgui {
                         done = true;
                 }
 
-                if (!done) {
+                if (!done && this.node != null) {
                     evt2.initiator = this._owner;
                     this.node.dispatchEvent(evt2);
                     Event._return(evt2);
@@ -379,7 +379,7 @@ namespace fgui {
             let obj: GObject = ti.target;
             while (obj != null) {
                 ti.downTargets.push(obj);
-                obj = obj.parent;
+                obj = obj.findParent();
             }
         }
 
@@ -407,16 +407,16 @@ namespace fgui {
                 return null;
 
             let obj = ti.downTargets[0];
-            if (obj && cc.isValid(obj.node) && obj.node.activeInHierarchy)
+            if (obj && obj.node != null && obj.node.activeInHierarchy)
                 return obj;
 
             obj = ti.target;
             while (obj != null) {
                 let index = ti.downTargets.indexOf(obj);
-                if (index != -1 && cc.isValid(obj.node) && obj.node.activeInHierarchy)
+                if (index != -1 && obj.node != null && obj.node.activeInHierarchy)
                     break;
 
-                obj = obj.parent;
+                obj = obj.findParent();
             }
 
             return obj;
@@ -427,13 +427,13 @@ namespace fgui {
                 return;
 
             let element: GObject = ti.lastRollOver;
-            while (element != null) {
+            while (element != null && element.node != null) {
                 this._rollOutChain.push(element);
-                element = element.parent;
+                element = element.findParent();
             }
 
             element = target;
-            while (element != null) {
+            while (element != null && element.node != null) {
                 let i = this._rollOutChain.indexOf(element);
                 if (i != -1) {
                     this._rollOutChain.length = i;
@@ -441,7 +441,7 @@ namespace fgui {
                 }
                 this._rollOverChain.push(element);
 
-                element = element.parent;
+                element = element.findParent();
             }
 
             ti.lastRollOver = target;
@@ -449,7 +449,7 @@ namespace fgui {
             let cnt = this._rollOutChain.length;
             for (let i = 0; i < cnt; i++) {
                 element = this._rollOutChain[i];
-                if (cc.isValid(element.node) && element.node.activeInHierarchy) {
+                if (element.node != null && element.node.activeInHierarchy) {
                     let evt = this.getEvent(ti, element, Event.ROLL_OUT, false);
                     element.node.dispatchEvent(evt);
                     Event._return(evt);
@@ -459,7 +459,7 @@ namespace fgui {
             cnt = this._rollOverChain.length;
             for (let i = 0; i < cnt; i++) {
                 element = this._rollOverChain[i];
-                if (cc.isValid(element.node) && element.node.activeInHierarchy) {
+                if (element.node != null && element.node.activeInHierarchy) {
                     let evt = this.getEvent(ti, element, Event.ROLL_OVER, false);
                     element.node.dispatchEvent(evt);
                     Event._return(evt);
