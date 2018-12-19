@@ -21,6 +21,7 @@ namespace fgui {
         private _linkedPopup: GObject;
         private _downEffect: number;
         private _downEffectValue: number;
+        private _downColor: cc.Color;
         private _downScaled: boolean;
         private _down: boolean;
         private _over: boolean;
@@ -239,19 +240,22 @@ namespace fgui {
             if (this._downEffect == 1) {
                 var cnt: number = this.numChildren;
                 if (val == GButton.DOWN || val == GButton.SELECTED_OVER || val == GButton.SELECTED_DISABLED) {
-                    var r: number = this._downEffectValue * 255;
-                    var color: number = (r << 16) + (r << 8) + r;
+
+                    if (!this._downColor) {
+                        var r: number = this._downEffectValue * 255;
+                        this._downColor = new cc.Color(r, r, r, 255);
+                    }
                     for (var i: number = 0; i < cnt; i++) {
                         var obj: GObject = this.getChildAt(i);
                         if (obj["color"] != undefined && !(obj instanceof GTextField))
-                            (<any>obj).color = color;
+                            (<any>obj).color = this._downColor;
                     }
                 }
                 else {
                     for (var i: number = 0; i < cnt; i++) {
                         var obj: GObject = this.getChildAt(i);
                         if (obj["color"] != undefined && !(obj instanceof GTextField))
-                            (<any>obj).color = 0xFFFFFF;
+                            (<any>obj).color = cc.Color.WHITE;
                     }
                 }
             }
@@ -393,7 +397,7 @@ namespace fgui {
                 return;
 
             if (this.grayed && this._buttonController.hasPage(GButton.DISABLED))
-				return;
+                return;
 
             this.setState(this._selected ? GButton.SELECTED_OVER : GButton.OVER);
         }
@@ -406,9 +410,9 @@ namespace fgui {
             if (this._down)
                 return;
 
-                if (this.grayed && this._buttonController.hasPage(GButton.DISABLED))
+            if (this.grayed && this._buttonController.hasPage(GButton.DISABLED))
                 return;
-                
+
             this.setState(this._selected ? GButton.DOWN : GButton.UP);
         }
 
