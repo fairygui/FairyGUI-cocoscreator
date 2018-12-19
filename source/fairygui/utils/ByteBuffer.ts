@@ -155,6 +155,7 @@ namespace fgui {
             var ba: ByteBuffer = new ByteBuffer(this._bytes.buffer, this._bytes.byteOffset + this._pos, count);
             ba.stringTable = this.stringTable;
             ba.version = this.version;
+            this._pos += count;
             return ba;
         }
 
