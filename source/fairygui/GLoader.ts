@@ -323,7 +323,10 @@ namespace fgui {
         }
 
         protected loadExternal(): void {
-            cc.loader.loadRes(this._url, cc.Asset, this.onLoaded.bind(this));
+            if (ToolSet.startsWith(this._url, "http://") || ToolSet.startsWith(this._url, "https://"))
+                cc.loader.load(this._url, this.onLoaded.bind(this));
+            else
+                cc.loader.loadRes(this._url, cc.Asset, this.onLoaded.bind(this));
         }
 
         private onLoaded(err, asset): void {
