@@ -1,5 +1,5 @@
 window.fgui={};
-var __extends = (this && this.__extends) || (function () {
+window.__extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
         function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
@@ -3190,19 +3190,21 @@ var __extends = (this && this.__extends) || (function () {
             if (this._downEffect == 1) {
                 var cnt = this.numChildren;
                 if (val == GButton.DOWN || val == GButton.SELECTED_OVER || val == GButton.SELECTED_DISABLED) {
-                    var r = this._downEffectValue * 255;
-                    var color = (r << 16) + (r << 8) + r;
+                    if (!this._downColor) {
+                        var r = this._downEffectValue * 255;
+                        this._downColor = new cc.Color(r, r, r, 255);
+                    }
                     for (var i = 0; i < cnt; i++) {
                         var obj = this.getChildAt(i);
                         if (obj["color"] != undefined && !(obj instanceof fgui.GTextField))
-                            obj.color = color;
+                            obj.color = this._downColor;
                     }
                 }
                 else {
                     for (var i = 0; i < cnt; i++) {
                         var obj = this.getChildAt(i);
                         if (obj["color"] != undefined && !(obj instanceof fgui.GTextField))
-                            obj.color = 0xFFFFFF;
+                            obj.color = cc.Color.WHITE;
                     }
                 }
             }
@@ -6999,7 +7001,10 @@ var __extends = (this && this.__extends) || (function () {
                 this.setErrorState();
         };
         GLoader.prototype.loadExternal = function () {
-            cc.loader.loadRes(this._url, cc.Asset, this.onLoaded.bind(this));
+            if (fgui.ToolSet.startsWith(this._url, "http://") || fgui.ToolSet.startsWith(this._url, "https://"))
+                cc.loader.load(this._url, this.onLoaded.bind(this));
+            else
+                cc.loader.loadRes(this._url, cc.Asset, this.onLoaded.bind(this));
         };
         GLoader.prototype.onLoaded = function (err, asset) {
             //因为是异步返回的，而这时可能url已经被改变，所以不能直接用返回的结果
@@ -7133,6 +7138,7 @@ var __extends = (this && this.__extends) || (function () {
                 this._content2.dispose();
                 this._content2 = null;
             }
+            this._content.spriteFrame = null;
             this._contentItem = null;
         };
         GLoader.prototype.handleSizeChanged = function () {
@@ -8895,7 +8901,7 @@ var __extends = (this && this.__extends) || (function () {
                 ;
             },
             set: function (val) {
-                this._editBox.inputFlag = cc.EditBox.InputFlag.PASSWORD;
+                this._editBox.inputFlag = val ? cc.EditBox.InputFlag.PASSWORD : cc.EditBox.InputFlag.DEFAULT;
             },
             enumerable: true,
             configurable: true
@@ -16880,6 +16886,7 @@ var __extends = (this && this.__extends) || (function () {
             var ba = new ByteBuffer(this._bytes.buffer, this._bytes.byteOffset + this._pos, count);
             ba.stringTable = this.stringTable;
             ba.version = this.version;
+            this._pos += count;
             return ba;
         };
         ByteBuffer.prototype.seek = function (indexTablePos, blockIndex) {

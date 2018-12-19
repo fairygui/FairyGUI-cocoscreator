@@ -518,6 +518,7 @@ declare namespace fgui {
         private _linkedPopup;
         private _downEffect;
         private _downEffectValue;
+        private _downColor;
         private _downScaled;
         private _down;
         private _over;
