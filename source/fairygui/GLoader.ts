@@ -408,9 +408,11 @@ namespace fgui {
                 this._updatingLayout = false;
 
                 this._container.setContentSize(this._width, this._height);
-                if (this._content2 != null)
+                this._container.setPosition(0, 0);
+                if (this._content2 != null) {
                     this._content2.setPosition(-this._width / 2, -this._height / 2);
-
+                    this._content2.setScale(1, 1);
+                }
                 if (this._contentWidth == this._width && this._contentHeight == this._height)
                     return;
             }
