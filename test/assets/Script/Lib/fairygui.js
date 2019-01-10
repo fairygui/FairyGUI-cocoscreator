@@ -11890,7 +11890,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         Transition.prototype.onEnable = function () {
             if (this._autoPlay && !this._playing)
-                this.play(null, null, this._autoPlayTimes, this._autoPlayDelay);
+                this.play(null, this._autoPlayTimes, this._autoPlayDelay);
         };
         Transition.prototype.onDisable = function () {
             if ((this._options & Transition.OPTION_AUTO_STOP_DISABLED) == 0)

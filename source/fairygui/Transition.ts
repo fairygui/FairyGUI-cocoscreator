@@ -440,7 +440,7 @@ namespace fgui {
 
         public onEnable(): void {
             if (this._autoPlay && !this._playing)
-                this.play(null, null, this._autoPlayTimes, this._autoPlayDelay);
+                this.play(null, this._autoPlayTimes, this._autoPlayDelay);
         }
 
         public onDisable(): void {
