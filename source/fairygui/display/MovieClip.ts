@@ -47,25 +47,27 @@ namespace fgui {
 
         public set frames(value: Array<Frame>) {
             this._frames = value;
-            if (this._frames != null)
+            if (this._frames != null) {
                 this._frameCount = this._frames.length;
-            else
+
+                if (this._end == -1 || this._end > this._frameCount - 1)
+                    this._end = this._frameCount - 1;
+                if (this._endAt == -1 || this._endAt > this._frameCount - 1)
+                    this._endAt = this._frameCount - 1;
+
+                if (this._frame < 0 || this._frame > this._frameCount - 1)
+                    this._frame = this._frameCount - 1;
+
+                this.type = cc.Sprite.Type.SIMPLE;
+                this.drawFrame();
+
+                this._frameElapsed = 0;
+                this._repeatedCount = 0;
+                this._reversed = false;
+            }
+            else {
                 this._frameCount = 0;
-
-            if (this._end == -1 || this._end > this._frameCount - 1)
-                this._end = this._frameCount - 1;
-            if (this._endAt == -1 || this._endAt > this._frameCount - 1)
-                this._endAt = this._frameCount - 1;
-
-            if (this._frame < 0 || this._frame > this._frameCount - 1)
-                this._frame = this._frameCount - 1;
-
-            this.type = cc.Sprite.Type.SIMPLE;
-            this.drawFrame();
-
-            this._frameElapsed = 0;
-            this._repeatedCount = 0;
-            this._reversed = false;
+            }
         }
 
         public get frameCount(): number {

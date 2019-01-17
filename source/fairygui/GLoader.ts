@@ -487,6 +487,7 @@ namespace fgui {
                 this._content2.dispose();
                 this._content2 = null;
             }
+            this._content.frames = null;
             this._content.spriteFrame = null;
             this._contentItem = null;
         }
