@@ -12544,14 +12544,14 @@ window.__extends = (this && this.__extends) || (function () {
         }
         TranslationHelper.loadFromXML = function (source) {
             TranslationHelper.strings = {};
-            var xml = new cc["SAXParser"]._parseXML(source).documentElement;
-            var nodes = xml.children;
+            var xml = new cc["SAXParser"]().parse(source).documentElement;
+            var nodes = xml.childNodes;
             var length1 = nodes.length;
             for (var i1 = 0; i1 < length1; i1++) {
                 var cxml = nodes[i1];
-                if (cxml.name == "string") {
-                    var key = cxml.attributes.name;
-                    var text = cxml.children.length > 0 ? cxml.children[0].text : "";
+                if (cxml.tagName == "string") {
+                    var key = cxml.getAttribute("name");
+                    var text = cxml.childNodes.length > 0 ? cxml.firstChild.nodeValue : "";
                     var i = key.indexOf("-");
                     if (i == -1)
                         continue;
@@ -12866,15 +12866,19 @@ window.__extends = (this && this.__extends) || (function () {
             return UIPackage._instByName[name];
         };
         UIPackage.addPackage = function (url) {
+            var pkg = UIPackage._instById[url];
+            if (pkg)
+                return pkg;
             var asset = cc.loader.getRes(url);
             if (!asset)
                 throw "Resource '" + url + "' not ready";
             if (!asset.rawBuffer)
                 throw "Missing asset data. Call UIConfig.registerLoader first!";
-            var pkg = new UIPackage();
+            pkg = new UIPackage();
             pkg.loadPackage(new fgui.ByteBuffer(asset.rawBuffer), url);
             UIPackage._instById[pkg.id] = pkg;
             UIPackage._instByName[pkg.name] = pkg;
+            UIPackage._instById[pkg._url] = pkg;
             return pkg;
         };
         UIPackage.loadPackage = function (url, completeCallback) {

@@ -16,7 +16,7 @@ namespace fgui {
 
         private static _instById: any = {};
         private static _instByName: any = {};
-  
+
         public constructor() {
             this._items = new Array<PackageItem>();
             this._itemsById = {};
@@ -33,6 +33,10 @@ namespace fgui {
         }
 
         public static addPackage(url: string): UIPackage {
+            let pkg: UIPackage = UIPackage._instById[url];
+            if (pkg)
+                return pkg;
+
             let asset: any = cc.loader.getRes(url);
             if (!asset)
                 throw "Resource '" + url + "' not ready";
@@ -40,10 +44,11 @@ namespace fgui {
             if (!asset.rawBuffer)
                 throw "Missing asset data. Call UIConfig.registerLoader first!";
 
-            let pkg: UIPackage = new UIPackage();
+            pkg = new UIPackage();
             pkg.loadPackage(new ByteBuffer(asset.rawBuffer), url);
             UIPackage._instById[pkg.id] = pkg;
             UIPackage._instByName[pkg.name] = pkg;
+            UIPackage._instById[pkg._url] = pkg;
             return pkg;
         }
 

@@ -4,14 +4,14 @@ namespace fgui {
 
         public static loadFromXML(source: string): void {
             TranslationHelper.strings = {};
-            var xml: any = new cc["SAXParser"]._parseXML(source).documentElement;
-            var nodes: any = xml.children;
+            var xml: any = new cc["SAXParser"]().parse(source).documentElement;
+            var nodes: any = xml.childNodes;
             var length1: number = nodes.length;
             for (var i1: number = 0; i1 < length1; i1++) {
                 var cxml: any = nodes[i1];
-                if (cxml.name == "string") {
-                    var key: string = cxml.attributes.name;
-                    var text: string = cxml.children.length > 0 ? cxml.children[0].text : "";
+                if (cxml.tagName == "string") {
+                    var key: string = cxml.getAttribute("name");
+                    var text: string = cxml.childNodes.length > 0 ? cxml.firstChild.nodeValue : "";
                     var i: number = key.indexOf("-");
                     if (i == -1)
                         continue;
