@@ -322,7 +322,7 @@ namespace fgui {
             let ti = this.updateInfo(0, evt.getLocation());
             ti.mouseWheelDelta = Math.max(evt.getScrollX(), evt.getScrollY());
 
-            let evt2 = this.getEvent(ti, ti.target, Event.MOUSE_WHEEL, false);
+            let evt2 = this.getEvent(ti, ti.target, Event.MOUSE_WHEEL, true);
             ti.target.node.dispatchEvent(evt2);
             Event._return(evt2);
         }

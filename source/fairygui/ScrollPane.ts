@@ -1341,7 +1341,7 @@ namespace fgui {
 			if (!this._mouseWheelEnabled)
 				return;
 
-			let delta = evt.mouseWheelDelta > 0 ? 1 : -1;
+			let delta = evt.mouseWheelDelta > 0 ? -1 : 1;
 			if (this._overlapSize.x > 0 && this._overlapSize.y == 0) {
 				if (this._pageMode)
 					this.setPosX(this._xPos + this._pageSize.x * delta, false);

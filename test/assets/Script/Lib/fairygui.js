@@ -11113,7 +11113,7 @@ window.__extends = (this && this.__extends) || (function () {
         ScrollPane.prototype.onMouseWheel = function (evt) {
             if (!this._mouseWheelEnabled)
                 return;
-            var delta = evt.mouseWheelDelta > 0 ? 1 : -1;
+            var delta = evt.mouseWheelDelta > 0 ? -1 : 1;
             if (this._overlapSize.x > 0 && this._overlapSize.y == 0) {
                 if (this._pageMode)
                     this.setPosX(this._xPos + this._pageSize.x * delta, false);
@@ -14587,7 +14587,7 @@ window.__extends = (this && this.__extends) || (function () {
         InputProcessor.prototype.mouseWheelHandler = function (evt) {
             var ti = this.updateInfo(0, evt.getLocation());
             ti.mouseWheelDelta = Math.max(evt.getScrollX(), evt.getScrollY());
-            var evt2 = this.getEvent(ti, ti.target, fgui.Event.MOUSE_WHEEL, false);
+            var evt2 = this.getEvent(ti, ti.target, fgui.Event.MOUSE_WHEEL, true);
             ti.target.node.dispatchEvent(evt2);
             fgui.Event._return(evt2);
         };
