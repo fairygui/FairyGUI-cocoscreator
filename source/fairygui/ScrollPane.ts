@@ -315,6 +315,14 @@ namespace fgui {
 			this._snapToItem = value;
 		}
 
+		public get mouseWheelEnabled(): boolean {
+			return this._mouseWheelEnabled;
+		}
+
+		public set mouseWheelEnabled(value: boolean) {
+			this._mouseWheelEnabled = value;
+		}
+
 		public get percX(): number {
 			return this._overlapSize.x == 0 ? 0 : this._xPos / this._overlapSize.x;
 		}
