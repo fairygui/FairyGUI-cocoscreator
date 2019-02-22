@@ -59,6 +59,23 @@ namespace fgui {
                 this.drawCommon();
         }
 
+        public set alpha(value : number){
+            if (this._alpha != value) {
+                this._alpha = value;
+                this._node.opacity = this._alpha * 255;
+                this.updateGear(3);
+                if (this._type != 0)
+                    this.drawCommon();
+            }
+        }
+
+        public get fillColor(){
+            return new cc.Color(this._fillColor.getR(),
+                                this._fillColor.getG(),
+                                this._fillColor.getB(),
+                                this._fillColor.getA() * this.alpha);
+        }
+
         private drawCommon(): void {
             let ctx = this._content;
             ctx.clear();
@@ -70,7 +87,7 @@ namespace fgui {
 
             ctx.lineWidth = this._lineSize;
             ctx.strokeColor = this._lineColor;
-            ctx.fillColor = this._fillColor;
+            ctx.fillColor = this.fillColor;
 
             if (this._type == 1) {
                 if (this._cornerRadius) {
