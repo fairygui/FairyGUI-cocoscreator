@@ -377,9 +377,15 @@ namespace fgui {
 
             this._selectedIndex = index;
             if (this._selectedIndex >= 0)
+            {
                 this.text = this._items[this._selectedIndex];
+                this.icon =  (this._icons != null && this._selectedIndex < this._icons.length) ? this._icons[this._selectedIndex] : null;
+            }         
             else
+            {
                 this.text = "";
+                this.icon = null;
+            }
             this._node.emit(Event.STATUS_CHANGED, this);
         }
 
