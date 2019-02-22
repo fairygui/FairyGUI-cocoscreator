@@ -384,6 +384,7 @@ namespace fgui {
             else
             {
                 this.text = "";
+        if (this._icons != null)
                 this.icon = null;
             }
             this._node.emit(Event.STATUS_CHANGED, this);
