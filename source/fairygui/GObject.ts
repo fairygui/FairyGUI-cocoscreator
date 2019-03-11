@@ -450,7 +450,20 @@ namespace fgui {
         }
 
         public set tooltips(value: string) {
-            this._tooltips = value;
+            if (this._tooltips)
+				{
+                    this._node.off(fgui.Event.ROLL_OVER, this.onRollOver, this);
+                    this._node.off(fgui.Event.ROLL_OUT, this.onRollOut, this);
+				}
+
+                this._tooltips = value;
+
+
+                if (this._tooltips)
+				{
+                    this._node.on(fgui.Event.ROLL_OVER, this.onRollOver, this);
+                    this._node.on(fgui.Event.ROLL_OUT, this.onRollOut, this);
+				}
         }
 
         public get blendMode(): BlendMode {
@@ -1019,6 +1032,15 @@ namespace fgui {
                 buffer.position = nextPos;
             }
         }
+
+        //toolTips support
+        private onRollOver():void {
+            this.root.showTooltips(this.tooltips);
+        };
+        private onRollOut():void {
+            this.root.hideTooltips();
+        };
+
 
         //drag support
         //-------------------------------------------------------------------
