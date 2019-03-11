@@ -74,7 +74,7 @@ namespace fgui {
         }
 
         public set password(val: boolean) {
-            this._editBox.inputFlag = cc.EditBox.InputFlag.PASSWORD;
+            this._editBox.inputFlag = val ? cc.EditBox.InputFlag.PASSWORD : cc.EditBox.InputFlag.DEFAULT;
         }
 
         public get align(): cc.Label.HorizontalAlign {

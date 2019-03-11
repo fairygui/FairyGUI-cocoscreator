@@ -3,7 +3,7 @@ namespace fgui {
 
     export class GTextField extends GObject {
         public _label: cc.Label;
-        
+
         protected _font: string;
         protected _fontSize: number = 0;
         protected _color: cc.Color;
@@ -61,19 +61,21 @@ namespace fgui {
         }
 
         public set font(value: string) {
-            if (this._font != value) {
+            if (this._font != value || !value) {
                 this._font = value;
 
                 this.markSizeChanged();
 
-                if (ToolSet.startsWith(this._font, "ui://")) {
-                    var pi: PackageItem = UIPackage.getItemByURL(this._font);
+                let newFont = value ? value : UIConfig.defaultFont;
+
+                if (ToolSet.startsWith(newFont, "ui://")) {
+                    var pi: PackageItem = UIPackage.getItemByURL(newFont);
                     if (pi) {
                         this.updateFont(<cc.Font>pi.owner.getItemAsset(pi));
                         return;
                     }
                 }
-                this.updateFont(value);
+                this.updateFont(newFont);
             }
         }
 

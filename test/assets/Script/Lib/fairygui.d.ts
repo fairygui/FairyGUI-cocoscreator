@@ -382,6 +382,8 @@ declare namespace fgui {
         constructFromResource(): void;
         setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void;
         setup_afterAdd(buffer: ByteBuffer, beginPos: number): void;
+        private onRollOver();
+        private onRollOut();
         private static sGlobalDragStart;
         private static sGlobalRect;
         private static sHelperPoint;
@@ -1322,6 +1324,7 @@ declare namespace fgui {
         scrollStep: number;
         decelerationRate: number;
         snapToItem: boolean;
+        mouseWheelEnabled: boolean;
         percX: number;
         setPercX(value: number, ani?: boolean): void;
         percY: number;

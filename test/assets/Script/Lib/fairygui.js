@@ -1167,7 +1167,15 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._tooltips;
             },
             set: function (value) {
+                if (this._tooltips) {
+                    this._node.off(fgui.Event.ROLL_OVER, this.onRollOver, this);
+                    this._node.off(fgui.Event.ROLL_OUT, this.onRollOut, this);
+                }
                 this._tooltips = value;
+                if (this._tooltips) {
+                    this._node.on(fgui.Event.ROLL_OVER, this.onRollOver, this);
+                    this._node.on(fgui.Event.ROLL_OUT, this.onRollOut, this);
+                }
             },
             enumerable: true,
             configurable: true
@@ -1764,6 +1772,15 @@ window.__extends = (this && this.__extends) || (function () {
                 buffer.position = nextPos;
             }
         };
+        //toolTips support
+        GObject.prototype.onRollOver = function () {
+            this.root.showTooltips(this.tooltips);
+        };
+        ;
+        GObject.prototype.onRollOut = function () {
+            this.root.hideTooltips();
+        };
+        ;
         GObject.prototype.initDrag = function () {
             if (this._draggable) {
                 this.on(fgui.Event.TOUCH_BEGIN, this.onTouchBegin_0, this);
@@ -3769,10 +3786,15 @@ window.__extends = (this && this.__extends) || (function () {
             if (this.dropdown.parent instanceof fgui.GRoot)
                 this.dropdown.parent.hidePopup();
             this._selectedIndex = index;
-            if (this._selectedIndex >= 0)
+            if (this._selectedIndex >= 0) {
                 this.text = this._items[this._selectedIndex];
-            else
+                this.icon = (this._icons != null && this._selectedIndex < this._icons.length) ? this._icons[this._selectedIndex] : null;
+            }
+            else {
                 this.text = "";
+                if (this._icons != null)
+                    this.icon = null;
+            }
             this._node.emit(fgui.Event.STATUS_CHANGED, this);
         };
         GComboBox.prototype.onRollOver_1 = function () {
@@ -7527,17 +7549,18 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._font;
             },
             set: function (value) {
-                if (this._font != value) {
+                if (this._font != value || !value) {
                     this._font = value;
                     this.markSizeChanged();
-                    if (fgui.ToolSet.startsWith(this._font, "ui://")) {
-                        var pi = fgui.UIPackage.getItemByURL(this._font);
+                    var newFont = value ? value : fgui.UIConfig.defaultFont;
+                    if (fgui.ToolSet.startsWith(newFont, "ui://")) {
+                        var pi = fgui.UIPackage.getItemByURL(newFont);
                         if (pi) {
                             this.updateFont(pi.owner.getItemAsset(pi));
                             return;
                         }
                     }
-                    this.updateFont(value);
+                    this.updateFont(newFont);
                 }
             },
             enumerable: true,
@@ -10175,6 +10198,16 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
                 this._snapToItem = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ScrollPane.prototype, "mouseWheelEnabled", {
+            get: function () {
+                return this._mouseWheelEnabled;
+            },
+            set: function (value) {
+                this._mouseWheelEnabled = value;
             },
             enumerable: true,
             configurable: true
