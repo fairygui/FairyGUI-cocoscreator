@@ -914,7 +914,7 @@ namespace fgui {
 
         }
 
-        protected handleVisibleChanged(): void {
+        public handleVisibleChanged(): void {
             this._node.active = this._finalVisible;
 
             if (this instanceof GGroup)

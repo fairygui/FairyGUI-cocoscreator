@@ -375,7 +375,7 @@ namespace fgui {
             for (var i: number = 0; i < cnt; i++) {
                 var child: GObject = this._parent.getChildAt(i);
                 if (child.group == this)
-                    child.node.active = child._finalVisible;
+                    child.handleVisibleChanged()
             }
         }
 

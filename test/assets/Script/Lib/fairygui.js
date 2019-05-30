@@ -4275,7 +4275,7 @@ window.__extends = (this && this.__extends) || (function () {
             for (var i = 0; i < cnt; i++) {
                 var child = this._parent.getChildAt(i);
                 if (child.group == this)
-                    child.node.active = child._finalVisible;
+                    child.handleVisibleChanged();
             }
         };
         GGroup.prototype.setup_beforeAdd = function (buffer, beginPos) {

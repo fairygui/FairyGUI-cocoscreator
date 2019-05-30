@@ -377,7 +377,7 @@ declare namespace fgui {
         handlePositionChanged(): void;
         protected handleSizeChanged(): void;
         protected handleGrayedChanged(): void;
-        protected handleVisibleChanged(): void;
+        handleVisibleChanged(): void;
         hitTest(globalPt: cc.Vec2): GObject;
         constructFromResource(): void;
         setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void;
