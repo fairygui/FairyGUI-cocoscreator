@@ -43,7 +43,7 @@ namespace fgui {
                 if (this._fillMethod != 0) {
                     this.type = cc.Sprite.Type.FILLED;
                     if (this._fillMethod <= 3)
-                        this.fillType = <cc.Sprite.FillType><number>this._fillMethod;
+                        this.fillType = <cc.Sprite.FillType><number>this._fillMethod - 1;
                     else
                         this.fillType = cc.Sprite.FillType.RADIAL;
                     this.fillCenter = new cc.Vec2(0.5, 0.5);
