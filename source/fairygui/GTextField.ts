@@ -373,15 +373,18 @@ namespace fgui {
         }
 
         protected updateFontSize() {
-            let fontSize: number = this._fontSize;
             let font: any = this._label.font;
             if (font instanceof cc.BitmapFont) {
                 if (!(<any>font)._fntConfig.resizable)
-                    fontSize = (<any>font)._fntConfig.fontSize;
+                    this._label.fontSize = (<any>font)._fntConfig.fontSize;
+                else
+                    this._label.fontSize = this._fontSize;
+                this._label.lineHeight = (<any>font)._fntConfig.fontSize + this._leading + 4;
             }
-
-            this._label.fontSize = fontSize;
-            this._label.lineHeight = fontSize + this._leading;
+            else {
+                this._label.fontSize = this._fontSize;
+                this._label.lineHeight = this._fontSize + this._leading;
+            }
         }
 
         protected updateOverflow() {

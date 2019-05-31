@@ -7865,14 +7865,18 @@ window.__extends = (this && this.__extends) || (function () {
                 this._outline.color = this._strokeColor;
         };
         GTextField.prototype.updateFontSize = function () {
-            var fontSize = this._fontSize;
             var font = this._label.font;
             if (font instanceof cc.BitmapFont) {
                 if (!font._fntConfig.resizable)
-                    fontSize = font._fntConfig.fontSize;
+                    this._label.fontSize = font._fntConfig.fontSize;
+                else
+                    this._label.fontSize = this._fontSize;
+                this._label.lineHeight = font._fntConfig.fontSize + this._leading + 4;
             }
-            this._label.fontSize = fontSize;
-            this._label.lineHeight = fontSize + this._leading;
+            else {
+                this._label.fontSize = this._fontSize;
+                this._label.lineHeight = this._fontSize + this._leading;
+            }
         };
         GTextField.prototype.updateOverflow = function () {
             if (this._autoSize == fgui.AutoSizeType.Both)
