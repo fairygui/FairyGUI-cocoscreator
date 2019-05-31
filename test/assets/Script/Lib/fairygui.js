@@ -1,4 +1,5 @@
-var __extends = (this && this.__extends) || (function () {
+window.fgui = {};
+window.__extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
         function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
@@ -8,7 +9,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var fgui;
+
 (function (fgui) {
     var AsyncOperation = /** @class */ (function () {
         function AsyncOperation() {
@@ -202,7 +203,7 @@ var fgui;
         return DisplayListItem;
     }());
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var Controller = /** @class */ (function (_super) {
         __extends(Controller, _super);
@@ -450,7 +451,7 @@ var fgui;
     }(cc.EventTarget));
     fgui.Controller = Controller;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var DragDropManager = /** @class */ (function () {
         function DragDropManager() {
@@ -525,7 +526,7 @@ var fgui;
     }());
     fgui.DragDropManager = DragDropManager;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var ButtonMode;
     (function (ButtonMode) {
@@ -710,7 +711,7 @@ var fgui;
         FillOrigin[FillOrigin["Right"] = 3] = "Right";
     })(FillOrigin = fgui.FillOrigin || (fgui.FillOrigin = {}));
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GObject = /** @class */ (function () {
         function GObject() {
@@ -1914,7 +1915,7 @@ var fgui;
     fgui.GObjectPartner = GObjectPartner;
 })(fgui || (fgui = {}));
 /// <reference path="GObject.ts" />
-var fgui;
+
 (function (fgui) {
     var GComponent = /** @class */ (function (_super) {
         __extends(GComponent, _super);
@@ -2969,7 +2970,7 @@ var fgui;
     fgui.GComponent = GComponent;
 })(fgui || (fgui = {}));
 /// <reference path="GComponent.ts" />
-var fgui;
+
 (function (fgui) {
     var GButton = /** @class */ (function (_super) {
         __extends(GButton, _super);
@@ -3435,7 +3436,7 @@ var fgui;
     }(fgui.GComponent));
     fgui.GButton = GButton;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GComboBox = /** @class */ (function (_super) {
         __extends(GComboBox, _super);
@@ -3835,7 +3836,7 @@ var fgui;
     }(fgui.GComponent));
     fgui.GComboBox = GComboBox;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GGraph = /** @class */ (function (_super) {
         __extends(GGraph, _super);
@@ -3938,7 +3939,7 @@ var fgui;
     }(fgui.GObject));
     fgui.GGraph = GGraph;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GGroup = /** @class */ (function (_super) {
         __extends(GGroup, _super);
@@ -4293,7 +4294,7 @@ var fgui;
     }(fgui.GObject));
     fgui.GGroup = GGroup;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GImage = /** @class */ (function (_super) {
         __extends(GImage, _super);
@@ -4401,7 +4402,7 @@ var fgui;
     }(fgui.GObject));
     fgui.GImage = GImage;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GLabel = /** @class */ (function (_super) {
         __extends(GLabel, _super);
@@ -4564,7 +4565,7 @@ var fgui;
     }(fgui.GComponent));
     fgui.GLabel = GLabel;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GList = /** @class */ (function (_super) {
         __extends(GList, _super);
@@ -6644,7 +6645,7 @@ var fgui;
         return ItemInfo;
     }());
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GObjectPool = /** @class */ (function () {
         function GObjectPool() {
@@ -6697,7 +6698,7 @@ var fgui;
     fgui.GObjectPool = GObjectPool;
 })(fgui || (fgui = {}));
 /// <reference path="GObjectPool.ts" />
-var fgui;
+
 (function (fgui) {
     var GLoader = /** @class */ (function (_super) {
         __extends(GLoader, _super);
@@ -7216,7 +7217,7 @@ var fgui;
     }(fgui.GObject));
     fgui.GLoader = GLoader;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GMovieClip = /** @class */ (function (_super) {
         __extends(GMovieClip, _super);
@@ -7318,7 +7319,7 @@ var fgui;
     }(fgui.GObject));
     fgui.GMovieClip = GMovieClip;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GProgressBar = /** @class */ (function (_super) {
         __extends(GProgressBar, _super);
@@ -7503,7 +7504,7 @@ var fgui;
     }(fgui.GComponent));
     fgui.GProgressBar = GProgressBar;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GTextField = /** @class */ (function (_super) {
         __extends(GTextField, _super);
@@ -7963,7 +7964,7 @@ var fgui;
     fgui.GTextField = GTextField;
 })(fgui || (fgui = {}));
 /// <reference path="GTextField.ts" />
-var fgui;
+
 (function (fgui) {
     var RichTextImageAtlas = /** @class */ (function (_super) {
         __extends(RichTextImageAtlas, _super);
@@ -8147,7 +8148,7 @@ var fgui;
     }(fgui.GTextField));
     fgui.GRichTextField = GRichTextField;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GRoot = /** @class */ (function (_super) {
         __extends(GRoot, _super);
@@ -8528,7 +8529,7 @@ var fgui;
     }(fgui.GComponent));
     fgui.GRoot = GRoot;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GScrollBar = /** @class */ (function (_super) {
         __extends(GScrollBar, _super);
@@ -8659,7 +8660,7 @@ var fgui;
     }(fgui.GComponent));
     fgui.GScrollBar = GScrollBar;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GSlider = /** @class */ (function (_super) {
         __extends(GSlider, _super);
@@ -8871,7 +8872,7 @@ var fgui;
     }(fgui.GComponent));
     fgui.GSlider = GSlider;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GTextInput = /** @class */ (function (_super) {
         __extends(GTextInput, _super);
@@ -9063,7 +9064,7 @@ var fgui;
         return MyEditBox;
     }(cc.EditBox));
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var Margin = /** @class */ (function () {
         function Margin() {
@@ -9085,7 +9086,7 @@ var fgui;
     }());
     fgui.Margin = Margin;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var PackageItem = /** @class */ (function () {
         function PackageItem() {
@@ -9106,7 +9107,7 @@ var fgui;
     }());
     fgui.PackageItem = PackageItem;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var PopupMenu = /** @class */ (function () {
         function PopupMenu(url) {
@@ -9272,7 +9273,7 @@ var fgui;
     }());
     fgui.PopupMenu = PopupMenu;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var RelationItem = /** @class */ (function () {
         function RelationItem(owner) {
@@ -9831,7 +9832,7 @@ var fgui;
     }());
     fgui.RelationDef = RelationDef;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var Relations = /** @class */ (function () {
         function Relations(owner) {
@@ -9969,7 +9970,7 @@ var fgui;
     }());
     fgui.Relations = Relations;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var ScrollPane = /** @class */ (function (_super) {
         __extends(ScrollPane, _super);
@@ -11549,7 +11550,7 @@ var fgui;
     }(cc.Component));
     fgui.ScrollPane = ScrollPane;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var Transition = /** @class */ (function () {
         function Transition(owner) {
@@ -12589,7 +12590,7 @@ var fgui;
         return TValue;
     }());
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var TranslationHelper = /** @class */ (function () {
         function TranslationHelper() {
@@ -12758,7 +12759,7 @@ var fgui;
     }());
     fgui.TranslationHelper = TranslationHelper;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var UIConfig = /** @class */ (function () {
         function UIConfig() {
@@ -12825,7 +12826,7 @@ var fgui;
         return _fontRegistry[name];
     };
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var UIObjectFactory = /** @class */ (function () {
         function UIObjectFactory() {
@@ -12902,7 +12903,7 @@ var fgui;
     }());
     fgui.UIObjectFactory = UIObjectFactory;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var UIPackage = /** @class */ (function () {
         function UIPackage() {
@@ -13438,7 +13439,7 @@ var fgui;
         return AtlasSprite;
     }());
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var Window = /** @class */ (function (_super) {
         __extends(Window, _super);
@@ -13703,7 +13704,7 @@ var fgui;
     }(fgui.GComponent));
     fgui.Window = Window;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var ControllerAction = /** @class */ (function () {
         function ControllerAction() {
@@ -13745,7 +13746,7 @@ var fgui;
     fgui.ControllerAction = ControllerAction;
 })(fgui || (fgui = {}));
 /// <reference path="ControllerAction.ts" />
-var fgui;
+
 (function (fgui) {
     var ChangePageAction = /** @class */ (function (_super) {
         __extends(ChangePageAction, _super);
@@ -13781,7 +13782,7 @@ var fgui;
     }(fgui.ControllerAction));
     fgui.ChangePageAction = ChangePageAction;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var PlayTransitionAction = /** @class */ (function (_super) {
         __extends(PlayTransitionAction, _super);
@@ -13819,7 +13820,7 @@ var fgui;
     }(fgui.ControllerAction));
     fgui.PlayTransitionAction = PlayTransitionAction;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var BlendMode;
     (function (BlendMode) {
@@ -13869,7 +13870,7 @@ var fgui;
     }());
     fgui.BlendModeUtils = BlendModeUtils;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var Image = /** @class */ (function (_super) {
         __extends(Image, _super);
@@ -14002,7 +14003,7 @@ var fgui;
     fgui.Image = Image;
 })(fgui || (fgui = {}));
 /// <reference path="Image.ts" />
-var fgui;
+
 (function (fgui) {
     var Frame = /** @class */ (function () {
         function Frame() {
@@ -14270,7 +14271,7 @@ var fgui;
     }(fgui.Image));
     fgui.MovieClip = MovieClip;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var Event = /** @class */ (function (_super) {
         __extends(Event, _super);
@@ -14352,7 +14353,7 @@ var fgui;
     }(cc.Event));
     fgui.Event = Event;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var PixelHitTest = /** @class */ (function () {
         function PixelHitTest(data, offsetX, offsetY) {
@@ -14389,7 +14390,7 @@ var fgui;
     }());
     fgui.PixelHitTestData = PixelHitTestData;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var InputProcessor = /** @class */ (function (_super) {
         __extends(InputProcessor, _super);
@@ -14796,7 +14797,7 @@ var fgui;
     }());
     ;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GearBase = /** @class */ (function () {
         function GearBase(owner) {
@@ -14882,7 +14883,7 @@ var fgui;
     fgui.GearTweenConfig = GearTweenConfig;
 })(fgui || (fgui = {}));
 /// <reference path="GearBase.ts" />
-var fgui;
+
 (function (fgui) {
     var GearAnimation = /** @class */ (function (_super) {
         __extends(GearAnimation, _super);
@@ -14935,7 +14936,7 @@ var fgui;
         return GearAnimationValue;
     }());
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GearColor = /** @class */ (function (_super) {
         __extends(GearColor, _super);
@@ -14993,7 +14994,7 @@ var fgui;
         return GearColorValue;
     }());
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GearDisplay = /** @class */ (function (_super) {
         __extends(GearDisplay, _super);
@@ -15035,7 +15036,7 @@ var fgui;
     }(fgui.GearBase));
     fgui.GearDisplay = GearDisplay;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GearIcon = /** @class */ (function (_super) {
         __extends(GearIcon, _super);
@@ -15068,7 +15069,7 @@ var fgui;
     }(fgui.GearBase));
     fgui.GearIcon = GearIcon;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GearLook = /** @class */ (function (_super) {
         __extends(GearLook, _super);
@@ -15176,7 +15177,7 @@ var fgui;
         return GearLookValue;
     }());
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GearSize = /** @class */ (function (_super) {
         __extends(GearSize, _super);
@@ -15291,7 +15292,7 @@ var fgui;
         return GearSizeValue;
     }());
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GearText = /** @class */ (function (_super) {
         __extends(GearText, _super);
@@ -15324,7 +15325,7 @@ var fgui;
     }(fgui.GearBase));
     fgui.GearText = GearText;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GearXY = /** @class */ (function (_super) {
         __extends(GearXY, _super);
@@ -15413,7 +15414,7 @@ var fgui;
     }(fgui.GearBase));
     fgui.GearXY = GearXY;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var TreeNode = /** @class */ (function () {
         function TreeNode(hasChild) {
@@ -15642,7 +15643,7 @@ var fgui;
     }());
     fgui.TreeNode = TreeNode;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var TreeView = /** @class */ (function () {
         function TreeView(list) {
@@ -15956,7 +15957,7 @@ var fgui;
 // LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
 // STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-var fgui;
+
 (function (fgui) {
     var EaseManager = /** @class */ (function () {
         function EaseManager() {
@@ -16122,7 +16123,7 @@ var fgui;
         return Bounce;
     }());
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var EaseType = /** @class */ (function () {
         function EaseType() {
@@ -16163,7 +16164,7 @@ var fgui;
     }());
     fgui.EaseType = EaseType;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GTween = /** @class */ (function () {
         function GTween() {
@@ -16203,7 +16204,7 @@ var fgui;
     }());
     fgui.GTween = GTween;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var GTweener = /** @class */ (function () {
         function GTweener() {
@@ -16635,7 +16636,7 @@ var fgui;
     }());
     fgui.GTweener = GTweener;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var TweenManager = /** @class */ (function () {
         function TweenManager() {
@@ -16746,7 +16747,7 @@ var fgui;
     }());
     fgui.TweenManager = TweenManager;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var TweenValue = /** @class */ (function () {
         function TweenValue() {
@@ -16804,7 +16805,7 @@ var fgui;
     }());
     fgui.TweenValue = TweenValue;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var ByteBuffer = /** @class */ (function () {
         function ByteBuffer(buffer, offset, length) {
@@ -16984,7 +16985,7 @@ var fgui;
     }());
     fgui.ByteBuffer = ByteBuffer;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var ColorMatrix = /** @class */ (function () {
         function ColorMatrix() {
@@ -17110,7 +17111,7 @@ var fgui;
     }());
     fgui.ColorMatrix = ColorMatrix;
 })(fgui || (fgui = {}));
-var fgui;
+
 (function (fgui) {
     var UBBParser = /** @class */ (function () {
         function UBBParser() {
@@ -17262,7 +17263,7 @@ var fgui;
     fgui.UBBParser = UBBParser;
 })(fgui || (fgui = {}));
 /// <reference path="UBBParser.ts" />
-var fgui;
+
 (function (fgui) {
     var ToolSet = /** @class */ (function () {
         function ToolSet() {
