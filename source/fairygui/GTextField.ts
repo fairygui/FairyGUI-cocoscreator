@@ -7,6 +7,7 @@ namespace fgui {
         protected _font: string;
         protected _fontSize: number = 0;
         protected _color: cc.Color;
+        protected _strokeColor: cc.Color;
         protected _leading: number = 0;
         protected _text: string;
         protected _ubbEnabled: boolean;
@@ -24,6 +25,7 @@ namespace fgui {
 
             this._text = "";
             this._color = cc.Color.WHITE;
+            this._strokeColor = cc.Color.BLACK;
             this._templateVars = null;
 
             this.createRenderer();
@@ -188,8 +190,10 @@ namespace fgui {
                     this._outline.enabled = false;
             }
             else {
-                if (!this._outline)
+                if (!this._outline) {
                     this._outline = this._node.addComponent(cc.LabelOutline);
+                    this.updateStrokeColor();
+                }
                 else
                     this._outline.enabled = true;
                 this._outline.width = value;
@@ -197,16 +201,15 @@ namespace fgui {
         }
 
         public get strokeColor(): cc.Color {
-            return this._outline ? this._outline.color : cc.Color.BLACK;
+            return this._strokeColor;
         }
 
         public set strokeColor(value: cc.Color) {
-            if (!this._outline) {
-                this._outline = this._node.addComponent(cc.LabelOutline);
-                this._outline.enabled = false;
+            if (this._strokeColor != value) {
+                this._strokeColor = value;
+                this.updateGear(4);
+                this.updateStrokeColor();
             }
-            this._outline.color = value;
-            this.updateGear(4);
         }
 
         public set ubbEnabled(value: boolean) {
@@ -348,15 +351,25 @@ namespace fgui {
         }
 
         protected updateFontColor() {
-            let font: any = this._label.font;
-            if (font instanceof cc.BitmapFont) {
-                if ((<any>font)._fntConfig.canTint)
-                    this._node.color = this._color;
-                else
-                    this._node.color = cc.Color.WHITE;
+            let c = this._color;
+            if (this._label) {
+                let font: any = this._label.font;
+                if ((font instanceof cc.BitmapFont) && !((<any>font)._fntConfig.canTint))
+                    c = cc.Color.WHITE;
             }
+
+            if (this._grayed)
+                c = ToolSet.toGrayed(c);
+            this._node.color = c
+        }
+
+        protected updateStrokeColor() {
+            if (!this._outline)
+                return;
+            if (this._grayed)
+                this._outline.color = ToolSet.toGrayed(this._strokeColor)
             else
-                this._node.color = this._color;
+                this._outline.color = this._strokeColor;
         }
 
         protected updateFontSize() {
@@ -422,6 +435,11 @@ namespace fgui {
             }
             else if (this._autoSize == AutoSizeType.Height)
                 this._node.width = this._width;
+        }
+
+        protected handleGrayedChanged(): void {
+            this.updateFontColor();
+            this.updateStrokeColor();
         }
 
         public setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void {

@@ -51,5 +51,10 @@ namespace fgui {
             let currentTime = new Date();
             return currentTime.getMilliseconds() / 1000;
         }
+
+        public static toGrayed(c: cc.Color): cc.Color {
+            let v = c.getR() * 0.299 + c.getG() * 0.587 + c.getB() * 0.114;
+            return new cc.Color(v, v, v, c.getA());
+        }
     }
 }

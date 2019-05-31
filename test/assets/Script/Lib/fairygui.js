@@ -7516,6 +7516,7 @@ window.__extends = (this && this.__extends) || (function () {
             _this._touchDisabled = true;
             _this._text = "";
             _this._color = cc.Color.WHITE;
+            _this._strokeColor = cc.Color.BLACK;
             _this._templateVars = null;
             _this.createRenderer();
             _this.fontSize = 12;
@@ -7690,8 +7691,10 @@ window.__extends = (this && this.__extends) || (function () {
                         this._outline.enabled = false;
                 }
                 else {
-                    if (!this._outline)
+                    if (!this._outline) {
                         this._outline = this._node.addComponent(cc.LabelOutline);
+                        this.updateStrokeColor();
+                    }
                     else
                         this._outline.enabled = true;
                     this._outline.width = value;
@@ -7702,15 +7705,14 @@ window.__extends = (this && this.__extends) || (function () {
         });
         Object.defineProperty(GTextField.prototype, "strokeColor", {
             get: function () {
-                return this._outline ? this._outline.color : cc.Color.BLACK;
+                return this._strokeColor;
             },
             set: function (value) {
-                if (!this._outline) {
-                    this._outline = this._node.addComponent(cc.LabelOutline);
-                    this._outline.enabled = false;
+                if (this._strokeColor != value) {
+                    this._strokeColor = value;
+                    this.updateGear(4);
+                    this.updateStrokeColor();
                 }
-                this._outline.color = value;
-                this.updateGear(4);
             },
             enumerable: true,
             configurable: true
@@ -7844,15 +7846,23 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         GTextField.prototype.updateFontColor = function () {
-            var font = this._label.font;
-            if (font instanceof cc.BitmapFont) {
-                if (font._fntConfig.canTint)
-                    this._node.color = this._color;
-                else
-                    this._node.color = cc.Color.WHITE;
+            var c = this._color;
+            if (this._label) {
+                var font = this._label.font;
+                if ((font instanceof cc.BitmapFont) && !(font._fntConfig.canTint))
+                    c = cc.Color.WHITE;
             }
+            if (this._grayed)
+                c = fgui.ToolSet.toGrayed(c);
+            this._node.color = c;
+        };
+        GTextField.prototype.updateStrokeColor = function () {
+            if (!this._outline)
+                return;
+            if (this._grayed)
+                this._outline.color = fgui.ToolSet.toGrayed(this._strokeColor);
             else
-                this._node.color = this._color;
+                this._outline.color = this._strokeColor;
         };
         GTextField.prototype.updateFontSize = function () {
             var fontSize = this._fontSize;
@@ -7908,6 +7918,10 @@ window.__extends = (this && this.__extends) || (function () {
             }
             else if (this._autoSize == fgui.AutoSizeType.Height)
                 this._node.width = this._width;
+        };
+        GTextField.prototype.handleGrayedChanged = function () {
+            this.updateFontColor();
+            this.updateStrokeColor();
         };
         GTextField.prototype.setup_beforeAdd = function (buffer, beginPos) {
             _super.prototype.setup_beforeAdd.call(this, buffer, beginPos);
@@ -8079,8 +8093,10 @@ window.__extends = (this && this.__extends) || (function () {
                 text2 = "<i>" + text2 + "</i>";
             if (this._underline)
                 text2 = "<u>" + text2 + "</u>";
-            if (this._color)
-                text2 = "<color=" + this._color.toHEX("#rrggbb") + ">" + text2 + "</color>";
+            var c = this._color;
+            if (this._grayed)
+                c = fgui.ToolSet.toGrayed(c);
+            text2 = "<color=" + c.toHEX("#rrggbb") + ">" + text2 + "</color>";
             if (this._autoSize == fgui.AutoSizeType.Both) {
                 if (this._richText.maxWidth != 0)
                     this._richText.maxWidth = 0;
@@ -8097,8 +8113,8 @@ window.__extends = (this && this.__extends) || (function () {
             else
                 this._richText.font = null;
         };
+        //不支持使用Node的颜色，等CCC支持后可以删掉这个函数
         GRichTextField.prototype.updateFontColor = function () {
-            //RichText 2.0.5还不支持使用Node的颜色
             this.updateText();
         };
         GRichTextField.prototype.updateFontSize = function () {
@@ -17287,6 +17303,10 @@ window.__extends = (this && this.__extends) || (function () {
         ToolSet.getTime = function () {
             var currentTime = new Date();
             return currentTime.getMilliseconds() / 1000;
+        };
+        ToolSet.toGrayed = function (c) {
+            var v = c.getR() * 0.299 + c.getG() * 0.587 + c.getB() * 0.114;
+            return new cc.Color(v, v, v, c.getA());
         };
         return ToolSet;
     }());

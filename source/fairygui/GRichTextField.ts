@@ -136,8 +136,10 @@ namespace fgui {
                 text2 = "<i>" + text2 + "</i>";
             if (this._underline)
                 text2 = "<u>" + text2 + "</u>";
-            if (this._color)
-                text2 = "<color=" + this._color.toHEX("#rrggbb") + ">" + text2 + "</color>";
+            let c = this._color
+            if (this._grayed)
+                c = ToolSet.toGrayed(c);
+            text2 = "<color=" + c.toHEX("#rrggbb") + ">" + text2 + "</color>";
 
             if (this._autoSize == AutoSizeType.Both) {
                 if (this._richText.maxWidth != 0)
@@ -157,8 +159,8 @@ namespace fgui {
                 this._richText.font = null;
         }
 
+        //不支持使用Node的颜色，等CCC支持后可以删掉这个函数
         protected updateFontColor() {
-            //RichText 2.0.5还不支持使用Node的颜色
             this.updateText();
         }
 
