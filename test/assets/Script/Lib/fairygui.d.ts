@@ -5,8 +5,8 @@ declare namespace fgui {
         createObject(pkgName: string, resName: string): void;
         createObjectFromURL(url: string): void;
         cancel(): void;
-        private internalCreateObject(item);
-        private completed(result);
+        private internalCreateObject;
+        private completed;
     }
 }
 declare namespace fgui {
@@ -61,30 +61,30 @@ declare namespace fgui {
         readonly dragging: boolean;
         startDrag(source: GObject, icon: string, sourceData?: any, touchId?: number): void;
         cancel(): void;
-        private onDragEnd();
+        private onDragEnd;
     }
 }
 declare namespace fgui {
     enum ButtonMode {
         Common = 0,
         Check = 1,
-        Radio = 2,
+        Radio = 2
     }
     enum AutoSizeType {
         None = 0,
         Both = 1,
         Height = 2,
-        Shrink = 3,
+        Shrink = 3
     }
     enum AlignType {
         Left = 0,
         Center = 1,
-        Right = 2,
+        Right = 2
     }
     enum VertAlignType {
         Top = 0,
         Middle = 1,
-        Bottom = 2,
+        Bottom = 2
     }
     enum LoaderFillType {
         None = 0,
@@ -92,25 +92,25 @@ declare namespace fgui {
         ScaleMatchHeight = 2,
         ScaleMatchWidth = 3,
         ScaleFree = 4,
-        ScaleNoBorder = 5,
+        ScaleNoBorder = 5
     }
     enum ListLayoutType {
         SingleColumn = 0,
         SingleRow = 1,
         FlowHorizontal = 2,
         FlowVertical = 3,
-        Pagination = 4,
+        Pagination = 4
     }
     enum ListSelectionMode {
         Single = 0,
         Multiple = 1,
         Multiple_SingleClick = 2,
-        None = 3,
+        None = 3
     }
     enum OverflowType {
         Visible = 0,
         Hidden = 1,
-        Scroll = 2,
+        Scroll = 2
     }
     enum PackageItemType {
         Image = 0,
@@ -121,7 +121,7 @@ declare namespace fgui {
         Font = 5,
         Swf = 6,
         Misc = 7,
-        Unknown = 8,
+        Unknown = 8
     }
     enum ObjectType {
         Image = 0,
@@ -140,45 +140,45 @@ declare namespace fgui {
         ComboBox = 13,
         ProgressBar = 14,
         Slider = 15,
-        ScrollBar = 16,
+        ScrollBar = 16
     }
     enum ProgressTitleType {
         Percent = 0,
         ValueAndMax = 1,
         Value = 2,
-        Max = 3,
+        Max = 3
     }
     enum ScrollBarDisplayType {
         Default = 0,
         Visible = 1,
         Auto = 2,
-        Hidden = 3,
+        Hidden = 3
     }
     enum ScrollType {
         Horizontal = 0,
         Vertical = 1,
-        Both = 2,
+        Both = 2
     }
     enum FlipType {
         None = 0,
         Horizontal = 1,
         Vertical = 2,
-        Both = 3,
+        Both = 3
     }
     enum ChildrenRenderOrder {
         Ascent = 0,
         Descent = 1,
-        Arch = 2,
+        Arch = 2
     }
     enum GroupLayoutType {
         None = 0,
         Horizontal = 1,
-        Vertical = 2,
+        Vertical = 2
     }
     enum PopupDirection {
         Auto = 0,
         Up = 1,
-        Down = 2,
+        Down = 2
     }
     enum RelationType {
         Left_Left = 0,
@@ -205,12 +205,12 @@ declare namespace fgui {
         TopExt_Bottom = 21,
         BottomExt_Top = 22,
         BottomExt_Bottom = 23,
-        Size = 24,
+        Size = 24
     }
     enum GraphType {
         PlaceHolder = 0,
         Rect = 1,
-        Ellipse = 2,
+        Ellipse = 2
     }
     enum FillMethod {
         None = 0,
@@ -218,13 +218,13 @@ declare namespace fgui {
         Vertical = 2,
         Radial90 = 3,
         Radial180 = 4,
-        Radial360 = 5,
+        Radial360 = 5
     }
     enum FillOrigin {
         Top = 0,
         Bottom = 1,
         Left = 2,
-        Right = 3,
+        Right = 3
     }
 }
 declare namespace fgui {
@@ -323,7 +323,7 @@ declare namespace fgui {
         updateGearFromRelations(index: number, dx: number, dy: number): void;
         addDisplayLock(): number;
         releaseDisplayLock(token: number): void;
-        private checkGearDisplay();
+        private checkGearDisplay;
         readonly gearXY: GearXY;
         readonly gearSize: GearSize;
         readonly gearLook: GearLook;
@@ -382,20 +382,20 @@ declare namespace fgui {
         constructFromResource(): void;
         setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void;
         setup_afterAdd(buffer: ByteBuffer, beginPos: number): void;
-        private onRollOver();
-        private onRollOut();
+        private onRollOver;
+        private onRollOut;
         private static sGlobalDragStart;
         private static sGlobalRect;
         private static sHelperPoint;
         private static sDragHelperRect;
         private static sUpdateInDragging;
         private static sDragQuery;
-        private initDrag();
-        private dragBegin(touchId);
-        private dragEnd();
-        private onTouchBegin_0(evt);
-        private onTouchMove_0(evt);
-        private onTouchEnd_0(evt);
+        private initDrag;
+        private dragBegin;
+        private dragEnd;
+        private onTouchBegin_0;
+        private onTouchMove_0;
+        private onTouchEnd_0;
     }
     class GObjectPartner extends cc.Component {
         _emitDisplayEvents: boolean;
@@ -433,7 +433,7 @@ declare namespace fgui {
         readonly displayListContainer: cc.Node;
         addChild(child: GObject): GObject;
         addChildAt(child: GObject, index: number): GObject;
-        private getInsertPosForSortingChild(target);
+        private getInsertPosForSortingChild;
         removeChild(child: GObject, dispose?: boolean): GObject;
         removeChildAt(index: number, dispose?: boolean): GObject;
         removeChildren(beginIndex?: number, endIndex?: number, dispose?: boolean): void;
@@ -445,7 +445,7 @@ declare namespace fgui {
         getChildIndex(child: GObject): number;
         setChildIndex(child: GObject, index: number): void;
         setChildIndexBefore(child: GObject, index: number): number;
-        private _setChildIndex(child, oldIndex, index);
+        private _setChildIndex;
         swapChildren(child1: GObject, child2: GObject): void;
         swapChildrenAt(index1: number, index2: number): void;
         readonly numChildren: number;
@@ -455,8 +455,8 @@ declare namespace fgui {
         getController(name: string): Controller;
         removeController(c: Controller): void;
         readonly controllers: Array<Controller>;
-        private onChildAdd(child, index);
-        private buildNativeDisplayList(dt?);
+        private onChildAdd;
+        private buildNativeDisplayList;
         applyController(c: Controller): void;
         applyAllControllers(): void;
         adjustRadioGroupDepth(obj: GObject, c: Controller): void;
@@ -471,8 +471,8 @@ declare namespace fgui {
         apexIndex: number;
         mask: GObject;
         setMask(value: GObject, inverted: boolean): void;
-        private onMaskReady();
-        private onMaskContentChanged();
+        private onMaskReady;
+        private onMaskContentChanged;
         readonly _pivotCorrectX: number;
         readonly _pivotCorrectY: number;
         readonly baseUserData: string;
@@ -484,7 +484,7 @@ declare namespace fgui {
         handleControllerChanged(c: Controller): void;
         hitTest(globalPt: cc.Vec2): GObject;
         setBoundsChangedFlag(): void;
-        private refresh(dt?);
+        private refresh;
         ensureBoundsCorrect(): void;
         protected updateBounds(): void;
         setBounds(ax: number, ay: number, aw: number, ah?: number): void;
@@ -554,11 +554,11 @@ declare namespace fgui {
         protected handleGrayedChanged(): void;
         protected constructExtension(buffer: ByteBuffer): void;
         setup_afterAdd(buffer: ByteBuffer, beginPos: number): void;
-        private onRollOver_1();
-        private onRollOut_1();
-        private onTouchBegin_1(evt);
-        private onTouchEnd_1(evt);
-        private onClick_1();
+        private onRollOver_1;
+        private onRollOut_1;
+        private onTouchBegin_1;
+        private onTouchEnd_1;
+        private onClick_1;
     }
 }
 declare namespace fgui {
@@ -595,17 +595,17 @@ declare namespace fgui {
         protected setState(val: string): void;
         protected constructExtension(buffer: ByteBuffer): void;
         handleControllerChanged(c: Controller): void;
-        private updateSelectionController();
+        private updateSelectionController;
         dispose(): void;
         setup_afterAdd(buffer: ByteBuffer, beginPos: number): void;
         protected showDropdown(): void;
-        private onPopupClosed();
-        private onClickItem(itemObject);
-        private onClickItem2(index);
-        private onRollOver_1();
-        private onRollOut_1();
-        private onTouchBegin_1(evt);
-        private onTouchEnd_1(evt);
+        private onPopupClosed;
+        private onClickItem;
+        private onClickItem2;
+        private onRollOver_1;
+        private onRollOut_1;
+        private onTouchBegin_1;
+        private onTouchEnd_1;
     }
 }
 declare namespace fgui {
@@ -622,7 +622,7 @@ declare namespace fgui {
         clearGraphics(): void;
         readonly type: GraphType;
         color: cc.Color;
-        private drawCommon();
+        private drawCommon;
         protected handleSizeChanged(): void;
         setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void;
     }
@@ -640,11 +640,11 @@ declare namespace fgui {
         lineGap: number;
         columnGap: number;
         setBoundsChangedFlag(childSizeChanged?: boolean): void;
-        private _ensureBoundsCorrect();
+        private _ensureBoundsCorrect;
         ensureBoundsCorrect(): void;
-        private updateBounds();
-        private handleLayout();
-        private updatePercent();
+        private updateBounds;
+        private handleLayout;
+        private updatePercent;
         moveChildren(dx: number, dy: number): void;
         resizeChildren(dw: number, dh: number): void;
         setChildrenAlpha(): void;
@@ -745,18 +745,18 @@ declare namespace fgui {
         addSelection(index: number, scrollItToView?: boolean): void;
         removeSelection(index: number): void;
         clearSelection(): void;
-        private clearSelectionExcept(g);
+        private clearSelectionExcept;
         selectAll(): void;
         selectNone(): void;
         selectReverse(): void;
         handleArrowKey(dir: number): void;
-        private onClickItem(evt);
-        private setSelectionOnEvent(item, evt);
+        private onClickItem;
+        private setSelectionOnEvent;
         resizeToFit(itemCount?: number, minSize?: number): void;
         getMaxItemWidth(): number;
         protected handleSizeChanged(): void;
         handleControllerChanged(c: Controller): void;
-        private updateSelectionController(index);
+        private updateSelectionController;
         getSnappingPosition(xValue: number, yValue: number, resultPoint?: cc.Vec2): cc.Vec2;
         scrollToView(index: number, ani?: boolean, setFirst?: boolean): void;
         getFirstChildInView(): number;
@@ -764,24 +764,24 @@ declare namespace fgui {
         itemIndexToChildIndex(index: number): number;
         setVirtual(): void;
         setVirtualAndLoop(): void;
-        private _setVirtual(loop);
+        private _setVirtual;
         numItems: number;
         refreshVirtualList(): void;
-        private checkVirtualList();
-        private setVirtualListChangedFlag(layoutChanged);
-        private _refreshVirtualList(dt?);
-        private __scrolled(evt);
-        private getIndexOnPos1(forceUpdate);
-        private getIndexOnPos2(forceUpdate);
-        private getIndexOnPos3(forceUpdate);
-        private handleScroll(forceUpdate);
+        private checkVirtualList;
+        private setVirtualListChangedFlag;
+        private _refreshVirtualList;
+        private __scrolled;
+        private getIndexOnPos1;
+        private getIndexOnPos2;
+        private getIndexOnPos3;
+        private handleScroll;
         private static pos_param;
-        private handleScroll1(forceUpdate);
-        private handleScroll2(forceUpdate);
-        private handleScroll3(forceUpdate);
-        private handleArchOrder1();
-        private handleArchOrder2();
-        private handleAlign(contentWidth, contentHeight);
+        private handleScroll1;
+        private handleScroll2;
+        private handleScroll3;
+        private handleArchOrder1;
+        private handleArchOrder2;
+        private handleAlign;
         protected updateBounds(): void;
         setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void;
         setup_afterAdd(buffer: ByteBuffer, beginPos: number): void;
@@ -845,15 +845,16 @@ declare namespace fgui {
         protected loadContent(): void;
         protected loadFromPackage(itemURL: string): void;
         protected loadExternal(): void;
-        private onLoaded(err, asset);
+        private onLoaded;
         protected freeExternal(texture: cc.SpriteFrame): void;
         protected onExternalLoadSuccess(texture: cc.SpriteFrame): void;
         protected onExternalLoadFailed(): void;
-        private setErrorState();
-        private clearErrorState();
-        private updateLayout();
-        private clearContent();
+        private setErrorState;
+        private clearErrorState;
+        private updateLayout;
+        private clearContent;
         protected handleSizeChanged(): void;
+        protected handleAnchorChanged(): void;
         protected handleGrayedChanged(): void;
         hitTest(globalPt: cc.Vec2): GObject;
         setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void;
@@ -1024,15 +1025,15 @@ declare namespace fgui {
         togglePopup(popup: GObject, target?: GObject, downward?: any): void;
         hidePopup(popup?: GObject): void;
         readonly hasAnyPopup: boolean;
-        private closePopup(target);
+        private closePopup;
         showTooltips(msg: string): void;
         showTooltipsWin(tooltipWin: GObject): void;
         hideTooltips(): void;
         volumeScale: number;
         playOneShotSound(clip: cc.AudioClip, volumeScale?: number): void;
-        private adjustModalLayer();
-        private onTouchBegin_1(evt);
-        private onWinResize();
+        private adjustModalLayer;
+        private onTouchBegin_1;
+        private onWinResize;
         handlePositionChanged(): void;
     }
 }
@@ -1053,12 +1054,12 @@ declare namespace fgui {
         scrollPerc: number;
         readonly minSize: number;
         protected constructExtension(buffer: ByteBuffer): void;
-        private onGripTouchDown(evt);
+        private onGripTouchDown;
         private static sScrollbarHelperPoint;
-        private onGripTouchMove(evt);
-        private onClickArrow1(evt);
-        private onClickArrow2(evt);
-        private onBarTouchBegin(evt);
+        private onGripTouchMove;
+        private onClickArrow1;
+        private onClickArrow2;
+        private onBarTouchBegin;
     }
 }
 declare namespace fgui {
@@ -1086,14 +1087,14 @@ declare namespace fgui {
         max: number;
         value: number;
         update(): void;
-        private updateWidthPercent(percent);
+        private updateWidthPercent;
         protected constructExtension(buffer: ByteBuffer): void;
         protected handleSizeChanged(): void;
         setup_afterAdd(buffer: ByteBuffer, beginPos: number): void;
-        private onGripTouchBegin(evt);
+        private onGripTouchBegin;
         private static sSilderHelperPoint;
-        private onGripTouchMove(evt);
-        private onBarTouchBegin(evt);
+        private onGripTouchMove;
+        private onBarTouchBegin;
     }
 }
 declare namespace fgui {
@@ -1118,8 +1119,8 @@ declare namespace fgui {
         protected updateFontColor(): void;
         protected updateFontSize(): void;
         protected updateOverflow(): void;
-        private onTextChanged();
-        private onTouchEnd1(evt);
+        private onTextChanged;
+        private onTouchEnd1;
         setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void;
     }
 }
@@ -1191,9 +1192,9 @@ declare namespace fgui {
         readonly contentPane: GComponent;
         readonly list: GList;
         show(target?: GObject, downward?: any): void;
-        private onClickItem(itemObject, evt);
-        private onClickItem2(itemObject, evt);
-        private onDisplay();
+        private onClickItem;
+        private onClickItem2;
+        private onDisplay;
     }
 }
 declare namespace fgui {
@@ -1215,13 +1216,13 @@ declare namespace fgui {
         dispose(): void;
         readonly isEmpty: boolean;
         applyOnSelfResized(dWidth: number, dHeight: number, applyPivot: boolean): void;
-        private applyOnXYChanged(info, dx, dy);
-        private applyOnSizeChanged(info);
-        private addRefTarget(target);
-        private releaseRefTarget(target);
-        private __targetXYChanged(evt);
-        private __targetSizeChanged(evt);
-        private __targetSizeWillChange(evt);
+        private applyOnXYChanged;
+        private applyOnSizeChanged;
+        private addRefTarget;
+        private releaseRefTarget;
+        private __targetXYChanged;
+        private __targetSizeChanged;
+        private __targetSizeWillChange;
     }
     class RelationDef {
         percent: boolean;
@@ -1362,39 +1363,39 @@ declare namespace fgui {
         lockFooter(size: number): void;
         onOwnerSizeChanged(): void;
         handleControllerChanged(c: Controller): void;
-        private updatePageController();
+        private updatePageController;
         adjustMaskContainer(): void;
         setSize(aWidth: number, aHeight: number): void;
         setContentSize(aWidth: number, aHeight: number): void;
         changeContentSizeOnScrolling(deltaWidth: number, deltaHeight: number, deltaPosX: number, deltaPosY: number): void;
-        private handleSizeChanged(onScrolling?);
-        private posChanged(ani);
-        private refresh(dt?);
-        private refresh2();
-        private syncScrollBar(end?);
-        private onTouchBegin(evt);
-        private onTouchMove(evt);
-        private onTouchEnd(evt);
-        private onRollOver();
-        private onRollOut();
-        private onMouseWheel(evt);
-        private showScrollBar(val);
-        private _showScrollBar(dt);
-        private getLoopPartSize(division, axis);
-        private loopCheckingCurrent();
-        private loopCheckingTarget(endPos);
-        private loopCheckingTarget2(endPos, axis);
-        private loopCheckingNewPos(value, axis);
-        private alignPosition(pos, inertialScrolling);
-        private alignByPage(pos, axis, inertialScrolling);
-        private updateTargetAndDuration(orignPos, resultPos);
-        private updateTargetAndDuration2(pos, axis);
-        private fixDuration(axis, oldChange);
-        private killTween();
-        private checkRefreshBar();
+        private handleSizeChanged;
+        private posChanged;
+        private refresh;
+        private refresh2;
+        private syncScrollBar;
+        private onTouchBegin;
+        private onTouchMove;
+        private onTouchEnd;
+        private onRollOver;
+        private onRollOut;
+        private onMouseWheel;
+        private showScrollBar;
+        private _showScrollBar;
+        private getLoopPartSize;
+        private loopCheckingCurrent;
+        private loopCheckingTarget;
+        private loopCheckingTarget2;
+        private loopCheckingNewPos;
+        private alignPosition;
+        private alignByPage;
+        private updateTargetAndDuration;
+        private updateTargetAndDuration2;
+        private fixDuration;
+        private killTween;
+        private checkRefreshBar;
         protected update(dt: number): boolean;
-        private runTween(axis, dt);
-        private static easeFunc(t, d);
+        private runTween;
+        private static easeFunc;
     }
 }
 declare namespace fgui {
@@ -1426,9 +1427,9 @@ declare namespace fgui {
         playReverse(onComplete?: () => void, times?: number, delay?: number): void;
         changePlayTimes(value: number): void;
         setAutoPlay(value: boolean, times?: number, delay?: number): void;
-        private _play(onComplete?, times?, delay?, startTime?, endTime?, reversed?);
+        private _play;
         stop(setToComplete?: boolean, processCallback?: boolean): void;
-        private stopItem(item, setToComplete);
+        private stopItem;
         setPaused(paused: boolean): void;
         dispose(): void;
         readonly playing: boolean;
@@ -1442,20 +1443,20 @@ declare namespace fgui {
         updateFromRelations(targetId: string, dx: number, dy: number): void;
         onEnable(): void;
         onDisable(): void;
-        private onDelayedPlay();
-        private internalPlay();
-        private playItem(item);
-        private skipAnimations();
-        private onDelayedPlayItem(tweener);
-        private onTweenStart(tweener);
-        private onTweenUpdate(tweener);
-        private onTweenComplete(tweener);
-        private onPlayTransCompleted(item);
-        private callHook(item, tweenEnd);
-        private checkAllComplete();
-        private applyValue(item);
+        private onDelayedPlay;
+        private internalPlay;
+        private playItem;
+        private skipAnimations;
+        private onDelayedPlayItem;
+        private onTweenStart;
+        private onTweenUpdate;
+        private onTweenComplete;
+        private onPlayTransCompleted;
+        private callHook;
+        private checkAllComplete;
+        private applyValue;
         setup(buffer: ByteBuffer): void;
-        private decodeValue(item, buffer, value);
+        private decodeValue;
     }
 }
 declare namespace fgui {
@@ -1540,7 +1541,7 @@ declare namespace fgui {
         static getItemByURL(url: string): PackageItem;
         static normalizeURL(url: string): string;
         static setStringsSource(source: string): void;
-        private loadPackage(buffer, url);
+        private loadPackage;
         dispose(): void;
         readonly id: string;
         readonly name: string;
@@ -1552,8 +1553,8 @@ declare namespace fgui {
         getItemAssetByName(resName: string): any;
         getItemAsset(item: PackageItem): cc.Asset;
         loadAllAssets(): void;
-        private loadMovieClip(item);
-        private loadFont(item);
+        private loadMovieClip;
+        private loadFont;
     }
 }
 declare namespace fgui {
@@ -1597,14 +1598,14 @@ declare namespace fgui {
         protected onHide(): void;
         protected doShowAnimation(): void;
         protected doHideAnimation(): void;
-        private __uiLoadComplete();
-        private _init();
+        private __uiLoadComplete;
+        private _init;
         dispose(): void;
         protected closeEventHandler(evt: cc.Event): void;
         protected onEnable(): void;
         protected onDisable(): void;
-        private onTouchBegin_1(evt);
-        private onDragStart_1(evt);
+        private onTouchBegin_1;
+        private onDragStart_1;
     }
 }
 declare namespace fgui {
@@ -1655,7 +1656,7 @@ declare namespace fgui {
         Off = 8,
         Custom1 = 9,
         Custom2 = 10,
-        Custom3 = 11,
+        Custom3 = 11
     }
     class BlendModeUtils {
         private static factors;
@@ -1676,7 +1677,7 @@ declare namespace fgui {
         fillOrigin: FillOrigin;
         fillClockwise: boolean;
         fillAmount: number;
-        private setupFill();
+        private setupFill;
     }
 }
 declare namespace fgui {
@@ -1717,7 +1718,7 @@ declare namespace fgui {
         advance(timeInMiniseconds: number): void;
         setPlaySettings(start?: number, end?: number, times?: number, endAt?: number, endCallback?: Function, callbackObj?: any): void;
         protected update(dt: number): void;
-        private drawFrame();
+        private drawFrame;
     }
 }
 declare namespace fgui {
@@ -1806,21 +1807,21 @@ declare namespace fgui {
         removeTouchMonitor(target: GObject): void;
         cancelClick(touchId: number): void;
         simulateClick(target: GObject): void;
-        private touchBeginHandler(touch, evt);
-        private touchMoveHandler(touch, evt);
-        private touchEndHandler(touch, evt);
-        private touchCancelHandler(touch, evt);
-        private mouseDownHandler(evt);
-        private mouseUpHandler(evt);
-        private mouseMoveHandler(evt);
-        private mouseWheelHandler(evt);
-        private updateInfo(touchId, pos, touch?);
-        private getInfo(touchId, createIfNotExisits?);
-        private setBegin(ti);
-        private setEnd(ti);
-        private clickTest(ti);
-        private handleRollOver(ti, target);
-        private getEvent(ti, target, type, bubbles);
+        private touchBeginHandler;
+        private touchMoveHandler;
+        private touchEndHandler;
+        private touchCancelHandler;
+        private mouseDownHandler;
+        private mouseUpHandler;
+        private mouseMoveHandler;
+        private mouseWheelHandler;
+        private updateInfo;
+        private getInfo;
+        private setBegin;
+        private setEnd;
+        private clickTest;
+        private handleRollOver;
+        private getEvent;
     }
 }
 declare namespace fgui {
@@ -1903,8 +1904,8 @@ declare namespace fgui {
         protected init(): void;
         protected addStatus(pageId: string, buffer: ByteBuffer): void;
         apply(): void;
-        private __tweenUpdate(tweener);
-        private __tweenComplete();
+        private __tweenUpdate;
+        private __tweenComplete;
         updateState(): void;
     }
 }
@@ -1916,8 +1917,8 @@ declare namespace fgui {
         protected init(): void;
         protected addStatus(pageId: string, buffer: ByteBuffer): void;
         apply(): void;
-        private __tweenUpdate(tweener);
-        private __tweenComplete();
+        private __tweenUpdate;
+        private __tweenComplete;
         updateState(): void;
         updateFromRelations(dx: number, dy: number): void;
     }
@@ -1941,8 +1942,8 @@ declare namespace fgui {
         protected init(): void;
         protected addStatus(pageId: string, buffer: ByteBuffer): void;
         apply(): void;
-        private __tweenUpdate(tweener);
-        private __tweenComplete();
+        private __tweenUpdate;
+        private __tweenComplete;
         updateState(): void;
         updateFromRelations(dx: number, dy: number): void;
     }
@@ -2018,18 +2019,18 @@ declare namespace fgui {
         updateNodes(nodes: Array<TreeNode>): void;
         expandAll(folderNode: TreeNode): void;
         collapseAll(folderNode: TreeNode): void;
-        private createCell(node);
+        private createCell;
         _afterInserted(node: TreeNode): void;
-        private getInsertIndexForNode(node);
+        private getInsertIndexForNode;
         _afterRemoved(node: TreeNode): void;
         _afterExpanded(node: TreeNode): void;
         _afterCollapsed(node: TreeNode): void;
         _afterMoved(node: TreeNode): void;
-        private checkChildren(folderNode, index);
-        private hideFolderNode(folderNode);
-        private removeNode(node);
-        private onClickExpandButton(evt);
-        private onClickItem(item, evt);
+        private checkChildren;
+        private hideFolderNode;
+        private removeNode;
+        private onClickExpandButton;
+        private onClickItem;
     }
 }
 declare namespace fgui {
@@ -2165,10 +2166,10 @@ declare namespace fgui {
         _init(): void;
         _reset(): void;
         _update(dt: number): void;
-        private update();
-        private callStartCallback();
-        private callUpdateCallback();
-        private callCompleteCallback();
+        private update;
+        private callStartCallback;
+        private callUpdateCallback;
+        private callCompleteCallback;
     }
 }
 declare namespace fgui {
@@ -2181,7 +2182,7 @@ declare namespace fgui {
         static isTweening(target: any, propType: any): boolean;
         static killTweens(target: any, completed: boolean, propType: any): boolean;
         static getTween(target: any, propType: any): GTweener;
-        private static update(dt);
+        private static update;
     }
 }
 declare namespace fgui {
@@ -2210,7 +2211,7 @@ declare namespace fgui {
         readonly data: Uint8Array;
         position: number;
         skip(count: number): void;
-        private validate(forward);
+        private validate;
         readByte(): number;
         readUbyte(): number;
         readBool(): boolean;

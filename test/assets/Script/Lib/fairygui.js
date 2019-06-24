@@ -1,8 +1,11 @@
 window.fgui = {};
 window.__extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -111,7 +114,7 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 else {
                     di = new DisplayListItem(null, type);
-                    if (type == fgui.ObjectType.List)
+                    if (type == fgui.ObjectType.List) //list
                         di.listItemCount = this.collectListChildren(buffer);
                 }
                 this._itemList.push(di);
@@ -179,7 +182,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._objectPool.push(obj);
                     if (di.type == fgui.ObjectType.List && di.listItemCount > 0) {
                         poolStart = this._objectPool.length - di.listItemCount - 1;
-                        for (k = 0; k < di.listItemCount; k++)
+                        for (k = 0; k < di.listItemCount; k++) //把他们都放到pool里，这样GList在创建时就不需要创建对象了
                             obj.itemPool.returnObject(this._objectPool[k + poolStart]);
                         this._objectPool.splice(poolStart, di.listItemCount);
                     }
@@ -507,7 +510,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         DragDropManager.prototype.onDragEnd = function () {
-            if (this._agent.parent == null)
+            if (this._agent.parent == null) //cancelled
                 return;
             fgui.GRoot.inst.removeChild(this._agent);
             var sourceData = this._sourceData;
@@ -2101,7 +2104,7 @@ window.__extends = (this && this.__extends) || (function () {
             var oldIndex = this._children.indexOf(child);
             if (oldIndex == -1)
                 throw "Not a child of this container";
-            if (child.sortingOrder != 0)
+            if (child.sortingOrder != 0) //no effect
                 return;
             var cnt = this._children.length;
             if (this._sortingChildCount > 0) {
@@ -2114,7 +2117,7 @@ window.__extends = (this && this.__extends) || (function () {
             var oldIndex = this._children.indexOf(child);
             if (oldIndex == -1)
                 throw "Not a child of this container";
-            if (child.sortingOrder != 0)
+            if (child.sortingOrder != 0) //no effect
                 return oldIndex;
             var cnt = this._children.length;
             if (this._sortingChildCount > 0) {
@@ -2725,9 +2728,9 @@ window.__extends = (this && this.__extends) || (function () {
                         }
                         else {
                             prev = this._children[i - 1];
-                            if (yValue < prev.y + prev.actualHeight / 2)
+                            if (yValue < prev.y + prev.actualHeight / 2) //top half part
                                 yValue = prev.y;
-                            else
+                            else //bottom half part
                                 yValue = obj.y;
                             break;
                         }
@@ -2748,9 +2751,9 @@ window.__extends = (this && this.__extends) || (function () {
                         }
                         else {
                             prev = this._children[i - 1];
-                            if (xValue < prev.x + prev.actualWidth / 2)
+                            if (xValue < prev.x + prev.actualWidth / 2) //top half part
                                 xValue = prev.x;
-                            else
+                            else //bottom half part
                                 xValue = obj.x;
                             break;
                         }
@@ -4193,7 +4196,8 @@ window.__extends = (this && this.__extends) || (function () {
                     child.setSize(nw, child._rawHeight + dh, true);
                     remainSize -= child.width;
                     if (last == i) {
-                        if (remainSize >= 1) {
+                        if (remainSize >= 1) //可能由于有些元件有宽度限制，导致无法铺满
+                         {
                             for (j = 0; j <= i; j++) {
                                 child = this._parent.getChildAt(j);
                                 if (child.group != this)
@@ -4234,7 +4238,8 @@ window.__extends = (this && this.__extends) || (function () {
                     child.setSize(child._rawWidth + dw, nh, true);
                     remainSize -= child.height;
                     if (last == i) {
-                        if (remainSize >= 1) {
+                        if (remainSize >= 1) //可能由于有些元件有宽度限制，导致无法铺满
+                         {
                             for (j = 0; j <= i; j++) {
                                 child = this._parent.getChildAt(j);
                                 if (child.group != this)
@@ -5037,7 +5042,7 @@ window.__extends = (this && this.__extends) || (function () {
             if (index == -1)
                 return;
             switch (dir) {
-                case 1://up
+                case 1: //up
                     if (this._layout == fgui.ListLayoutType.SingleColumn || this._layout == fgui.ListLayoutType.FlowVertical) {
                         index--;
                         if (index >= 0) {
@@ -5066,7 +5071,7 @@ window.__extends = (this && this.__extends) || (function () {
                         }
                     }
                     break;
-                case 3://right
+                case 3: //right
                     if (this._layout == fgui.ListLayoutType.SingleRow || this._layout == fgui.ListLayoutType.FlowHorizontal || this._layout == fgui.ListLayoutType.Pagination) {
                         index++;
                         if (index < this._children.length) {
@@ -5096,7 +5101,7 @@ window.__extends = (this && this.__extends) || (function () {
                         }
                     }
                     break;
-                case 5://down
+                case 5: //down
                     if (this._layout == fgui.ListLayoutType.SingleColumn || this._layout == fgui.ListLayoutType.FlowVertical) {
                         index++;
                         if (index < this._children.length) {
@@ -5126,7 +5131,7 @@ window.__extends = (this && this.__extends) || (function () {
                         }
                     }
                     break;
-                case 7://left
+                case 7: //left
                     if (this._layout == fgui.ListLayoutType.SingleRow || this._layout == fgui.ListLayoutType.FlowHorizontal || this._layout == fgui.ListLayoutType.Pagination) {
                         index--;
                         if (index >= 0) {
@@ -5586,7 +5591,8 @@ window.__extends = (this && this.__extends) || (function () {
                             this._curLineItemCount = 1;
                     }
                 }
-                else {
+                else //pagination
+                 {
                     if (this._columnCount > 0)
                         this._curLineItemCount = this._columnCount;
                     else {
@@ -5905,7 +5911,7 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 ii.updateFlag = this.itemInfoVer;
                 ii.obj.setPosition(curX, curY);
-                if (curIndex == newFirstIndex)
+                if (curIndex == newFirstIndex) //要显示多一条才不会穿帮
                     max += ii.height;
                 curX += ii.width + this._columnGap;
                 if (curIndex % this._curLineItemCount == this._curLineItemCount - 1) {
@@ -5931,7 +5937,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
             if (deltaSize != 0 || firstItemDeltaSize != 0)
                 this._scrollPane.changeContentSizeOnScrolling(0, deltaSize, 0, firstItemDeltaSize);
-            if (curIndex > 0 && this.numChildren > 0 && this._container.y < 0 && this.getChildAt(0).y > -this._container.y)
+            if (curIndex > 0 && this.numChildren > 0 && this._container.y < 0 && this.getChildAt(0).y > -this._container.y) //最后一页没填满！
                 return true;
             else
                 return false;
@@ -6040,7 +6046,7 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 ii.updateFlag = this.itemInfoVer;
                 ii.obj.setPosition(curX, curY);
-                if (curIndex == newFirstIndex)
+                if (curIndex == newFirstIndex) //要显示多一条才不会穿帮
                     max += ii.width;
                 curY += ii.height + this._lineGap;
                 if (curIndex % this._curLineItemCount == this._curLineItemCount - 1) {
@@ -6066,7 +6072,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
             if (deltaSize != 0 || firstItemDeltaSize != 0)
                 this._scrollPane.changeContentSizeOnScrolling(deltaSize, 0, firstItemDeltaSize, 0);
-            if (curIndex > 0 && this.numChildren > 0 && this._container.x < 0 && this.getChildAt(0).x > -this._container.x)
+            if (curIndex > 0 && this.numChildren > 0 && this._container.x < 0 && this.getChildAt(0).x > -this._container.x) //最后一页没填满！
                 return true;
             else
                 return false;
@@ -6457,7 +6463,8 @@ window.__extends = (this && this.__extends) || (function () {
                     ch = Math.ceil(maxHeight);
                 }
             }
-            else {
+            else //pagination
+             {
                 var eachHeight;
                 if (this._autoResizeItem && this._lineCount > 0)
                     eachHeight = Math.floor((viewHeight - (this._lineCount - 1) * this._lineGap) / this._lineCount);
@@ -6521,7 +6528,8 @@ window.__extends = (this && this.__extends) || (function () {
                             j = 0;
                             k++;
                             if (this._lineCount != 0 && k >= this._lineCount
-                                || this._lineCount == 0 && curY + child.height > viewHeight && maxWidth != 0) {
+                                || this._lineCount == 0 && curY + child.height > viewHeight && maxWidth != 0) //new page
+                             {
                                 page++;
                                 curY = 0;
                                 k = 0;
@@ -6717,7 +6725,8 @@ window.__extends = (this && this.__extends) || (function () {
             _this._verticalAlign = fgui.VertAlignType.Top;
             _this._showErrorSign = true;
             _this._color = cc.Color.WHITE;
-            _this._container = new cc.PrivateNode("Image");
+            _this._container = new cc.Node("Image");
+            _this._container.setAnchorPoint(0, 1);
             _this._node.addChild(_this._container);
             _this._content = _this._container.addComponent(fgui.MovieClip);
             return _this;
@@ -7083,6 +7092,8 @@ window.__extends = (this && this.__extends) || (function () {
             }
             this._contentWidth = this._contentSourceWidth;
             this._contentHeight = this._contentSourceHeight;
+            var pivotCorrectX = -this.pivotX * this._width;
+            var pivotCorrectY = this.pivotY * this._height;
             if (this._autoSize) {
                 this._updatingLayout = true;
                 if (this._contentWidth == 0)
@@ -7092,9 +7103,9 @@ window.__extends = (this && this.__extends) || (function () {
                 this.setSize(this._contentWidth, this._contentHeight);
                 this._updatingLayout = false;
                 this._container.setContentSize(this._width, this._height);
-                this._container.setPosition(0, 0);
+                this._container.setPosition(pivotCorrectX, pivotCorrectY);
                 if (this._content2 != null) {
-                    this._content2.setPosition(-this._width / 2, -this._height / 2);
+                    this._content2.setPosition(pivotCorrectX - this._width / 2, pivotCorrectY - this._height / 2);
                     this._content2.setScale(1, 1);
                 }
                 if (this._contentWidth == this._width && this._contentHeight == this._height)
@@ -7133,23 +7144,24 @@ window.__extends = (this && this.__extends) || (function () {
             }
             this._container.setContentSize(this._contentWidth, this._contentHeight);
             if (this._content2 != null) {
-                this._content2.setPosition(-this._width / 2, -this._height / 2);
+                this._content2.setPosition(pivotCorrectX - this._width / 2, pivotCorrectY - this._height / 2);
                 this._content2.setScale(sx, sy);
             }
             var nx, ny;
-            if (this._align == fgui.AlignType.Center)
+            if (this._align == fgui.AlignType.Left)
                 nx = 0;
-            else if (this._align == fgui.AlignType.Right)
+            else if (this._align == fgui.AlignType.Center)
                 nx = Math.floor((this._width - this._contentWidth) / 2);
             else
-                nx = -Math.floor((this._width - this._contentWidth) / 2);
-            if (this._verticalAlign == fgui.VertAlignType.Middle)
+                nx = this._width - this._contentWidth;
+            if (this._verticalAlign == fgui.VertAlignType.Top)
                 ny = 0;
-            else if (this._verticalAlign == fgui.VertAlignType.Bottom)
-                ny = -Math.floor((this._height - this._contentHeight) / 2);
-            else
+            else if (this._verticalAlign == fgui.VertAlignType.Middle)
                 ny = Math.floor((this._height - this._contentHeight) / 2);
-            this._container.setPosition(nx, ny);
+            else
+                ny = this._height - this._contentHeight;
+            ny = -ny;
+            this._container.setPosition(pivotCorrectX + nx, pivotCorrectY + ny);
         };
         GLoader.prototype.clearContent = function () {
             this.clearErrorState();
@@ -7169,6 +7181,11 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GLoader.prototype.handleSizeChanged = function () {
             _super.prototype.handleSizeChanged.call(this);
+            if (!this._updatingLayout)
+                this.updateLayout();
+        };
+        GLoader.prototype.handleAnchorChanged = function () {
+            _super.prototype.handleAnchorChanged.call(this);
             if (!this._updatingLayout)
                 this.updateLayout();
         };
@@ -7751,7 +7768,8 @@ window.__extends = (this && this.__extends) || (function () {
             var value;
             var result = "";
             while ((pos2 = template.indexOf("{", pos1)) != -1) {
-                if (pos2 > 0 && template.charCodeAt(pos2 - 1) == 92) {
+                if (pos2 > 0 && template.charCodeAt(pos2 - 1) == 92) //\
+                 {
                     result += template.substring(pos1, pos2 - 1);
                     result += "{";
                     pos1 = pos2 + 1;
@@ -7828,7 +7846,7 @@ window.__extends = (this && this.__extends) || (function () {
             var text2 = this._text;
             if (this._templateVars != null)
                 text2 = this.parseTemplate(text2);
-            if (this._ubbEnabled)
+            if (this._ubbEnabled) //不支持同一个文本不同样式
                 text2 = fgui.UBBParser.inst.parse(fgui.ToolSet.encodeHTML(text2), true);
             this._label.string = text2;
         };
@@ -7947,7 +7965,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this.strokeColor = buffer.readColor();
                 this.stroke = buffer.readFloat();
             }
-            if (buffer.readBool())
+            if (buffer.readBool()) //shadow
                 buffer.skip(12);
             if (buffer.readBool())
                 this._templateVars = {};
@@ -9003,7 +9021,7 @@ window.__extends = (this && this.__extends) || (function () {
             var text2 = this._text;
             if (this._templateVars != null)
                 text2 = this.parseTemplate(text2);
-            if (this._ubbEnabled)
+            if (this._ubbEnabled) //不支持同一个文本不同样式
                 text2 = fgui.UBBParser.inst.parse(fgui.ToolSet.encodeHTML(text2), true);
             this._editBox.string = text2;
         };
@@ -9039,7 +9057,7 @@ window.__extends = (this && this.__extends) || (function () {
             if (iv != 0)
                 this.maxLength = iv;
             iv = buffer.readInt();
-            if (iv != 0) {
+            if (iv != 0) { //keyboardType
             }
             if (buffer.readBool())
                 this.password = true;
@@ -10830,7 +10848,8 @@ window.__extends = (this && this.__extends) || (function () {
             }
             this.refresh2();
             this._owner.node.emit(fgui.Event.SCROLL, this._owner);
-            if (this._needRefresh) {
+            if (this._needRefresh) //在onScroll事件里开发者可能修改位置，这里再刷新一次，避免闪烁
+             {
                 this._needRefresh = false;
                 this.unschedule(this.refresh);
                 this.refresh2();
@@ -10917,7 +10936,7 @@ window.__extends = (this && this.__extends) || (function () {
                 return;
             if (!this._touchEffect)
                 return;
-            if (ScrollPane.draggingPane != null && ScrollPane.draggingPane != this || fgui.GObject.draggingObject != null)
+            if (ScrollPane.draggingPane != null && ScrollPane.draggingPane != this || fgui.GObject.draggingObject != null) //已经有其他拖动
                 return;
             var pt = this._owner.globalToLocal(evt.pos.x, evt.pos.y, ScrollPane.sHelperPoint);
             var sensitivity = fgui.UIConfig.touchScrollSensitivity;
@@ -10930,9 +10949,10 @@ window.__extends = (this && this.__extends) || (function () {
                     diff = Math.abs(this._beginTouchPos.y - pt.y);
                     if (diff < sensitivity)
                         return;
-                    if ((ScrollPane._gestureFlag & 2) != 0) {
+                    if ((ScrollPane._gestureFlag & 2) != 0) //已经有水平方向的手势在监测，那么我们用严格的方式检查是不是按垂直方向移动，避免冲突
+                     {
                         diff2 = Math.abs(this._beginTouchPos.x - pt.x);
-                        if (diff < diff2)
+                        if (diff < diff2) //不通过则不允许滚动了
                             return;
                     }
                 }
@@ -11018,7 +11038,8 @@ window.__extends = (this && this.__extends) || (function () {
             if (deltaTime != 0) {
                 var frameRate = 60;
                 var elapsed = deltaTime * frameRate - 1;
-                if (elapsed > 1) {
+                if (elapsed > 1) //速度衰减
+                 {
                     var factor = Math.pow(0.833, elapsed);
                     this._velocity.x = this._velocity.x * factor;
                     this._velocity.y = this._velocity.y * factor;
@@ -11311,17 +11332,19 @@ window.__extends = (this && this.__extends) || (function () {
                 var testPageSize = Math.min(this._pageSize[axis], this._contentSize[axis] - (page + 1) * this._pageSize[axis]);
                 var delta = -pos - page * this._pageSize[axis];
                 //页面吸附策略
-                if (Math.abs(change) > this._pageSize[axis]) {
+                if (Math.abs(change) > this._pageSize[axis]) //如果滚动距离超过1页,则需要超过页面的一半，才能到更下一页
+                 {
                     if (delta > testPageSize * 0.5)
                         page++;
                 }
-                else {
+                else //否则只需要页面的1/3，当然，需要考虑到左移和右移的情况
+                 {
                     if (delta > testPageSize * (change < 0 ? 0.3 : 0.7))
                         page++;
                 }
                 //重新计算终点
                 pos = -page * this._pageSize[axis];
-                if (pos < -this._overlapSize[axis])
+                if (pos < -this._overlapSize[axis]) //最后一页未必有pageSize那么大
                     pos = -this._overlapSize[axis];
             }
             //惯性滚动模式下，会增加判断尽量不要滚动超过一页
@@ -11402,7 +11425,8 @@ window.__extends = (this && this.__extends) || (function () {
             this._tweenDuration[axis] = newDuration;
         };
         ScrollPane.prototype.killTween = function () {
-            if (this._tweening == 1) {
+            if (this._tweening == 1) //取消类型为1的tween需立刻设置到终点
+             {
                 this._container.setPosition(this._tweenStart.x + this._tweenChange.x, -(this._tweenStart.y + this._tweenChange.y));
                 this._owner.node.emit(fgui.Event.SCROLL, this._owner);
             }
@@ -11506,14 +11530,16 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 if (this._tweening == 2 && this._bouncebackEffect) {
                     if (newValue > 20 + threshold1 && this._tweenChange[axis] > 0
-                        || newValue > threshold1 && this._tweenChange[axis] == 0) {
+                        || newValue > threshold1 && this._tweenChange[axis] == 0) //开始回弹
+                     {
                         this._tweenTime[axis] = 0;
                         this._tweenDuration[axis] = ScrollPane.TWEEN_TIME_DEFAULT;
                         this._tweenChange[axis] = -newValue + threshold1;
                         this._tweenStart[axis] = newValue;
                     }
                     else if (newValue < threshold2 - 20 && this._tweenChange[axis] < 0
-                        || newValue < threshold2 && this._tweenChange[axis] == 0) {
+                        || newValue < threshold2 && this._tweenChange[axis] == 0) //开始回弹
+                     {
                         this._tweenTime[axis] = 0;
                         this._tweenDuration[axis] = ScrollPane.TWEEN_TIME_DEFAULT;
                         this._tweenChange[axis] = threshold2 - newValue;
@@ -11633,7 +11659,8 @@ window.__extends = (this && this.__extends) || (function () {
                     if (trans == this)
                         trans = null;
                     if (trans != null) {
-                        if (item.value.playTimes == 0) {
+                        if (item.value.playTimes == 0) //stop
+                         {
                             var j;
                             for (j = i - 1; j >= 0; j--) {
                                 var item2 = this._items[j];
@@ -11700,7 +11727,8 @@ window.__extends = (this && this.__extends) || (function () {
             if (item.tweener != null) {
                 item.tweener.kill(setToComplete);
                 item.tweener = null;
-                if (item.type == TransitionActionType.Shake && !setToComplete) {
+                if (item.type == TransitionActionType.Shake && !setToComplete) //震动必须归位，否则下次就越震越远了。
+                 {
                     item.target._gearLocked = true;
                     item.target.setPosition(item.target.x - item.value.lastOffsetX, item.target.y - item.value.lastOffsetY);
                     item.target._gearLocked = false;
@@ -12153,7 +12181,8 @@ window.__extends = (this && this.__extends) || (function () {
         };
         Transition.prototype.onTweenStart = function (tweener) {
             var item = tweener.target;
-            if (item.type == TransitionActionType.XY || item.type == TransitionActionType.Size) {
+            if (item.type == TransitionActionType.XY || item.type == TransitionActionType.Size) //位置和大小要到start才最终确认起始值
+             {
                 var startValue;
                 var endValue;
                 if (this._reversed) {
@@ -12229,7 +12258,7 @@ window.__extends = (this && this.__extends) || (function () {
             var item = tweener.target;
             item.tweener = null;
             this._totalTasks--;
-            if (tweener.allCompleted)
+            if (tweener.allCompleted) //当整体播放结束时间在这个tween的中间时不应该调用结尾钩子
                 this.callHook(item, true);
             this.checkAllComplete();
         };
@@ -12655,7 +12684,8 @@ window.__extends = (this && this.__extends) || (function () {
                 for (j = 0; j < gearCnt; j++) {
                     nextPos = buffer.readShort();
                     nextPos += buffer.position;
-                    if (buffer.readByte() == 6) {
+                    if (buffer.readByte() == 6) //gearText
+                     {
                         buffer.skip(2); //controller
                         valueCnt = buffer.readShort();
                         for (k = 0; k < valueCnt; k++) {
@@ -12801,6 +12831,7 @@ window.__extends = (this && this.__extends) || (function () {
     fgui.UIConfig = UIConfig;
     var _flag = false;
     fgui.addLoadHandler = function (ext) {
+        var _a, _b;
         if (_flag)
             return;
         _flag = true;
@@ -12813,7 +12844,6 @@ window.__extends = (this && this.__extends) || (function () {
                 return item.content;
             },
             _b));
-        var _a, _b;
     };
     var _fontRegistry = {};
     fgui.registerFont = function (name, font) {
@@ -13981,8 +14011,8 @@ window.__extends = (this && this.__extends) || (function () {
                 this.fillStart = this._fillClockwise ? 1 : 0;
             }
             else {
-                var origin = this._fillOrigin;
-                switch (origin) {
+                var origin_1 = this._fillOrigin;
+                switch (origin_1) {
                     case fgui.FillOrigin.Right:
                         this.fillOrigin = 0;
                         break;
@@ -14159,7 +14189,8 @@ window.__extends = (this && this.__extends) || (function () {
                         this._repeatedCount++;
                     }
                 }
-                if (this._frame == beginFrame && this._reversed == beginReversed) {
+                if (this._frame == beginFrame && this._reversed == beginReversed) //走了一轮了
+                 {
                     var roundTime = backupTime - timeInMiniseconds; //这就是一轮需要的时间
                     timeInMiniseconds -= Math.floor(timeInMiniseconds / roundTime) * roundTime; //跳过
                 }
@@ -14228,12 +14259,14 @@ window.__extends = (this && this.__extends) || (function () {
                     this._repeatedCount++;
                 }
             }
-            if (this._status == 1) {
+            if (this._status == 1) //new loop
+             {
                 this._frame = this._start;
                 this._frameElapsed = 0;
                 this._status = 0;
             }
-            else if (this._status == 2) {
+            else if (this._status == 2) //ending
+             {
                 this._frame = this._endAt;
                 this._frameElapsed = 0;
                 this._status = 3; //ended
@@ -14569,7 +14602,7 @@ window.__extends = (this && this.__extends) || (function () {
                 ti.target.node.dispatchEvent(evt2);
                 fgui.Event._return(evt2);
             }
-            if (cc.sys.isMobile)
+            if (cc.sys.isMobile) //on mobile platform, trigger RollOut on up event, but not on PC
                 this.handleRollOver(ti, null);
             else
                 this.handleRollOver(ti, ti.target);
@@ -16490,7 +16523,8 @@ window.__extends = (this && this.__extends) || (function () {
                 dt *= this._timeScale;
             if (dt == 0)
                 return;
-            if (this._ended != 0) {
+            if (this._ended != 0) //Maybe completed by seek
+             {
                 this.callCompleteCallback();
                 this._killed = true;
                 return;
@@ -16506,7 +16540,8 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GTweener.prototype.update = function () {
             this._ended = 0;
-            if (this._valueSize == 0) {
+            if (this._valueSize == 0) //DelayedCall
+             {
                 if (this._elapsedTime >= this._delay + this._duration)
                     this._ended = 1;
                 return;
@@ -16730,7 +16765,8 @@ window.__extends = (this && this.__extends) || (function () {
                 }
             }
             if (freePosStart >= 0) {
-                if (TweenManager._totalActiveTweens != cnt) {
+                if (TweenManager._totalActiveTweens != cnt) //new tweens added
+                 {
                     var j = cnt;
                     cnt = TweenManager._totalActiveTweens - cnt;
                     for (i = 0; i < cnt; i++)
@@ -16920,7 +16956,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         ByteBuffer.prototype.readS = function () {
             var index = this.readUshort();
-            if (index == 65534)
+            if (index == 65534) //null
                 return null;
             else if (index == 65533)
                 return "";
@@ -17193,7 +17229,8 @@ window.__extends = (this && this.__extends) || (function () {
             var pos2;
             var result = "";
             while ((pos2 = this._text.indexOf("[", pos1)) != -1) {
-                if (this._text.charCodeAt(pos2 - 1) == 92) {
+                if (this._text.charCodeAt(pos2 - 1) == 92) //\
+                 {
                     result += this._text.substring(pos1, pos2 - 1);
                     result += "[";
                     pos1 = pos2 + 1;
@@ -17220,7 +17257,8 @@ window.__extends = (this && this.__extends) || (function () {
             var func;
             var result = "";
             while ((pos2 = this._text.indexOf("[", pos1)) != -1) {
-                if (pos2 > 0 && this._text.charCodeAt(pos2 - 1) == 92) {
+                if (pos2 > 0 && this._text.charCodeAt(pos2 - 1) == 92) //\
+                 {
                     result += this._text.substring(pos1, pos2 - 1);
                     result += "[";
                     pos1 = pos2 + 1;

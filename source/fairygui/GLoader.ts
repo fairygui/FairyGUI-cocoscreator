@@ -42,7 +42,8 @@ namespace fgui {
             this._showErrorSign = true;
             this._color = cc.Color.WHITE;
 
-            this._container = new cc.PrivateNode("Image");
+            this._container = new cc.Node("Image");
+            this._container.setAnchorPoint(0, 1);
             this._node.addChild(this._container);
 
             this._content = this._container.addComponent(MovieClip);
@@ -397,6 +398,9 @@ namespace fgui {
             this._contentWidth = this._contentSourceWidth;
             this._contentHeight = this._contentSourceHeight;
 
+            let pivotCorrectX = -this.pivotX * this._width;
+            let pivotCorrectY = this.pivotY * this._height;
+
             if (this._autoSize) {
                 this._updatingLayout = true;
                 if (this._contentWidth == 0)
@@ -408,9 +412,9 @@ namespace fgui {
                 this._updatingLayout = false;
 
                 this._container.setContentSize(this._width, this._height);
-                this._container.setPosition(0, 0);
+                this._container.setPosition(pivotCorrectX, pivotCorrectY);
                 if (this._content2 != null) {
-                    this._content2.setPosition(-this._width / 2, -this._height / 2);
+                    this._content2.setPosition(pivotCorrectX - this._width / 2, pivotCorrectY - this._height / 2);
                     this._content2.setScale(1, 1);
                 }
                 if (this._contentWidth == this._width && this._contentHeight == this._height)
@@ -452,26 +456,25 @@ namespace fgui {
 
             this._container.setContentSize(this._contentWidth, this._contentHeight);
             if (this._content2 != null) {
-                this._content2.setPosition(-this._width / 2, -this._height / 2);
+                this._content2.setPosition(pivotCorrectX - this._width / 2, pivotCorrectY - this._height / 2);
                 this._content2.setScale(sx, sy);
             }
 
             var nx: number, ny: number;
-            if (this._align == AlignType.Center)
+            if (this._align == AlignType.Left)
                 nx = 0;
-            else if (this._align == AlignType.Right)
+            else if (this._align == AlignType.Center)
                 nx = Math.floor((this._width - this._contentWidth) / 2);
             else
-                nx = -Math.floor((this._width - this._contentWidth) / 2);
-
-            if (this._verticalAlign == VertAlignType.Middle)
+                nx = this._width - this._contentWidth;
+            if (this._verticalAlign == VertAlignType.Top)
                 ny = 0;
-            else if (this._verticalAlign == VertAlignType.Bottom)
-                ny = -Math.floor((this._height - this._contentHeight) / 2);
-            else
+            else if (this._verticalAlign == VertAlignType.Middle)
                 ny = Math.floor((this._height - this._contentHeight) / 2);
-
-            this._container.setPosition(nx, ny);
+            else
+                ny = this._height - this._contentHeight;
+            ny = -ny;
+            this._container.setPosition(pivotCorrectX + nx, pivotCorrectY + ny);
         }
 
         private clearContent(): void {
@@ -494,6 +497,13 @@ namespace fgui {
 
         protected handleSizeChanged(): void {
             super.handleSizeChanged();
+
+            if (!this._updatingLayout)
+                this.updateLayout();
+        }
+
+        protected handleAnchorChanged(): void {
+            super.handleAnchorChanged();
 
             if (!this._updatingLayout)
                 this.updateLayout();
