@@ -1025,7 +1025,7 @@ namespace fgui {
                 }
 
                 if (this._virtualListChanged != 0)
-                    this._partner.callLater(this._refreshVirtualList);
+                    this._partner.unschedule(this._refreshVirtualList);
 
                 //立即刷新
                 this._refreshVirtualList();

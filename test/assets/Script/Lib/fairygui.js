@@ -5519,7 +5519,7 @@ window.__extends = (this && this.__extends) || (function () {
                             this._virtualItems[i].selected = false;
                     }
                     if (this._virtualListChanged != 0)
-                        this._partner.callLater(this._refreshVirtualList);
+                        this._partner.unschedule(this._refreshVirtualList);
                     //立即刷新
                     this._refreshVirtualList();
                 }
