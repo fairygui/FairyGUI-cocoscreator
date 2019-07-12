@@ -2409,6 +2409,7 @@ window.__extends = (this && this.__extends) || (function () {
         GComponent.prototype.setMask = function (value, inverted) {
             if (this._maskContent) {
                 this._maskContent.node.off(cc.Node.EventType.POSITION_CHANGED, this.onMaskContentChanged, this);
+                this._maskContent.node.off(cc.Node.EventType.SIZE_CHANGED, this.onMaskContentChanged, this);
                 this._maskContent.node.off(cc.Node.EventType.SCALE_CHANGED, this.onMaskContentChanged, this);
                 this._maskContent.node.off(cc.Node.EventType.ANCHOR_CHANGED, this.onMaskContentChanged, this);
                 this._maskContent.visible = true;
@@ -2428,6 +2429,7 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 value.visible = false;
                 value.node.on(cc.Node.EventType.POSITION_CHANGED, this.onMaskContentChanged, this);
+                value.node.on(cc.Node.EventType.SIZE_CHANGED, this.onMaskContentChanged, this);
                 value.node.on(cc.Node.EventType.SCALE_CHANGED, this.onMaskContentChanged, this);
                 value.node.on(cc.Node.EventType.ANCHOR_CHANGED, this.onMaskContentChanged, this);
                 this._customMask.inverted = inverted;
