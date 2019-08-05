@@ -1886,10 +1886,8 @@ namespace fgui {
                 this._alignOffset.y = newOffsetY;
                 if (this._scrollPane != null)
                     this._scrollPane.adjustMaskContainer();
-                else {
-                    this._container.x = this._margin.left + this._alignOffset.x;
-                    this._container.y = this._margin.top + this._alignOffset.y;
-                }
+                else
+                    this._container.setPosition(this._pivotCorrectX + this._alignOffset.x, this._pivotCorrectY-this._alignOffset.y);
             }
         }
 

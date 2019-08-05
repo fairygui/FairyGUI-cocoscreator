@@ -2520,7 +2520,7 @@ window.__extends = (this && this.__extends) || (function () {
             else if (this._scrollPane)
                 this._scrollPane.adjustMaskContainer();
             else
-                this._container.setPosition(this._pivotCorrectX, this._pivotCorrectY);
+                this._container.setPosition(this._pivotCorrectX + this._alignOffset.x, this._pivotCorrectY - this._alignOffset.y);
         };
         GComponent.prototype.handleSizeChanged = function () {
             _super.prototype.handleSizeChanged.call(this);
@@ -6279,10 +6279,8 @@ window.__extends = (this && this.__extends) || (function () {
                 this._alignOffset.y = newOffsetY;
                 if (this._scrollPane != null)
                     this._scrollPane.adjustMaskContainer();
-                else {
-                    this._container.x = this._margin.left + this._alignOffset.x;
-                    this._container.y = this._margin.top + this._alignOffset.y;
-                }
+                else
+                    this._container.setPosition(this._pivotCorrectX + this._alignOffset.x, this._pivotCorrectY - this._alignOffset.y);
             }
         };
         GList.prototype.updateBounds = function () {

@@ -686,7 +686,7 @@ namespace fgui {
             else if (this._scrollPane)
                 this._scrollPane.adjustMaskContainer();
             else
-                this._container.setPosition(this._pivotCorrectX, this._pivotCorrectY);
+                this._container.setPosition(this._pivotCorrectX + this._alignOffset.x, this._pivotCorrectY-this._alignOffset.y);
         }
 
         protected handleSizeChanged(): void {
