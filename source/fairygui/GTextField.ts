@@ -322,7 +322,10 @@ namespace fgui {
 
         public ensureSizeCorrect(): void {
             if (this._sizeDirty) {
-                this._label["_updateRenderData"](true);
+                if(this._label["_forceUpdateRenderData"]) //2.1 above
+                    this._label["_forceUpdateRenderData"]();
+                else
+                    this._label["_updateRenderData"](true);
                 this._sizeDirty = false;
             }
         }

@@ -3873,7 +3873,10 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GGraph.prototype.clearGraphics = function () {
             this._type = fgui.GraphType.PlaceHolder;
-            this._content.clear();
+            if (this._hasContent) {
+                this._content.clear();
+                this._hasContent = false;
+            }
         };
         Object.defineProperty(GGraph.prototype, "type", {
             get: function () {
@@ -3896,7 +3899,10 @@ window.__extends = (this && this.__extends) || (function () {
         });
         GGraph.prototype.drawCommon = function () {
             var ctx = this._content;
-            ctx.clear();
+            if (this._hasContent) {
+                this._hasContent = false;
+                ctx.clear();
+            }
             var w = this._width;
             var h = this._height;
             if (w == 0 || h == 0)
@@ -3916,6 +3922,7 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._lineSize != 0)
                 ctx.stroke();
             ctx.fill();
+            this._hasContent = true;
         };
         GGraph.prototype.handleSizeChanged = function () {
             _super.prototype.handleSizeChanged.call(this);
@@ -7838,7 +7845,10 @@ window.__extends = (this && this.__extends) || (function () {
         });
         GTextField.prototype.ensureSizeCorrect = function () {
             if (this._sizeDirty) {
-                this._label["_updateRenderData"](true);
+                if (this._label["_forceUpdateRenderData"]) //2.1 above
+                    this._label["_forceUpdateRenderData"]();
+                else
+                    this._label["_updateRenderData"](true);
                 this._sizeDirty = false;
             }
         };

@@ -9,6 +9,7 @@ namespace fgui {
         private _lineColor: cc.Color;
         private _fillColor: cc.Color;
         private _cornerRadius: Array<number>;
+        private _hasContent: boolean;
 
         public constructor() {
             super();
@@ -42,7 +43,11 @@ namespace fgui {
 
         public clearGraphics(): void {
             this._type = GraphType.PlaceHolder;
-            this._content.clear();
+            if(this._hasContent)
+            {
+                this._content.clear();
+                this._hasContent = false;
+            }
         }
 
         public get type(): GraphType {
@@ -61,7 +66,11 @@ namespace fgui {
 
         private drawCommon(): void {
             let ctx = this._content;
-            ctx.clear();
+            if(this._hasContent)
+            {
+                this._hasContent = false;
+                ctx.clear();
+            }
 
             var w: number = this._width;
             var h: number = this._height;
@@ -85,6 +94,8 @@ namespace fgui {
             if (this._lineSize != 0)
                 ctx.stroke();
             ctx.fill();
+
+            this._hasContent = true;
         }
 
         protected handleSizeChanged(): void {

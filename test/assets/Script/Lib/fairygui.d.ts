@@ -616,6 +616,7 @@ declare namespace fgui {
         private _lineColor;
         private _fillColor;
         private _cornerRadius;
+        private _hasContent;
         constructor();
         drawRect(lineSize: number, lineColor: cc.Color, fillColor: cc.Color, corner?: Array<number>): void;
         drawEllipse(lineSize: number, lineColor: cc.Color, fillColor: cc.Color): void;
