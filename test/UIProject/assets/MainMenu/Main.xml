@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="1136,640">
+  <displayList>
+    <graph id="n3_txxc" name="n3" xy="0,0" size="1136,640" locked="true" type="rect" lineSize="0" fillColor="#ff333333">
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <component id="n1_rftu" name="n1" src="rftu4" fileName="Button.xml" xy="104,75" size="235,51">
+      <Button title="基础功能展示"/>
+    </component>
+    <component id="n2_rftu" name="n2" src="rftu4" fileName="Button.xml" xy="104,146" size="235,51">
+      <Button title="动效展示"/>
+    </component>
+    <component id="n4_oarg" name="n4" src="rftu4" fileName="Button.xml" xy="104,217" size="235,51">
+      <Button title="虚拟列表"/>
+    </component>
+    <component id="n5_oarg" name="n5" src="rftu4" fileName="Button.xml" xy="104,288" size="235,51">
+      <Button title="循环列表"/>
+    </component>
+    <component id="n6_oarg" name="n6" src="rftu4" fileName="Button.xml" xy="104,359" size="235,51">
+      <Button title="点击测试"/>
+    </component>
+    <component id="n7_oarg" name="n7" src="rftu4" fileName="Button.xml" xy="104,430" size="235,51">
+      <Button title="下拉刷新"/>
+    </component>
+    <component id="n8_oarg" name="n8" src="rftu4" fileName="Button.xml" xy="450,75" size="235,51">
+      <Button title="模式等待"/>
+    </component>
+    <component id="n9_oarg" name="n9" src="rftu4" fileName="Button.xml" xy="450,146" size="235,51">
+      <Button title="摇杆"/>
+    </component>
+    <component id="n10_szln" name="n10" src="rftu4" fileName="Button.xml" xy="450,217" size="235,51">
+      <Button title="背包"/>
+    </component>
+    <component id="n11_szln" name="n11" src="rftu4" fileName="Button.xml" xy="450,288" size="235,51">
+      <Button title="聊天"/>
+    </component>
+    <component id="n12_szln" name="n12" src="rftu4" fileName="Button.xml" xy="450,359" size="235,51">
+      <Button title="列表效果"/>
+    </component>
+    <component id="n13_szln" name="n13" src="rftu4" fileName="Button.xml" xy="450,430" size="235,51">
+      <Button title="双向滚动"/>
+    </component>
+    <component id="n14_vu0y" name="n14" src="rftu4" fileName="Button.xml" xy="796,75" size="235,51">
+      <Button title="树形列表"/>
+    </component>
+    <component id="n15_x869" name="n15" src="rftu4" fileName="Button.xml" xy="796,146" size="235,51">
+      <Button title="新手向导"/>
+    </component>
+    <component id="n16_gfio" name="n16" src="rftu4" fileName="Button.xml" xy="796,217" size="235,51">
+      <Button title="圆形进度"/>
+    </component>
+  </displayList>
+</component>

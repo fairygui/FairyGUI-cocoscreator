@@ -1,0 +1,16 @@
+{
+	"binaryFormat":true,
+	"codeGeneration":{
+		"classNamePrefix":"",
+		"codePath":"",
+		"codeType":"",
+		"getMemberByName":false,
+		"ignoreNoname":true,
+		"memberNamePrefix":"m_",
+		"packageName":""
+	},
+	"compressDesc":false,
+	"fileExtension":"bin",
+	"packageCount":2,
+	"path":"../assets/resources/UI"
+}

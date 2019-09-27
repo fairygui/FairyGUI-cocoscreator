@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<packageDescription id="16eoroa8" jpegQuality="80" compressPNG="true">
+  <resources>
+    <image id="jtds0" name="0.png" path="/"/>
+    <image id="jtds1" name="02.png" path="/"/>
+    <image id="jtds2" name="1.png" path="/"/>
+    <image id="jtds3" name="2.png" path="/" scale="9grid" scale9grid="18,18,36,36"/>
+    <image id="jtds4" name="4.png" path="/"/>
+    <image id="jtds5" name="5.png" path="/" scale="9grid" scale9grid="64,54,484,303"/>
+    <component id="jtds6" name="Button1.xml" path="/"/>
+    <component id="jtds7" name="CloseButton.xml" path="/"/>
+    <component id="jtds8" name="GlobalModalWaiting.xml" path="/" exported="true"/>
+    <component id="jtds9" name="Main.xml" path="/" exported="true"/>
+    <component id="jtdsa" name="TestWin.xml" path="/" exported="true"/>
+    <component id="jtdsb" name="WindowFrame.xml" path="/"/>
+    <component id="jtdsc" name="WindowModalWaiting.xml" path="/" exported="true"/>
+    <movieclip id="jtdsd" name="qtm011.jta" path="/"/>
+  </resources>
+  <publish name="ModalWaiting">
+    <atlas name="Default" index="0"/>
+  </publish>
+</packageDescription>
