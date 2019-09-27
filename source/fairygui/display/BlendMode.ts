@@ -32,12 +32,12 @@ namespace fgui {
         ];
 
         public static apply(node: cc.Node, blendMode: BlendMode) {
-            let renderer = node.getComponent(cc.RenderComponent);
-            if (renderer) {
-                let f = BlendModeUtils.factors[<number>blendMode];
-                renderer.srcBlendFactor = f[0];
-                renderer.dstBlendFactor = f[1];
-            }
+            let f = BlendModeUtils.factors[<number>blendMode];
+            let renderers = node.getComponentsInChildren(cc.RenderComponent);
+            renderers.forEach(element => {
+                (<any>element).srcBlendFactor = f[0];
+                (<any>element).dstBlendFactor = f[1];
+            });
         }
 
         public static override(blendMode: BlendMode, srcFactor: number, dstFactor: number) {

@@ -5,6 +5,7 @@ namespace fgui {
         public _label: cc.Label;
 
         protected _font: string;
+        protected _realFont: string | cc.Font;
         protected _fontSize: number = 0;
         protected _color: cc.Color;
         protected _strokeColor: cc.Color;
@@ -68,16 +69,17 @@ namespace fgui {
 
                 this.markSizeChanged();
 
-                let newFont = value ? value : UIConfig.defaultFont;
+                let newFont: any = value ? value : UIConfig.defaultFont;
 
                 if (ToolSet.startsWith(newFont, "ui://")) {
                     var pi: PackageItem = UIPackage.getItemByURL(newFont);
-                    if (pi) {
-                        this.updateFont(<cc.Font>pi.owner.getItemAsset(pi));
-                        return;
-                    }
+                    if (pi)
+                        newFont = <cc.Font>pi.owner.getItemAsset(pi);
+                    else
+                        newFont = UIConfig.defaultFont;
                 }
-                this.updateFont(newFont);
+                this._realFont = newFont;
+                this.updateFont();
             }
         }
 
@@ -336,31 +338,36 @@ namespace fgui {
             this._label.string = text2;
         }
 
-        protected updateFont(value: string | cc.Font) {
+        protected assignFont(label: any, value: string | cc.Font): void {
             if (value instanceof cc.Font)
-                this._label.font = value;
+                label.font = value;
             else {
                 let font = getFontByName(<string>value);
                 if (!font) {
-                    this._label.fontFamily = <string>value;
-                    this._label.isSystemFontUsed = true;
+                    label.fontFamily = <string>value;
+                    label.useSystemFont = true;
                 }
                 else
-                    this._label.font = font;
+                    label.font = font;
             }
         }
 
-        protected updateFontColor() {
-            let c = this._color;
-            if (this._label) {
-                let font: any = this._label.font;
-                if ((font instanceof cc.BitmapFont) && !((<any>font)._fntConfig.canTint))
-                    c = cc.Color.WHITE;
-            }
+        protected assignFontColor(label: any, value: cc.Color): void {
+            let font: any = label.font;
+            if ((font instanceof cc.BitmapFont) && !((<any>font)._fntConfig.canTint))
+                value = cc.Color.WHITE;
 
             if (this._grayed)
-                c = ToolSet.toGrayed(c);
-            this._node.color = c
+                value = ToolSet.toGrayed(value);
+            label.node.color = value;
+        }
+
+        protected updateFont() {
+            this.assignFont(this._label, this._realFont);
+        }
+
+        protected updateFontColor() {
+            this.assignFontColor(this._label, this._color);
         }
 
         protected updateStrokeColor() {

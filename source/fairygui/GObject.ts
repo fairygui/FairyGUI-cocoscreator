@@ -372,24 +372,13 @@ namespace fgui {
         }
 
         public get rotation(): number {
-            let x = this._node.angle;
-            if (x != undefined)
-                return -x;
-            else
-                return this._node.rotation;
+            return -this._node.angle;
         }
 
         public set rotation(value: number) {
-            let x = this._node.angle; //2.1才开始加的接口，兼容一下
-            if (x != undefined) {
-                value = -value;
-                if (x != value) {
-                    this._node.angle = value;
-                    this.updateGear(3);
-                }
-            }
-            else if (this._node.rotation != value) {
-                this._node.rotation = value;
+            value = -value;
+            if (this._node.angle != value) {
+                this._node.angle = value;
                 this.updateGear(3);
             }
         }
@@ -826,8 +815,9 @@ namespace fgui {
                 pt.y += (1 - this.node.anchorY) * this._height;
             }
 
-            pt.set(this._node.convertToWorldSpaceAR(pt));
-            pt.y = GRoot.inst.height - pt.y;
+            let v3 = this._node.convertToWorldSpaceAR(pt);
+            pt.x = v3.x;
+            pt.y = GRoot.inst.height - v3.y;
             return pt;
         }
 
@@ -837,10 +827,13 @@ namespace fgui {
             let pt = resultPoint || new cc.Vec2();
             pt.x = ax;
             pt.y = GRoot.inst.height - ay;
-            pt.set(this._node.convertToNodeSpaceAR(pt));
+
+            let v3 = this._node.convertToNodeSpaceAR(pt);
+            pt.x = v3.x;
+            pt.y = v3.y;
             if (!this._pivotAsAnchor) {
-                pt.x -= this.node.anchorX * this._width;
-                pt.y += (1 - this.node.anchorY) * this._height;
+                pt.x -= this._node.anchorX * this._width;
+                pt.y += (1 - this._node.anchorY) * this._height;
             }
             pt.y = -pt.y;
             return pt;
@@ -928,7 +921,9 @@ namespace fgui {
             if (this._touchDisabled || !this._touchable || !this._node.activeInHierarchy)
                 return null;
 
-            let pt: cc.Vec2 = this._node.convertToNodeSpace(globalPt);
+            let pt: cc.Vec3 = this._node.convertToNodeSpaceAR(globalPt);
+            pt.x += this._node.anchorX * this._width;
+            pt.y += this._node.anchorY * this._height;
             if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
                 return this;
             else

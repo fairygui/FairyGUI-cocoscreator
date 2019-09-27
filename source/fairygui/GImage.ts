@@ -78,11 +78,10 @@ namespace fgui {
             else if (this.packageItem.scaleByTile)
                 this._content.type = cc.Sprite.Type.TILED;
             this._content.spriteFrame = <cc.SpriteFrame>this.packageItem.asset;
-            this._content.setState(this._grayed ? cc.Sprite.State.GRAY : cc.Sprite.State.NORMAL);
         }
 
         protected handleGrayedChanged(): void {
-            this._content.setState(this._grayed ? cc.Sprite.State.GRAY : cc.Sprite.State.NORMAL);
+            this._content.grayed = this._grayed;
         }
 
         public setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void {

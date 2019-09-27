@@ -7,6 +7,9 @@ namespace fgui {
         private _fillOrigin: FillOrigin = FillOrigin.Left;
         private _fillAmount: number = 0;
         private _fillClockwise: boolean = false;
+        private _grayed: boolean = false;
+        private _graySpriteMaterial: cc.Material;
+        private _spriteMaterial: cc.Material;
 
         public constructor() {
             super();
@@ -119,5 +122,33 @@ namespace fgui {
                 }
             }
         }
+
+        public get grayed(): boolean {
+            return this._grayed;
+        }
+
+        public set grayed(value: boolean) {
+            if (this._grayed == value)
+                return;
+
+            this._grayed = value;
+            let material;
+            if (value) {
+                material = this._graySpriteMaterial;
+                if (!material) {
+                    material = (<any>cc.Material).getBuiltinMaterial('2d-gray-sprite');
+                }
+                material = this._graySpriteMaterial = (<any>cc.Material).getInstantiatedMaterial(material, this);
+            }
+            else {
+                material = this._spriteMaterial;
+                if (!material) {
+                    material = (<any>cc.Material).getBuiltinMaterial('2d-sprite', this);
+                }
+                material = this._spriteMaterial = (<any>cc.Material).getInstantiatedMaterial(material, this);
+            }
+
+            this.setMaterial(0, material);
+        };
     }
 }

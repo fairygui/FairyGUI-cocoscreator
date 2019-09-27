@@ -15,8 +15,8 @@ namespace fgui {
 
         protected createRenderer() {
             this._editBox = this._node.addComponent(MyEditBox);
-            this._editBox.placeholder = "";
             this._editBox.maxLength = -1;
+            this._editBox["_updateTextLabel"]();
 
             this._node.on('text-changed', this.onTextChanged, this);
             this.on(Event.TOUCH_END, this.onTouchEnd1, this);
@@ -44,17 +44,26 @@ namespace fgui {
 
         public set promptText(val: string) {
             this._promptText = val;
-            this._editBox.placeholder = UBBParser.inst.parse(this._promptText, true);
+            let newCreate: boolean = !this._editBox.placeholderLabel;
+            this._editBox["_updatePlaceholderLabel"]();
+            if (newCreate)
+                this.assignFont(this._editBox.placeholderLabel, this._realFont);
+            this._editBox.placeholderLabel.string = UBBParser.inst.parse(this._promptText, true);
 
             if (UBBParser.inst.lastColor) {
-                let c = this._editBox.placeholderFontColor;
+                let c = this._editBox.placeholderLabel.node.color;
                 if (!c)
                     c = new cc.Color();
                 c.fromHEX(UBBParser.inst.lastColor);
-                this._editBox.placeholderFontColor = c;
+                this.assignFontColor(this._editBox.placeholderLabel, c);
             }
+            else
+                this.assignFontColor(this._editBox.placeholderLabel, this._color);
+
             if (UBBParser.inst.lastSize)
-                this._editBox.placeholderFontSize = parseInt(UBBParser.inst.lastSize);
+                this._editBox.placeholderLabel.fontSize = parseInt(UBBParser.inst.lastSize);
+            else
+                this._editBox.placeholderLabel.fontSize = this._fontSize;
         }
 
         public get promptText(): string {
@@ -78,19 +87,19 @@ namespace fgui {
         }
 
         public get align(): cc.Label.HorizontalAlign {
-            return cc.Label.HorizontalAlign.LEFT;
+            return this._editBox.textLabel.horizontalAlign;
         }
 
         public set align(value: cc.Label.HorizontalAlign) {
-            //not supported
+            this._editBox.textLabel.horizontalAlign = value;
         }
 
         public get verticalAlign(): cc.Label.VerticalAlign {
-            return cc.Label.VerticalAlign.TOP;
+            return this._editBox.textLabel.verticalAlign;
         }
 
         public set verticalAlign(value: cc.Label.VerticalAlign) {
-            //not supported
+            this._editBox.textLabel.verticalAlign = value;
         }
 
         public get letterSpacing(): number {
@@ -129,17 +138,21 @@ namespace fgui {
             this._editBox.string = text2;
         }
 
-        protected updateFont(value: string | cc.Font) {
-            //not supported
+        protected updateFont() {
+            this.assignFont(this._editBox.textLabel, this._realFont);
+            if (this._editBox.placeholderLabel)
+                this.assignFont(this._editBox.placeholderLabel, this._realFont);
         }
 
         protected updateFontColor() {
-            this._editBox.fontColor = this._color;
+            this.assignFontColor(this._editBox.textLabel, this._color);
         }
 
         protected updateFontSize() {
-            this._editBox.fontSize = this._fontSize;
-            this._editBox.lineHeight = this._fontSize + this._leading;
+            this._editBox.textLabel.fontSize = this._fontSize;
+            this._editBox.textLabel.lineHeight = this._fontSize + this._leading;
+            if (this._editBox.placeholderLabel)
+                this._editBox.placeholderLabel.fontSize = this._editBox.textLabel.fontSize;
         }
 
         protected updateOverflow() {
@@ -183,10 +196,22 @@ namespace fgui {
             //取消掉原来的事件处理
         }
 
+        _syncSize() {
+            let size = this.node.getContentSize();
+            let impl = this["_impl"];
+
+            impl.setSize(size.width, size.height);
+
+            if (this.textLabel)
+                this.textLabel.node.setContentSize(size.width, size.height);
+            if (this.placeholderLabel)
+                this.placeholderLabel.node.setContentSize(size.width, size.height);
+        }
+
         public openKeyboard(touch: any) {
             let impl = this["_impl"];
             if (impl) {
-                impl._onTouchEnded(touch);
+                impl.beginEditing();
             }
         }
     }

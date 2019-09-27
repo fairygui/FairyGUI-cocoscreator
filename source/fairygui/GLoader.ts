@@ -510,7 +510,7 @@ namespace fgui {
         }
 
         protected handleGrayedChanged(): void {
-            this._content.setState(this._grayed ? cc.Sprite.State.GRAY : cc.Sprite.State.NORMAL);
+            this._content.grayed = this._grayed;
         }
 
         public hitTest(globalPt: cc.Vec2): GObject {
@@ -523,7 +523,9 @@ namespace fgui {
                     return obj;
             }
 
-            let pt: cc.Vec2 = this._node.convertToNodeSpace(globalPt);
+            let pt: cc.Vec3 = this._node.convertToNodeSpaceAR(globalPt);
+            pt.x += this._node.anchorX * this._width;
+            pt.y += this._node.anchorY * this._height;
             if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
                 return this;
             else

@@ -740,7 +740,10 @@ namespace fgui {
             let flag = 0;
 
             if (this.hitArea || this._rectMask) {
-                let pt: cc.Vec2 = this._node.convertToNodeSpace(globalPt);
+                let pt: cc.Vec3 = this._node.convertToNodeSpaceAR(globalPt);
+                pt.x += this._node.anchorX * this._width;
+                pt.y += this._node.anchorY * this._height;
+                
                 if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
                     flag = 1;
                 else
@@ -778,7 +781,9 @@ namespace fgui {
 
             if (this._opaque) {
                 if (flag == 0) {
-                    let pt: cc.Vec2 = this._node.convertToNodeSpace(globalPt);
+                    let pt: cc.Vec3 = this._node.convertToNodeSpaceAR(globalPt);
+                    pt.x += this._node.anchorX * this._width;
+                    pt.y += this._node.anchorY * this._height;
                     if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
                         flag = 1;
                     else

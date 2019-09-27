@@ -152,16 +152,12 @@ namespace fgui {
                 this._richText.string = text2;
         }
 
-        protected updateFont(value: string | cc.Font) {
-            if (value instanceof cc.TTFFont)
-                this._richText.font = value;
-            else
-                this._richText.font = null;
+        protected updateFont() {
+            this.assignFont(this._richText, this._realFont);
         }
 
-        //不支持使用Node的颜色，等CCC支持后可以删掉这个函数
         protected updateFontColor() {
-            this.updateText();
+            this.assignFontColor(this._richText, this._color);
         }
 
         protected updateFontSize() {

@@ -623,6 +623,7 @@ namespace fgui {
             let spriteFrame = new cc.SpriteFrame();
             spriteFrame.setTexture(mainTexture);
             font.spriteFrame = spriteFrame;
+            font.onLoad();
         }
     }
 

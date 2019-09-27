@@ -330,7 +330,7 @@ namespace fgui {
         private updateInfo(touchId: number, pos: cc.Vec2, touch?: cc.Touch): TouchInfo {
             let camera = cc.Camera.findCamera(this.node);
             if (camera)
-                camera.getCameraToWorldPoint(pos, this._touchPos);
+                camera.getScreenToWorldPoint(pos, this._touchPos);
             else
                 this._touchPos.set(pos);
             let target = this._owner.hitTest(this._touchPos);
