@@ -74,7 +74,8 @@ namespace fgui {
         ComboBox,
         ProgressBar,
         Slider,
-        ScrollBar
+        ScrollBar,
+        Tree
     }
     export enum ProgressTitleType {
         Percent,
@@ -152,21 +153,32 @@ namespace fgui {
         Ellipse
     }
 
-    export enum FillMethod
-	{
-		None,
-		Horizontal,
-		Vertical,
-		Radial90,
-		Radial180,
-		Radial360,
+    export enum FillMethod {
+        None,
+        Horizontal,
+        Vertical,
+        Radial90,
+        Radial180,
+        Radial360,
     }
-    
-    export enum FillOrigin
-	{
-		Top,
-		Bottom,
-		Left,
-		Right
+
+    export enum FillOrigin {
+        Top,
+        Bottom,
+        Left,
+        Right
+    }
+
+    export enum ObjectPropID {
+        Text,
+        Icon,
+        Color,
+        OutlineColor,
+        Playing,
+        Frame,
+        DeltaTime,
+        TimeScale,
+        FontSize,
+        Selected
     }
 } 

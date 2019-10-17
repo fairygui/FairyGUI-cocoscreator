@@ -50,4 +50,19 @@ namespace fgui {
             this.pixels = ba.readBuffer().data;
         }
     }
+
+    export class ChildHitArea implements IHitTest {
+
+        private _child: GObject;
+        private _reversed: boolean;
+
+        constructor(child: GObject, reversed?: boolean) {
+            this._child = child;
+            this._reversed = reversed;
+        }
+
+        public hitTest(obj: GComponent, x: number, y: number): boolean {
+            return false;
+        }
+    }
 }

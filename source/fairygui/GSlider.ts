@@ -2,10 +2,12 @@
 namespace fgui {
 
     export class GSlider extends GComponent {
+        private _min: number = 0;
         private _max: number = 0;
         private _value: number = 0;
         private _titleType: ProgressTitleType;
-        private _reverse: boolean = false;
+        private _reverse: boolean;
+        private _wholeNumbers: boolean;
 
         private _titleObject: GTextField;
         private _barObjectH: GObject;
@@ -41,6 +43,28 @@ namespace fgui {
             this._titleType = value;
         }
 
+        public get wholeNumbers(): boolean {
+            return this._wholeNumbers;
+        }
+
+        public set wholeNumbers(value: boolean) {
+            if (this._wholeNumbers != value) {
+                this._wholeNumbers = value;
+                this.update();
+            }
+        }
+
+        public get min(): number {
+            return this._min;
+        }
+
+        public set min(value: number) {
+            if (this._min != value) {
+                this._min = value;
+                this.update();
+            }
+        }
+
         public get max(): number {
             return this._max;
         }
@@ -64,11 +88,24 @@ namespace fgui {
         }
 
         public update(): void {
-            var percent: number = Math.min(this._value / this._max, 1);
-            this.updateWidthPercent(percent);
+            this.updateWithPercent((this._value - this._min) / (this._max - this._min));
         }
 
-        private updateWidthPercent(percent: number): void {
+        private updateWithPercent(percent: number, manual?: boolean): void {
+            percent = ToolSet.clamp01(percent);
+            if (manual) {
+                var newValue: number = ToolSet.clamp(this._min + (this._max - this._min) * percent, this._min, this._max);
+                if (this._wholeNumbers) {
+                    newValue = Math.round(newValue);
+                    percent = ToolSet.clamp01((newValue - this._min) / (this._max - this._min));
+                }
+
+                if (newValue != this._value) {
+                    this._value = newValue;
+                    this._node.emit(Event.STATUS_CHANGED, this);
+                }
+            }
+
             if (this._titleObject) {
                 switch (this._titleType) {
                     case ProgressTitleType.Percent:
@@ -114,6 +151,10 @@ namespace fgui {
 
             this._titleType = buffer.readByte();
             this._reverse = buffer.readBool();
+            if (buffer.version >= 2) {
+                this._wholeNumbers = buffer.readBool();
+                this.changeOnClick = buffer.readBool();
+            }
 
             this._titleObject = <GTextField><any>(this.getChild("title"));
             this._barObjectH = this.getChild("bar");
@@ -164,6 +205,8 @@ namespace fgui {
 
             this._value = buffer.readInt();
             this._max = buffer.readInt();
+            if (buffer.version >= 2)
+                this._min = buffer.readInt();
 
             this.update();
         }
@@ -174,7 +217,7 @@ namespace fgui {
             evt.captureTouch();
 
             this._clickPos = this.globalToLocal(evt.pos.x, evt.pos.y);
-            this._clickPercent = this._value / this._max;
+            this._clickPercent = ToolSet.clamp01((this._value - this._min) / (this._max - this._min));
         }
 
         private static sSilderHelperPoint: cc.Vec2 = new cc.Vec2();
@@ -196,16 +239,7 @@ namespace fgui {
                 percent = this._clickPercent + deltaX / this._barMaxWidth;
             else
                 percent = this._clickPercent + deltaY / this._barMaxHeight;
-            if (percent > 1)
-                percent = 1;
-            else if (percent < 0)
-                percent = 0;
-            var newValue: number = Math.round(this._max * percent);
-            if (newValue != this._value) {
-                this._value = newValue;
-                this._node.emit(Event.STATUS_CHANGED, this);
-            }
-            this.updateWidthPercent(percent);
+            this.updateWithPercent(percent, true);
         }
 
         private onBarTouchBegin(evt: Event): void {
@@ -213,26 +247,17 @@ namespace fgui {
                 return;
 
             var pt: cc.Vec2 = this._gripObject.globalToLocal(evt.pos.x, evt.pos.y, GSlider.sSilderHelperPoint);
-            var percent: number = this._value / this._max;
+            var percent: number = ToolSet.clamp01((this._value - this._min) / (this._max - this._min));
             var delta: number;
             if (this._barObjectH)
-                delta = (pt.x - this._gripObject.width / 2) / this._barMaxWidth;
+                delta = pt.x / this._barMaxWidth;
             if (this._barObjectV)
-                delta = (pt.y - this._gripObject.height / 2) / this._barMaxHeight;
+                delta = pt.y / this._barMaxHeight;
             if (this._reverse)
                 percent -= delta;
             else
                 percent += delta;
-            if (percent > 1)
-                percent = 1;
-            else if (percent < 0)
-                percent = 0;
-            var newValue: number = Math.round(this._max * percent);
-            if (newValue != this._value) {
-                this._value = newValue;
-                this._node.emit(Event.STATUS_CHANGED, this);
-            }
-            this.updateWidthPercent(percent);
+            this.updateWithPercent(percent, true);
         }
     }
 }

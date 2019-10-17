@@ -13,6 +13,7 @@ namespace fgui {
         private _fixedGripSize: boolean;
 
         private _dragOffset: cc.Vec2;
+        private _gripDragging: boolean;
 
         public constructor() {
             super();
@@ -27,20 +28,22 @@ namespace fgui {
             this._vertical = vertical;
         }
 
-        public set displayPerc(val: number) {
+        public setDisplayPerc(value: number) {
             if (this._vertical) {
                 if (!this._fixedGripSize)
-                    this._grip.height = val * this._bar.height;
+                    this._grip.height = Math.floor(value * this._bar.height);
                 this._grip.y = this._bar.y + (this._bar.height - this._grip.height) * this._scrollPerc;
+
             }
             else {
                 if (!this._fixedGripSize)
-                    this._grip.width = val * this._bar.width;
+                    this._grip.width = Math.floor(value * this._bar.width);
                 this._grip.x = this._bar.x + (this._bar.width - this._grip.width) * this._scrollPerc;
             }
+            this._grip.visible = value != 0 && value != 1;
         }
 
-        public set scrollPerc(val: number) {
+        public setScrollPerc(val: number) {
             this._scrollPerc = val;
             if (this._vertical)
                 this._grip.y = this._bar.y + (this._bar.height - this._grip.height) * this._scrollPerc;
@@ -53,6 +56,10 @@ namespace fgui {
                 return (this._arrowButton1 != null ? this._arrowButton1.height : 0) + (this._arrowButton2 != null ? this._arrowButton2.height : 0);
             else
                 return (this._arrowButton1 != null ? this._arrowButton1.width : 0) + (this._arrowButton2 != null ? this._arrowButton2.width : 0);
+        }
+        
+        public get gripDragging(): boolean {
+            return this._gripDragging;
         }
 
         protected constructExtension(buffer: ByteBuffer): void {
@@ -77,6 +84,7 @@ namespace fgui {
 
             this._grip.on(Event.TOUCH_BEGIN, this.onGripTouchDown, this);
             this._grip.on(Event.TOUCH_MOVE, this.onGripTouchMove, this);
+            this._grip.on(Event.TOUCH_END, this.onGripTouchEnd, this);
 
             if (this._arrowButton1)
                 this._arrowButton1.on(Event.TOUCH_BEGIN, this.onClickArrow1, this);
@@ -87,11 +95,11 @@ namespace fgui {
         }
 
         private onGripTouchDown(evt: Event): void {
-            if (!this._bar)
-                return;
-
             evt.stopPropagation();
             evt.captureTouch();
+
+            this._gripDragging = true;
+            this._target.updateScrollBarVisible();
 
             this.globalToLocal(evt.pos.x, evt.pos.y, this._dragOffset);
             this._dragOffset.x -= this._grip.x;
@@ -112,6 +120,14 @@ namespace fgui {
                 var curX: number = pt.x - this._dragOffset.x;
                 this._target.setPercX((curX - this._bar.x) / (this._bar.width - this._grip.width), false);
             }
+        }
+
+        private onGripTouchEnd(evt: Event): void {
+            if (!this.onStage)
+                return;
+
+            this._gripDragging = false;
+            this._target.updateScrollBarVisible();
         }
 
         private onClickArrow1(evt: Event): void {

@@ -322,7 +322,7 @@ namespace fgui {
 
         public ensureSizeCorrect(): void {
             if (this._sizeDirty) {
-                if(this._label["_forceUpdateRenderData"]) //2.1 above
+                if (this._label["_forceUpdateRenderData"]) //2.1 above
                     this._label["_forceUpdateRenderData"]();
                 else
                     this._label["_updateRenderData"](true);
@@ -453,6 +453,36 @@ namespace fgui {
         protected handleGrayedChanged(): void {
             this.updateFontColor();
             this.updateStrokeColor();
+        }
+
+        public getProp(index: number): any {
+            switch (index) {
+                case ObjectPropID.Color:
+                    return this.color;
+                case ObjectPropID.OutlineColor:
+                    return this.strokeColor;
+                case ObjectPropID.FontSize:
+                    return this.fontSize;
+                default:
+                    return super.getProp(index);
+            }
+        }
+
+        public setProp(index: number, value: any): void {
+            switch (index) {
+                case ObjectPropID.Color:
+                    this.color = value;
+                    break;
+                case ObjectPropID.OutlineColor:
+                    this.strokeColor = value;
+                    break;
+                case ObjectPropID.FontSize:
+                    this.fontSize = value;
+                    break;
+                default:
+                    super.setProp(index, value);
+                    break;
+            }
         }
 
         public setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void {

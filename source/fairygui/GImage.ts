@@ -65,23 +65,39 @@ namespace fgui {
         }
 
         public constructFromResource(): void {
-            this.sourceWidth = this.packageItem.width;
-            this.sourceHeight = this.packageItem.height;
+            var contentItem: PackageItem = this.packageItem.getBranch();
+            this.sourceWidth = contentItem.width;
+            this.sourceHeight = contentItem.height;
             this.initWidth = this.sourceWidth;
             this.initHeight = this.sourceHeight;
             this.setSize(this.sourceWidth, this.sourceHeight);
 
-            this.packageItem.load();
+            contentItem = contentItem.getHighResolution();
+            contentItem.load();
 
-            if (this.packageItem.scale9Grid)
+            if (contentItem.scale9Grid)
                 this._content.type = cc.Sprite.Type.SLICED;
-            else if (this.packageItem.scaleByTile)
+            else if (contentItem.scaleByTile)
                 this._content.type = cc.Sprite.Type.TILED;
-            this._content.spriteFrame = <cc.SpriteFrame>this.packageItem.asset;
+            this._content.spriteFrame = <cc.SpriteFrame>contentItem.asset;
         }
 
         protected handleGrayedChanged(): void {
             this._content.grayed = this._grayed;
+        }
+
+        public getProp(index: number): any {
+            if (index == ObjectPropID.Color)
+                return this.color;
+            else
+                return super.getProp(index);
+        }
+
+        public setProp(index: number, value: any): void {
+            if (index == ObjectPropID.Color)
+                this.color = value;
+            else
+                super.setProp(index, value);
         }
 
         public setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void {

@@ -94,6 +94,9 @@ namespace fgui {
                 case ObjectType.ComboBox:
                     return new GComboBox();
 
+                case ObjectType.Tree:
+                    return new GTree();
+
                 default:
                     return null;
             }

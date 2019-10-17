@@ -1,18 +1,17 @@
-/// <reference path="GearBase.ts" />
+///<reference path="GearBase.ts"/>
 
 namespace fgui {
-
     export class GearAnimation extends GearBase {
-        private _storage: any;
+        private _storage: Object;
         private _default: GearAnimationValue;
 
-        public constructor(owner: GObject) {
+        constructor(owner: GObject) {
             super(owner);
         }
 
         protected init(): void {
-            this._default = new GearAnimationValue((<any>this._owner).playing,
-                (<any>this._owner).frame);
+            this._default = new GearAnimationValue(this._owner.getProp(ObjectPropID.Playing),
+                this._owner.getProp(ObjectPropID.Frame));
             this._storage = {};
         }
 
@@ -35,8 +34,8 @@ namespace fgui {
             if (!gv)
                 gv = this._default;
 
-            (<any>this._owner).frame = gv.frame;
-            (<any>this._owner).playing = gv.playing;
+            this._owner.setProp(ObjectPropID.Playing, gv.playing);
+            this._owner.setProp(ObjectPropID.Frame, gv.frame);
 
             this._owner._gearLocked = false;
         }
@@ -48,8 +47,8 @@ namespace fgui {
                 this._storage[this._controller.selectedPageId] = gv;
             }
 
-            gv.frame = (<any>this._owner).frame;
-            gv.playing = (<any>this._owner).playing;
+            gv.playing = this._owner.getProp(ObjectPropID.Playing);
+            gv.frame = this._owner.getProp(ObjectPropID.Frame);
         }
     }
 
@@ -57,9 +56,10 @@ namespace fgui {
         public playing: boolean;
         public frame: number;
 
-        public constructor(playing: boolean = true, frame: number = 0) {
+        constructor(playing: boolean = true, frame: number = 0) {
             this.playing = playing;
             this.frame = frame;
         }
     }
+
 }

@@ -15,6 +15,9 @@ namespace fgui {
         public rawData: ByteBuffer;
         public asset: cc.Texture2D | cc.SpriteFrame | cc.AudioClip | cc.LabelAtlas;
 
+        public highResolution: Array<string>;
+        public branches: Array<string>;
+
         //image
         public scale9Grid: cc.Rect;
         public scaleByTile: boolean;
@@ -36,6 +39,26 @@ namespace fgui {
 
         public load(): any {
             return this.owner.getItemAsset(this);
+        }
+
+        public getBranch(): PackageItem {
+            if (this.branches && this.owner._branchIndex != -1) {
+                var itemId: string = this.branches[this.owner._branchIndex];
+                if (itemId)
+                    return this.owner.getItemById(itemId);
+            }
+
+            return this;
+        }
+
+        public getHighResolution(): PackageItem {
+            if (this.highResolution && GRoot.contentScaleLevel > 0) {
+                var itemId: string = this.highResolution[GRoot.contentScaleLevel - 1];
+                if (itemId)
+                    return this.owner.getItemById(itemId);
+            }
+
+            return this;
         }
 
         public toString(): string {

@@ -3,11 +3,11 @@
     "module": "amd",
     "lib": [ "dom", "es5", "es2015.promise" ],
     "target": "es5",
-    "experimentalDecorators": true,
     "skipLibCheck": true,
-    "outFile": "test/assets/Script/Lib/fairygui.js",
+    "outFile": "./fairygui.js",
     "declaration": true,
-    "sourceMap": false
+    "sourceMap": false,
+    "removeComments": true
   },
   "exclude": [
     "node_modules",

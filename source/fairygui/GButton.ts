@@ -314,6 +314,51 @@ namespace fgui {
                 super.handleGrayedChanged();
         }
 
+        public getProp(index: number): any {
+            switch (index) {
+                case ObjectPropID.Color:
+                    return this.titleColor;
+                case ObjectPropID.OutlineColor:
+                    {
+                        var tf: GTextField = this.getTextField();
+                        if (tf)
+                            return tf.strokeColor;
+                        else
+                            return 0;
+                    }
+                case ObjectPropID.FontSize:
+                    return this.titleFontSize;
+                case ObjectPropID.Selected:
+                    return this.selected;
+                default:
+                    return super.getProp(index);
+            }
+        }
+
+        public setProp(index: number, value: any): void {
+            switch (index) {
+                case ObjectPropID.Color:
+                    this.titleColor = value;
+                    break;
+                case ObjectPropID.OutlineColor:
+                    {
+                        var tf: GTextField = this.getTextField();
+                        if (tf)
+                            tf.strokeColor = value;
+                    }
+                    break;
+                case ObjectPropID.FontSize:
+                    this.titleFontSize = value;
+                    break;
+                case ObjectPropID.Selected:
+                    this.selected = value;
+                    break;
+                default:
+                    super.setProp(index, value);
+                    break;
+            }
+        }
+
         protected constructExtension(buffer: ByteBuffer): void {
             buffer.seek(0, 6);
 

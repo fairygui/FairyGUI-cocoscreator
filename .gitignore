@@ -1,1 +1,4 @@
+/node_modules
+/bin
 .DS_Store
+test/UIProject/.objs

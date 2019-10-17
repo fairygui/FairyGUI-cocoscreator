@@ -209,11 +209,11 @@ namespace fgui {
                 }
                 else if (item.type == TransitionActionType.Animation) {
                     if (paused) {
-                        item.value.flag = (<any>(item.target)).playing;
-                        (<any>(item.target)).playing = false;
+                        item.value.flag = item.target.getProp(ObjectPropID.Playing);
+                        item.target.setProp(ObjectPropID.Playing, false);
                     }
                     else
-                        (<any>(item.target)).playing = item.value.flag;
+                        item.target.setProp(ObjectPropID.Playing, item.value.flag);
                 }
 
                 if (item.tweener != null)
@@ -409,7 +409,7 @@ namespace fgui {
                         }
                         else if (item.type == TransitionActionType.Animation) {
                             if (item.target != null)
-                                (<any>(item.target)).timeScale = value;
+                                item.target.setProp(ObjectPropID.TimeScale, value);
                         }
                     }
                 }
@@ -616,7 +616,7 @@ namespace fgui {
             var playStartTime: number;
             var playTotalTime: number;
             var value: any;
-            var target: any;
+            var target: GObject;
             var item: TransitionItem;
 
             var cnt: number = this._items.length;
@@ -630,8 +630,8 @@ namespace fgui {
                     continue;
 
                 target = item.target;
-                frame = target.frame;
-                playStartTime = target.playing ? 0 : -1;
+                frame = target.getProp(ObjectPropID.Frame);
+                playStartTime = target.getProp(ObjectPropID.Playing) ? 0 : -1;
                 playTotalTime = 0;
 
                 for (var j: number = i; j < cnt; j++) {
@@ -668,10 +668,10 @@ namespace fgui {
                 if (playStartTime >= 0)
                     playTotalTime += (this._startTime - playStartTime);
 
-                target.playing = playStartTime >= 0;
-                target.frame = frame;
+                target.setProp(ObjectPropID.Playing, playStartTime >= 0);
+                target.setProp(ObjectPropID.Frame, frame);
                 if (playTotalTime > 0)
-                    target.advance(playTotalTime * 1000);
+                    target.setProp(ObjectPropID.DeltaTime, playTotalTime * 1000);
             }
         }
 
@@ -706,33 +706,53 @@ namespace fgui {
                 if (item.type == TransitionActionType.XY) {
                     if (item.target != this._owner) {
                         if (!startValue.b1)
-                            startValue.f1 = item.target.x;
+                            tweener.startValue.x = item.target.x;
+                        else if (startValue.b3) //percent
+                            tweener.startValue.x = startValue.f1 * this._owner.width;
+
                         if (!startValue.b2)
-                            startValue.f2 = item.target.y;
+                            tweener.startValue.y = item.target.y;
+                        else if (startValue.b3) //percent
+                            tweener.startValue.y = startValue.f2 * this._owner.height;
+
+                        if (!endValue.b1)
+                            tweener.endValue.x = tweener.startValue.x;
+                        else if (endValue.b3)
+                            tweener.endValue.x = endValue.f1 * this._owner.width;
+
+                        if (!endValue.b2)
+                            tweener.endValue.y = tweener.startValue.y;
+                        else if (endValue.b3)
+                            tweener.endValue.y = endValue.f2 * this._owner.height;
                     }
                     else {
                         if (!startValue.b1)
-                            startValue.f1 = item.target.x - this._ownerBaseX;
+                            tweener.startValue.x = item.target.x - this._ownerBaseX;
                         if (!startValue.b2)
-                            startValue.f2 = item.target.y - this._ownerBaseY;
+                            tweener.startValue.y = item.target.y - this._ownerBaseY;
+
+                        if (!endValue.b1)
+                            tweener.endValue.x = tweener.startValue.x;
+                        if (!endValue.b2)
+                            tweener.endValue.y = tweener.startValue.y;
                     }
                 }
                 else {
                     if (!startValue.b1)
-                        startValue.f1 = item.target.width;
+                        tweener.startValue.x = item.target.width;
                     if (!startValue.b2)
-                        startValue.f2 = item.target.height;
+                        tweener.startValue.y = item.target.height;
+
+                    if (!endValue.b1)
+                        tweener.endValue.x = tweener.startValue.x;
+                    if (!endValue.b2)
+                        tweener.endValue.y = tweener.startValue.y;
                 }
 
-                if (!endValue.b1)
-                    endValue.f1 = startValue.f1;
-                if (!endValue.b2)
-                    endValue.f2 = startValue.f2;
-
-                tweener.startValue.x = startValue.f1;
-                tweener.startValue.y = startValue.f2;
-                tweener.endValue.x = endValue.f1;
-                tweener.endValue.y = endValue.f2;
+                if (item.tweenConfig.path) {
+                    item.value.b1 = item.value.b2 = true;
+                    tweener.setPath(item.tweenConfig.path);
+                }
             }
 
             this.callHook(item, false);
@@ -747,6 +767,10 @@ namespace fgui {
                 case TransitionActionType.Skew:
                     item.value.f1 = tweener.value.x;
                     item.value.f2 = tweener.value.y;
+                    if (item.tweenConfig.path) {
+                        item.value.f1 += tweener.startValue.x;
+                        item.value.f2 += tweener.startValue.y;
+                    }
                     break;
 
                 case TransitionActionType.Alpha:
@@ -835,104 +859,113 @@ namespace fgui {
 
         private applyValue(item: TransitionItem): void {
             item.target._gearLocked = true;
+            var value: any = item.value;
 
             switch (item.type) {
                 case TransitionActionType.XY:
                     if (item.target == this._owner) {
-                        var f1: number, f2: number;
-                        if (!item.value.b1)
-                            f1 = item.target.x;
+                        if (value.b1 && value.b2)
+                            item.target.setPosition(value.f1 + this._ownerBaseX, value.f2 + this._ownerBaseY);
+                        else if (value.b1)
+                            item.target.x = value.f1 + this._ownerBaseX;
                         else
-                            f1 = item.value.f1 + this._ownerBaseX;
-                        if (!item.value.b2)
-                            f2 = item.target.y;
-                        else
-                            f2 = item.value.f2 + this._ownerBaseY;
-                        item.target.setPosition(f1, f2);
+                            item.target.y = value.f2 + this._ownerBaseY;
                     }
                     else {
-                        if (!item.value.b1)
-                            item.value.f1 = item.target.x;
-                        if (!item.value.b2)
-                            item.value.f2 = item.target.y;
-                        item.target.setPosition(item.value.f1, item.value.f2);
+                        if (value.b3) //position in percent
+                        {
+                            if (value.b1 && value.b2)
+                                item.target.setPosition(value.f1 * this._owner.width, value.f2 * this._owner.height);
+                            else if (value.b1)
+                                item.target.x = value.f1 * this._owner.width;
+                            else if (value.b2)
+                                item.target.y = value.f2 * this._owner.height;
+                        }
+                        else {
+                            if (value.b1 && value.b2)
+                                item.target.setPosition(value.f1, value.f2);
+                            else if (value.b1)
+                                item.target.x = value.f1;
+                            else if (value.b2)
+                                item.target.y = value.f2;
+                        }
                     }
                     break;
 
                 case TransitionActionType.Size:
-                    if (!item.value.b1)
-                        item.value.f1 = item.target.width;
-                    if (!item.value.b2)
-                        item.value.f2 = item.target.height;
-                    item.target.setSize(item.value.f1, item.value.f2);
+                    if (!value.b1)
+                        value.f1 = item.target.width;
+                    if (!value.b2)
+                        value.f2 = item.target.height;
+                    item.target.setSize(value.f1, value.f2);
                     break;
 
                 case TransitionActionType.Pivot:
-                    item.target.setPivot(item.value.f1, item.value.f2, item.target.pivotAsAnchor);
+                    item.target.setPivot(value.f1, value.f2, item.target.pivotAsAnchor);
                     break;
 
                 case TransitionActionType.Alpha:
-                    item.target.alpha = item.value.f1;
+                    item.target.alpha = value.f1;
                     break;
 
                 case TransitionActionType.Rotation:
-                    item.target.rotation = item.value.f1;
+                    item.target.rotation = value.f1;
                     break;
 
                 case TransitionActionType.Scale:
-                    item.target.setScale(item.value.f1, item.value.f2);
+                    item.target.setScale(value.f1, value.f2);
                     break;
 
                 case TransitionActionType.Skew:
-                    item.target.setSkew(item.value.f1, item.value.f2);
+                    item.target.setSkew(value.f1, value.f2);
                     break;
 
                 case TransitionActionType.Color:
-                    (<any>(item.target)).color = item.value.f1;
+                    item.target.setProp(ObjectPropID.Color, value.f1);
                     break;
 
                 case TransitionActionType.Animation:
-                    if (item.value.frame >= 0)
-                        (<any>(item.target)).frame = item.value.frame;
-                    (<any>(item.target)).playing = item.value.playing;
-                    (<any>(item.target)).timeScale = this._timeScale;
+                    if (value.frame >= 0)
+                        item.target.setProp(ObjectPropID.Frame, value.frame);
+                    item.target.setProp(ObjectPropID.Playing, value.playing);
+                    item.target.setProp(ObjectPropID.TimeScale, this._timeScale);
                     break;
 
                 case TransitionActionType.Visible:
-                    item.target.visible = item.value.visible;
+                    item.target.visible = value.visible;
                     break;
 
                 case TransitionActionType.Transition:
                     if (this._playing) {
-                        var trans: Transition = item.value.trans;
+                        var trans: Transition = value.trans;
                         if (trans != null) {
                             this._totalTasks++;
                             var startTime: number = this._startTime > item.time ? (this._startTime - item.time) : 0;
                             var endTime: number = this._endTime >= 0 ? (this._endTime - item.time) : -1;
-                            if (item.value.stopTime >= 0 && (endTime < 0 || endTime > item.value.stopTime))
-                                endTime = item.value.stopTime;
+                            if (value.stopTime >= 0 && (endTime < 0 || endTime > value.stopTime))
+                                endTime = value.stopTime;
                             trans.timeScale = this._timeScale;
-                            trans._play(function () { this.onPlayTransCompleted(item); }.bind(this), item.value.playTimes, 0, startTime, endTime, this._reversed);
+                            trans._play(function () { this.onPlayTransCompleted(item); }.bind(this), value.playTimes, 0, startTime, endTime, this._reversed);
                         }
                     }
                     break;
 
                 case TransitionActionType.Sound:
                     if (this._playing && item.time >= this._startTime) {
-                        if (item.value.audioClip == null) {
-                            var pi: PackageItem = UIPackage.getItemByURL(item.value.sound);
+                        if (value.audioClip == null) {
+                            var pi: PackageItem = UIPackage.getItemByURL(value.sound);
                             if (pi)
-                                item.value.audioClip = <cc.AudioClip>pi.owner.getItemAsset(pi);
+                                value.audioClip = <cc.AudioClip>pi.owner.getItemAsset(pi);
                         }
-                        if (item.value.audioClip)
-                            GRoot.inst.playOneShotSound(item.value.audioClip, item.value.volume);
+                        if (value.audioClip)
+                            GRoot.inst.playOneShotSound(value.audioClip, value.volume);
                     }
                     break;
 
                 case TransitionActionType.Shake:
-                    item.target.setPosition(item.target.x - item.value.lastOffsetX + item.value.offsetX, item.target.y - item.value.lastOffsetY + item.value.offsetY);
-                    item.value.lastOffsetX = item.value.offsetX;
-                    item.value.lastOffsetY = item.value.offsetY;
+                    item.target.setPosition(item.target.x - value.lastOffsetX + value.offsetX, item.target.y - value.lastOffsetY + value.offsetY);
+                    value.lastOffsetX = value.offsetX;
+                    value.lastOffsetY = value.offsetY;
                     break;
 
                 case TransitionActionType.ColorFilter:
@@ -941,11 +974,11 @@ namespace fgui {
                         break;
                     }
                 case TransitionActionType.Text:
-                    item.target.text = item.value.text;
+                    item.target.text = value.text;
                     break;
 
                 case TransitionActionType.Icon:
-                    item.target.icon = item.value.text;
+                    item.target.icon = value.text;
                     break;
             }
 
@@ -996,6 +1029,36 @@ namespace fgui {
                     buffer.seek(curPos, 3);
 
                     this.decodeValue(item, buffer, item.tweenConfig.endValue);
+
+                    if (buffer.version >= 2) {
+                        var pathLen: number = buffer.readInt();
+                        if (pathLen > 0) {
+                            item.tweenConfig.path = new GPath();
+                            var pts: Array<GPathPoint> = new Array<GPathPoint>();
+
+                            for (var j: number = 0; j < pathLen; j++) {
+                                var curveType: number = buffer.readByte();
+                                switch (curveType) {
+                                    case CurveType.Bezier:
+                                        pts.push(GPathPoint.newBezierPoint(buffer.readFloat(), buffer.readFloat(),
+                                            buffer.readFloat(), buffer.readFloat()));
+                                        break;
+
+                                    case CurveType.CubicBezier:
+                                        pts.push(GPathPoint.newCubicBezierPoint(buffer.readFloat(), buffer.readFloat(),
+                                            buffer.readFloat(), buffer.readFloat(),
+                                            buffer.readFloat(), buffer.readFloat()));
+                                        break;
+
+                                    default:
+                                        pts.push(GPathPoint.newPoint(buffer.readFloat(), buffer.readFloat(), curveType));
+                                        break;
+                                }
+                            }
+
+                            item.tweenConfig.path.create(pts);
+                        }
+                    }
                 }
                 else {
                     if (item.time > this._totalDuration)
@@ -1011,7 +1074,6 @@ namespace fgui {
         }
 
         private decodeValue(item: TransitionItem, buffer: ByteBuffer, value: any): void {
-            var arr: Array<any>;
             switch (item.type) {
                 case TransitionActionType.XY:
                 case TransitionActionType.Size:
@@ -1021,6 +1083,9 @@ namespace fgui {
                     value.b2 = buffer.readBool();
                     value.f1 = buffer.readFloat();
                     value.f2 = buffer.readFloat();
+
+                    if (buffer.version >= 2 && item.type == TransitionActionType.XY)
+                        value.b3 = buffer.readBool(); //percent
                     break;
 
                 case TransitionActionType.Alpha:
@@ -1162,6 +1227,7 @@ namespace fgui {
         public endValue: TValue;
         public endLabel: string;
         public endHook: Function;
+        public path: GPath;
 
         public constructor() {
             this.easeType = EaseType.QuadOut;
@@ -1214,6 +1280,7 @@ namespace fgui {
 
         public b1: boolean;
         public b2: boolean;
+        public b3: boolean;
 
         public constructor() {
             this.f1 = this.f2 = this.f3 = this.f4 = 0;

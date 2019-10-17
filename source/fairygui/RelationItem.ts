@@ -185,30 +185,46 @@ namespace fgui {
 
                 case RelationType.LeftExt_Left:
                 case RelationType.LeftExt_Right:
-                    tmp = this._owner.xMin;
-                    this._owner.width = this._owner._rawWidth - dx;
-                    this._owner.xMin = tmp + dx;
+                    if (this._owner != this._target.parent) {
+                        tmp = this._owner.xMin;
+                        this._owner.width = this._owner._rawWidth - dx;
+                        this._owner.xMin = tmp + dx;
+                    }
+                    else
+                        this._owner.width = this._owner._rawWidth - dx;
                     break;
 
                 case RelationType.RightExt_Left:
                 case RelationType.RightExt_Right:
-                    tmp = this._owner.xMin;
-                    this._owner.width = this._owner._rawWidth + dx;
-                    this._owner.xMin = tmp;
+                    if (this._owner != this._target.parent) {
+                        tmp = this._owner.xMin;
+                        this._owner.width = this._owner._rawWidth + dx;
+                        this._owner.xMin = tmp;
+                    }
+                    else
+                        this._owner.width = this._owner._rawWidth + dx;
                     break;
 
                 case RelationType.TopExt_Top:
                 case RelationType.TopExt_Bottom:
-                    tmp = this._owner.yMin;
-                    this._owner.height = this._owner._rawHeight - dy;
-                    this._owner.yMin = tmp + dy;
+                    if (this._owner != this._target.parent) {
+                        tmp = this._owner.yMin;
+                        this._owner.height = this._owner._rawHeight - dy;
+                        this._owner.yMin = tmp + dy;
+                    }
+                    else
+                        this._owner.height = this._owner._rawHeight - dy;
                     break;
 
                 case RelationType.BottomExt_Top:
                 case RelationType.BottomExt_Bottom:
-                    tmp = this._owner.yMin;
-                    this._owner.height = this._owner._rawHeight + dy;
-                    this._owner.yMin = tmp;
+                    if (this._owner != this._target.parent) {
+                        tmp = this._owner.yMin;
+                        this._owner.height = this._owner._rawHeight + dy;
+                        this._owner.yMin = tmp;
+                    }
+                    else
+                        this._owner.height = this._owner._rawHeight + dy;
                     break;
             }
         }

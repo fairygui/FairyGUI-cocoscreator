@@ -1,29 +1,48 @@
 namespace fgui {
-
     export class GGroup extends GObject {
         private _layout: number = 0;
         private _lineGap: number = 0;
         private _columnGap: number = 0;
-        private _percentReady: boolean = false;
-        private _boundsChanged: boolean = false;
+        private _excludeInvisibles: boolean;
+        private _autoSizeDisabled: boolean;
+        private _mainGridIndex: number = -1;
+        private _mainGridMinSize: number = 50;
+
+        private _boundsChanged: boolean;
+        private _percentReady: boolean;
+        private _mainChildIndex: number = -1;
+        private _totalSize: number = 0;
+        private _numChildren: number = 0;
 
         public _updating: number = 0;
 
-        public constructor() {
+        constructor() {
             super();
 
             this._node.name = "GGroup";
             this._touchDisabled = true;
         }
 
+        public dispose(): void {
+            this._boundsChanged = false;
+
+            super.dispose();
+        }
+
+        /**
+         * @see GroupLayout
+         */
         public get layout(): number {
             return this._layout;
         }
 
+        /**
+         * @see GroupLayout
+         */
         public set layout(value: number) {
             if (this._layout != value) {
                 this._layout = value;
-                this.setBoundsChangedFlag(true);
+                this.setBoundsChangedFlag();
             }
         }
 
@@ -34,7 +53,7 @@ namespace fgui {
         public set lineGap(value: number) {
             if (this._lineGap != value) {
                 this._lineGap = value;
-                this.setBoundsChangedFlag();
+                this.setBoundsChangedFlag(true);
             }
         }
 
@@ -45,13 +64,54 @@ namespace fgui {
         public set columnGap(value: number) {
             if (this._columnGap != value) {
                 this._columnGap = value;
+                this.setBoundsChangedFlag(true);
+            }
+        }
+
+        public get excludeInvisibles(): boolean {
+            return this._excludeInvisibles;
+        }
+
+        public set excludeInvisibles(value: boolean) {
+            if (this._excludeInvisibles != value) {
+                this._excludeInvisibles = value;
                 this.setBoundsChangedFlag();
             }
         }
 
-        public setBoundsChangedFlag(childSizeChanged?: boolean): void {
+        public get autoSizeDisabled(): boolean {
+            return this._autoSizeDisabled;
+        }
+
+        public set autoSizeDisabled(value: boolean) {
+            this._autoSizeDisabled = value;
+        }
+
+        public get mainGridMinSize(): number {
+            return this._mainGridMinSize;
+        }
+
+        public set mainGridMinSize(value: number) {
+            if (this._mainGridMinSize != value) {
+                this._mainGridMinSize = value;
+                this.setBoundsChangedFlag();
+            }
+        }
+
+        public get mainGridIndex(): number {
+            return this._mainGridIndex;
+        }
+
+        public set mainGridIndex(value: number) {
+            if (this._mainGridIndex != value) {
+                this._mainGridIndex = value;
+                this.setBoundsChangedFlag();
+            }
+        }
+
+        public setBoundsChangedFlag(positionChangedOnly: boolean = false): void {
             if (this._updating == 0 && this._parent != null) {
-                if (childSizeChanged)
+                if (!positionChangedOnly)
                     this._percentReady = false;
 
                 if (!this._boundsChanged) {
@@ -67,18 +127,38 @@ namespace fgui {
             _t.ensureBoundsCorrect();
         }
 
-        public ensureBoundsCorrect(): void {
-            if (this._boundsChanged)
+        public ensureSizeCorrect(): void {
+            if (this._parent == null || !this._boundsChanged || this._layout == 0)
+                return;
+
+            this._boundsChanged = false;
+            if (this._autoSizeDisabled)
+                this.resizeChildren(0, 0);
+            else {
+                this.handleLayout();
                 this.updateBounds();
+            }
+        }
+
+        public ensureBoundsCorrect(): void {
+            if (this._parent == null || !this._boundsChanged)
+                return;
+
+            this._boundsChanged = false;
+            if (this._layout == 0)
+                this.updateBounds();
+            else {
+                if (this._autoSizeDisabled)
+                    this.resizeChildren(0, 0);
+                else {
+                    this.handleLayout();
+                    this.updateBounds();
+                }
+            }
         }
 
         private updateBounds(): void {
-            this._boundsChanged = false;
-
-            if (this._parent == null)
-                return;
-
-            this.handleLayout();
+            this._partner.unschedule(this._ensureBoundsCorrect);
 
             var cnt: number = this._parent.numChildren;
             var i: number;
@@ -89,35 +169,43 @@ namespace fgui {
             var empty: boolean = true;
             for (i = 0; i < cnt; i++) {
                 child = this._parent.getChildAt(i);
-                if (child.group == this) {
-                    tmp = child.x;
-                    if (tmp < ax)
-                        ax = tmp;
-                    tmp = child.y;
-                    if (tmp < ay)
-                        ay = tmp;
-                    tmp = child.x + child.width;
-                    if (tmp > ar)
-                        ar = tmp;
-                    tmp = child.y + child.height;
-                    if (tmp > ab)
-                        ab = tmp;
-                    empty = false;
-                }
+                if (child.group != this || this._excludeInvisibles && !child.internalVisible3)
+                    continue;
+
+                tmp = child.xMin;
+                if (tmp < ax)
+                    ax = tmp;
+                tmp = child.yMin;
+                if (tmp < ay)
+                    ay = tmp;
+                tmp = child.xMin + child.width;
+                if (tmp > ar)
+                    ar = tmp;
+                tmp = child.yMin + child.height;
+                if (tmp > ab)
+                    ab = tmp;
+                empty = false;
             }
 
+            var w: number = 0, h: number = 0;
             if (!empty) {
-                this._updating = 1;
+                this._updating |= 1;
                 this.setPosition(ax, ay);
-                this._updating = 2;
-                this.setSize(ar - ax, ab - ay);
+                this._updating &= 2;
+
+                w = ar - ax;
+                h = ab - ay;
+            }
+
+            if ((this._updating & 2) == 0) {
+                this._updating |= 2;
+                this.setSize(w, h);
+                this._updating &= 1;
             }
             else {
-                this._updating = 2;
-                this.setSize(0, 0);
+                this._updating &= 1;
+                this.resizeChildren(this._width - w, this._height - h);
             }
-
-            this._updating = 0;
         }
 
         private handleLayout(): void {
@@ -128,96 +216,41 @@ namespace fgui {
             var cnt: number;
 
             if (this._layout == GroupLayoutType.Horizontal) {
-                var curX: number = NaN;
+                var curX: number = this.x;
                 cnt = this._parent.numChildren;
                 for (i = 0; i < cnt; i++) {
                     child = this._parent.getChildAt(i);
                     if (child.group != this)
                         continue;
+                    if (this._excludeInvisibles && !child.internalVisible3)
+                        continue;
 
-                    if (isNaN(curX))
-                        curX = Math.floor(child.x);
-                    else
-                        child.x = curX;
+                    child.xMin = curX;
                     if (child.width != 0)
-                        curX += Math.floor(child.width + this._columnGap);
+                        curX += child.width + this._columnGap;
                 }
-                if (!this._percentReady)
-                    this.updatePercent();
             }
             else if (this._layout == GroupLayoutType.Vertical) {
-                var curY: number = NaN;
+                var curY: number = this.y;
                 cnt = this._parent.numChildren;
                 for (i = 0; i < cnt; i++) {
                     child = this._parent.getChildAt(i);
                     if (child.group != this)
                         continue;
+                    if (this._excludeInvisibles && !child.internalVisible3)
+                        continue;
 
-                    if (isNaN(curY))
-                        curY = Math.floor(child.y);
-                    else
-                        child.y = curY;
+                    child.yMin = curY;
                     if (child.height != 0)
-                        curY += Math.floor(child.height + this._lineGap);
+                        curY += child.height + this._lineGap;
                 }
-                if (!this._percentReady)
-                    this.updatePercent();
             }
 
             this._updating &= 2;
         }
 
-        private updatePercent(): void {
-            this._percentReady = true;
-
-            var cnt: number = this._parent.numChildren;
-            var i: number;
-            var child: GObject;
-            var size: number = 0;
-            if (this._layout == GroupLayoutType.Horizontal) {
-                for (i = 0; i < cnt; i++) {
-                    child = this._parent.getChildAt(i);
-                    if (child.group != this)
-                        continue;
-
-                    size += child.width;
-                }
-
-                for (i = 0; i < cnt; i++) {
-                    child = this._parent.getChildAt(i);
-                    if (child.group != this)
-                        continue;
-
-                    if (size > 0)
-                        child._sizePercentInGroup = child.width / size;
-                    else
-                        child._sizePercentInGroup = 0;
-                }
-            }
-            else {
-                for (i = 0; i < cnt; i++) {
-                    child = this._parent.getChildAt(i);
-                    if (child.group != this)
-                        continue;
-
-                    size += child.height;
-                }
-
-                for (i = 0; i < cnt; i++) {
-                    child = this._parent.getChildAt(i);
-                    if (child.group != this)
-                        continue;
-
-                    if (size > 0)
-                        child._sizePercentInGroup = child.height / size;
-                    else
-                        child._sizePercentInGroup = 0;
-                }
-            }
-        }
-
         public moveChildren(dx: number, dy: number): void {
-            if ((this._updating & 1) != 0 || !this._parent)
+            if ((this._updating & 1) != 0 || this._parent == null)
                 return;
 
             this._updating |= 1;
@@ -236,138 +269,163 @@ namespace fgui {
         }
 
         public resizeChildren(dw: number, dh: number): void {
-            if (this._layout == GroupLayoutType.None || (this._updating & 2) != 0 || !this._parent)
+            if (this._layout == GroupLayoutType.None || (this._updating & 2) != 0 || this._parent == null)
                 return;
 
             this._updating |= 2;
 
-            if (!this._percentReady)
-                this.updatePercent();
+            if (this._boundsChanged) {
+                this._boundsChanged = false;
+                if (!this._autoSizeDisabled) {
+                    this.updateBounds();
+                    return;
+                }
+            }
 
             var cnt: number = this._parent.numChildren;
             var i: number;
-            var j: number;
             var child: GObject;
-            var last: number = -1;
-            var numChildren: number = 0;
-            var lineSize: number = 0;
-            var remainSize: number = 0;
-            var found: boolean = false;
 
-            for (i = 0; i < cnt; i++) {
-                child = this._parent.getChildAt(i);
-                if (child.group != this)
-                    continue;
+            if (!this._percentReady) {
+                this._percentReady = true;
+                this._numChildren = 0;
+                this._totalSize = 0;
+                this._mainChildIndex = -1;
 
-                last = i;
-                numChildren++;
-            }
-
-            if (this._layout == GroupLayoutType.Horizontal) {
-                remainSize = lineSize = this._width - (numChildren - 1) * this._columnGap;
-                var curX: number = NaN;
-                var nw: number;
+                var j: number = 0;
                 for (i = 0; i < cnt; i++) {
                     child = this._parent.getChildAt(i);
                     if (child.group != this)
                         continue;
 
-                    if (isNaN(curX))
-                        curX = Math.floor(child.x);
-                    else
-                        child.x = curX;
-                    if (last == i)
-                        nw = remainSize;
-                    else
-                        nw = Math.round(child._sizePercentInGroup * lineSize);
-                    child.setSize(nw, child._rawHeight + dh, true);
-                    remainSize -= child.width;
-                    if (last == i) {
-                        if (remainSize >= 1) //可能由于有些元件有宽度限制，导致无法铺满
-                        {
-                            for (j = 0; j <= i; j++) {
-                                child = this._parent.getChildAt(j);
-                                if (child.group != this)
-                                    continue;
+                    if (!this._excludeInvisibles || child.internalVisible3) {
+                        if (j == this._mainGridIndex)
+                            this._mainChildIndex = i;
 
-                                if (!found) {
-                                    nw = child.width + remainSize;
-                                    if ((child.maxWidth == 0 || nw < child.maxWidth)
-                                        && (child.minWidth == 0 || nw > child.minWidth)) {
-                                        child.setSize(nw, child.height, true);
-                                        found = true;
-                                    }
-                                }
-                                else
-                                    child.x += remainSize;
-                            }
-                        }
+                        this._numChildren++;
+
+                        if (this._layout == 1)
+                            this._totalSize += child.width;
+                        else
+                            this._totalSize += child.height;
                     }
+
+                    j++;
+                }
+
+                if (this._mainChildIndex != -1) {
+                    if (this._layout == 1) {
+                        child = this._parent.getChildAt(this._mainChildIndex);
+                        this._totalSize += this._mainGridMinSize - child.width;
+                        child._sizePercentInGroup = this._mainGridMinSize / this._totalSize;
+                    }
+                    else {
+                        child = this._parent.getChildAt(this._mainChildIndex);
+                        this._totalSize += this._mainGridMinSize - child.height;
+                        child._sizePercentInGroup = this._mainGridMinSize / this._totalSize;
+                    }
+                }
+
+                for (i = 0; i < cnt; i++) {
+                    child = this._parent.getChildAt(i);
+                    if (child.group != this)
+                        continue;
+
+                    if (i == this._mainChildIndex)
+                        continue;
+
+                    if (this._totalSize > 0)
+                        child._sizePercentInGroup = (this._layout == 1 ? child.width : child.height) / this._totalSize;
                     else
-                        curX += (child.width + this._columnGap);
+                        child._sizePercentInGroup = 0;
                 }
             }
-            else if (this._layout == GroupLayoutType.Vertical) {
-                remainSize = lineSize = this.height - (numChildren - 1) * this._lineGap;
-                var curY: number = NaN;
-                var nh: number;
+
+            var remainSize: number = 0;
+            var remainPercent: number = 1;
+            var priorHandled: boolean = false;
+
+            if (this._layout == 1) {
+                remainSize = this.width - (this._numChildren - 1) * this._columnGap;
+                if (this._mainChildIndex != -1 && remainSize >= this._totalSize) {
+                    child = this._parent.getChildAt(this._mainChildIndex);
+                    child.setSize(remainSize - (this._totalSize - this._mainGridMinSize), child._rawHeight + dh, true);
+                    remainSize -= child.width;
+                    remainPercent -= child._sizePercentInGroup;
+                    priorHandled = true;
+                }
+
+                var curX: number = this.x;
                 for (i = 0; i < cnt; i++) {
                     child = this._parent.getChildAt(i);
                     if (child.group != this)
                         continue;
 
-                    if (isNaN(curY))
-                        curY = Math.floor(child.y);
-                    else
-                        child.y = curY;
-                    if (last == i)
-                        nh = remainSize;
-                    else
-                        nh = Math.round(child._sizePercentInGroup * lineSize);
-                    child.setSize(child._rawWidth + dw, nh, true);
-                    remainSize -= child.height;
-                    if (last == i) {
-                        if (remainSize >= 1) //可能由于有些元件有宽度限制，导致无法铺满
-                        {
-                            for (j = 0; j <= i; j++) {
-                                child = this._parent.getChildAt(j);
-                                if (child.group != this)
-                                    continue;
-
-                                if (!found) {
-                                    nh = child.height + remainSize;
-                                    if ((child.maxHeight == 0 || nh < child.maxHeight)
-                                        && (child.minHeight == 0 || nh > child.minHeight)) {
-                                        child.setSize(child.width, nh, true);
-                                        found = true;
-                                    }
-                                }
-                                else
-                                    child.y += remainSize;
-                            }
-                        }
+                    if (this._excludeInvisibles && !child.internalVisible3) {
+                        child.setSize(child._rawWidth, child._rawHeight + dh, true);
+                        continue;
                     }
-                    else
-                        curY += (child.height + this._lineGap);
+
+                    if (!priorHandled || i != this._mainChildIndex) {
+                        child.setSize(Math.round(child._sizePercentInGroup / remainPercent * remainSize), child._rawHeight + dh, true);
+                        remainPercent -= child._sizePercentInGroup;
+                        remainSize -= child.width;
+                    }
+
+                    child.xMin = curX;
+                    if (child.width != 0)
+                        curX += child.width + this._columnGap;
+                }
+            }
+            else {
+                remainSize = this.height - (this._numChildren - 1) * this._lineGap;
+                if (this._mainChildIndex != -1 && remainSize >= this._totalSize) {
+                    child = this._parent.getChildAt(this._mainChildIndex);
+                    child.setSize(child._rawWidth + dw, remainSize - (this._totalSize - this._mainGridMinSize), true);
+                    remainSize -= child.height;
+                    remainPercent -= child._sizePercentInGroup;
+                    priorHandled = true;
+                }
+
+                var curY: number = this.y;
+                for (i = 0; i < cnt; i++) {
+                    child = this._parent.getChildAt(i);
+                    if (child.group != this)
+                        continue;
+
+                    if (this._excludeInvisibles && !child.internalVisible3) {
+                        child.setSize(child._rawWidth + dw, child._rawHeight, true);
+                        continue;
+                    }
+
+                    if (!priorHandled || i != this._mainChildIndex) {
+                        child.setSize(child._rawWidth + dw, Math.round(child._sizePercentInGroup / remainPercent * remainSize), true);
+                        remainPercent -= child._sizePercentInGroup;
+                        remainSize -= child.height;
+                    }
+
+                    child.yMin = curY;
+                    if (child.height != 0)
+                        curY += child.height + this._lineGap;
                 }
             }
 
             this._updating &= 1;
         }
 
-        public setChildrenAlpha(): void {
-            if (this._underConstruct || !this._parent)
+        public handleAlphaChanged(): void {
+            if (this._underConstruct)
                 return;
 
             var cnt: number = this._parent.numChildren;
             for (var i: number = 0; i < cnt; i++) {
                 var child: GObject = this._parent.getChildAt(i);
                 if (child.group == this)
-                    child.alpha = this._alpha;
+                    child.alpha = this.alpha;
             }
         }
 
-        public setChildrenVisible(): void {
+        public handleVisibleChanged(): void {
             if (!this._parent)
                 return;
 
@@ -375,7 +433,7 @@ namespace fgui {
             for (var i: number = 0; i < cnt; i++) {
                 var child: GObject = this._parent.getChildAt(i);
                 if (child.group == this)
-                    child.handleVisibleChanged()
+                    child.handleVisibleChanged();
             }
         }
 
@@ -387,13 +445,19 @@ namespace fgui {
             this._layout = buffer.readByte();
             this._lineGap = buffer.readInt();
             this._columnGap = buffer.readInt();
+            if (buffer.version >= 2) {
+                this._excludeInvisibles = buffer.readBool();
+                this._autoSizeDisabled = buffer.readBool();
+                this._mainChildIndex = buffer.readInt();
+            }
         }
 
         public setup_afterAdd(buffer: ByteBuffer, beginPos: number): void {
             super.setup_afterAdd(buffer, beginPos);
 
-            if (!this._visible)
-                this.setChildrenVisible();
+            if (!this.visible)
+                this.handleVisibleChanged();
         }
     }
+
 }

@@ -1,39 +1,64 @@
-
 namespace fgui {
-
     export class GearXY extends GearBase {
-        private _storage: any;
-        private _default: cc.Vec2;
+        public positionsInPercent: boolean;
 
-        public constructor(owner: GObject) {
+        private _storage: Object;
+        private _default: any;
+
+        constructor(owner: GObject) {
             super(owner);
         }
 
         protected init(): void {
-            this._default = new cc.Vec2(this._owner.x, this._owner.y);
+            this._default = {
+                x: this._owner.x, y: this._owner.y,
+                px: this._owner.x / this._owner.parent.width, py: this._owner.y / this._owner.parent.height
+            };
             this._storage = {};
         }
 
         protected addStatus(pageId: string, buffer: ByteBuffer): void {
-            var gv: cc.Vec2;
+            var gv: any;
             if (pageId == null)
                 gv = this._default;
             else {
-                gv = new cc.Vec2();
+                gv = {};
                 this._storage[pageId] = gv;
             }
             gv.x = buffer.readInt();
             gv.y = buffer.readInt();
         }
 
+        public addExtStatus(pageId: string, buffer: ByteBuffer): void {
+            var gv: any;
+            if (pageId == null)
+                gv = this._default;
+            else
+                gv = this._storage[pageId];
+            gv.px = buffer.readFloat();
+            gv.py = buffer.readFloat();
+        }
+
         public apply(): void {
-            var pt: cc.Vec2 = this._storage[this._controller.selectedPageId];
+            var pt: any = this._storage[this._controller.selectedPageId];
             if (!pt)
                 pt = this._default;
 
-            if (this._tweenConfig && this._tweenConfig.tween && !UIPackage._constructing && !GearBase.disableAllTweenEffect) {
+            var ex: number;
+            var ey: number;
+
+            if (this.positionsInPercent && this._owner.parent) {
+                ex = pt.px * this._owner.parent.width;
+                ey = pt.py * this._owner.parent.height;
+            }
+            else {
+                ex = pt.x;
+                ey = pt.y;
+            }
+
+            if (this._tweenConfig != null && this._tweenConfig.tween && !UIPackage._constructing && !GearBase.disableAllTweenEffect) {
                 if (this._tweenConfig._tweener != null) {
-                    if (this._tweenConfig._tweener.endValue.x != pt.x || this._tweenConfig._tweener.endValue.y != pt.y) {
+                    if (this._tweenConfig._tweener.endValue.x != ex || this._tweenConfig._tweener.endValue.y != ey) {
                         this._tweenConfig._tweener.kill(true);
                         this._tweenConfig._tweener = null;
                     }
@@ -41,11 +66,14 @@ namespace fgui {
                         return;
                 }
 
-                if (this._owner.x != pt.x || this._owner.y != pt.y) {
+                var ox: number = this._owner.x;
+                var oy: number = this._owner.y;
+
+                if (ox != ex || oy != ey) {
                     if (this._owner.checkGearController(0, this._controller))
                         this._tweenConfig._displayLockToken = this._owner.addDisplayLock();
 
-                    this._tweenConfig._tweener = GTween.to2(this._owner.x, this._owner.y, pt.x, pt.y, this._tweenConfig.duration)
+                    this._tweenConfig._tweener = GTween.to2(ox, oy, ex, ey, this._tweenConfig.duration)
                         .setDelay(this._tweenConfig.delay)
                         .setEase(this._tweenConfig.easeType)
                         .setTarget(this)
@@ -55,7 +83,7 @@ namespace fgui {
             }
             else {
                 this._owner._gearLocked = true;
-                this._owner.setPosition(pt.x, pt.y);
+                this._owner.setPosition(ex, ey);
                 this._owner._gearLocked = false;
             }
         }
@@ -75,22 +103,24 @@ namespace fgui {
         }
 
         public updateState(): void {
-            var pt: cc.Vec2 = this._storage[this._controller.selectedPageId];
+            var pt: any = this._storage[this._controller.selectedPageId];
             if (!pt) {
-                pt = new cc.Vec2();
+                pt = {};
                 this._storage[this._controller.selectedPageId] = pt;
             }
 
             pt.x = this._owner.x;
             pt.y = this._owner.y;
+            pt.px = this._owner.x / this._owner.parent.width;
+            pt.py = this._owner.y / this._owner.parent.height;
         }
 
         public updateFromRelations(dx: number, dy: number): void {
-            if (this._controller == null || this._storage == null)
+            if (this._controller == null || this._storage == null || this.positionsInPercent)
                 return;
 
             for (var key in this._storage) {
-                var pt: cc.Vec2 = this._storage[key];
+                var pt: any = this._storage[key];
                 pt.x += dx;
                 pt.y += dy;
             }

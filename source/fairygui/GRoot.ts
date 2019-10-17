@@ -2,6 +2,8 @@
 namespace fgui {
 
     export class GRoot extends GComponent {
+        public static contentScaleLevel: number = 0;
+
         private _modalLayer: GGraph;
         private _popupStack: Array<GObject>;
         private _justClosedPopups: Array<GObject>;
@@ -419,11 +421,24 @@ namespace fgui {
 
             this.setSize(size.width, size.height);
             this._node.setPosition(-pos.x, this._height - pos.y);
+
+            this.updateContentScaleLevel();
         }
 
         public handlePositionChanged() {
             //nothing here
         }
 
+        private updateContentScaleLevel(): void {
+            var ss: number = Math.max(cc.view.getScaleX(), cc.view.getScaleY());
+            if (ss >= 3.5)
+                GRoot.contentScaleLevel = 3; //x4
+            else if (ss >= 2.5)
+                GRoot.contentScaleLevel = 2; //x3
+            else if (ss >= 1.5)
+                GRoot.contentScaleLevel = 1; //x2
+            else
+                GRoot.contentScaleLevel = 0;
+        }
     }
 }

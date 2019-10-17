@@ -160,24 +160,7 @@ namespace fgui {
                 this.updateGear(5);
             }
         }
-
-        public get timeScale(): number {
-            if (this._content instanceof MovieClip)
-                return (<MovieClip>this._content).timeScale;
-            else
-                return 1;
-        }
-
-        public set timeScale(value: number) {
-            if (this._content instanceof MovieClip)
-                (<MovieClip>this._content).timeScale = value;
-        }
-
-        public advance(timeInMiniseconds: number): void {
-            if (this._content instanceof MovieClip)
-                (<MovieClip>this._content).advance(timeInMiniseconds);
-        }
-
+        
         public get color(): cc.Color {
             return this._color;
         }
@@ -269,10 +252,14 @@ namespace fgui {
         protected loadFromPackage(itemURL: string) {
             this._contentItem = UIPackage.getItemByURL(itemURL);
             if (this._contentItem != null) {
+                this._contentItem = this._contentItem.getBranch();
+                this._contentSourceWidth = this._contentItem.width;
+                this._contentSourceHeight = this._contentItem.height;
+                this._contentItem = this._contentItem.getHighResolution();
                 this._contentItem.load();
 
                 if (this._autoSize)
-                    this.setSize(this._contentItem.width, this._contentItem.height);
+                    this.setSize(this._contentSourceWidth, this._contentSourceHeight);
 
                 if (this._contentItem.type == PackageItemType.Image) {
                     if (!this._contentItem.asset) {
@@ -286,14 +273,10 @@ namespace fgui {
                             this._content.type = cc.Sprite.Type.TILED;
                         else
                             this._content.type = cc.Sprite.Type.SIMPLE;
-                        this._contentSourceWidth = this._contentItem.width;
-                        this._contentSourceHeight = this._contentItem.height;
                         this.updateLayout();
                     }
                 }
                 else if (this._contentItem.type == PackageItemType.MovieClip) {
-                    this._contentSourceWidth = this._contentItem.width;
-                    this._contentSourceHeight = this._contentItem.height;
                     this._content.interval = this._contentItem.interval;
                     this._content.swing = this._contentItem.swing;
                     this._content.repeatDelay = this._contentItem.repeatDelay;
@@ -311,8 +294,6 @@ namespace fgui {
                     else {
                         this._content2 = obj.asCom;
                         this._container.addChild(this._content2.node);
-                        this._contentSourceWidth = this._contentItem.width;
-                        this._contentSourceHeight = this._contentItem.height;
                         this.updateLayout();
                     }
                 }
@@ -530,6 +511,44 @@ namespace fgui {
                 return this;
             else
                 return null;
+        }
+
+        public getProp(index: number): any {
+            switch (index) {
+                case ObjectPropID.Color:
+                    return this.color;
+                case ObjectPropID.Playing:
+                    return this.playing;
+                case ObjectPropID.Frame:
+                    return this.frame;
+                case ObjectPropID.TimeScale:
+                    return this._content.timeScale;
+                default:
+                    return super.getProp(index);
+            }
+        }
+
+        public setProp(index: number, value: any): void {
+            switch (index) {
+                case ObjectPropID.Color:
+                    this.color = value;
+                    break;
+                case ObjectPropID.Playing:
+                    this.playing = value;
+                    break;
+                case ObjectPropID.Frame:
+                    this.frame = value;
+                    break;
+                case ObjectPropID.TimeScale:
+                    this._content.timeScale = value;
+                    break;
+                case ObjectPropID.DeltaTime:
+                    this._content.advance(value);
+                    break;
+                default:
+                    super.setProp(index, value);
+                    break;
+            }
         }
 
         public setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void {

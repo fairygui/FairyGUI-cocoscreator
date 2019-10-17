@@ -180,7 +180,10 @@ namespace fgui {
         }
 
         public set value(val: string) {
-            this.selectedIndex = this._values.indexOf(val);
+            var index: number = this._values.indexOf(val);
+            if (index == -1 && val == null)
+                index = this._values.indexOf("");
+            this.selectedIndex = index;
         }
 
         public get selectionController(): Controller {
@@ -205,6 +208,56 @@ namespace fgui {
         protected setState(val: string): void {
             if (this._buttonController)
                 this._buttonController.selectedPage = val;
+        }
+
+        public getProp(index: number): any {
+            switch (index) {
+                case ObjectPropID.Color:
+                    return this.titleColor;
+                case ObjectPropID.OutlineColor:
+                    {
+                        var tf: GTextField = this.getTextField();
+                        if (tf)
+                            return tf.strokeColor;
+                        else
+                            return 0;
+                    }
+                case ObjectPropID.FontSize:
+                    {
+                        tf = this.getTextField();
+                        if (tf)
+                            return tf.fontSize;
+                        else
+                            return 0;
+                    }
+                default:
+                    return super.getProp(index);
+            }
+        }
+
+        public setProp(index: number, value: any): void {
+            switch (index) {
+                case ObjectPropID.Color:
+                    this.titleColor = value;
+                    break;
+                case ObjectPropID.OutlineColor:
+                    {
+                        var tf: GTextField = this.getTextField();
+                        if (tf)
+                            tf.strokeColor = value;
+                    }
+                    break;
+                case ObjectPropID.FontSize:
+                    {
+                        tf = this.getTextField();
+                        if (tf)
+                            tf.fontSize = value;
+                    }
+                    break;
+                default:
+                    super.setProp(index, value);
+                    break;
+            }
         }
 
         protected constructExtension(buffer: ByteBuffer): void {
@@ -344,6 +397,7 @@ namespace fgui {
             }
             this._list.selectedIndex = -1;
             this.dropdown.width = this.width;
+            this._list.ensureBoundsCorrect();
 
             var downward: any = null;
             if (this._popupDirection == PopupDirection.Down)

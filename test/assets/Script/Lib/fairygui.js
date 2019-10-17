@@ -1,11 +1,8 @@
 window.fgui = {};
 window.__extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -14,7 +11,7 @@ window.__extends = (this && this.__extends) || (function () {
 })();
 
 (function (fgui) {
-    var AsyncOperation = /** @class */ (function () {
+    var AsyncOperation = (function () {
         function AsyncOperation() {
         }
         AsyncOperation.prototype.createObject = function (pkgName, resName) {
@@ -59,7 +56,7 @@ window.__extends = (this && this.__extends) || (function () {
         return AsyncOperation;
     }());
     fgui.AsyncOperation = AsyncOperation;
-    var AsyncOperationRunner = /** @class */ (function (_super) {
+    var AsyncOperationRunner = (function (_super) {
         __extends(AsyncOperationRunner, _super);
         function AsyncOperationRunner() {
             var _this = _super.call(this) || this;
@@ -114,7 +111,7 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 else {
                     di = new DisplayListItem(null, type);
-                    if (type == fgui.ObjectType.List) //list
+                    if (type == fgui.ObjectType.List)
                         di.listItemCount = this.collectListChildren(buffer);
                 }
                 this._itemList.push(di);
@@ -182,7 +179,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._objectPool.push(obj);
                     if (di.type == fgui.ObjectType.List && di.listItemCount > 0) {
                         poolStart = this._objectPool.length - di.listItemCount - 1;
-                        for (k = 0; k < di.listItemCount; k++) //把他们都放到pool里，这样GList在创建时就不需要创建对象了
+                        for (k = 0; k < di.listItemCount; k++)
                             obj.itemPool.returnObject(this._objectPool[k + poolStart]);
                         this._objectPool.splice(poolStart, di.listItemCount);
                     }
@@ -198,7 +195,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         return AsyncOperationRunner;
     }(cc.Component));
-    var DisplayListItem = /** @class */ (function () {
+    var DisplayListItem = (function () {
         function DisplayListItem(packageItem, type) {
             this.packageItem = packageItem;
             this.type = type;
@@ -208,7 +205,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var Controller = /** @class */ (function (_super) {
+    var Controller = (function (_super) {
         __extends(Controller, _super);
         function Controller() {
             var _this = _super.call(this) || this;
@@ -248,7 +245,6 @@ window.__extends = (this && this.__extends) || (function () {
         Controller.prototype.offChanged = function (callback, target) {
             this.off(fgui.Event.STATUS_CHANGED, callback, target);
         };
-        //功能和设置selectedIndex一样，但不会触发事件
         Controller.prototype.setSelectedIndex = function (value) {
             if (this._selectedIndex != value) {
                 if (value > this._pageIds.length - 1)
@@ -283,7 +279,6 @@ window.__extends = (this && this.__extends) || (function () {
             enumerable: true,
             configurable: true
         });
-        //功能和设置selectedPage一样，但不会触发事件
         Controller.prototype.setSelectedPage = function (value) {
             var i = this._pageNames.indexOf(value);
             if (i == -1)
@@ -430,6 +425,25 @@ window.__extends = (this && this.__extends) || (function () {
                 this._pageIds.push(buffer.readS());
                 this._pageNames.push(buffer.readS());
             }
+            var homePageIndex = 0;
+            if (buffer.version >= 2) {
+                var homePageType = buffer.readByte();
+                switch (homePageType) {
+                    case 1:
+                        homePageIndex = buffer.readShort();
+                        break;
+                    case 2:
+                        homePageIndex = this._pageNames.indexOf(fgui.UIPackage.branch);
+                        if (homePageIndex == -1)
+                            homePageIndex = 0;
+                        break;
+                    case 3:
+                        homePageIndex = this._pageNames.indexOf(fgui.UIPackage.getVar(buffer.readS()));
+                        if (homePageIndex == -1)
+                            homePageIndex = 0;
+                        break;
+                }
+            }
             buffer.seek(beginPos, 2);
             cnt = buffer.readShort();
             if (cnt > 0) {
@@ -445,7 +459,7 @@ window.__extends = (this && this.__extends) || (function () {
                 }
             }
             if (this.parent != null && this._pageIds.length > 0)
-                this._selectedIndex = 0;
+                this._selectedIndex = homePageIndex;
             else
                 this._selectedIndex = -1;
         };
@@ -456,11 +470,11 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var DragDropManager = /** @class */ (function () {
+    var DragDropManager = (function () {
         function DragDropManager() {
             this._agent = new fgui.GLoader();
             this._agent.draggable = true;
-            this._agent.touchable = false; //important
+            this._agent.touchable = false;
             this._agent.setSize(100, 100);
             this._agent.setPivot(0.5, 0.5, true);
             this._agent.align = fgui.AlignType.Center;
@@ -510,7 +524,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         DragDropManager.prototype.onDragEnd = function () {
-            if (this._agent.parent == null) //cancelled
+            if (this._agent.parent == null)
                 return;
             fgui.GRoot.inst.removeChild(this._agent);
             var sourceData = this._sourceData;
@@ -617,6 +631,7 @@ window.__extends = (this && this.__extends) || (function () {
         ObjectType[ObjectType["ProgressBar"] = 14] = "ProgressBar";
         ObjectType[ObjectType["Slider"] = 15] = "Slider";
         ObjectType[ObjectType["ScrollBar"] = 16] = "ScrollBar";
+        ObjectType[ObjectType["Tree"] = 17] = "Tree";
     })(ObjectType = fgui.ObjectType || (fgui.ObjectType = {}));
     var ProgressTitleType;
     (function (ProgressTitleType) {
@@ -713,10 +728,23 @@ window.__extends = (this && this.__extends) || (function () {
         FillOrigin[FillOrigin["Left"] = 2] = "Left";
         FillOrigin[FillOrigin["Right"] = 3] = "Right";
     })(FillOrigin = fgui.FillOrigin || (fgui.FillOrigin = {}));
+    var ObjectPropID;
+    (function (ObjectPropID) {
+        ObjectPropID[ObjectPropID["Text"] = 0] = "Text";
+        ObjectPropID[ObjectPropID["Icon"] = 1] = "Icon";
+        ObjectPropID[ObjectPropID["Color"] = 2] = "Color";
+        ObjectPropID[ObjectPropID["OutlineColor"] = 3] = "OutlineColor";
+        ObjectPropID[ObjectPropID["Playing"] = 4] = "Playing";
+        ObjectPropID[ObjectPropID["Frame"] = 5] = "Frame";
+        ObjectPropID[ObjectPropID["DeltaTime"] = 6] = "DeltaTime";
+        ObjectPropID[ObjectPropID["TimeScale"] = 7] = "TimeScale";
+        ObjectPropID[ObjectPropID["FontSize"] = 8] = "FontSize";
+        ObjectPropID[ObjectPropID["Selected"] = 9] = "Selected";
+    })(ObjectPropID = fgui.ObjectPropID || (fgui.ObjectPropID = {}));
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GObject = /** @class */ (function () {
+    var GObject = (function () {
         function GObject() {
             this._x = 0;
             this._y = 0;
@@ -766,7 +794,7 @@ window.__extends = (this && this.__extends) || (function () {
             this._id = this._node.uuid;
             this._name = "";
             this._relations = new fgui.Relations(this);
-            this._gears = [];
+            this._gears = new Array(10);
             this._blendMode = fgui.BlendMode.Normal;
             this._partner = this._node.addComponent(GObjectPartner);
         }
@@ -820,7 +848,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._parent && !(this._parent instanceof fgui.GList)) {
                     this._parent.setBoundsChangedFlag();
                     if (this._group != null)
-                        this._group.setBoundsChangedFlag();
+                        this._group.setBoundsChangedFlag(true);
                     this._node.emit(fgui.Event.XY_CHANGED, this);
                 }
                 if (GObject.draggingObject == this && !GObject.sUpdateInDragging)
@@ -932,7 +960,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._relations.onOwnerSizeChanged(dWidth, dHeight, this._pivotAsAnchor || !ignorePivot);
                     this._parent.setBoundsChangedFlag();
                     if (this._group != null)
-                        this._group.setBoundsChangedFlag(true);
+                        this._group.setBoundsChangedFlag();
                 }
                 this._node.emit(fgui.Event.SIZE_CHANGED, this);
             }
@@ -1108,7 +1136,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._alpha = value;
                     this._node.opacity = this._alpha * 255;
                     if (this instanceof fgui.GGroup)
-                        this.setChildrenAlpha();
+                        this.handleAlphaChanged();
                     this.updateGear(3);
                 }
             },
@@ -1123,6 +1151,8 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._visible != value) {
                     this._visible = value;
                     this.handleVisibleChanged();
+                    if (this._group && this._group.excludeInvisibles)
+                        this._group.setBoundsChangedFlag();
                 }
             },
             enumerable: true,
@@ -1131,6 +1161,13 @@ window.__extends = (this && this.__extends) || (function () {
         Object.defineProperty(GObject.prototype, "_finalVisible", {
             get: function () {
                 return this._visible && this._internalVisible && (!this._group || this._group._finalVisible);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GObject.prototype, "internalVisible3", {
+            get: function () {
+                return this._visible && this._internalVisible;
             },
             enumerable: true,
             configurable: true
@@ -1209,10 +1246,10 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 if (this._group != value) {
                     if (this._group != null)
-                        this._group.setBoundsChangedFlag(true);
+                        this._group.setBoundsChangedFlag();
                     this._group = value;
                     if (this._group != null)
-                        this._group.setBoundsChangedFlag(true);
+                        this._group.setBoundsChangedFlag();
                 }
             },
             enumerable: true,
@@ -1220,37 +1257,8 @@ window.__extends = (this && this.__extends) || (function () {
         });
         GObject.prototype.getGear = function (index) {
             var gear = this._gears[index];
-            if (gear == null) {
-                switch (index) {
-                    case 0:
-                        gear = new fgui.GearDisplay(this);
-                        break;
-                    case 1:
-                        gear = new fgui.GearXY(this);
-                        break;
-                    case 2:
-                        gear = new fgui.GearSize(this);
-                        break;
-                    case 3:
-                        gear = new fgui.GearLook(this);
-                        break;
-                    case 4:
-                        gear = new fgui.GearColor(this);
-                        break;
-                    case 5:
-                        gear = new fgui.GearAnimation(this);
-                        break;
-                    case 6:
-                        gear = new fgui.GearText(this);
-                        break;
-                    case 7:
-                        gear = new fgui.GearIcon(this);
-                        break;
-                    default:
-                        throw "FairyGUI: invalid gear index!";
-                }
-                this._gears[index] = gear;
-            }
+            if (gear == null)
+                this._gears[index] = gear = fgui.GearBase.create(this, index);
             return gear;
         };
         GObject.prototype.updateGear = function (index) {
@@ -1288,9 +1296,13 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._handlingController)
                 return;
             var connected = this._gears[0] == null || this._gears[0].connected;
+            if (this._gears[8])
+                connected = this._gears[8].evaluate(connected);
             if (connected != this._internalVisible) {
                 this._internalVisible = connected;
                 this.handleVisibleChanged();
+                if (this._group && this._group.excludeInvisibles)
+                    this._group.setBoundsChangedFlag();
             }
         };
         Object.defineProperty(GObject.prototype, "gearXY", {
@@ -1348,7 +1360,6 @@ window.__extends = (this && this.__extends) || (function () {
         GObject.prototype.findParent = function () {
             if (this._parent)
                 return this._parent;
-            //可能有些不直接在children里，但node挂着的
             var pn = this._node.parent;
             while (pn) {
                 var gobj = pn["$gobj"];
@@ -1436,6 +1447,13 @@ window.__extends = (this && this.__extends) || (function () {
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(GObject.prototype, "asTree", {
+            get: function () {
+                return this;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(GObject.prototype, "asGraph", {
             get: function () {
                 return (this instanceof fgui.GGraph) ? this : null;
@@ -1499,6 +1517,13 @@ window.__extends = (this && this.__extends) || (function () {
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(GObject.prototype, "treeNode", {
+            get: function () {
+                return this._treeNode;
+            },
+            enumerable: true,
+            configurable: true
+        });
         GObject.prototype.dispose = function () {
             var n = this._node;
             if (!n)
@@ -1507,6 +1532,11 @@ window.__extends = (this && this.__extends) || (function () {
             this._relations.dispose();
             this._node = null;
             n.destroy();
+            for (var i = 0; i < 10; i++) {
+                var gear = this._gears[i];
+                if (gear != null)
+                    gear.dispose();
+            }
         };
         GObject.prototype.onEnable = function () {
         };
@@ -1645,7 +1675,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GObject.prototype.handleControllerChanged = function (c) {
             this._handlingController = true;
-            for (var i = 0; i < 8; i++) {
+            for (var i = 0; i < 10; i++) {
                 var gear = this._gears[i];
                 if (gear != null && gear.controller == c)
                     gear.apply();
@@ -1677,7 +1707,7 @@ window.__extends = (this && this.__extends) || (function () {
         GObject.prototype.handleVisibleChanged = function () {
             this._node.active = this._finalVisible;
             if (this instanceof fgui.GGroup)
-                this.setChildrenVisible();
+                this.handleVisibleChanged();
             if (this._parent)
                 this._parent.setBoundsChangedFlag();
         };
@@ -1691,6 +1721,42 @@ window.__extends = (this && this.__extends) || (function () {
                 return this;
             else
                 return null;
+        };
+        GObject.prototype.getProp = function (index) {
+            switch (index) {
+                case fgui.ObjectPropID.Text:
+                    return this.text;
+                case fgui.ObjectPropID.Icon:
+                    return this.icon;
+                case fgui.ObjectPropID.Color:
+                    return null;
+                case fgui.ObjectPropID.OutlineColor:
+                    return null;
+                case fgui.ObjectPropID.Playing:
+                    return false;
+                case fgui.ObjectPropID.Frame:
+                    return 0;
+                case fgui.ObjectPropID.DeltaTime:
+                    return 0;
+                case fgui.ObjectPropID.TimeScale:
+                    return 1;
+                case fgui.ObjectPropID.FontSize:
+                    return 0;
+                case fgui.ObjectPropID.Selected:
+                    return false;
+                default:
+                    return undefined;
+            }
+        };
+        GObject.prototype.setProp = function (index, value) {
+            switch (index) {
+                case fgui.ObjectPropID.Text:
+                    this.text = value;
+                    break;
+                case fgui.ObjectPropID.Icon:
+                    this.icon = value;
+                    break;
+            }
         };
         GObject.prototype.constructFromResource = function () {
         };
@@ -1745,7 +1811,6 @@ window.__extends = (this && this.__extends) || (function () {
             this.blendMode = buffer.readByte();
             var filter = buffer.readByte();
             if (filter == 1) {
-                //TODO: filter support
             }
             var str = buffer.readS();
             if (str != null)
@@ -1769,7 +1834,6 @@ window.__extends = (this && this.__extends) || (function () {
                 buffer.position = nextPos;
             }
         };
-        //toolTips support
         GObject.prototype.onRollOver = function () {
             this.root.showTooltips(this.tooltips);
         };
@@ -1867,8 +1931,6 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         GObject._defaultGroupIndex = -1;
-        //drag support
-        //-------------------------------------------------------------------
         GObject.sGlobalDragStart = new cc.Vec2();
         GObject.sGlobalRect = new cc.Rect();
         GObject.sHelperPoint = new cc.Vec2();
@@ -1877,7 +1939,7 @@ window.__extends = (this && this.__extends) || (function () {
         return GObject;
     }());
     fgui.GObject = GObject;
-    var GObjectPartner = /** @class */ (function (_super) {
+    var GObjectPartner = (function (_super) {
         __extends(GObjectPartner, _super);
         function GObjectPartner() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -1911,10 +1973,9 @@ window.__extends = (this && this.__extends) || (function () {
     }(cc.Component));
     fgui.GObjectPartner = GObjectPartner;
 })(fgui || (fgui = {}));
-/// <reference path="GObject.ts" />
 
 (function (fgui) {
-    var GComponent = /** @class */ (function (_super) {
+    var GComponent = (function (_super) {
         __extends(GComponent, _super);
         function GComponent() {
             var _this = _super.call(this) || this;
@@ -1950,7 +2011,7 @@ window.__extends = (this && this.__extends) || (function () {
             cnt = this._children.length;
             for (i = cnt - 1; i >= 0; --i) {
                 var obj = this._children[i];
-                obj._parent = null; //avoid removeFromParent call
+                obj._parent = null;
                 obj.dispose();
             }
             this._boundsChanged = false;
@@ -2065,6 +2126,26 @@ window.__extends = (this && this.__extends) || (function () {
             }
             return null;
         };
+        GComponent.prototype.getChildByPath = function (path) {
+            var arr = path.split(".");
+            var cnt = arr.length;
+            var gcom = this;
+            var obj;
+            for (var i = 0; i < cnt; ++i) {
+                obj = gcom.getChild(arr[i]);
+                if (!obj)
+                    break;
+                if (i != cnt - 1) {
+                    if (!(gcom instanceof GComponent)) {
+                        obj = null;
+                        break;
+                    }
+                    else
+                        gcom = obj;
+                }
+            }
+            return obj;
+        };
         GComponent.prototype.getVisibleChild = function (name) {
             var cnt = this._children.length;
             for (var i = 0; i < cnt; ++i) {
@@ -2098,7 +2179,7 @@ window.__extends = (this && this.__extends) || (function () {
             var oldIndex = this._children.indexOf(child);
             if (oldIndex == -1)
                 throw "Not a child of this container";
-            if (child.sortingOrder != 0) //no effect
+            if (child.sortingOrder != 0)
                 return;
             var cnt = this._children.length;
             if (this._sortingChildCount > 0) {
@@ -2111,7 +2192,7 @@ window.__extends = (this && this.__extends) || (function () {
             var oldIndex = this._children.indexOf(child);
             if (oldIndex == -1)
                 throw "Not a child of this container";
-            if (child.sortingOrder != 0) //no effect
+            if (child.sortingOrder != 0)
                 return oldIndex;
             var cnt = this._children.length;
             if (this._sortingChildCount > 0) {
@@ -2550,7 +2631,7 @@ window.__extends = (this && this.__extends) || (function () {
             var target;
             if (this._customMask) {
                 var b = this._customMask["_hitTest"](globalPt) || false;
-                if (b == this._customMask.inverted)
+                if (!b)
                     return null;
             }
             var flag = 0;
@@ -2728,9 +2809,9 @@ window.__extends = (this && this.__extends) || (function () {
                         }
                         else {
                             prev = this._children[i - 1];
-                            if (yValue < prev.y + prev.actualHeight / 2) //top half part
+                            if (yValue < prev.y + prev.actualHeight / 2)
                                 yValue = prev.y;
-                            else //bottom half part
+                            else
                                 yValue = obj.y;
                             break;
                         }
@@ -2751,9 +2832,9 @@ window.__extends = (this && this.__extends) || (function () {
                         }
                         else {
                             prev = this._children[i - 1];
-                            if (xValue < prev.x + prev.actualWidth / 2) //top half part
+                            if (xValue < prev.x + prev.actualWidth / 2)
                                 xValue = prev.x;
-                            else //bottom half part
+                            else
                                 xValue = obj.x;
                             break;
                         }
@@ -2906,20 +2987,22 @@ window.__extends = (this && this.__extends) || (function () {
                 buffer.position = nextPos;
             }
             buffer.seek(0, 4);
-            buffer.skip(2); //customData
+            buffer.skip(2);
             this.opaque = buffer.readBool();
             var maskId = buffer.readShort();
             if (maskId != -1) {
                 this.setMask(this.getChildAt(maskId), buffer.readBool());
             }
             var hitTestId = buffer.readS();
+            i1 = buffer.readInt();
+            i2 = buffer.readInt();
             if (hitTestId != null) {
                 pi = this.packageItem.owner.getItemById(hitTestId);
-                if (pi && pi.hitTestData) {
-                    i1 = buffer.readInt();
-                    i2 = buffer.readInt();
+                if (pi && pi.hitTestData)
                     this.hitArea = new fgui.PixelHitTest(pi.hitTestData, i1, i2);
-                }
+            }
+            else if (i1 != 0 && i2 != -1) {
+                this.hitArea = new fgui.ChildHitArea(this.getChildAt(i2));
             }
             buffer.seek(0, 5);
             var transitionCount = buffer.readShort();
@@ -2957,6 +3040,17 @@ window.__extends = (this && this.__extends) || (function () {
                 if (cc != null)
                     cc.selectedPageId = pageId;
             }
+            if (buffer.version >= 2) {
+                cnt = buffer.readShort();
+                for (i = 0; i < cnt; i++) {
+                    var target = buffer.readS();
+                    var propertyId = buffer.readShort();
+                    var value = buffer.readS();
+                    var obj = this.getChildByPath(target);
+                    if (obj)
+                        obj.setProp(propertyId, value);
+                }
+            }
         };
         GComponent.prototype.onEnable = function () {
             var cnt = this._transitions.length;
@@ -2972,10 +3066,9 @@ window.__extends = (this && this.__extends) || (function () {
     }(fgui.GObject));
     fgui.GComponent = GComponent;
 })(fgui || (fgui = {}));
-/// <reference path="GComponent.ts" />
 
 (function (fgui) {
-    var GButton = /** @class */ (function (_super) {
+    var GButton = (function (_super) {
         __extends(GButton, _super);
         function GButton() {
             var _this = _super.call(this) || this;
@@ -3278,6 +3371,49 @@ window.__extends = (this && this.__extends) || (function () {
             else
                 _super.prototype.handleGrayedChanged.call(this);
         };
+        GButton.prototype.getProp = function (index) {
+            switch (index) {
+                case fgui.ObjectPropID.Color:
+                    return this.titleColor;
+                case fgui.ObjectPropID.OutlineColor:
+                    {
+                        var tf = this.getTextField();
+                        if (tf)
+                            return tf.strokeColor;
+                        else
+                            return 0;
+                    }
+                case fgui.ObjectPropID.FontSize:
+                    return this.titleFontSize;
+                case fgui.ObjectPropID.Selected:
+                    return this.selected;
+                default:
+                    return _super.prototype.getProp.call(this, index);
+            }
+        };
+        GButton.prototype.setProp = function (index, value) {
+            switch (index) {
+                case fgui.ObjectPropID.Color:
+                    this.titleColor = value;
+                    break;
+                case fgui.ObjectPropID.OutlineColor:
+                    {
+                        var tf = this.getTextField();
+                        if (tf)
+                            tf.strokeColor = value;
+                    }
+                    break;
+                case fgui.ObjectPropID.FontSize:
+                    this.titleFontSize = value;
+                    break;
+                case fgui.ObjectPropID.Selected:
+                    this.selected = value;
+                    break;
+                default:
+                    _super.prototype.setProp.call(this, index, value);
+                    break;
+            }
+        };
         GButton.prototype.constructExtension = function (buffer) {
             buffer.seek(0, 6);
             this._mode = buffer.readByte();
@@ -3441,7 +3577,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GComboBox = /** @class */ (function (_super) {
+    var GComboBox = (function (_super) {
         __extends(GComboBox, _super);
         function GComboBox() {
             var _this = _super.call(this) || this;
@@ -3620,7 +3756,10 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._values[this._selectedIndex];
             },
             set: function (val) {
-                this.selectedIndex = this._values.indexOf(val);
+                var index = this._values.indexOf(val);
+                if (index == -1 && val == null)
+                    index = this._values.indexOf("");
+                this.selectedIndex = index;
             },
             enumerable: true,
             configurable: true
@@ -3648,6 +3787,54 @@ window.__extends = (this && this.__extends) || (function () {
         GComboBox.prototype.setState = function (val) {
             if (this._buttonController)
                 this._buttonController.selectedPage = val;
+        };
+        GComboBox.prototype.getProp = function (index) {
+            switch (index) {
+                case fgui.ObjectPropID.Color:
+                    return this.titleColor;
+                case fgui.ObjectPropID.OutlineColor:
+                    {
+                        var tf = this.getTextField();
+                        if (tf)
+                            return tf.strokeColor;
+                        else
+                            return 0;
+                    }
+                case fgui.ObjectPropID.FontSize:
+                    {
+                        tf = this.getTextField();
+                        if (tf)
+                            return tf.fontSize;
+                        else
+                            return 0;
+                    }
+                default:
+                    return _super.prototype.getProp.call(this, index);
+            }
+        };
+        GComboBox.prototype.setProp = function (index, value) {
+            switch (index) {
+                case fgui.ObjectPropID.Color:
+                    this.titleColor = value;
+                    break;
+                case fgui.ObjectPropID.OutlineColor:
+                    {
+                        var tf = this.getTextField();
+                        if (tf)
+                            tf.strokeColor = value;
+                    }
+                    break;
+                case fgui.ObjectPropID.FontSize:
+                    {
+                        tf = this.getTextField();
+                        if (tf)
+                            tf.fontSize = value;
+                    }
+                    break;
+                default:
+                    _super.prototype.setProp.call(this, index, value);
+                    break;
+            }
         };
         GComboBox.prototype.constructExtension = function (buffer) {
             var str;
@@ -3763,6 +3950,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
             this._list.selectedIndex = -1;
             this.dropdown.width = this.width;
+            this._list.ensureBoundsCorrect();
             var downward = null;
             if (this._popupDirection == fgui.PopupDirection.Down)
                 downward = true;
@@ -3841,7 +4029,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GGraph = /** @class */ (function (_super) {
+    var GGraph = (function (_super) {
         __extends(GGraph, _super);
         function GGraph() {
             var _this = _super.call(this) || this;
@@ -3852,6 +4040,8 @@ window.__extends = (this && this.__extends) || (function () {
             _this._lineColor = cc.Color.BLACK;
             _this._fillColor = cc.Color.WHITE;
             _this._cornerRadius = null;
+            _this._sides = 3;
+            _this._startAngle = 0;
             _this._content = _this._node.addComponent(cc.Graphics);
             return _this;
         }
@@ -3861,7 +4051,7 @@ window.__extends = (this && this.__extends) || (function () {
             this._lineColor = lineColor;
             this._fillColor = fillColor;
             this._cornerRadius = corner;
-            this.drawCommon();
+            this.updateGraph();
         };
         GGraph.prototype.drawEllipse = function (lineSize, lineColor, fillColor) {
             this._type = fgui.GraphType.Ellipse;
@@ -3869,8 +4059,40 @@ window.__extends = (this && this.__extends) || (function () {
             this._lineColor = lineColor;
             this._fillColor = fillColor;
             this._cornerRadius = null;
-            this.drawCommon();
+            this.updateGraph();
         };
+        GGraph.prototype.drawRegularPolygon = function (lineSize, lineColor, fillColor, sides, startAngle, distances) {
+            if (startAngle === void 0) { startAngle = 0; }
+            if (distances === void 0) { distances = null; }
+            this._type = 3;
+            this._lineSize = lineSize;
+            this._lineColor = lineColor;
+            this._fillColor = fillColor;
+            this._sides = sides;
+            this._startAngle = startAngle;
+            this._distances = distances;
+            this.updateGraph();
+        };
+        GGraph.prototype.drawPolygon = function (lineSize, lineColor, fillColor, points) {
+            this._type = 4;
+            this._lineSize = lineSize;
+            this._lineColor = lineColor;
+            this._fillColor = fillColor;
+            this._polygonPoints = points;
+            this.updateGraph();
+        };
+        Object.defineProperty(GGraph.prototype, "distances", {
+            get: function () {
+                return this._distances;
+            },
+            set: function (value) {
+                this._distances = value;
+                if (this._type == 3)
+                    this.updateGraph();
+            },
+            enumerable: true,
+            configurable: true
+        });
         GGraph.prototype.clearGraphics = function () {
             this._type = fgui.GraphType.PlaceHolder;
             if (this._hasContent) {
@@ -3892,12 +4114,12 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._fillColor = value;
                 if (this._type != 0)
-                    this.drawCommon();
+                    this.updateGraph();
             },
             enumerable: true,
             configurable: true
         });
-        GGraph.prototype.drawCommon = function () {
+        GGraph.prototype.updateGraph = function () {
             var ctx = this._content;
             if (this._hasContent) {
                 this._hasContent = false;
@@ -3907,42 +4129,114 @@ window.__extends = (this && this.__extends) || (function () {
             var h = this._height;
             if (w == 0 || h == 0)
                 return;
+            var px = -this.pivotX * this._width;
+            var py = this.pivotY * this._height;
             ctx.lineWidth = this._lineSize;
             ctx.strokeColor = this._lineColor;
             ctx.fillColor = this._fillColor;
             if (this._type == 1) {
                 if (this._cornerRadius) {
-                    ctx.roundRect(0, -h, w, h, this._cornerRadius[0] * 2);
+                    ctx.roundRect(0 + px, -h + py, w, h, this._cornerRadius[0] * 2);
                 }
                 else
-                    ctx.rect(0, -h, w, h);
+                    ctx.rect(0 + px, -h + py, w, h);
             }
-            else
-                ctx.ellipse(w / 2, -h / 2, w / 2, h / 2);
+            else if (this._type == 2) {
+                ctx.ellipse(w / 2 + px, -h / 2 + py, w / 2, h / 2);
+            }
+            else if (this._type == 3) {
+                this.drawPath(ctx, this._polygonPoints, px, py);
+            }
+            else if (this._type == 4) {
+                if (!this._polygonPoints)
+                    this._polygonPoints = [];
+                var radius = Math.min(this._width, this._height) / 2;
+                this._polygonPoints.length = 0;
+                var angle = cc.misc.degreesToRadians(this._startAngle);
+                var deltaAngle = 2 * Math.PI / this._sides;
+                var dist;
+                for (var i = 0; i < this._sides; i++) {
+                    if (this._distances) {
+                        dist = this._distances[i];
+                        if (isNaN(dist))
+                            dist = 1;
+                    }
+                    else
+                        dist = 1;
+                    var xv = radius + radius * dist * Math.cos(angle);
+                    var yv = radius + radius * dist * Math.sin(angle);
+                    this._polygonPoints.push(xv, yv);
+                    angle += deltaAngle;
+                }
+                this.drawPath(ctx, this._polygonPoints, px, py);
+            }
             if (this._lineSize != 0)
                 ctx.stroke();
             ctx.fill();
             this._hasContent = true;
         };
+        GGraph.prototype.drawPath = function (ctx, points, px, py) {
+            var cnt = points.length;
+            ctx.moveTo(points[0] + px, -points[1] + py);
+            for (var i = 2; i < cnt; i += 2)
+                ctx.lineTo(points[i] + px, -points[i + 1] + py);
+            ctx.lineTo(points[0] + px, -points[1] + py);
+        };
         GGraph.prototype.handleSizeChanged = function () {
             _super.prototype.handleSizeChanged.call(this);
             if (this._type != 0)
-                this.drawCommon();
+                this.updateGraph();
+        };
+        GGraph.prototype.handleAnchorChanged = function () {
+            _super.prototype.handleSizeChanged.call(this);
+            if (this._type != 0)
+                this.updateGraph();
+        };
+        GGraph.prototype.getProp = function (index) {
+            if (index == fgui.ObjectPropID.Color)
+                return this.color;
+            else
+                return _super.prototype.getProp.call(this, index);
+        };
+        GGraph.prototype.setProp = function (index, value) {
+            if (index == fgui.ObjectPropID.Color)
+                this.color = value;
+            else
+                _super.prototype.setProp.call(this, index, value);
         };
         GGraph.prototype.setup_beforeAdd = function (buffer, beginPos) {
             _super.prototype.setup_beforeAdd.call(this, buffer, beginPos);
             buffer.seek(beginPos, 5);
             this._type = buffer.readByte();
             if (this._type != 0) {
+                var i;
+                var cnt;
                 this._lineSize = buffer.readInt();
                 this._lineColor = buffer.readColor(true);
                 this._fillColor = buffer.readColor(true);
                 if (buffer.readBool()) {
                     this._cornerRadius = new Array(4);
-                    for (var i = 0; i < 4; i++)
+                    for (i = 0; i < 4; i++)
                         this._cornerRadius[i] = buffer.readFloat();
                 }
-                this.drawCommon();
+                if (this._type == 3) {
+                    cnt = buffer.readShort();
+                    this._polygonPoints = [];
+                    this._polygonPoints.length = cnt;
+                    for (i = 0; i < cnt; i++)
+                        this._polygonPoints[i] = buffer.readFloat();
+                }
+                else if (this._type == 4) {
+                    this._sides = buffer.readShort();
+                    this._startAngle = buffer.readFloat();
+                    cnt = buffer.readShort();
+                    if (cnt > 0) {
+                        this._distances = [];
+                        for (i = 0; i < cnt; i++)
+                            this._distances[i] = buffer.readFloat();
+                    }
+                }
+                this.updateGraph();
             }
         };
         return GGraph;
@@ -3951,20 +4245,27 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GGroup = /** @class */ (function (_super) {
+    var GGroup = (function (_super) {
         __extends(GGroup, _super);
         function GGroup() {
             var _this = _super.call(this) || this;
             _this._layout = 0;
             _this._lineGap = 0;
             _this._columnGap = 0;
-            _this._percentReady = false;
-            _this._boundsChanged = false;
+            _this._mainGridIndex = -1;
+            _this._mainGridMinSize = 50;
+            _this._mainChildIndex = -1;
+            _this._totalSize = 0;
+            _this._numChildren = 0;
             _this._updating = 0;
             _this._node.name = "GGroup";
             _this._touchDisabled = true;
             return _this;
         }
+        GGroup.prototype.dispose = function () {
+            this._boundsChanged = false;
+            _super.prototype.dispose.call(this);
+        };
         Object.defineProperty(GGroup.prototype, "layout", {
             get: function () {
                 return this._layout;
@@ -3972,7 +4273,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 if (this._layout != value) {
                     this._layout = value;
-                    this.setBoundsChangedFlag(true);
+                    this.setBoundsChangedFlag();
                 }
             },
             enumerable: true,
@@ -3985,7 +4286,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 if (this._lineGap != value) {
                     this._lineGap = value;
-                    this.setBoundsChangedFlag();
+                    this.setBoundsChangedFlag(true);
                 }
             },
             enumerable: true,
@@ -3998,15 +4299,65 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 if (this._columnGap != value) {
                     this._columnGap = value;
+                    this.setBoundsChangedFlag(true);
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GGroup.prototype, "excludeInvisibles", {
+            get: function () {
+                return this._excludeInvisibles;
+            },
+            set: function (value) {
+                if (this._excludeInvisibles != value) {
+                    this._excludeInvisibles = value;
                     this.setBoundsChangedFlag();
                 }
             },
             enumerable: true,
             configurable: true
         });
-        GGroup.prototype.setBoundsChangedFlag = function (childSizeChanged) {
+        Object.defineProperty(GGroup.prototype, "autoSizeDisabled", {
+            get: function () {
+                return this._autoSizeDisabled;
+            },
+            set: function (value) {
+                this._autoSizeDisabled = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GGroup.prototype, "mainGridMinSize", {
+            get: function () {
+                return this._mainGridMinSize;
+            },
+            set: function (value) {
+                if (this._mainGridMinSize != value) {
+                    this._mainGridMinSize = value;
+                    this.setBoundsChangedFlag();
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GGroup.prototype, "mainGridIndex", {
+            get: function () {
+                return this._mainGridIndex;
+            },
+            set: function (value) {
+                if (this._mainGridIndex != value) {
+                    this._mainGridIndex = value;
+                    this.setBoundsChangedFlag();
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        GGroup.prototype.setBoundsChangedFlag = function (positionChangedOnly) {
+            if (positionChangedOnly === void 0) { positionChangedOnly = false; }
             if (this._updating == 0 && this._parent != null) {
-                if (childSizeChanged)
+                if (!positionChangedOnly)
                     this._percentReady = false;
                 if (!this._boundsChanged) {
                     this._boundsChanged = true;
@@ -4019,15 +4370,34 @@ window.__extends = (this && this.__extends) || (function () {
             var _t = (this.node["$gobj"]);
             _t.ensureBoundsCorrect();
         };
-        GGroup.prototype.ensureBoundsCorrect = function () {
-            if (this._boundsChanged)
+        GGroup.prototype.ensureSizeCorrect = function () {
+            if (this._parent == null || !this._boundsChanged || this._layout == 0)
+                return;
+            this._boundsChanged = false;
+            if (this._autoSizeDisabled)
+                this.resizeChildren(0, 0);
+            else {
+                this.handleLayout();
                 this.updateBounds();
+            }
+        };
+        GGroup.prototype.ensureBoundsCorrect = function () {
+            if (this._parent == null || !this._boundsChanged)
+                return;
+            this._boundsChanged = false;
+            if (this._layout == 0)
+                this.updateBounds();
+            else {
+                if (this._autoSizeDisabled)
+                    this.resizeChildren(0, 0);
+                else {
+                    this.handleLayout();
+                    this.updateBounds();
+                }
+            }
         };
         GGroup.prototype.updateBounds = function () {
-            this._boundsChanged = false;
-            if (this._parent == null)
-                return;
-            this.handleLayout();
+            this._partner.unschedule(this._ensureBoundsCorrect);
             var cnt = this._parent.numChildren;
             var i;
             var child;
@@ -4037,33 +4407,39 @@ window.__extends = (this && this.__extends) || (function () {
             var empty = true;
             for (i = 0; i < cnt; i++) {
                 child = this._parent.getChildAt(i);
-                if (child.group == this) {
-                    tmp = child.x;
-                    if (tmp < ax)
-                        ax = tmp;
-                    tmp = child.y;
-                    if (tmp < ay)
-                        ay = tmp;
-                    tmp = child.x + child.width;
-                    if (tmp > ar)
-                        ar = tmp;
-                    tmp = child.y + child.height;
-                    if (tmp > ab)
-                        ab = tmp;
-                    empty = false;
-                }
+                if (child.group != this || this._excludeInvisibles && !child.internalVisible3)
+                    continue;
+                tmp = child.xMin;
+                if (tmp < ax)
+                    ax = tmp;
+                tmp = child.yMin;
+                if (tmp < ay)
+                    ay = tmp;
+                tmp = child.xMin + child.width;
+                if (tmp > ar)
+                    ar = tmp;
+                tmp = child.yMin + child.height;
+                if (tmp > ab)
+                    ab = tmp;
+                empty = false;
             }
+            var w = 0, h = 0;
             if (!empty) {
-                this._updating = 1;
+                this._updating |= 1;
                 this.setPosition(ax, ay);
-                this._updating = 2;
-                this.setSize(ar - ax, ab - ay);
+                this._updating &= 2;
+                w = ar - ax;
+                h = ab - ay;
+            }
+            if ((this._updating & 2) == 0) {
+                this._updating |= 2;
+                this.setSize(w, h);
+                this._updating &= 1;
             }
             else {
-                this._updating = 2;
-                this.setSize(0, 0);
+                this._updating &= 1;
+                this.resizeChildren(this._width - w, this._height - h);
             }
-            this._updating = 0;
         };
         GGroup.prototype.handleLayout = function () {
             this._updating |= 1;
@@ -4071,84 +4447,37 @@ window.__extends = (this && this.__extends) || (function () {
             var i;
             var cnt;
             if (this._layout == fgui.GroupLayoutType.Horizontal) {
-                var curX = NaN;
+                var curX = this.x;
                 cnt = this._parent.numChildren;
                 for (i = 0; i < cnt; i++) {
                     child = this._parent.getChildAt(i);
                     if (child.group != this)
                         continue;
-                    if (isNaN(curX))
-                        curX = Math.floor(child.x);
-                    else
-                        child.x = curX;
+                    if (this._excludeInvisibles && !child.internalVisible3)
+                        continue;
+                    child.xMin = curX;
                     if (child.width != 0)
-                        curX += Math.floor(child.width + this._columnGap);
+                        curX += child.width + this._columnGap;
                 }
-                if (!this._percentReady)
-                    this.updatePercent();
             }
             else if (this._layout == fgui.GroupLayoutType.Vertical) {
-                var curY = NaN;
+                var curY = this.y;
                 cnt = this._parent.numChildren;
                 for (i = 0; i < cnt; i++) {
                     child = this._parent.getChildAt(i);
                     if (child.group != this)
                         continue;
-                    if (isNaN(curY))
-                        curY = Math.floor(child.y);
-                    else
-                        child.y = curY;
+                    if (this._excludeInvisibles && !child.internalVisible3)
+                        continue;
+                    child.yMin = curY;
                     if (child.height != 0)
-                        curY += Math.floor(child.height + this._lineGap);
+                        curY += child.height + this._lineGap;
                 }
-                if (!this._percentReady)
-                    this.updatePercent();
             }
             this._updating &= 2;
         };
-        GGroup.prototype.updatePercent = function () {
-            this._percentReady = true;
-            var cnt = this._parent.numChildren;
-            var i;
-            var child;
-            var size = 0;
-            if (this._layout == fgui.GroupLayoutType.Horizontal) {
-                for (i = 0; i < cnt; i++) {
-                    child = this._parent.getChildAt(i);
-                    if (child.group != this)
-                        continue;
-                    size += child.width;
-                }
-                for (i = 0; i < cnt; i++) {
-                    child = this._parent.getChildAt(i);
-                    if (child.group != this)
-                        continue;
-                    if (size > 0)
-                        child._sizePercentInGroup = child.width / size;
-                    else
-                        child._sizePercentInGroup = 0;
-                }
-            }
-            else {
-                for (i = 0; i < cnt; i++) {
-                    child = this._parent.getChildAt(i);
-                    if (child.group != this)
-                        continue;
-                    size += child.height;
-                }
-                for (i = 0; i < cnt; i++) {
-                    child = this._parent.getChildAt(i);
-                    if (child.group != this)
-                        continue;
-                    if (size > 0)
-                        child._sizePercentInGroup = child.height / size;
-                    else
-                        child._sizePercentInGroup = 0;
-                }
-            }
-        };
         GGroup.prototype.moveChildren = function (dx, dy) {
-            if ((this._updating & 1) != 0 || !this._parent)
+            if ((this._updating & 1) != 0 || this._parent == null)
                 return;
             this._updating |= 1;
             var cnt = this._parent.numChildren;
@@ -4163,124 +4492,136 @@ window.__extends = (this && this.__extends) || (function () {
             this._updating &= 2;
         };
         GGroup.prototype.resizeChildren = function (dw, dh) {
-            if (this._layout == fgui.GroupLayoutType.None || (this._updating & 2) != 0 || !this._parent)
+            if (this._layout == fgui.GroupLayoutType.None || (this._updating & 2) != 0 || this._parent == null)
                 return;
             this._updating |= 2;
-            if (!this._percentReady)
-                this.updatePercent();
-            var cnt = this._parent.numChildren;
-            var i;
-            var j;
-            var child;
-            var last = -1;
-            var numChildren = 0;
-            var lineSize = 0;
-            var remainSize = 0;
-            var found = false;
-            for (i = 0; i < cnt; i++) {
-                child = this._parent.getChildAt(i);
-                if (child.group != this)
-                    continue;
-                last = i;
-                numChildren++;
-            }
-            if (this._layout == fgui.GroupLayoutType.Horizontal) {
-                remainSize = lineSize = this._width - (numChildren - 1) * this._columnGap;
-                var curX = NaN;
-                var nw;
-                for (i = 0; i < cnt; i++) {
-                    child = this._parent.getChildAt(i);
-                    if (child.group != this)
-                        continue;
-                    if (isNaN(curX))
-                        curX = Math.floor(child.x);
-                    else
-                        child.x = curX;
-                    if (last == i)
-                        nw = remainSize;
-                    else
-                        nw = Math.round(child._sizePercentInGroup * lineSize);
-                    child.setSize(nw, child._rawHeight + dh, true);
-                    remainSize -= child.width;
-                    if (last == i) {
-                        if (remainSize >= 1) //可能由于有些元件有宽度限制，导致无法铺满
-                         {
-                            for (j = 0; j <= i; j++) {
-                                child = this._parent.getChildAt(j);
-                                if (child.group != this)
-                                    continue;
-                                if (!found) {
-                                    nw = child.width + remainSize;
-                                    if ((child.maxWidth == 0 || nw < child.maxWidth)
-                                        && (child.minWidth == 0 || nw > child.minWidth)) {
-                                        child.setSize(nw, child.height, true);
-                                        found = true;
-                                    }
-                                }
-                                else
-                                    child.x += remainSize;
-                            }
-                        }
-                    }
-                    else
-                        curX += (child.width + this._columnGap);
+            if (this._boundsChanged) {
+                this._boundsChanged = false;
+                if (!this._autoSizeDisabled) {
+                    this.updateBounds();
+                    return;
                 }
             }
-            else if (this._layout == fgui.GroupLayoutType.Vertical) {
-                remainSize = lineSize = this.height - (numChildren - 1) * this._lineGap;
-                var curY = NaN;
-                var nh;
+            var cnt = this._parent.numChildren;
+            var i;
+            var child;
+            if (!this._percentReady) {
+                this._percentReady = true;
+                this._numChildren = 0;
+                this._totalSize = 0;
+                this._mainChildIndex = -1;
+                var j = 0;
                 for (i = 0; i < cnt; i++) {
                     child = this._parent.getChildAt(i);
                     if (child.group != this)
                         continue;
-                    if (isNaN(curY))
-                        curY = Math.floor(child.y);
-                    else
-                        child.y = curY;
-                    if (last == i)
-                        nh = remainSize;
-                    else
-                        nh = Math.round(child._sizePercentInGroup * lineSize);
-                    child.setSize(child._rawWidth + dw, nh, true);
-                    remainSize -= child.height;
-                    if (last == i) {
-                        if (remainSize >= 1) //可能由于有些元件有宽度限制，导致无法铺满
-                         {
-                            for (j = 0; j <= i; j++) {
-                                child = this._parent.getChildAt(j);
-                                if (child.group != this)
-                                    continue;
-                                if (!found) {
-                                    nh = child.height + remainSize;
-                                    if ((child.maxHeight == 0 || nh < child.maxHeight)
-                                        && (child.minHeight == 0 || nh > child.minHeight)) {
-                                        child.setSize(child.width, nh, true);
-                                        found = true;
-                                    }
-                                }
-                                else
-                                    child.y += remainSize;
-                            }
-                        }
+                    if (!this._excludeInvisibles || child.internalVisible3) {
+                        if (j == this._mainGridIndex)
+                            this._mainChildIndex = i;
+                        this._numChildren++;
+                        if (this._layout == 1)
+                            this._totalSize += child.width;
+                        else
+                            this._totalSize += child.height;
                     }
+                    j++;
+                }
+                if (this._mainChildIndex != -1) {
+                    if (this._layout == 1) {
+                        child = this._parent.getChildAt(this._mainChildIndex);
+                        this._totalSize += this._mainGridMinSize - child.width;
+                        child._sizePercentInGroup = this._mainGridMinSize / this._totalSize;
+                    }
+                    else {
+                        child = this._parent.getChildAt(this._mainChildIndex);
+                        this._totalSize += this._mainGridMinSize - child.height;
+                        child._sizePercentInGroup = this._mainGridMinSize / this._totalSize;
+                    }
+                }
+                for (i = 0; i < cnt; i++) {
+                    child = this._parent.getChildAt(i);
+                    if (child.group != this)
+                        continue;
+                    if (i == this._mainChildIndex)
+                        continue;
+                    if (this._totalSize > 0)
+                        child._sizePercentInGroup = (this._layout == 1 ? child.width : child.height) / this._totalSize;
                     else
-                        curY += (child.height + this._lineGap);
+                        child._sizePercentInGroup = 0;
+                }
+            }
+            var remainSize = 0;
+            var remainPercent = 1;
+            var priorHandled = false;
+            if (this._layout == 1) {
+                remainSize = this.width - (this._numChildren - 1) * this._columnGap;
+                if (this._mainChildIndex != -1 && remainSize >= this._totalSize) {
+                    child = this._parent.getChildAt(this._mainChildIndex);
+                    child.setSize(remainSize - (this._totalSize - this._mainGridMinSize), child._rawHeight + dh, true);
+                    remainSize -= child.width;
+                    remainPercent -= child._sizePercentInGroup;
+                    priorHandled = true;
+                }
+                var curX = this.x;
+                for (i = 0; i < cnt; i++) {
+                    child = this._parent.getChildAt(i);
+                    if (child.group != this)
+                        continue;
+                    if (this._excludeInvisibles && !child.internalVisible3) {
+                        child.setSize(child._rawWidth, child._rawHeight + dh, true);
+                        continue;
+                    }
+                    if (!priorHandled || i != this._mainChildIndex) {
+                        child.setSize(Math.round(child._sizePercentInGroup / remainPercent * remainSize), child._rawHeight + dh, true);
+                        remainPercent -= child._sizePercentInGroup;
+                        remainSize -= child.width;
+                    }
+                    child.xMin = curX;
+                    if (child.width != 0)
+                        curX += child.width + this._columnGap;
+                }
+            }
+            else {
+                remainSize = this.height - (this._numChildren - 1) * this._lineGap;
+                if (this._mainChildIndex != -1 && remainSize >= this._totalSize) {
+                    child = this._parent.getChildAt(this._mainChildIndex);
+                    child.setSize(child._rawWidth + dw, remainSize - (this._totalSize - this._mainGridMinSize), true);
+                    remainSize -= child.height;
+                    remainPercent -= child._sizePercentInGroup;
+                    priorHandled = true;
+                }
+                var curY = this.y;
+                for (i = 0; i < cnt; i++) {
+                    child = this._parent.getChildAt(i);
+                    if (child.group != this)
+                        continue;
+                    if (this._excludeInvisibles && !child.internalVisible3) {
+                        child.setSize(child._rawWidth + dw, child._rawHeight, true);
+                        continue;
+                    }
+                    if (!priorHandled || i != this._mainChildIndex) {
+                        child.setSize(child._rawWidth + dw, Math.round(child._sizePercentInGroup / remainPercent * remainSize), true);
+                        remainPercent -= child._sizePercentInGroup;
+                        remainSize -= child.height;
+                    }
+                    child.yMin = curY;
+                    if (child.height != 0)
+                        curY += child.height + this._lineGap;
                 }
             }
             this._updating &= 1;
         };
-        GGroup.prototype.setChildrenAlpha = function () {
-            if (this._underConstruct || !this._parent)
+        GGroup.prototype.handleAlphaChanged = function () {
+            if (this._underConstruct)
                 return;
             var cnt = this._parent.numChildren;
             for (var i = 0; i < cnt; i++) {
                 var child = this._parent.getChildAt(i);
                 if (child.group == this)
-                    child.alpha = this._alpha;
+                    child.alpha = this.alpha;
             }
         };
-        GGroup.prototype.setChildrenVisible = function () {
+        GGroup.prototype.handleVisibleChanged = function () {
             if (!this._parent)
                 return;
             var cnt = this._parent.numChildren;
@@ -4296,11 +4637,16 @@ window.__extends = (this && this.__extends) || (function () {
             this._layout = buffer.readByte();
             this._lineGap = buffer.readInt();
             this._columnGap = buffer.readInt();
+            if (buffer.version >= 2) {
+                this._excludeInvisibles = buffer.readBool();
+                this._autoSizeDisabled = buffer.readBool();
+                this._mainChildIndex = buffer.readInt();
+            }
         };
         GGroup.prototype.setup_afterAdd = function (buffer, beginPos) {
             _super.prototype.setup_afterAdd.call(this, buffer, beginPos);
-            if (!this._visible)
-                this.setChildrenVisible();
+            if (!this.visible)
+                this.handleVisibleChanged();
         };
         return GGroup;
     }(fgui.GObject));
@@ -4308,7 +4654,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GImage = /** @class */ (function (_super) {
+    var GImage = (function (_super) {
         __extends(GImage, _super);
         function GImage() {
             var _this = _super.call(this) || this;
@@ -4381,20 +4727,34 @@ window.__extends = (this && this.__extends) || (function () {
             configurable: true
         });
         GImage.prototype.constructFromResource = function () {
-            this.sourceWidth = this.packageItem.width;
-            this.sourceHeight = this.packageItem.height;
+            var contentItem = this.packageItem.getBranch();
+            this.sourceWidth = contentItem.width;
+            this.sourceHeight = contentItem.height;
             this.initWidth = this.sourceWidth;
             this.initHeight = this.sourceHeight;
             this.setSize(this.sourceWidth, this.sourceHeight);
-            this.packageItem.load();
-            if (this.packageItem.scale9Grid)
+            contentItem = contentItem.getHighResolution();
+            contentItem.load();
+            if (contentItem.scale9Grid)
                 this._content.type = cc.Sprite.Type.SLICED;
-            else if (this.packageItem.scaleByTile)
+            else if (contentItem.scaleByTile)
                 this._content.type = cc.Sprite.Type.TILED;
-            this._content.spriteFrame = this.packageItem.asset;
+            this._content.spriteFrame = contentItem.asset;
         };
         GImage.prototype.handleGrayedChanged = function () {
             this._content.grayed = this._grayed;
+        };
+        GImage.prototype.getProp = function (index) {
+            if (index == fgui.ObjectPropID.Color)
+                return this.color;
+            else
+                return _super.prototype.getProp.call(this, index);
+        };
+        GImage.prototype.setProp = function (index, value) {
+            if (index == fgui.ObjectPropID.Color)
+                this.color = value;
+            else
+                _super.prototype.setProp.call(this, index, value);
         };
         GImage.prototype.setup_beforeAdd = function (buffer, beginPos) {
             _super.prototype.setup_beforeAdd.call(this, buffer, beginPos);
@@ -4415,7 +4775,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GLabel = /** @class */ (function (_super) {
+    var GLabel = (function (_super) {
         __extends(GLabel, _super);
         function GLabel() {
             var _this = _super.call(this) || this;
@@ -4477,16 +4837,6 @@ window.__extends = (this && this.__extends) || (function () {
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(GLabel.prototype, "color", {
-            get: function () {
-                return this.titleColor;
-            },
-            set: function (value) {
-                this.titleColor = value;
-            },
-            enumerable: true,
-            configurable: true
-        });
         Object.defineProperty(GLabel.prototype, "titleFontSize", {
             get: function () {
                 var tf = this.getTextField();
@@ -4527,6 +4877,44 @@ window.__extends = (this && this.__extends) || (function () {
             else
                 return null;
         };
+        GLabel.prototype.getProp = function (index) {
+            switch (index) {
+                case fgui.ObjectPropID.Color:
+                    return this.titleColor;
+                case fgui.ObjectPropID.OutlineColor:
+                    {
+                        var tf = this.getTextField();
+                        if (tf)
+                            return tf.strokeColor;
+                        else
+                            return 0;
+                    }
+                case fgui.ObjectPropID.FontSize:
+                    return this.titleFontSize;
+                default:
+                    return _super.prototype.getProp.call(this, index);
+            }
+        };
+        GLabel.prototype.setProp = function (index, value) {
+            switch (index) {
+                case fgui.ObjectPropID.Color:
+                    this.titleColor = value;
+                    break;
+                case fgui.ObjectPropID.OutlineColor:
+                    {
+                        var tf = this.getTextField();
+                        if (tf)
+                            tf.strokeColor = value;
+                    }
+                    break;
+                case fgui.ObjectPropID.FontSize:
+                    this.titleFontSize = value;
+                    break;
+                default:
+                    _super.prototype.setProp.call(this, index, value);
+                    break;
+            }
+        };
         GLabel.prototype.constructExtension = function (buffer) {
             this._titleObject = this.getChild("title");
             this._iconObject = this.getChild("icon");
@@ -4563,7 +4951,6 @@ window.__extends = (this && this.__extends) || (function () {
                         input.maxLength = iv;
                     iv = buffer.readInt();
                     if (iv != 0) {
-                        //keyboardType
                     }
                     if (buffer.readBool())
                         input.password = true;
@@ -4578,7 +4965,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GList = /** @class */ (function (_super) {
+    var GList = (function (_super) {
         __extends(GList, _super);
         function GList() {
             var _this = _super.call(this) || this;
@@ -4591,11 +4978,11 @@ window.__extends = (this && this.__extends) || (function () {
             _this._lastSelectedIndex = 0;
             _this._numItems = 0;
             _this._realNumItems = 0;
-            _this._firstIndex = 0; //the top left index
-            _this._curLineItemCount = 0; //item count in one line
-            _this._curLineItemCount2 = 0; //只用在页面模式，表示垂直方向的项目数
-            _this._virtualListChanged = 0; //1-content changed, 2-size changed
-            _this.itemInfoVer = 0; //用来标志item是否在本次处理中已经被重用了
+            _this._firstIndex = 0;
+            _this._curLineItemCount = 0;
+            _this._curLineItemCount2 = 0;
+            _this._virtualListChanged = 0;
+            _this.itemInfoVer = 0;
             _this._node.name = "GList";
             _this._trackBounds = true;
             _this._pool = new fgui.GObjectPool();
@@ -4878,8 +5265,9 @@ window.__extends = (this && this.__extends) || (function () {
             enumerable: true,
             configurable: true
         });
-        GList.prototype.getSelection = function () {
-            var ret = new Array();
+        GList.prototype.getSelection = function (result) {
+            if (!result)
+                result = new Array();
             var i;
             if (this._virtual) {
                 for (i = 0; i < this._realNumItems; i++) {
@@ -4889,10 +5277,10 @@ window.__extends = (this && this.__extends) || (function () {
                         var j = i;
                         if (this._loop) {
                             j = i % this._numItems;
-                            if (ret.indexOf(j) != -1)
+                            if (result.indexOf(j) != -1)
                                 continue;
                         }
-                        ret.push(j);
+                        result.push(j);
                     }
                 }
             }
@@ -4901,10 +5289,10 @@ window.__extends = (this && this.__extends) || (function () {
                 for (i = 0; i < cnt; i++) {
                     var obj = this._children[i].asButton;
                     if (obj != null && obj.selected)
-                        ret.push(i);
+                        result.push(i);
                 }
             }
-            return ret;
+            return result;
         };
         GList.prototype.addSelection = function (index, scrollItToView) {
             if (this._selectionMode == fgui.ListSelectionMode.None)
@@ -5048,7 +5436,7 @@ window.__extends = (this && this.__extends) || (function () {
             if (index == -1)
                 return;
             switch (dir) {
-                case 1: //up
+                case 1:
                     if (this._layout == fgui.ListLayoutType.SingleColumn || this._layout == fgui.ListLayoutType.FlowVertical) {
                         index--;
                         if (index >= 0) {
@@ -5077,7 +5465,7 @@ window.__extends = (this && this.__extends) || (function () {
                         }
                     }
                     break;
-                case 3: //right
+                case 3:
                     if (this._layout == fgui.ListLayoutType.SingleRow || this._layout == fgui.ListLayoutType.FlowHorizontal || this._layout == fgui.ListLayoutType.Pagination) {
                         index++;
                         if (index < this._children.length) {
@@ -5107,7 +5495,7 @@ window.__extends = (this && this.__extends) || (function () {
                         }
                     }
                     break;
-                case 5: //down
+                case 5:
                     if (this._layout == fgui.ListLayoutType.SingleColumn || this._layout == fgui.ListLayoutType.FlowVertical) {
                         index++;
                         if (index < this._children.length) {
@@ -5137,7 +5525,7 @@ window.__extends = (this && this.__extends) || (function () {
                         }
                     }
                     break;
-                case 7: //left
+                case 7:
                     if (this._layout == fgui.ListLayoutType.SingleRow || this._layout == fgui.ListLayoutType.FlowHorizontal || this._layout == fgui.ListLayoutType.Pagination) {
                         index--;
                         if (index >= 0) {
@@ -5175,6 +5563,9 @@ window.__extends = (this && this.__extends) || (function () {
             this.setSelectionOnEvent(item, evt);
             if (this._scrollPane && this.scrollItemToViewOnClick)
                 this._scrollPane.scrollToView(item, true);
+            this.dispatchItemEvent(item, evt);
+        };
+        GList.prototype.dispatchItemEvent = function (item, evt) {
             this._node.emit(fgui.Event.CLICK_ITEM, item, evt);
         };
         GList.prototype.setSelectionOnEvent = function (item, evt) {
@@ -5382,7 +5773,7 @@ window.__extends = (this && this.__extends) || (function () {
                     var page = index / (this._curLineItemCount * this._curLineItemCount2);
                     rect = new cc.Rect(page * this.viewWidth + (index % this._curLineItemCount) * (ii.width + this._columnGap), (index / this._curLineItemCount) % this._curLineItemCount2 * (ii.height + this._lineGap), ii.width, ii.height);
                 }
-                setFirst = true; //因为在可变item大小的情况下，只有设置在最顶端，位置才不会因为高度变化而改变，所以只能支持setFirst=true
+                setFirst = true;
                 if (this._scrollPane != null)
                     this._scrollPane.scrollToView(rect, ani, setFirst);
             }
@@ -5441,15 +5832,9 @@ window.__extends = (this && this.__extends) || (function () {
         GList.prototype.setVirtual = function () {
             this._setVirtual(false);
         };
-        /// <summary>
-        /// Set the list to be virtual list, and has loop behavior.
-        /// </summary>
         GList.prototype.setVirtualAndLoop = function () {
             this._setVirtual(true);
         };
-        /// <summary>
-        /// Set the list to be virtual list.
-        /// </summary>
         GList.prototype._setVirtual = function (loop) {
             if (!this._virtual) {
                 if (this._scrollPane == null)
@@ -5490,11 +5875,6 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         Object.defineProperty(GList.prototype, "numItems", {
-            /// <summary>
-            /// Set the list item count. 
-            /// If the list is not virtual, specified number of items will be created. 
-            /// If the list is virtual, only items in view will be created.
-            /// </summary>
             get: function () {
                 if (this._virtual)
                     return this._numItems;
@@ -5507,10 +5887,9 @@ window.__extends = (this && this.__extends) || (function () {
                         throw "Set itemRenderer first!";
                     this._numItems = value;
                     if (this._loop)
-                        this._realNumItems = this._numItems * 6; //设置6倍数量，用于循环滚动
+                        this._realNumItems = this._numItems * 6;
                     else
                         this._realNumItems = this._numItems;
-                    //_virtualItems的设计是只增不减的
                     var oldCount = this._virtualItems.length;
                     if (this._realNumItems > oldCount) {
                         for (i = oldCount; i < this._realNumItems; i++) {
@@ -5526,7 +5905,6 @@ window.__extends = (this && this.__extends) || (function () {
                     }
                     if (this._virtualListChanged != 0)
                         this._partner.unschedule(this._refreshVirtualList);
-                    //立即刷新
                     this._refreshVirtualList();
                 }
                 else {
@@ -5597,8 +5975,7 @@ window.__extends = (this && this.__extends) || (function () {
                             this._curLineItemCount = 1;
                     }
                 }
-                else //pagination
-                 {
+                else {
                     if (this._columnCount > 0)
                         this._curLineItemCount = this._columnCount;
                     else {
@@ -5815,8 +6192,7 @@ window.__extends = (this && this.__extends) || (function () {
         GList.prototype.handleScroll1 = function (forceUpdate) {
             var pos = this._scrollPane.scrollingPosY;
             var max = pos + this._scrollPane.viewHeight;
-            var end = max == this._scrollPane.contentHeight; //这个标志表示当前需要滚动到最末，无论内容变化大小
-            //寻找当前位置的第一条项目
+            var end = max == this._scrollPane.contentHeight;
             GList.pos_param = pos;
             var newFirstIndex = this.getIndexOnPos1(forceUpdate);
             pos = GList.pos_param;
@@ -5856,7 +6232,6 @@ window.__extends = (this && this.__extends) || (function () {
                     }
                 }
                 if (ii.obj == null) {
-                    //搜索最适合的重用item，保证每次刷新需要新建或者重新render的item最少
                     if (forward) {
                         for (j = reuseIndex; j >= oldFirstIndex; j--) {
                             ii2 = this._virtualItems[j];
@@ -5908,7 +6283,6 @@ window.__extends = (this && this.__extends) || (function () {
                     if (curIndex % this._curLineItemCount == 0) {
                         deltaSize += Math.ceil(ii.obj.height) - ii.height;
                         if (curIndex == newFirstIndex && oldFirstIndex > newFirstIndex) {
-                            //当内容向下滚动时，如果新出现的项目大小发生变化，需要做一个位置补偿，才不会导致滚动跳动
                             firstItemDeltaSize = Math.ceil(ii.obj.height) - ii.height;
                         }
                     }
@@ -5917,7 +6291,7 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 ii.updateFlag = this.itemInfoVer;
                 ii.obj.setPosition(curX, curY);
-                if (curIndex == newFirstIndex) //要显示多一条才不会穿帮
+                if (curIndex == newFirstIndex)
                     max += ii.height;
                 curX += ii.width + this._columnGap;
                 if (curIndex % this._curLineItemCount == this._curLineItemCount - 1) {
@@ -5943,7 +6317,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
             if (deltaSize != 0 || firstItemDeltaSize != 0)
                 this._scrollPane.changeContentSizeOnScrolling(0, deltaSize, 0, firstItemDeltaSize);
-            if (curIndex > 0 && this.numChildren > 0 && this._container.y < 0 && this.getChildAt(0).y > -this._container.y) //最后一页没填满！
+            if (curIndex > 0 && this.numChildren > 0 && this._container.y <= 0 && this.getChildAt(0).y > -this._container.y)
                 return true;
             else
                 return false;
@@ -5951,8 +6325,7 @@ window.__extends = (this && this.__extends) || (function () {
         GList.prototype.handleScroll2 = function (forceUpdate) {
             var pos = this._scrollPane.scrollingPosX;
             var max = pos + this._scrollPane.viewWidth;
-            var end = pos == this._scrollPane.contentWidth; //这个标志表示当前需要滚动到最末，无论内容变化大小
-            //寻找当前位置的第一条项目
+            var end = pos == this._scrollPane.contentWidth;
             GList.pos_param = pos;
             var newFirstIndex = this.getIndexOnPos2(forceUpdate);
             pos = GList.pos_param;
@@ -6043,7 +6416,6 @@ window.__extends = (this && this.__extends) || (function () {
                     if (curIndex % this._curLineItemCount == 0) {
                         deltaSize += Math.ceil(ii.obj.width) - ii.width;
                         if (curIndex == newFirstIndex && oldFirstIndex > newFirstIndex) {
-                            //当内容向下滚动时，如果新出现的一个项目大小发生变化，需要做一个位置补偿，才不会导致滚动跳动
                             firstItemDeltaSize = Math.ceil(ii.obj.width) - ii.width;
                         }
                     }
@@ -6052,7 +6424,7 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 ii.updateFlag = this.itemInfoVer;
                 ii.obj.setPosition(curX, curY);
-                if (curIndex == newFirstIndex) //要显示多一条才不会穿帮
+                if (curIndex == newFirstIndex)
                     max += ii.width;
                 curY += ii.height + this._lineGap;
                 if (curIndex % this._curLineItemCount == this._curLineItemCount - 1) {
@@ -6078,14 +6450,13 @@ window.__extends = (this && this.__extends) || (function () {
             }
             if (deltaSize != 0 || firstItemDeltaSize != 0)
                 this._scrollPane.changeContentSizeOnScrolling(deltaSize, 0, firstItemDeltaSize, 0);
-            if (curIndex > 0 && this.numChildren > 0 && this._container.x < 0 && this.getChildAt(0).x > -this._container.x) //最后一页没填满！
+            if (curIndex > 0 && this.numChildren > 0 && this._container.x <= 0 && this.getChildAt(0).x > -this._container.x)
                 return true;
             else
                 return false;
         };
         GList.prototype.handleScroll3 = function (forceUpdate) {
             var pos = this._scrollPane.scrollingPosX;
-            //寻找当前位置的第一条项目
             GList.pos_param = pos;
             var newFirstIndex = this.getIndexOnPos3(forceUpdate);
             pos = GList.pos_param;
@@ -6093,7 +6464,6 @@ window.__extends = (this && this.__extends) || (function () {
                 return;
             var oldFirstIndex = this._firstIndex;
             this._firstIndex = newFirstIndex;
-            //分页模式不支持不等高，所以渲染满一页就好了
             var reuseIndex = oldFirstIndex;
             var virtualItemCount = this._virtualItems.length;
             var pageSize = this._curLineItemCount * this._curLineItemCount2;
@@ -6101,7 +6471,7 @@ window.__extends = (this && this.__extends) || (function () {
             var viewWidth = this.viewWidth;
             var page = Math.floor(newFirstIndex / pageSize);
             var startIndex = page * pageSize;
-            var lastIndex = startIndex + pageSize * 2; //测试两页
+            var lastIndex = startIndex + pageSize * 2;
             var needRender;
             var i;
             var ii, ii2;
@@ -6110,7 +6480,6 @@ window.__extends = (this && this.__extends) || (function () {
             var partWidth = (this._scrollPane.viewWidth - this._columnGap * (this._curLineItemCount - 1)) / this._curLineItemCount;
             var partHeight = (this._scrollPane.viewHeight - this._lineGap * (this._curLineItemCount2 - 1)) / this._curLineItemCount2;
             this.itemInfoVer++;
-            //先标记这次要用到的项目
             for (i = startIndex; i < lastIndex; i++) {
                 if (i >= this._realNumItems)
                     continue;
@@ -6135,7 +6504,6 @@ window.__extends = (this && this.__extends) || (function () {
                 if (ii.updateFlag != this.itemInfoVer)
                     continue;
                 if (ii.obj == null) {
-                    //寻找看有没有可重用的
                     while (reuseIndex < virtualItemCount) {
                         ii2 = this._virtualItems[reuseIndex];
                         if (ii2.obj != null && ii2.updateFlag != this.itemInfoVer) {
@@ -6186,7 +6554,6 @@ window.__extends = (this && this.__extends) || (function () {
                     ii.height = Math.ceil(ii.obj.height);
                 }
             }
-            //排列item
             var borderX = (startIndex / pageSize) * viewWidth;
             var xx = borderX;
             var yy = 0;
@@ -6212,7 +6579,6 @@ window.__extends = (this && this.__extends) || (function () {
                 else
                     xx += ii.width + this._columnGap;
             }
-            //释放未使用的
             for (i = reuseIndex; i < virtualItemCount; i++) {
                 ii = this._virtualItems[i];
                 if (ii.updateFlag != this.itemInfoVer && ii.obj != null) {
@@ -6320,8 +6686,19 @@ window.__extends = (this && this.__extends) || (function () {
                     if (child.width > maxWidth)
                         maxWidth = child.width;
                 }
-                cw = Math.ceil(maxWidth);
                 ch = curY;
+                if (ch <= viewHeight && this._autoResizeItem && this._scrollPane && this._scrollPane._displayInDemand && this._scrollPane.vtScrollBar) {
+                    viewWidth += this._scrollPane.vtScrollBar.width;
+                    for (i = 0; i < cnt; i++) {
+                        child = this.getChildAt(i);
+                        if (this.foldInvisibleItems && !child.visible)
+                            continue;
+                        child.setSize(viewWidth, child.height, true);
+                        if (child.width > maxWidth)
+                            maxWidth = child.width;
+                    }
+                }
+                cw = Math.ceil(maxWidth);
             }
             else if (this._layout == fgui.ListLayoutType.SingleRow) {
                 for (i = 0; i < cnt; i++) {
@@ -6338,6 +6715,17 @@ window.__extends = (this && this.__extends) || (function () {
                         maxHeight = child.height;
                 }
                 cw = curX;
+                if (cw <= viewWidth && this._autoResizeItem && this._scrollPane && this._scrollPane._displayInDemand && this._scrollPane.hzScrollBar) {
+                    viewHeight += this._scrollPane.hzScrollBar.height;
+                    for (i = 0; i < cnt; i++) {
+                        child = this.getChildAt(i);
+                        if (this.foldInvisibleItems && !child.visible)
+                            continue;
+                        child.setSize(child.width, viewHeight, true);
+                        if (child.height > maxHeight)
+                            maxHeight = child.height;
+                    }
+                }
                 ch = Math.ceil(maxHeight);
             }
             else if (this._layout == fgui.ListLayoutType.FlowHorizontal) {
@@ -6366,7 +6754,6 @@ window.__extends = (this && this.__extends) || (function () {
                                 if (child.height > maxHeight)
                                     maxHeight = child.height;
                             }
-                            //new line
                             curY += Math.ceil(maxHeight) + this._lineGap;
                             maxHeight = 0;
                             j = 0;
@@ -6386,7 +6773,6 @@ window.__extends = (this && this.__extends) || (function () {
                             curX += this._columnGap;
                         if (this._columnCount != 0 && j >= this._columnCount
                             || this._columnCount == 0 && curX + child.width > viewWidth && maxHeight != 0) {
-                            //new line
                             curX = 0;
                             curY += Math.ceil(maxHeight) + this._lineGap;
                             maxHeight = 0;
@@ -6430,7 +6816,6 @@ window.__extends = (this && this.__extends) || (function () {
                                 if (child.width > maxWidth)
                                     maxWidth = child.width;
                             }
-                            //new line
                             curX += Math.ceil(maxWidth) + this._columnGap;
                             maxWidth = 0;
                             j = 0;
@@ -6467,8 +6852,7 @@ window.__extends = (this && this.__extends) || (function () {
                     ch = Math.ceil(maxHeight);
                 }
             }
-            else //pagination
-             {
+            else {
                 var eachHeight;
                 if (this._autoResizeItem && this._lineCount > 0)
                     eachHeight = Math.floor((viewHeight - (this._lineCount - 1) * this._lineGap) / this._lineCount);
@@ -6479,7 +6863,6 @@ window.__extends = (this && this.__extends) || (function () {
                             continue;
                         if (j == 0 && (this._lineCount != 0 && k >= this._lineCount
                             || this._lineCount == 0 && curY + (this._lineCount > 0 ? eachHeight : child.height) > viewHeight)) {
-                            //new page
                             page++;
                             curY = 0;
                             k = 0;
@@ -6504,7 +6887,6 @@ window.__extends = (this && this.__extends) || (function () {
                                 if (child.height > maxHeight)
                                     maxHeight = child.height;
                             }
-                            //new line
                             curY += Math.ceil(maxHeight) + this._lineGap;
                             maxHeight = 0;
                             j = 0;
@@ -6525,15 +6907,13 @@ window.__extends = (this && this.__extends) || (function () {
                             child.setSize(child.width, eachHeight, true);
                         if (this._columnCount != 0 && j >= this._columnCount
                             || this._columnCount == 0 && curX + child.width > viewWidth && maxHeight != 0) {
-                            //new line
                             curX = 0;
                             curY += Math.ceil(maxHeight) + this._lineGap;
                             maxHeight = 0;
                             j = 0;
                             k++;
                             if (this._lineCount != 0 && k >= this._lineCount
-                                || this._lineCount == 0 && curY + child.height > viewHeight && maxWidth != 0) //new page
-                             {
+                                || this._lineCount == 0 && curY + child.height > viewHeight && maxWidth != 0) {
                                 page++;
                                 curY = 0;
                                 k = 0;
@@ -6557,13 +6937,6 @@ window.__extends = (this && this.__extends) || (function () {
         GList.prototype.setup_beforeAdd = function (buffer, beginPos) {
             _super.prototype.setup_beforeAdd.call(this, buffer, beginPos);
             buffer.seek(beginPos, 5);
-            var i;
-            var j;
-            var cnt;
-            var i1;
-            var i2;
-            var nextPos;
-            var str;
             this._layout = buffer.readByte();
             this._selectionMode = buffer.readByte();
             this._align = buffer.readByte();
@@ -6592,10 +6965,21 @@ window.__extends = (this && this.__extends) || (function () {
                 this.setupOverflow(overflow);
             if (buffer.readBool())
                 buffer.skip(8);
+            if (buffer.version >= 2) {
+                this.scrollItemToViewOnClick = buffer.readBool();
+                this.foldInvisibleItems = buffer.readBool();
+            }
             buffer.seek(beginPos, 8);
             this._defaultItem = buffer.readS();
-            var itemCount = buffer.readShort();
-            for (i = 0; i < itemCount; i++) {
+            this.readItems(buffer);
+        };
+        GList.prototype.readItems = function (buffer) {
+            var cnt;
+            var i;
+            var nextPos;
+            var str;
+            cnt = buffer.readShort();
+            for (i = 0; i < cnt; i++) {
                 nextPos = buffer.readShort();
                 nextPos += buffer.position;
                 str = buffer.readS();
@@ -6609,32 +6993,49 @@ window.__extends = (this && this.__extends) || (function () {
                 var obj = this.getFromPool(str);
                 if (obj != null) {
                     this.addChild(obj);
-                    str = buffer.readS();
-                    if (str != null)
-                        obj.text = str;
-                    str = buffer.readS();
-                    if (str != null && (obj instanceof fgui.GButton))
-                        obj.selectedTitle = str;
-                    str = buffer.readS();
-                    if (str != null)
-                        obj.icon = str;
-                    str = buffer.readS();
-                    if (str != null && (obj instanceof fgui.GButton))
-                        obj.selectedIcon = str;
-                    str = buffer.readS();
-                    if (str != null)
-                        obj.name = str;
-                    if (obj instanceof fgui.GComponent) {
-                        cnt = buffer.readShort();
-                        for (j = 0; j < cnt; j++) {
-                            var cc = obj.getController(buffer.readS());
-                            str = buffer.readS();
-                            if (cc != null)
-                                cc.selectedPageId = str;
-                        }
-                    }
+                    this.setupItem(buffer, obj);
                 }
                 buffer.position = nextPos;
+            }
+        };
+        GList.prototype.setupItem = function (buffer, obj) {
+            var str;
+            str = buffer.readS();
+            if (str != null)
+                obj.text = str;
+            str = buffer.readS();
+            if (str != null && (obj instanceof fgui.GButton))
+                obj.selectedTitle = str;
+            str = buffer.readS();
+            if (str != null)
+                obj.icon = str;
+            str = buffer.readS();
+            if (str != null && (obj instanceof fgui.GButton))
+                obj.selectedIcon = str;
+            str = buffer.readS();
+            if (str != null)
+                obj.name = str;
+            var cnt;
+            var i;
+            if (obj instanceof fgui.GComponent) {
+                cnt = buffer.readShort();
+                for (i = 0; i < cnt; i++) {
+                    var cc = obj.getController(buffer.readS());
+                    str = buffer.readS();
+                    if (cc != null)
+                        cc.selectedPageId = str;
+                }
+                if (buffer.version >= 2) {
+                    cnt = buffer.readShort();
+                    for (i = 0; i < cnt; i++) {
+                        var target = buffer.readS();
+                        var propertyId = buffer.readShort();
+                        var value = buffer.readS();
+                        var obj2 = obj.getChildByPath(target);
+                        if (obj2)
+                            obj2.setProp(propertyId, value);
+                    }
+                }
             }
         };
         GList.prototype.setup_afterAdd = function (buffer, beginPos) {
@@ -6647,7 +7048,7 @@ window.__extends = (this && this.__extends) || (function () {
         return GList;
     }(fgui.GComponent));
     fgui.GList = GList;
-    var ItemInfo = /** @class */ (function () {
+    var ItemInfo = (function () {
         function ItemInfo() {
             this.width = 0;
             this.height = 0;
@@ -6659,7 +7060,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GObjectPool = /** @class */ (function () {
+    var GObjectPool = (function () {
         function GObjectPool() {
             this._count = 0;
             this._pool = {};
@@ -6709,10 +7110,9 @@ window.__extends = (this && this.__extends) || (function () {
     }());
     fgui.GObjectPool = GObjectPool;
 })(fgui || (fgui = {}));
-/// <reference path="GObjectPool.ts" />
 
 (function (fgui) {
-    var GLoader = /** @class */ (function (_super) {
+    var GLoader = (function (_super) {
         __extends(GLoader, _super);
         function GLoader() {
             var _this = _super.call(this) || this;
@@ -6863,24 +7263,6 @@ window.__extends = (this && this.__extends) || (function () {
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(GLoader.prototype, "timeScale", {
-            get: function () {
-                if (this._content instanceof fgui.MovieClip)
-                    return this._content.timeScale;
-                else
-                    return 1;
-            },
-            set: function (value) {
-                if (this._content instanceof fgui.MovieClip)
-                    this._content.timeScale = value;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        GLoader.prototype.advance = function (timeInMiniseconds) {
-            if (this._content instanceof fgui.MovieClip)
-                this._content.advance(timeInMiniseconds);
-        };
         Object.defineProperty(GLoader.prototype, "color", {
             get: function () {
                 return this._color;
@@ -6984,9 +7366,13 @@ window.__extends = (this && this.__extends) || (function () {
         GLoader.prototype.loadFromPackage = function (itemURL) {
             this._contentItem = fgui.UIPackage.getItemByURL(itemURL);
             if (this._contentItem != null) {
+                this._contentItem = this._contentItem.getBranch();
+                this._contentSourceWidth = this._contentItem.width;
+                this._contentSourceHeight = this._contentItem.height;
+                this._contentItem = this._contentItem.getHighResolution();
                 this._contentItem.load();
                 if (this._autoSize)
-                    this.setSize(this._contentItem.width, this._contentItem.height);
+                    this.setSize(this._contentSourceWidth, this._contentSourceHeight);
                 if (this._contentItem.type == fgui.PackageItemType.Image) {
                     if (!this._contentItem.asset) {
                         this.setErrorState();
@@ -6999,14 +7385,10 @@ window.__extends = (this && this.__extends) || (function () {
                             this._content.type = cc.Sprite.Type.TILED;
                         else
                             this._content.type = cc.Sprite.Type.SIMPLE;
-                        this._contentSourceWidth = this._contentItem.width;
-                        this._contentSourceHeight = this._contentItem.height;
                         this.updateLayout();
                     }
                 }
                 else if (this._contentItem.type == fgui.PackageItemType.MovieClip) {
-                    this._contentSourceWidth = this._contentItem.width;
-                    this._contentSourceHeight = this._contentItem.height;
                     this._content.interval = this._contentItem.interval;
                     this._content.swing = this._contentItem.swing;
                     this._content.repeatDelay = this._contentItem.repeatDelay;
@@ -7024,8 +7406,6 @@ window.__extends = (this && this.__extends) || (function () {
                     else {
                         this._content2 = obj.asCom;
                         this._container.addChild(this._content2.node);
-                        this._contentSourceWidth = this._contentItem.width;
-                        this._contentSourceHeight = this._contentItem.height;
                         this.updateLayout();
                     }
                 }
@@ -7042,7 +7422,6 @@ window.__extends = (this && this.__extends) || (function () {
                 cc.loader.loadRes(this._url, cc.Asset, this.onLoaded.bind(this));
         };
         GLoader.prototype.onLoaded = function (err, asset) {
-            //因为是异步返回的，而这时可能url已经被改变，所以不能直接用返回的结果
             if (!this._url || !cc.isValid(this._node))
                 return;
             asset = cc.loader.getRes(this._url);
@@ -7212,6 +7591,42 @@ window.__extends = (this && this.__extends) || (function () {
             else
                 return null;
         };
+        GLoader.prototype.getProp = function (index) {
+            switch (index) {
+                case fgui.ObjectPropID.Color:
+                    return this.color;
+                case fgui.ObjectPropID.Playing:
+                    return this.playing;
+                case fgui.ObjectPropID.Frame:
+                    return this.frame;
+                case fgui.ObjectPropID.TimeScale:
+                    return this._content.timeScale;
+                default:
+                    return _super.prototype.getProp.call(this, index);
+            }
+        };
+        GLoader.prototype.setProp = function (index, value) {
+            switch (index) {
+                case fgui.ObjectPropID.Color:
+                    this.color = value;
+                    break;
+                case fgui.ObjectPropID.Playing:
+                    this.playing = value;
+                    break;
+                case fgui.ObjectPropID.Frame:
+                    this.frame = value;
+                    break;
+                case fgui.ObjectPropID.TimeScale:
+                    this._content.timeScale = value;
+                    break;
+                case fgui.ObjectPropID.DeltaTime:
+                    this._content.advance(value);
+                    break;
+                default:
+                    _super.prototype.setProp.call(this, index, value);
+                    break;
+            }
+        };
         GLoader.prototype.setup_beforeAdd = function (buffer, beginPos) {
             _super.prototype.setup_beforeAdd.call(this, buffer, beginPos);
             buffer.seek(beginPos, 5);
@@ -7242,7 +7657,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GMovieClip = /** @class */ (function (_super) {
+    var GMovieClip = (function (_super) {
         __extends(GMovieClip, _super);
         function GMovieClip() {
             var _this = _super.call(this) || this;
@@ -7309,32 +7724,69 @@ window.__extends = (this && this.__extends) || (function () {
         GMovieClip.prototype.advance = function (timeInMiniseconds) {
             this._content.advance(timeInMiniseconds);
         };
-        //从start帧开始，播放到end帧（-1表示结尾），重复times次（0表示无限循环），循环结束后，停止在endAt帧（-1表示参数end）
         GMovieClip.prototype.setPlaySettings = function (start, end, times, endAt, endCallback, callbackObj) {
             this._content.setPlaySettings(start, end, times, endAt, endCallback, callbackObj);
         };
         GMovieClip.prototype.handleGrayedChanged = function () {
             this._content.grayed = this._grayed;
         };
+        GMovieClip.prototype.getProp = function (index) {
+            switch (index) {
+                case fgui.ObjectPropID.Color:
+                    return this.color;
+                case fgui.ObjectPropID.Playing:
+                    return this.playing;
+                case fgui.ObjectPropID.Frame:
+                    return this.frame;
+                case fgui.ObjectPropID.TimeScale:
+                    return this.timeScale;
+                default:
+                    return _super.prototype.getProp.call(this, index);
+            }
+        };
+        GMovieClip.prototype.setProp = function (index, value) {
+            switch (index) {
+                case fgui.ObjectPropID.Color:
+                    this.color = value;
+                    break;
+                case fgui.ObjectPropID.Playing:
+                    this.playing = value;
+                    break;
+                case fgui.ObjectPropID.Frame:
+                    this.frame = value;
+                    break;
+                case fgui.ObjectPropID.TimeScale:
+                    this.timeScale = value;
+                    break;
+                case fgui.ObjectPropID.DeltaTime:
+                    this.advance(value);
+                    break;
+                default:
+                    _super.prototype.setProp.call(this, index, value);
+                    break;
+            }
+        };
         GMovieClip.prototype.constructFromResource = function () {
-            this.sourceWidth = this.packageItem.width;
-            this.sourceHeight = this.packageItem.height;
+            var contentItem = this.packageItem.getBranch();
+            this.sourceWidth = contentItem.width;
+            this.sourceHeight = contentItem.height;
             this.initWidth = this.sourceWidth;
             this.initHeight = this.sourceHeight;
             this.setSize(this.sourceWidth, this.sourceHeight);
-            this.packageItem.load();
-            this._content.interval = this.packageItem.interval;
-            this._content.swing = this.packageItem.swing;
-            this._content.repeatDelay = this.packageItem.repeatDelay;
-            this._content.frames = this.packageItem.frames;
-            this._content.smoothing = this.packageItem.smoothing;
+            contentItem = contentItem.getHighResolution();
+            contentItem.load();
+            this._content.interval = contentItem.interval;
+            this._content.swing = contentItem.swing;
+            this._content.repeatDelay = contentItem.repeatDelay;
+            this._content.frames = contentItem.frames;
+            this._content.smoothing = contentItem.smoothing;
         };
         GMovieClip.prototype.setup_beforeAdd = function (buffer, beginPos) {
             _super.prototype.setup_beforeAdd.call(this, buffer, beginPos);
             buffer.seek(beginPos, 5);
             if (buffer.readBool())
                 this.color = buffer.readColor();
-            buffer.readByte(); //flip
+            buffer.readByte();
             this._content.frame = buffer.readInt();
             this._content.playing = buffer.readBool();
         };
@@ -7344,10 +7796,11 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GProgressBar = /** @class */ (function (_super) {
+    var GProgressBar = (function (_super) {
         __extends(GProgressBar, _super);
         function GProgressBar() {
             var _this = _super.call(this) || this;
+            _this._min = 0;
             _this._max = 0;
             _this._value = 0;
             _this._barMaxWidth = 0;
@@ -7356,7 +7809,6 @@ window.__extends = (this && this.__extends) || (function () {
             _this._barMaxHeightDelta = 0;
             _this._barStartX = 0;
             _this._barStartY = 0;
-            _this._tweening = false;
             _this._node.name = "GProgressBar";
             _this._titleType = fgui.ProgressTitleType.Percent;
             _this._value = 50;
@@ -7370,6 +7822,19 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 if (this._titleType != value) {
                     this._titleType = value;
+                    this.update(this._value);
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GProgressBar.prototype, "min", {
+            get: function () {
+                return this._min;
+            },
+            set: function (value) {
+                if (this._min != value) {
+                    this._min = value;
                     this.update(this._value);
                 }
             },
@@ -7394,48 +7859,42 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._value;
             },
             set: function (value) {
-                if (this._tweening) {
-                    fgui.GTween.kill(this, true, this.update);
-                    this._tweening = false;
-                }
                 if (this._value != value) {
+                    fgui.GTween.kill(this, false, this.update);
                     this._value = value;
-                    this.update(this._value);
+                    this.update(value);
                 }
             },
             enumerable: true,
             configurable: true
         });
         GProgressBar.prototype.tweenValue = function (value, duration) {
-            if (this._value != value) {
-                if (this._tweening) {
-                    fgui.GTween.kill(this, false, this.update);
-                    this._tweening = false;
-                }
-                var oldValule = this._value;
-                this._value = value;
-                this._tweening = true;
-                return fgui.GTween.to(oldValule, this._value, duration).setTarget(this, this.update).setEase(fgui.EaseType.Linear)
-                    .onComplete(function () { this._tweening = false; }, this);
+            var oldValule;
+            var tweener = fgui.GTween.getTween(this, this.update);
+            if (tweener != null) {
+                oldValule = tweener.value.x;
+                tweener.kill();
             }
             else
-                return null;
+                oldValule = this._value;
+            this._value = value;
+            return fgui.GTween.to(oldValule, this._value, duration).setTarget(this, this.update).setEase(fgui.EaseType.Linear);
         };
         GProgressBar.prototype.update = function (newValue) {
             var percent = this._max != 0 ? Math.min(newValue / this._max, 1) : 0;
             if (this._titleObject) {
                 switch (this._titleType) {
                     case fgui.ProgressTitleType.Percent:
-                        this._titleObject.text = Math.round(percent * 100) + "%";
+                        this._titleObject.text = Math.floor(percent * 100) + "%";
                         break;
                     case fgui.ProgressTitleType.ValueAndMax:
-                        this._titleObject.text = Math.round(newValue) + "/" + Math.round(this._max);
+                        this._titleObject.text = Math.floor(newValue) + "/" + Math.floor(this._max);
                         break;
                     case fgui.ProgressTitleType.Value:
-                        this._titleObject.text = "" + Math.round(newValue);
+                        this._titleObject.text = "" + Math.floor(newValue);
                         break;
                     case fgui.ProgressTitleType.Max:
-                        this._titleObject.text = "" + Math.round(this._max);
+                        this._titleObject.text = "" + Math.floor(this._max);
                         break;
                 }
             }
@@ -7516,12 +7975,9 @@ window.__extends = (this && this.__extends) || (function () {
             }
             this._value = buffer.readInt();
             this._max = buffer.readInt();
+            if (buffer.version >= 2)
+                this._min = buffer.readInt();
             this.update(this._value);
-        };
-        GProgressBar.prototype.onDestroy = function () {
-            _super.prototype.onDestroy.call(this);
-            if (this._tweening)
-                fgui.GTween.kill(this);
         };
         return GProgressBar;
     }(fgui.GComponent));
@@ -7529,7 +7985,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GTextField = /** @class */ (function (_super) {
+    var GTextField = (function (_super) {
         __extends(GTextField, _super);
         function GTextField() {
             var _this = _super.call(this) || this;
@@ -7775,8 +8231,7 @@ window.__extends = (this && this.__extends) || (function () {
             var value;
             var result = "";
             while ((pos2 = template.indexOf("{", pos1)) != -1) {
-                if (pos2 > 0 && template.charCodeAt(pos2 - 1) == 92) //\
-                 {
+                if (pos2 > 0 && template.charCodeAt(pos2 - 1) == 92) {
                     result += template.substring(pos1, pos2 - 1);
                     result += "{";
                     pos1 = pos2 + 1;
@@ -7845,7 +8300,7 @@ window.__extends = (this && this.__extends) || (function () {
         });
         GTextField.prototype.ensureSizeCorrect = function () {
             if (this._sizeDirty) {
-                if (this._label["_forceUpdateRenderData"]) //2.1 above
+                if (this._label["_forceUpdateRenderData"])
                     this._label["_forceUpdateRenderData"]();
                 else
                     this._label["_updateRenderData"](true);
@@ -7856,7 +8311,7 @@ window.__extends = (this && this.__extends) || (function () {
             var text2 = this._text;
             if (this._templateVars != null)
                 text2 = this.parseTemplate(text2);
-            if (this._ubbEnabled) //不支持同一个文本不同样式
+            if (this._ubbEnabled)
                 text2 = fgui.UBBParser.inst.parse(fgui.ToolSet.encodeHTML(text2), true);
             this._label.string = text2;
         };
@@ -7958,6 +8413,34 @@ window.__extends = (this && this.__extends) || (function () {
             this.updateFontColor();
             this.updateStrokeColor();
         };
+        GTextField.prototype.getProp = function (index) {
+            switch (index) {
+                case fgui.ObjectPropID.Color:
+                    return this.color;
+                case fgui.ObjectPropID.OutlineColor:
+                    return this.strokeColor;
+                case fgui.ObjectPropID.FontSize:
+                    return this.fontSize;
+                default:
+                    return _super.prototype.getProp.call(this, index);
+            }
+        };
+        GTextField.prototype.setProp = function (index, value) {
+            switch (index) {
+                case fgui.ObjectPropID.Color:
+                    this.color = value;
+                    break;
+                case fgui.ObjectPropID.OutlineColor:
+                    this.strokeColor = value;
+                    break;
+                case fgui.ObjectPropID.FontSize:
+                    this.fontSize = value;
+                    break;
+                default:
+                    _super.prototype.setProp.call(this, index, value);
+                    break;
+            }
+        };
         GTextField.prototype.setup_beforeAdd = function (buffer, beginPos) {
             _super.prototype.setup_beforeAdd.call(this, buffer, beginPos);
             buffer.seek(beginPos, 5);
@@ -7978,7 +8461,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this.strokeColor = buffer.readColor();
                 this.stroke = buffer.readFloat();
             }
-            if (buffer.readBool()) //shadow
+            if (buffer.readBool())
                 buffer.skip(12);
             if (buffer.readBool())
                 this._templateVars = {};
@@ -7994,10 +8477,9 @@ window.__extends = (this && this.__extends) || (function () {
     }(fgui.GObject));
     fgui.GTextField = GTextField;
 })(fgui || (fgui = {}));
-/// <reference path="GTextField.ts" />
 
 (function (fgui) {
-    var RichTextImageAtlas = /** @class */ (function (_super) {
+    var RichTextImageAtlas = (function (_super) {
         __extends(RichTextImageAtlas, _super);
         function RichTextImageAtlas() {
             return _super !== null && _super.apply(this, arguments) || this;
@@ -8016,7 +8498,7 @@ window.__extends = (this && this.__extends) || (function () {
         return RichTextImageAtlas;
     }(cc.SpriteAtlas));
     fgui.RichTextImageAtlas = RichTextImageAtlas;
-    var GRichTextField = /** @class */ (function (_super) {
+    var GRichTextField = (function (_super) {
         __extends(GRichTextField, _super);
         function GRichTextField() {
             var _this = _super.call(this) || this;
@@ -8046,7 +8528,6 @@ window.__extends = (this && this.__extends) || (function () {
                 return cc.Label.VerticalAlign.TOP;
             },
             set: function (value) {
-                //not supported
             },
             enumerable: true,
             configurable: true
@@ -8056,7 +8537,6 @@ window.__extends = (this && this.__extends) || (function () {
                 return 0;
             },
             set: function (value) {
-                //not supported
             },
             enumerable: true,
             configurable: true
@@ -8105,13 +8585,11 @@ window.__extends = (this && this.__extends) || (function () {
                 return false;
             },
             set: function (value) {
-                //not supported
             },
             enumerable: true,
             configurable: true
         });
         GRichTextField.prototype.markSizeChanged = function () {
-            //RichText貌似没有延迟重建文本，所以这里不需要
         };
         GRichTextField.prototype.updateText = function () {
             var text2 = this._text;
@@ -8177,7 +8655,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GRoot = /** @class */ (function (_super) {
+    var GRoot = (function (_super) {
         __extends(GRoot, _super);
         function GRoot() {
             var _this = _super.call(this) || this;
@@ -8548,17 +9026,29 @@ window.__extends = (this && this.__extends) || (function () {
             pos.y = pos.y / cc.view.getScaleY();
             this.setSize(size.width, size.height);
             this._node.setPosition(-pos.x, this._height - pos.y);
+            this.updateContentScaleLevel();
         };
         GRoot.prototype.handlePositionChanged = function () {
-            //nothing here
         };
+        GRoot.prototype.updateContentScaleLevel = function () {
+            var ss = Math.max(cc.view.getScaleX(), cc.view.getScaleY());
+            if (ss >= 3.5)
+                GRoot.contentScaleLevel = 3;
+            else if (ss >= 2.5)
+                GRoot.contentScaleLevel = 2;
+            else if (ss >= 1.5)
+                GRoot.contentScaleLevel = 1;
+            else
+                GRoot.contentScaleLevel = 0;
+        };
+        GRoot.contentScaleLevel = 0;
         return GRoot;
     }(fgui.GComponent));
     fgui.GRoot = GRoot;
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GScrollBar = /** @class */ (function (_super) {
+    var GScrollBar = (function (_super) {
         __extends(GScrollBar, _super);
         function GScrollBar() {
             var _this = _super.call(this) || this;
@@ -8571,39 +9061,39 @@ window.__extends = (this && this.__extends) || (function () {
             this._target = target;
             this._vertical = vertical;
         };
-        Object.defineProperty(GScrollBar.prototype, "displayPerc", {
-            set: function (val) {
-                if (this._vertical) {
-                    if (!this._fixedGripSize)
-                        this._grip.height = val * this._bar.height;
-                    this._grip.y = this._bar.y + (this._bar.height - this._grip.height) * this._scrollPerc;
-                }
-                else {
-                    if (!this._fixedGripSize)
-                        this._grip.width = val * this._bar.width;
-                    this._grip.x = this._bar.x + (this._bar.width - this._grip.width) * this._scrollPerc;
-                }
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(GScrollBar.prototype, "scrollPerc", {
-            set: function (val) {
-                this._scrollPerc = val;
-                if (this._vertical)
-                    this._grip.y = this._bar.y + (this._bar.height - this._grip.height) * this._scrollPerc;
-                else
-                    this._grip.x = this._bar.x + (this._bar.width - this._grip.width) * this._scrollPerc;
-            },
-            enumerable: true,
-            configurable: true
-        });
+        GScrollBar.prototype.setDisplayPerc = function (value) {
+            if (this._vertical) {
+                if (!this._fixedGripSize)
+                    this._grip.height = Math.floor(value * this._bar.height);
+                this._grip.y = this._bar.y + (this._bar.height - this._grip.height) * this._scrollPerc;
+            }
+            else {
+                if (!this._fixedGripSize)
+                    this._grip.width = Math.floor(value * this._bar.width);
+                this._grip.x = this._bar.x + (this._bar.width - this._grip.width) * this._scrollPerc;
+            }
+            this._grip.visible = value != 0 && value != 1;
+        };
+        GScrollBar.prototype.setScrollPerc = function (val) {
+            this._scrollPerc = val;
+            if (this._vertical)
+                this._grip.y = this._bar.y + (this._bar.height - this._grip.height) * this._scrollPerc;
+            else
+                this._grip.x = this._bar.x + (this._bar.width - this._grip.width) * this._scrollPerc;
+        };
         Object.defineProperty(GScrollBar.prototype, "minSize", {
             get: function () {
                 if (this._vertical)
                     return (this._arrowButton1 != null ? this._arrowButton1.height : 0) + (this._arrowButton2 != null ? this._arrowButton2.height : 0);
                 else
                     return (this._arrowButton1 != null ? this._arrowButton1.width : 0) + (this._arrowButton2 != null ? this._arrowButton2.width : 0);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GScrollBar.prototype, "gripDragging", {
+            get: function () {
+                return this._gripDragging;
             },
             enumerable: true,
             configurable: true
@@ -8625,6 +9115,7 @@ window.__extends = (this && this.__extends) || (function () {
             this._arrowButton2 = this.getChild("arrow2");
             this._grip.on(fgui.Event.TOUCH_BEGIN, this.onGripTouchDown, this);
             this._grip.on(fgui.Event.TOUCH_MOVE, this.onGripTouchMove, this);
+            this._grip.on(fgui.Event.TOUCH_END, this.onGripTouchEnd, this);
             if (this._arrowButton1)
                 this._arrowButton1.on(fgui.Event.TOUCH_BEGIN, this.onClickArrow1, this);
             if (this._arrowButton2)
@@ -8632,10 +9123,10 @@ window.__extends = (this && this.__extends) || (function () {
             this.on(fgui.Event.TOUCH_BEGIN, this.onBarTouchBegin, this);
         };
         GScrollBar.prototype.onGripTouchDown = function (evt) {
-            if (!this._bar)
-                return;
             evt.stopPropagation();
             evt.captureTouch();
+            this._gripDragging = true;
+            this._target.updateScrollBarVisible();
             this.globalToLocal(evt.pos.x, evt.pos.y, this._dragOffset);
             this._dragOffset.x -= this._grip.x;
             this._dragOffset.y -= this._grip.y;
@@ -8652,6 +9143,12 @@ window.__extends = (this && this.__extends) || (function () {
                 var curX = pt.x - this._dragOffset.x;
                 this._target.setPercX((curX - this._bar.x) / (this._bar.width - this._grip.width), false);
             }
+        };
+        GScrollBar.prototype.onGripTouchEnd = function (evt) {
+            if (!this.onStage)
+                return;
+            this._gripDragging = false;
+            this._target.updateScrollBarVisible();
         };
         GScrollBar.prototype.onClickArrow1 = function (evt) {
             evt.stopPropagation();
@@ -8689,13 +9186,13 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GSlider = /** @class */ (function (_super) {
+    var GSlider = (function (_super) {
         __extends(GSlider, _super);
         function GSlider() {
             var _this = _super.call(this) || this;
+            _this._min = 0;
             _this._max = 0;
             _this._value = 0;
-            _this._reverse = false;
             _this._barMaxWidth = 0;
             _this._barMaxHeight = 0;
             _this._barMaxWidthDelta = 0;
@@ -8718,6 +9215,32 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
                 this._titleType = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GSlider.prototype, "wholeNumbers", {
+            get: function () {
+                return this._wholeNumbers;
+            },
+            set: function (value) {
+                if (this._wholeNumbers != value) {
+                    this._wholeNumbers = value;
+                    this.update();
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GSlider.prototype, "min", {
+            get: function () {
+                return this._min;
+            },
+            set: function (value) {
+                if (this._min != value) {
+                    this._min = value;
+                    this.update();
+                }
             },
             enumerable: true,
             configurable: true
@@ -8749,10 +9272,21 @@ window.__extends = (this && this.__extends) || (function () {
             configurable: true
         });
         GSlider.prototype.update = function () {
-            var percent = Math.min(this._value / this._max, 1);
-            this.updateWidthPercent(percent);
+            this.updateWithPercent((this._value - this._min) / (this._max - this._min));
         };
-        GSlider.prototype.updateWidthPercent = function (percent) {
+        GSlider.prototype.updateWithPercent = function (percent, manual) {
+            percent = fgui.ToolSet.clamp01(percent);
+            if (manual) {
+                var newValue = fgui.ToolSet.clamp(this._min + (this._max - this._min) * percent, this._min, this._max);
+                if (this._wholeNumbers) {
+                    newValue = Math.round(newValue);
+                    percent = fgui.ToolSet.clamp01((newValue - this._min) / (this._max - this._min));
+                }
+                if (newValue != this._value) {
+                    this._value = newValue;
+                    this._node.emit(fgui.Event.STATUS_CHANGED, this);
+                }
+            }
             if (this._titleObject) {
                 switch (this._titleType) {
                     case fgui.ProgressTitleType.Percent:
@@ -8792,6 +9326,10 @@ window.__extends = (this && this.__extends) || (function () {
             buffer.seek(0, 6);
             this._titleType = buffer.readByte();
             this._reverse = buffer.readBool();
+            if (buffer.version >= 2) {
+                this._wholeNumbers = buffer.readBool();
+                this.changeOnClick = buffer.readBool();
+            }
             this._titleObject = (this.getChild("title"));
             this._barObjectH = this.getChild("bar");
             this._barObjectV = this.getChild("bar_v");
@@ -8833,6 +9371,8 @@ window.__extends = (this && this.__extends) || (function () {
             }
             this._value = buffer.readInt();
             this._max = buffer.readInt();
+            if (buffer.version >= 2)
+                this._min = buffer.readInt();
             this.update();
         };
         GSlider.prototype.onGripTouchBegin = function (evt) {
@@ -8840,7 +9380,7 @@ window.__extends = (this && this.__extends) || (function () {
             evt.stopPropagation();
             evt.captureTouch();
             this._clickPos = this.globalToLocal(evt.pos.x, evt.pos.y);
-            this._clickPercent = this._value / this._max;
+            this._clickPercent = fgui.ToolSet.clamp01((this._value - this._min) / (this._max - this._min));
         };
         GSlider.prototype.onGripTouchMove = function (evt) {
             if (!this.canDrag) {
@@ -8858,41 +9398,23 @@ window.__extends = (this && this.__extends) || (function () {
                 percent = this._clickPercent + deltaX / this._barMaxWidth;
             else
                 percent = this._clickPercent + deltaY / this._barMaxHeight;
-            if (percent > 1)
-                percent = 1;
-            else if (percent < 0)
-                percent = 0;
-            var newValue = Math.round(this._max * percent);
-            if (newValue != this._value) {
-                this._value = newValue;
-                this._node.emit(fgui.Event.STATUS_CHANGED, this);
-            }
-            this.updateWidthPercent(percent);
+            this.updateWithPercent(percent, true);
         };
         GSlider.prototype.onBarTouchBegin = function (evt) {
             if (!this.changeOnClick)
                 return;
             var pt = this._gripObject.globalToLocal(evt.pos.x, evt.pos.y, GSlider.sSilderHelperPoint);
-            var percent = this._value / this._max;
+            var percent = fgui.ToolSet.clamp01((this._value - this._min) / (this._max - this._min));
             var delta;
             if (this._barObjectH)
-                delta = (pt.x - this._gripObject.width / 2) / this._barMaxWidth;
+                delta = pt.x / this._barMaxWidth;
             if (this._barObjectV)
-                delta = (pt.y - this._gripObject.height / 2) / this._barMaxHeight;
+                delta = pt.y / this._barMaxHeight;
             if (this._reverse)
                 percent -= delta;
             else
                 percent += delta;
-            if (percent > 1)
-                percent = 1;
-            else if (percent < 0)
-                percent = 0;
-            var newValue = Math.round(this._max * percent);
-            if (newValue != this._value) {
-                this._value = newValue;
-                this._node.emit(fgui.Event.STATUS_CHANGED, this);
-            }
-            this.updateWidthPercent(percent);
+            this.updateWithPercent(percent, true);
         };
         GSlider.sSilderHelperPoint = new cc.Vec2();
         return GSlider;
@@ -8901,7 +9423,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GTextInput = /** @class */ (function (_super) {
+    var GTextInput = (function (_super) {
         __extends(GTextInput, _super);
         function GTextInput() {
             var _this = _super.call(this) || this;
@@ -8972,7 +9494,6 @@ window.__extends = (this && this.__extends) || (function () {
                 return "";
             },
             set: function (value) {
-                //not supported
             },
             enumerable: true,
             configurable: true
@@ -9013,7 +9534,6 @@ window.__extends = (this && this.__extends) || (function () {
                 return 0;
             },
             set: function (value) {
-                //not supported
             },
             enumerable: true,
             configurable: true
@@ -9032,13 +9552,12 @@ window.__extends = (this && this.__extends) || (function () {
             this._editBox.setFocus();
         };
         GTextInput.prototype.markSizeChanged = function () {
-            //不支持自动大小，所以这里空
         };
         GTextInput.prototype.updateText = function () {
             var text2 = this._text;
             if (this._templateVars != null)
                 text2 = this.parseTemplate(text2);
-            if (this._ubbEnabled) //不支持同一个文本不同样式
+            if (this._ubbEnabled)
                 text2 = fgui.UBBParser.inst.parse(fgui.ToolSet.encodeHTML(text2), true);
             this._editBox.string = text2;
         };
@@ -9057,7 +9576,6 @@ window.__extends = (this && this.__extends) || (function () {
                 this._editBox.placeholderLabel.fontSize = this._editBox.textLabel.fontSize;
         };
         GTextInput.prototype.updateOverflow = function () {
-            //not supported
         };
         GTextInput.prototype.onTextChanged = function () {
             this._text = this._editBox.string;
@@ -9078,7 +9596,7 @@ window.__extends = (this && this.__extends) || (function () {
             if (iv != 0)
                 this.maxLength = iv;
             iv = buffer.readInt();
-            if (iv != 0) { //keyboardType
+            if (iv != 0) {
             }
             if (buffer.readBool())
                 this.password = true;
@@ -9086,13 +9604,12 @@ window.__extends = (this && this.__extends) || (function () {
         return GTextInput;
     }(fgui.GTextField));
     fgui.GTextInput = GTextInput;
-    var MyEditBox = /** @class */ (function (_super) {
+    var MyEditBox = (function (_super) {
         __extends(MyEditBox, _super);
         function MyEditBox() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
         MyEditBox.prototype._registerEvent = function () {
-            //取消掉原来的事件处理
         };
         MyEditBox.prototype._syncSize = function () {
             var size = this.node.getContentSize();
@@ -9114,7 +9631,559 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var Margin = /** @class */ (function () {
+    var GTree = (function (_super) {
+        __extends(GTree, _super);
+        function GTree() {
+            var _this = _super.call(this) || this;
+            _this._indent = 15;
+            _this._rootNode = new fgui.GTreeNode(true);
+            _this._rootNode._setTree(_this);
+            _this._rootNode.expanded = true;
+            return _this;
+        }
+        Object.defineProperty(GTree.prototype, "rootNode", {
+            get: function () {
+                return this._rootNode;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GTree.prototype, "indent", {
+            get: function () {
+                return this._indent;
+            },
+            set: function (value) {
+                this._indent = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GTree.prototype, "clickToExpand", {
+            get: function () {
+                return this._clickToExpand;
+            },
+            set: function (value) {
+                this._clickToExpand = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        GTree.prototype.getSelectedNode = function () {
+            if (this.selectedIndex != -1)
+                return this.getChildAt(this.selectedIndex)._treeNode;
+            else
+                return null;
+        };
+        GTree.prototype.getSelectedNodes = function (result) {
+            if (!result)
+                result = new Array();
+            GTree.helperIntList.length = 0;
+            _super.prototype.getSelection.call(this, GTree.helperIntList);
+            var cnt = GTree.helperIntList.length;
+            var ret = new Array();
+            for (var i = 0; i < cnt; i++) {
+                var node = this.getChildAt(GTree.helperIntList[i])._treeNode;
+                ret.push(node);
+            }
+            return ret;
+        };
+        GTree.prototype.selectNode = function (node, scrollItToView) {
+            var parentNode = node.parent;
+            while (parentNode != null && parentNode != this._rootNode) {
+                parentNode.expanded = true;
+                parentNode = parentNode.parent;
+            }
+            if (!node._cell)
+                return;
+            this.addSelection(this.getChildIndex(node._cell), scrollItToView);
+        };
+        GTree.prototype.unselectNode = function (node) {
+            if (!node._cell)
+                return;
+            this.removeSelection(this.getChildIndex(node._cell));
+        };
+        GTree.prototype.expandAll = function (folderNode) {
+            if (!folderNode)
+                folderNode = this._rootNode;
+            folderNode.expanded = true;
+            var cnt = folderNode.numChildren;
+            for (var i = 0; i < cnt; i++) {
+                var node = folderNode.getChildAt(i);
+                if (node.isFolder)
+                    this.expandAll(node);
+            }
+        };
+        GTree.prototype.collapseAll = function (folderNode) {
+            if (!folderNode)
+                folderNode = this._rootNode;
+            if (folderNode != this._rootNode)
+                folderNode.expanded = false;
+            var cnt = folderNode.numChildren;
+            for (var i = 0; i < cnt; i++) {
+                var node = folderNode.getChildAt(i);
+                if (node.isFolder)
+                    this.collapseAll(node);
+            }
+        };
+        GTree.prototype.createCell = function (node) {
+            var child = this.getFromPool(node._resURL);
+            if (!child)
+                throw new Error("cannot create tree node object.");
+            child._treeNode = node;
+            node._cell = child;
+            var indentObj = child.getChild("indent");
+            if (indentObj != null)
+                indentObj.width = (node.level - 1) * this._indent;
+            var cc;
+            cc = child.getController("expanded");
+            if (cc) {
+                cc.on(fgui.Event.STATUS_CHANGED, this.__expandedStateChanged, this);
+                cc.selectedIndex = node.expanded ? 1 : 0;
+            }
+            cc = child.getController("leaf");
+            if (cc)
+                cc.selectedIndex = node.isFolder ? 0 : 1;
+            if (this.treeNodeRender)
+                this.treeNodeRender(node, child);
+        };
+        GTree.prototype._afterInserted = function (node) {
+            if (!node._cell)
+                this.createCell(node);
+            var index = this.getInsertIndexForNode(node);
+            this.addChildAt(node._cell, index);
+            if (this.treeNodeRender)
+                this.treeNodeRender(node, node._cell);
+            if (node.isFolder && node.expanded)
+                this.checkChildren(node, index);
+        };
+        GTree.prototype.getInsertIndexForNode = function (node) {
+            var prevNode = node.getPrevSibling();
+            if (prevNode == null)
+                prevNode = node.parent;
+            var insertIndex = this.getChildIndex(prevNode._cell) + 1;
+            var myLevel = node.level;
+            var cnt = this.numChildren;
+            for (var i = insertIndex; i < cnt; i++) {
+                var testNode = this.getChildAt(i)._treeNode;
+                if (testNode.level <= myLevel)
+                    break;
+                insertIndex++;
+            }
+            return insertIndex;
+        };
+        GTree.prototype._afterRemoved = function (node) {
+            this.removeNode(node);
+        };
+        GTree.prototype._afterExpanded = function (node) {
+            if (node == this._rootNode) {
+                this.checkChildren(this._rootNode, 0);
+                return;
+            }
+            if (this.treeNodeWillExpand != null)
+                this.treeNodeWillExpand(node, true);
+            if (node._cell == null)
+                return;
+            if (this.treeNodeRender)
+                this.treeNodeRender(node, node._cell);
+            var cc = node._cell.getController("expanded");
+            if (cc)
+                cc.selectedIndex = 1;
+            node._cell.on(fgui.Event.TOUCH_BEGIN, this.__cellMouseDown, this);
+            if (node._cell.parent != null)
+                this.checkChildren(node, this.getChildIndex(node._cell));
+        };
+        GTree.prototype._afterCollapsed = function (node) {
+            if (node == this._rootNode) {
+                this.checkChildren(this._rootNode, 0);
+                return;
+            }
+            if (this.treeNodeWillExpand)
+                this.treeNodeWillExpand(node, false);
+            if (node._cell == null)
+                return;
+            if (this.treeNodeRender)
+                this.treeNodeRender(node, node._cell);
+            var cc = node._cell.getController("expanded");
+            if (cc)
+                cc.selectedIndex = 0;
+            if (node._cell.parent != null)
+                this.hideFolderNode(node);
+        };
+        GTree.prototype._afterMoved = function (node) {
+            var startIndex = this.getChildIndex(node._cell);
+            var endIndex;
+            if (node.isFolder)
+                endIndex = this.getFolderEndIndex(startIndex, node.level);
+            else
+                endIndex = startIndex + 1;
+            var insertIndex = this.getInsertIndexForNode(node);
+            var i;
+            var cnt = endIndex - startIndex;
+            var obj;
+            if (insertIndex < startIndex) {
+                for (i = 0; i < cnt; i++) {
+                    obj = this.getChildAt(startIndex + i);
+                    this.setChildIndex(obj, insertIndex + i);
+                }
+            }
+            else {
+                for (i = 0; i < cnt; i++) {
+                    obj = this.getChildAt(startIndex);
+                    this.setChildIndex(obj, insertIndex);
+                }
+            }
+        };
+        GTree.prototype.getFolderEndIndex = function (startIndex, level) {
+            var cnt = this.numChildren;
+            for (var i = startIndex + 1; i < cnt; i++) {
+                var node = this.getChildAt(i)._treeNode;
+                if (node.level <= level)
+                    return i;
+            }
+            return cnt;
+        };
+        GTree.prototype.checkChildren = function (folderNode, index) {
+            var cnt = folderNode.numChildren;
+            for (var i = 0; i < cnt; i++) {
+                index++;
+                var node = folderNode.getChildAt(i);
+                if (node._cell == null)
+                    this.createCell(node);
+                if (!node._cell.parent)
+                    this.addChildAt(node._cell, index);
+                if (node.isFolder && node.expanded)
+                    index = this.checkChildren(node, index);
+            }
+            return index;
+        };
+        GTree.prototype.hideFolderNode = function (folderNode) {
+            var cnt = folderNode.numChildren;
+            for (var i = 0; i < cnt; i++) {
+                var node = folderNode.getChildAt(i);
+                if (node._cell)
+                    this.removeChild(node._cell);
+                if (node.isFolder && node.expanded)
+                    this.hideFolderNode(node);
+            }
+        };
+        GTree.prototype.removeNode = function (node) {
+            if (node._cell != null) {
+                if (node._cell.parent != null)
+                    this.removeChild(node._cell);
+                this.returnToPool(node._cell);
+                node._cell._treeNode = null;
+                node._cell = null;
+            }
+            if (node.isFolder) {
+                var cnt = node.numChildren;
+                for (var i = 0; i < cnt; i++) {
+                    var node2 = node.getChildAt(i);
+                    this.removeNode(node2);
+                }
+            }
+        };
+        GTree.prototype.__cellMouseDown = function (evt) {
+            var node = fgui.GObject.cast(evt.currentTarget)._treeNode;
+            this._expandedStatusInEvt = node.expanded;
+        };
+        GTree.prototype.__expandedStateChanged = function (cc) {
+            var node = cc.parent._treeNode;
+            node.expanded = cc.selectedIndex == 1;
+        };
+        GTree.prototype.dispatchItemEvent = function (item, evt) {
+            if (this._clickToExpand != 0) {
+                var node = item._treeNode;
+                if (node && this._expandedStatusInEvt == node.expanded) {
+                    if (this._clickToExpand == 2) {
+                    }
+                    else
+                        node.expanded = !node.expanded;
+                }
+            }
+            _super.prototype.dispatchItemEvent.call(this, item, evt);
+        };
+        GTree.prototype.setup_beforeAdd = function (buffer, beginPos) {
+            _super.prototype.setup_beforeAdd.call(this, buffer, beginPos);
+            buffer.seek(beginPos, 9);
+            this._indent = buffer.readInt();
+            this._clickToExpand = buffer.readByte();
+        };
+        GTree.prototype.readItems = function (buffer) {
+            var cnt;
+            var i;
+            var nextPos;
+            var str;
+            var isFolder;
+            var lastNode;
+            var level;
+            var prevLevel = 0;
+            cnt = buffer.readShort();
+            for (i = 0; i < cnt; i++) {
+                nextPos = buffer.readShort();
+                nextPos += buffer.position;
+                str = buffer.readS();
+                if (str == null) {
+                    str = this.defaultItem;
+                    if (!str) {
+                        buffer.position = nextPos;
+                        continue;
+                    }
+                }
+                isFolder = buffer.readBool();
+                level = buffer.readByte();
+                var node = new fgui.GTreeNode(isFolder, str);
+                node.expanded = true;
+                if (i == 0)
+                    this._rootNode.addChild(node);
+                else {
+                    if (level > prevLevel)
+                        lastNode.addChild(node);
+                    else if (level < prevLevel) {
+                        for (var j = level; j <= prevLevel; j++)
+                            lastNode = lastNode.parent;
+                        lastNode.addChild(node);
+                    }
+                    else
+                        lastNode.parent.addChild(node);
+                }
+                lastNode = node;
+                prevLevel = level;
+                this.setupItem(buffer, node.cell);
+                buffer.position = nextPos;
+            }
+        };
+        GTree.helperIntList = new Array();
+        return GTree;
+    }(fgui.GList));
+    fgui.GTree = GTree;
+})(fgui || (fgui = {}));
+
+(function (fgui) {
+    var GTreeNode = (function () {
+        function GTreeNode(hasChild, resURL) {
+            this._level = 0;
+            this._resURL = resURL;
+            if (hasChild)
+                this._children = new Array();
+        }
+        Object.defineProperty(GTreeNode.prototype, "expanded", {
+            get: function () {
+                return this._expanded;
+            },
+            set: function (value) {
+                if (this._children == null)
+                    return;
+                if (this._expanded != value) {
+                    this._expanded = value;
+                    if (this._tree != null) {
+                        if (this._expanded)
+                            this._tree._afterExpanded(this);
+                        else
+                            this._tree._afterCollapsed(this);
+                    }
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GTreeNode.prototype, "isFolder", {
+            get: function () {
+                return this._children != null;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GTreeNode.prototype, "parent", {
+            get: function () {
+                return this._parent;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GTreeNode.prototype, "text", {
+            get: function () {
+                if (this._cell != null)
+                    return this._cell.text;
+                else
+                    return null;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GTreeNode.prototype, "cell", {
+            get: function () {
+                return this._cell;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GTreeNode.prototype, "level", {
+            get: function () {
+                return this._level;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        GTreeNode.prototype._setLevel = function (value) {
+            this._level = value;
+        };
+        GTreeNode.prototype.addChild = function (child) {
+            this.addChildAt(child, this._children.length);
+            return child;
+        };
+        GTreeNode.prototype.addChildAt = function (child, index) {
+            if (!child)
+                throw new Error("child is null");
+            var numChildren = this._children.length;
+            if (index >= 0 && index <= numChildren) {
+                if (child._parent == this) {
+                    this.setChildIndex(child, index);
+                }
+                else {
+                    if (child._parent)
+                        child._parent.removeChild(child);
+                    var cnt = this._children.length;
+                    if (index == cnt)
+                        this._children.push(child);
+                    else
+                        this._children.splice(index, 0, child);
+                    child._parent = this;
+                    child._level = this._level + 1;
+                    child._setTree(this._tree);
+                    if (this._tree != null && this == this._tree.rootNode || this._cell != null && this._cell.parent != null && this._expanded)
+                        this._tree._afterInserted(child);
+                }
+                return child;
+            }
+            else {
+                throw new RangeError("Invalid child index");
+            }
+        };
+        GTreeNode.prototype.removeChild = function (child) {
+            var childIndex = this._children.indexOf(child);
+            if (childIndex != -1) {
+                this.removeChildAt(childIndex);
+            }
+            return child;
+        };
+        GTreeNode.prototype.removeChildAt = function (index) {
+            if (index >= 0 && index < this.numChildren) {
+                var child = this._children[index];
+                this._children.splice(index, 1);
+                child._parent = null;
+                if (this._tree != null) {
+                    child._setTree(null);
+                    this._tree._afterRemoved(child);
+                }
+                return child;
+            }
+            else {
+                throw "Invalid child index";
+            }
+        };
+        GTreeNode.prototype.removeChildren = function (beginIndex, endIndex) {
+            if (beginIndex === void 0) { beginIndex = 0; }
+            if (endIndex === void 0) { endIndex = -1; }
+            if (endIndex < 0 || endIndex >= this.numChildren)
+                endIndex = this.numChildren - 1;
+            for (var i = beginIndex; i <= endIndex; ++i)
+                this.removeChildAt(beginIndex);
+        };
+        GTreeNode.prototype.getChildAt = function (index) {
+            if (index >= 0 && index < this.numChildren)
+                return this._children[index];
+            else
+                throw "Invalid child index";
+        };
+        GTreeNode.prototype.getChildIndex = function (child) {
+            return this._children.indexOf(child);
+        };
+        GTreeNode.prototype.getPrevSibling = function () {
+            if (this._parent == null)
+                return null;
+            var i = this._parent._children.indexOf(this);
+            if (i <= 0)
+                return null;
+            return this._parent._children[i - 1];
+        };
+        GTreeNode.prototype.getNextSibling = function () {
+            if (this._parent == null)
+                return null;
+            var i = this._parent._children.indexOf(this);
+            if (i < 0 || i >= this._parent._children.length - 1)
+                return null;
+            return this._parent._children[i + 1];
+        };
+        GTreeNode.prototype.setChildIndex = function (child, index) {
+            var oldIndex = this._children.indexOf(child);
+            if (oldIndex == -1)
+                throw "Not a child of this container";
+            var cnt = this._children.length;
+            if (index < 0)
+                index = 0;
+            else if (index > cnt)
+                index = cnt;
+            if (oldIndex == index)
+                return;
+            this._children.splice(oldIndex, 1);
+            this._children.splice(index, 0, child);
+            if (this._tree != null && this == this._tree.rootNode || this._cell != null && this._cell.parent != null && this._expanded)
+                this._tree._afterMoved(child);
+        };
+        GTreeNode.prototype.swapChildren = function (child1, child2) {
+            var index1 = this._children.indexOf(child1);
+            var index2 = this._children.indexOf(child2);
+            if (index1 == -1 || index2 == -1)
+                throw "Not a child of this container";
+            this.swapChildrenAt(index1, index2);
+        };
+        GTreeNode.prototype.swapChildrenAt = function (index1, index2) {
+            var child1 = this._children[index1];
+            var child2 = this._children[index2];
+            this.setChildIndex(child1, index2);
+            this.setChildIndex(child2, index1);
+        };
+        Object.defineProperty(GTreeNode.prototype, "numChildren", {
+            get: function () {
+                return this._children.length;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        GTreeNode.prototype.expandToRoot = function () {
+            var p = this;
+            while (p) {
+                p.expanded = true;
+                p = p.parent;
+            }
+        };
+        Object.defineProperty(GTreeNode.prototype, "tree", {
+            get: function () {
+                return this._tree;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        GTreeNode.prototype._setTree = function (value) {
+            this._tree = value;
+            if (this._tree != null && this._tree.treeNodeWillExpand && this._expanded)
+                this._tree.treeNodeWillExpand(this, true);
+            if (this._children != null) {
+                var cnt = this._children.length;
+                for (var i = 0; i < cnt; i++) {
+                    var node = this._children[i];
+                    node._level = this._level + 1;
+                    node._setTree(value);
+                }
+            }
+        };
+        return GTreeNode;
+    }());
+    fgui.GTreeNode = GTreeNode;
+})(fgui || (fgui = {}));
+
+(function (fgui) {
+    var Margin = (function () {
         function Margin() {
             this.left = 0;
             this.right = 0;
@@ -9136,17 +10205,32 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var PackageItem = /** @class */ (function () {
+    var PackageItem = (function () {
         function PackageItem() {
             this.width = 0;
             this.height = 0;
             this.tileGridIndice = 0;
-            //movieclip
             this.interval = 0;
             this.repeatDelay = 0;
         }
         PackageItem.prototype.load = function () {
             return this.owner.getItemAsset(this);
+        };
+        PackageItem.prototype.getBranch = function () {
+            if (this.branches && this.owner._branchIndex != -1) {
+                var itemId = this.branches[this.owner._branchIndex];
+                if (itemId)
+                    return this.owner.getItemById(itemId);
+            }
+            return this;
+        };
+        PackageItem.prototype.getHighResolution = function () {
+            if (this.highResolution && fgui.GRoot.contentScaleLevel > 0) {
+                var itemId = this.highResolution[fgui.GRoot.contentScaleLevel - 1];
+                if (itemId)
+                    return this.owner.getItemById(itemId);
+            }
+            return this;
         };
         PackageItem.prototype.toString = function () {
             return this.name;
@@ -9157,7 +10241,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var PopupMenu = /** @class */ (function () {
+    var PopupMenu = (function () {
         function PopupMenu(url) {
             if (url === void 0) { url = null; }
             if (!url) {
@@ -9323,7 +10407,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var RelationItem = /** @class */ (function () {
+    var RelationItem = (function () {
         function RelationItem(owner) {
             this._owner = owner;
             this._defs = new Array();
@@ -9376,8 +10460,6 @@ window.__extends = (this && this.__extends) || (function () {
             info.type = relationType;
             info.axis = (relationType <= fgui.RelationType.Right_Right || relationType == fgui.RelationType.Width || relationType >= fgui.RelationType.LeftExt_Left && relationType <= fgui.RelationType.RightExt_Right) ? 0 : 1;
             this._defs.push(info);
-            //当使用中线关联时，因为需要除以2，很容易因为奇数宽度/高度造成小数点坐标；当使用百分比时，也会造成小数坐标；
-            //所以设置了这类关联的对象，自动启用pixelSnapping
             if (usePercent || relationType == fgui.RelationType.Left_Center || relationType == fgui.RelationType.Center_Center || relationType == fgui.RelationType.Right_Center
                 || relationType == fgui.RelationType.Top_Middle || relationType == fgui.RelationType.Middle_Middle || relationType == fgui.RelationType.Bottom_Middle)
                 this._owner.pixelSnapping = true;
@@ -9485,27 +10567,43 @@ window.__extends = (this && this.__extends) || (function () {
                     break;
                 case fgui.RelationType.LeftExt_Left:
                 case fgui.RelationType.LeftExt_Right:
-                    tmp = this._owner.xMin;
-                    this._owner.width = this._owner._rawWidth - dx;
-                    this._owner.xMin = tmp + dx;
+                    if (this._owner != this._target.parent) {
+                        tmp = this._owner.xMin;
+                        this._owner.width = this._owner._rawWidth - dx;
+                        this._owner.xMin = tmp + dx;
+                    }
+                    else
+                        this._owner.width = this._owner._rawWidth - dx;
                     break;
                 case fgui.RelationType.RightExt_Left:
                 case fgui.RelationType.RightExt_Right:
-                    tmp = this._owner.xMin;
-                    this._owner.width = this._owner._rawWidth + dx;
-                    this._owner.xMin = tmp;
+                    if (this._owner != this._target.parent) {
+                        tmp = this._owner.xMin;
+                        this._owner.width = this._owner._rawWidth + dx;
+                        this._owner.xMin = tmp;
+                    }
+                    else
+                        this._owner.width = this._owner._rawWidth + dx;
                     break;
                 case fgui.RelationType.TopExt_Top:
                 case fgui.RelationType.TopExt_Bottom:
-                    tmp = this._owner.yMin;
-                    this._owner.height = this._owner._rawHeight - dy;
-                    this._owner.yMin = tmp + dy;
+                    if (this._owner != this._target.parent) {
+                        tmp = this._owner.yMin;
+                        this._owner.height = this._owner._rawHeight - dy;
+                        this._owner.yMin = tmp + dy;
+                    }
+                    else
+                        this._owner.height = this._owner._rawHeight - dy;
                     break;
                 case fgui.RelationType.BottomExt_Top:
                 case fgui.RelationType.BottomExt_Bottom:
-                    tmp = this._owner.yMin;
-                    this._owner.height = this._owner._rawHeight + dy;
-                    this._owner.yMin = tmp;
+                    if (this._owner != this._target.parent) {
+                        tmp = this._owner.yMin;
+                        this._owner.height = this._owner._rawHeight + dy;
+                        this._owner.yMin = tmp;
+                    }
+                    else
+                        this._owner.height = this._owner._rawHeight + dy;
                     break;
             }
         };
@@ -9868,7 +10966,7 @@ window.__extends = (this && this.__extends) || (function () {
         return RelationItem;
     }());
     fgui.RelationItem = RelationItem;
-    var RelationDef = /** @class */ (function () {
+    var RelationDef = (function () {
         function RelationDef() {
         }
         RelationDef.prototype.copyFrom = function (source) {
@@ -9882,7 +10980,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var Relations = /** @class */ (function () {
+    var Relations = (function () {
         function Relations(owner) {
             this._owner = owner;
             this._items = new Array();
@@ -10020,10 +11118,12 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var ScrollPane = /** @class */ (function (_super) {
+    var ScrollPane = (function (_super) {
         __extends(ScrollPane, _super);
         function ScrollPane() {
-            return _super !== null && _super.apply(this, arguments) || this;
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this._aniFlag = 0;
+            return _this;
         }
         ScrollPane.prototype.setup = function (buffer) {
             this._owner = (this.node["$gobj"]);
@@ -10033,11 +11133,11 @@ window.__extends = (this && this.__extends) || (function () {
             this._container = this._owner._container;
             this._container.parent = this._maskContainer;
             this._scrollBarMargin = new fgui.Margin();
-            this._scrollBarVisible = true;
             this._mouseWheelEnabled = true;
             this._xPos = 0;
             this._yPos = 0;
             this._aniFlag = 0;
+            this._tweening = 0;
             this._footerLockedSize = 0;
             this._headerLockedSize = 0;
             this._viewSize = new cc.Vec2();
@@ -10092,6 +11192,7 @@ window.__extends = (this && this.__extends) || (function () {
             this._inertiaDisabled = (flags & 256) != 0;
             if ((flags & 512) == 0)
                 this._maskContainer.addComponent(cc.Mask);
+            this._floating = (flags & 1024) != 0;
             if (scrollBarDisplay == fgui.ScrollBarDisplayType.Default)
                 scrollBarDisplay = fgui.UIConfig.defaultScrollBarDisplay;
             if (scrollBarDisplay != fgui.ScrollBarDisplayType.Hidden) {
@@ -10117,7 +11218,6 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 this._scrollBarDisplayAuto = scrollBarDisplay == fgui.ScrollBarDisplayType.Auto;
                 if (this._scrollBarDisplayAuto) {
-                    this._scrollBarVisible = false;
                     if (this._vtScrollBar)
                         this._vtScrollBar.node.active = false;
                     if (this._hzScrollBar)
@@ -10282,6 +11382,13 @@ window.__extends = (this && this.__extends) || (function () {
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(ScrollPane.prototype, "isDragged", {
+            get: function () {
+                return this._dragged;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(ScrollPane.prototype, "percX", {
             get: function () {
                 return this._overlapSize.x == 0 ? 0 : this._xPos / this._overlapSize.x;
@@ -10370,7 +11477,7 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
                 value = value + this._owner.margin.left + this._owner.margin.right;
-                if (this._vtScrollBar != null)
+                if (this._vtScrollBar != null && !this._floating)
                     value += this._vtScrollBar.width;
                 this._owner.width = value;
             },
@@ -10383,7 +11490,7 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
                 value = value + this._owner.margin.top + this._owner.margin.bottom;
-                if (this._hzScrollBar != null)
+                if (this._hzScrollBar != null && !this._floating)
                     value += this._hzScrollBar.height;
                 this._owner.height = value;
             },
@@ -10421,11 +11528,17 @@ window.__extends = (this && this.__extends) || (function () {
             configurable: true
         });
         ScrollPane.prototype.setCurrentPageX = function (value, ani) {
-            if (this._pageMode && this._overlapSize.x > 0)
+            if (!this._pageMode)
+                return;
+            this._owner.ensureBoundsCorrect();
+            if (this._overlapSize.x > 0)
                 this.setPosX(value * this._pageSize.x, ani);
         };
         ScrollPane.prototype.setCurrentPageY = function (value, ani) {
-            if (this._pageMode && this._overlapSize.y > 0)
+            if (!this._pageMode)
+                return;
+            this._owner.ensureBoundsCorrect();
+            if (this._overlapSize.y > 0)
                 this.setPosY(value * this._pageSize.y, ani);
         };
         Object.defineProperty(ScrollPane.prototype, "isBottomMost", {
@@ -10579,7 +11692,7 @@ window.__extends = (this && this.__extends) || (function () {
             if (ScrollPane.draggingPane == this)
                 ScrollPane.draggingPane = null;
             ScrollPane._gestureFlag = 0;
-            this.isDragged = false;
+            this._dragged = false;
         };
         ScrollPane.prototype.lockHeader = function (size) {
             if (this._headerLockedSize == size)
@@ -10594,8 +11707,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this._tweenChange.set(cc.Vec2.ZERO);
                 this._tweenChange[this._refreshBarAxis] = this._headerLockedSize - this._tweenStart[this._refreshBarAxis];
                 this._tweenDuration.x = this._tweenDuration.y = ScrollPane.TWEEN_TIME_DEFAULT;
-                this._tweenTime.set(cc.Vec2.ZERO);
-                this._tweening = 2;
+                this.startTween(2);
             }
         };
         ScrollPane.prototype.lockFooter = function (size) {
@@ -10616,8 +11728,7 @@ window.__extends = (this && this.__extends) || (function () {
                     max += this._footerLockedSize;
                 this._tweenChange[this._refreshBarAxis] = -max - this._tweenStart[this._refreshBarAxis];
                 this._tweenDuration.x = this._tweenDuration.y = ScrollPane.TWEEN_TIME_DEFAULT;
-                this._tweenTime.set(cc.Vec2.ZERO);
-                this._tweening = 2;
+                this.startTween(2);
             }
         };
         ScrollPane.prototype.onOwnerSizeChanged = function () {
@@ -10641,7 +11752,7 @@ window.__extends = (this && this.__extends) || (function () {
                     index = this.currentPageY;
                 if (index < this._pageController.pageCount) {
                     var c = this._pageController;
-                    this._pageController = null; //防止HandleControllerChanged的调用
+                    this._pageController = null;
                     c.selectedIndex = index;
                     this._pageController = c;
                 }
@@ -10649,7 +11760,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         ScrollPane.prototype.adjustMaskContainer = function () {
             var mx = 0;
-            if (this._displayOnLeft && this._vtScrollBar != null)
+            if (this._displayOnLeft && this._vtScrollBar != null && !this._floating)
                 mx = Math.floor(this._owner.margin.left + this._vtScrollBar.width);
             this._maskContainer.setAnchorPoint(this._owner._alignOffset.x / this._viewSize.x, 1 - this._owner._alignOffset.y / this._viewSize.y);
             if (this._owner._customMask)
@@ -10660,7 +11771,7 @@ window.__extends = (this && this.__extends) || (function () {
         ScrollPane.prototype.setSize = function (aWidth, aHeight) {
             if (this._hzScrollBar) {
                 this._hzScrollBar.y = aHeight - this._hzScrollBar.height;
-                if (this._vtScrollBar && !this._vScrollNone) {
+                if (this._vtScrollBar) {
                     this._hzScrollBar.width = aWidth - this._vtScrollBar.width - this._scrollBarMargin.left - this._scrollBarMargin.right;
                     if (this._displayOnLeft)
                         this._hzScrollBar.x = this._scrollBarMargin.left + this._vtScrollBar.width;
@@ -10683,9 +11794,9 @@ window.__extends = (this && this.__extends) || (function () {
             }
             this._viewSize.x = aWidth;
             this._viewSize.y = aHeight;
-            if (this._hzScrollBar && !this._hScrollNone)
+            if (this._hzScrollBar && !this._floating)
                 this._viewSize.y -= this._hzScrollBar.height;
-            if (this._vtScrollBar && !this._vScrollNone)
+            if (this._vtScrollBar && !this._floating)
                 this._viewSize.x -= this._vtScrollBar.width;
             this._viewSize.x -= (this._owner.margin.left + this._owner.margin.right);
             this._viewSize.y -= (this._owner.margin.top + this._owner.margin.bottom);
@@ -10710,7 +11821,6 @@ window.__extends = (this && this.__extends) || (function () {
             this._contentSize.y += deltaHeight;
             this.handleSizeChanged();
             if (this._tweening == 1) {
-                //如果原来滚动位置是贴边，加入处理继续贴边。
                 if (deltaWidth != 0 && isRightmost && this._tweenChange.x < 0) {
                     this._xPos = this._overlapSize.x;
                     this._tweenChange.x = -this._xPos - this._tweenStart.x;
@@ -10721,7 +11831,6 @@ window.__extends = (this && this.__extends) || (function () {
                 }
             }
             else if (this._tweening == 2) {
-                //重新调整起始位置，确保能够顺滑滚下去
                 if (deltaPosX != 0) {
                     this._container.x -= deltaPosX;
                     this._tweenStart.x -= deltaPosX;
@@ -10733,7 +11842,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._yPos = -(-this._container.y);
                 }
             }
-            else if (this.isDragged) {
+            else if (this._dragged) {
                 if (deltaPosX != 0) {
                     this._container.x -= deltaPosX;
                     this._containerPos.x -= deltaPosX;
@@ -10746,7 +11855,6 @@ window.__extends = (this && this.__extends) || (function () {
                 }
             }
             else {
-                //如果原来滚动位置是贴边，加入处理继续贴边。
                 if (deltaWidth != 0 && isRightmost) {
                     this._xPos = this._overlapSize.x;
                     this._container.x = -this._xPos;
@@ -10759,61 +11867,31 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._pageMode)
                 this.updatePageController();
         };
-        ScrollPane.prototype.handleSizeChanged = function (onScrolling) {
+        ScrollPane.prototype.handleSizeChanged = function () {
             if (this._displayInDemand) {
-                if (this._vtScrollBar) {
-                    if (this._contentSize.y <= this._viewSize.y) {
-                        if (!this._vScrollNone) {
-                            this._vScrollNone = true;
-                            this._viewSize.x += this._vtScrollBar.width;
-                        }
-                    }
-                    else {
-                        if (this._vScrollNone) {
-                            this._vScrollNone = false;
-                            this._viewSize.x -= this._vtScrollBar.width;
-                        }
-                    }
-                }
-                if (this._hzScrollBar) {
-                    if (this._contentSize.x <= this._viewSize.x) {
-                        if (!this._hScrollNone) {
-                            this._hScrollNone = true;
-                            this._viewSize.y += this._hzScrollBar.height;
-                        }
-                    }
-                    else {
-                        if (this._hScrollNone) {
-                            this._hScrollNone = false;
-                            this._viewSize.y -= this._hzScrollBar.height;
-                        }
-                    }
-                }
+                this._vScrollNone = this._contentSize.y <= this._viewSize.y;
+                this._hScrollNone = this._contentSize.x <= this._viewSize.x;
             }
             if (this._vtScrollBar) {
-                if (this._viewSize.y < this._vtScrollBar.minSize)
-                    //没有使用this._vtScrollBar.visible是因为ScrollBar用了一个trick，它并不在owner的DisplayList里，因此this._vtScrollBar.visible是无效的
-                    this._vtScrollBar.node.active = false;
-                else {
-                    this._vtScrollBar.node.active = this._scrollBarVisible && !this._vScrollNone;
-                    if (this._contentSize.y == 0)
-                        this._vtScrollBar.displayPerc = 0;
-                    else
-                        this._vtScrollBar.displayPerc = Math.min(1, this._viewSize.y / this._contentSize.y);
-                }
+                if (this._contentSize.y == 0)
+                    this._vtScrollBar.setDisplayPerc(0);
+                else
+                    this._vtScrollBar.setDisplayPerc(Math.min(1, this._viewSize.y / this._contentSize.y));
             }
             if (this._hzScrollBar) {
-                if (this._viewSize.x < this._hzScrollBar.minSize)
-                    this._hzScrollBar.node.active = false;
-                else {
-                    this._hzScrollBar.node.active = this._scrollBarVisible && !this._hScrollNone;
-                    if (this._contentSize.x == 0)
-                        this._hzScrollBar.displayPerc = 0;
-                    else
-                        this._hzScrollBar.displayPerc = Math.min(1, this._viewSize.x / this._contentSize.x);
-                }
+                if (this._contentSize.x == 0)
+                    this._hzScrollBar.setDisplayPerc(0);
+                else
+                    this._hzScrollBar.setDisplayPerc(Math.min(1, this._viewSize.x / this._contentSize.x));
             }
-            this._maskContainer.setContentSize(this._viewSize.x, this._viewSize.y);
+            this.updateScrollBarVisible();
+            var maskWidth = this._viewSize.x;
+            var maskHeight = this._viewSize.y;
+            if (this._vScrollNone && this._vtScrollBar)
+                maskWidth += this._vtScrollBar.width;
+            if (this._hScrollNone && this._hzScrollBar)
+                maskHeight += this._hzScrollBar.height;
+            this._maskContainer.setContentSize(maskWidth, maskHeight);
             if (this._vtScrollBar)
                 this._vtScrollBar.handlePositionChanged();
             if (this._hzScrollBar)
@@ -10830,7 +11908,6 @@ window.__extends = (this && this.__extends) || (function () {
                 this._overlapSize.y = Math.ceil(Math.max(0, this._contentSize.y - this._viewSize.y));
             else
                 this._overlapSize.y = 0;
-            //边界检查
             this._xPos = fgui.ToolSet.clamp(this._xPos, 0, this._overlapSize.x);
             this._yPos = fgui.ToolSet.clamp(this._yPos, 0, this._overlapSize.y);
             var max = this._overlapSize[this._refreshBarAxis];
@@ -10854,8 +11931,7 @@ window.__extends = (this && this.__extends) || (function () {
                 else
                     this._footer.width = this._viewSize.x;
             }
-            this.syncScrollBar(true);
-            this.checkRefreshBar();
+            this.updateScrollBarPos();
             if (this._pageMode)
                 this.updatePageController();
         };
@@ -10880,17 +11956,16 @@ window.__extends = (this && this.__extends) || (function () {
             }
             this.refresh2();
             this._owner.node.emit(fgui.Event.SCROLL, this._owner);
-            if (this._needRefresh) //在onScroll事件里开发者可能修改位置，这里再刷新一次，避免闪烁
-             {
+            if (this._needRefresh) {
                 this._needRefresh = false;
                 this.unschedule(this.refresh);
                 this.refresh2();
             }
-            this.syncScrollBar();
+            this.updateScrollBarPos();
             this._aniFlag = 0;
         };
         ScrollPane.prototype.refresh2 = function () {
-            if (this._aniFlag == 1 && !this.isDragged) {
+            if (this._aniFlag == 1 && !this._dragged) {
                 var posX;
                 var posY;
                 if (this._overlapSize.x > 0)
@@ -10908,13 +11983,12 @@ window.__extends = (this && this.__extends) || (function () {
                     posY = 0;
                 }
                 if (posX != this._container.x || posY != (-this._container.y)) {
-                    this._tweening = 1;
-                    this._tweenTime.set(cc.Vec2.ZERO);
                     this._tweenDuration.x = this._tweenDuration.y = ScrollPane.TWEEN_TIME_GO;
                     this._tweenStart.x = this._container.x;
                     this._tweenStart.y = (-this._container.y);
                     this._tweenChange.x = posX - this._tweenStart.x;
                     this._tweenChange.y = posY - this._tweenStart.y;
+                    this.startTween(1);
                 }
                 else if (this._tweening != 0)
                     this.killTween();
@@ -10928,18 +12002,6 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._pageMode)
                 this.updatePageController();
         };
-        ScrollPane.prototype.syncScrollBar = function (end) {
-            if (this._vtScrollBar != null) {
-                this._vtScrollBar.scrollPerc = this._overlapSize.y == 0 ? 0 : fgui.ToolSet.clamp(-(-this._container.y), 0, this._overlapSize.y) / this._overlapSize.y;
-                if (this._scrollBarDisplayAuto)
-                    this.showScrollBar(!end);
-            }
-            if (this._hzScrollBar != null) {
-                this._hzScrollBar.scrollPerc = this._overlapSize.x == 0 ? 0 : fgui.ToolSet.clamp(-this._container.x, 0, this._overlapSize.x) / this._overlapSize.x;
-                if (this._scrollBarDisplayAuto)
-                    this.showScrollBar(!end);
-            }
-        };
         ScrollPane.prototype.onTouchBegin = function (evt) {
             if (!this._touchEffect)
                 return;
@@ -10947,10 +12009,10 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._tweening != 0) {
                 this.killTween();
                 fgui.GRoot.inst.inputProcessor.cancelClick(evt.touchId);
-                this.isDragged = true;
+                this._dragged = true;
             }
             else
-                this.isDragged = false;
+                this._dragged = false;
             var pt = this._owner.globalToLocal(evt.pos.x, evt.pos.y, ScrollPane.sHelperPoint);
             this._containerPos.x = this._container.x;
             this._containerPos.y = -this._container.y;
@@ -10968,7 +12030,7 @@ window.__extends = (this && this.__extends) || (function () {
                 return;
             if (!this._touchEffect)
                 return;
-            if (ScrollPane.draggingPane != null && ScrollPane.draggingPane != this || fgui.GObject.draggingObject != null) //已经有其他拖动
+            if (ScrollPane.draggingPane != null && ScrollPane.draggingPane != this || fgui.GObject.draggingObject != null)
                 return;
             var pt = this._owner.globalToLocal(evt.pos.x, evt.pos.y, ScrollPane.sHelperPoint);
             var sensitivity = fgui.UIConfig.touchScrollSensitivity;
@@ -10976,15 +12038,13 @@ window.__extends = (this && this.__extends) || (function () {
             var sv, sh, st;
             if (this._scrollType == fgui.ScrollType.Vertical) {
                 if (!this._isHoldAreaDone) {
-                    //表示正在监测垂直方向的手势
                     ScrollPane._gestureFlag |= 1;
                     diff = Math.abs(this._beginTouchPos.y - pt.y);
                     if (diff < sensitivity)
                         return;
-                    if ((ScrollPane._gestureFlag & 2) != 0) //已经有水平方向的手势在监测，那么我们用严格的方式检查是不是按垂直方向移动，避免冲突
-                     {
+                    if ((ScrollPane._gestureFlag & 2) != 0) {
                         diff2 = Math.abs(this._beginTouchPos.x - pt.x);
-                        if (diff < diff2) //不通过则不允许滚动了
+                        if (diff < diff2)
                             return;
                     }
                 }
@@ -11058,7 +12118,6 @@ window.__extends = (this && this.__extends) || (function () {
                 else
                     this._container.x = newPosX;
             }
-            //更新速度
             var now = fgui.ToolSet.getTime();
             var deltaTime = Math.max(now - this._lastMoveTime, 1 / 60);
             var deltaPositionX = pt.x - this._lastTouchPos.x;
@@ -11070,8 +12129,7 @@ window.__extends = (this && this.__extends) || (function () {
             if (deltaTime != 0) {
                 var frameRate = 60;
                 var elapsed = deltaTime * frameRate - 1;
-                if (elapsed > 1) //速度衰减
-                 {
+                if (elapsed > 1) {
                     var factor = Math.pow(0.833, elapsed);
                     this._velocity.x = this._velocity.x * factor;
                     this._velocity.y = this._velocity.y * factor;
@@ -11079,8 +12137,6 @@ window.__extends = (this && this.__extends) || (function () {
                 this._velocity.x = fgui.ToolSet.lerp(this._velocity.x, deltaPositionX * 60 / frameRate / deltaTime, deltaTime * 10);
                 this._velocity.y = fgui.ToolSet.lerp(this._velocity.y, deltaPositionY * 60 / frameRate / deltaTime, deltaTime * 10);
             }
-            /*速度计算使用的是本地位移，但在后续的惯性滚动判断中需要用到屏幕位移，所以这里要记录一个位移的比例。
-            */
             var deltaGlobalPositionX = this._lastTouchGlobalPos.x - evt.pos.x;
             var deltaGlobalPositionY = this._lastTouchGlobalPos.y - evt.pos.y;
             if (deltaPositionX != 0)
@@ -11091,12 +12147,10 @@ window.__extends = (this && this.__extends) || (function () {
             this._lastTouchGlobalPos.x = evt.pos.x;
             this._lastTouchGlobalPos.y = evt.pos.y;
             this._lastMoveTime = now;
-            //同步更新pos值
             if (this._overlapSize.x > 0)
                 this._xPos = fgui.ToolSet.clamp(-this._container.x, 0, this._overlapSize.x);
             if (this._overlapSize.y > 0)
                 this._yPos = fgui.ToolSet.clamp(-(-this._container.y), 0, this._overlapSize.y);
-            //循环滚动特别检查
             if (this._loop != 0) {
                 newPosX = this._container.x;
                 newPosY = (-this._container.y);
@@ -11107,9 +12161,9 @@ window.__extends = (this && this.__extends) || (function () {
             }
             ScrollPane.draggingPane = this;
             this._isHoldAreaDone = true;
-            this.isDragged = true;
-            this.syncScrollBar();
-            this.checkRefreshBar();
+            this._dragged = true;
+            this.updateScrollBarPos();
+            this.updateScrollBarVisible();
             if (this._pageMode)
                 this.updatePageController();
             this._owner.node.emit(fgui.Event.SCROLL), this._owner;
@@ -11118,11 +12172,11 @@ window.__extends = (this && this.__extends) || (function () {
             if (ScrollPane.draggingPane == this)
                 ScrollPane.draggingPane = null;
             ScrollPane._gestureFlag = 0;
-            if (!this.isDragged || !this._touchEffect || !this._owner.node.activeInHierarchy) {
-                this.isDragged = false;
+            if (!this._dragged || !this._touchEffect || !this._owner.node.activeInHierarchy) {
+                this._dragged = false;
                 return;
             }
-            this.isDragged = false;
+            this._dragged = false;
             this._tweenStart.x = this._container.x;
             this._tweenStart.y = -this._container.y;
             ScrollPane.sEndPos.set(this._tweenStart);
@@ -11174,7 +12228,6 @@ window.__extends = (this && this.__extends) || (function () {
                 this._tweenDuration.x = this._tweenDuration.y = ScrollPane.TWEEN_TIME_DEFAULT;
             }
             else {
-                //更新速度
                 if (!this._inertiaDisabled) {
                     var frameRate = 60;
                     var elapsed = (fgui.ToolSet.getTime() - this._lastMoveTime) * frameRate - 1;
@@ -11183,38 +12236,35 @@ window.__extends = (this && this.__extends) || (function () {
                         this._velocity.x = this._velocity.x * factor;
                         this._velocity.y = this._velocity.y * factor;
                     }
-                    //根据速度计算目标位置和需要时间
                     this.updateTargetAndDuration(this._tweenStart, ScrollPane.sEndPos);
                 }
                 else
                     this._tweenDuration.x = this._tweenDuration.y = ScrollPane.TWEEN_TIME_DEFAULT;
                 ScrollPane.sOldChange.x = ScrollPane.sEndPos.x - this._tweenStart.x;
                 ScrollPane.sOldChange.y = ScrollPane.sEndPos.y - this._tweenStart.y;
-                //调整目标位置
                 this.loopCheckingTarget(ScrollPane.sEndPos);
                 if (this._pageMode || this._snapToItem)
                     this.alignPosition(ScrollPane.sEndPos, true);
                 this._tweenChange.x = ScrollPane.sEndPos.x - this._tweenStart.x;
                 this._tweenChange.y = ScrollPane.sEndPos.y - this._tweenStart.y;
                 if (this._tweenChange.x == 0 && this._tweenChange.y == 0) {
-                    if (this._scrollBarDisplayAuto)
-                        this.showScrollBar(false);
+                    this.updateScrollBarVisible();
                     return;
                 }
-                //如果目标位置已调整，随之调整需要时间
                 if (this._pageMode || this._snapToItem) {
                     this.fixDuration("x", ScrollPane.sOldChange.x);
                     this.fixDuration("y", ScrollPane.sOldChange.y);
                 }
             }
-            this._tweening = 2;
-            this._tweenTime.set(cc.Vec2.ZERO);
+            this.startTween(2);
         };
         ScrollPane.prototype.onRollOver = function () {
-            this.showScrollBar(true);
+            this._hover = true;
+            this.updateScrollBarVisible();
         };
         ScrollPane.prototype.onRollOut = function () {
-            this.showScrollBar(false);
+            this._hover = false;
+            this.updateScrollBarVisible();
         };
         ScrollPane.prototype.onMouseWheel = function (evt) {
             if (!this._mouseWheelEnabled)
@@ -11233,23 +12283,43 @@ window.__extends = (this && this.__extends) || (function () {
                     this.setPosY(this._yPos + this._mouseWheelStep * delta, false);
             }
         };
-        ScrollPane.prototype.showScrollBar = function (val) {
-            if (val) {
-                this._showScrollBar(NaN);
-                this.unschedule(this._showScrollBar);
+        ScrollPane.prototype.updateScrollBarPos = function () {
+            if (this._vtScrollBar != null)
+                this._vtScrollBar.setScrollPerc(this._overlapSize.y == 0 ? 0 : fgui.ToolSet.clamp(this._container.y, 0, this._overlapSize.y) / this._overlapSize.y);
+            if (this._hzScrollBar != null)
+                this._hzScrollBar.setScrollPerc(this._overlapSize.x == 0 ? 0 : fgui.ToolSet.clamp(-this._container.x, 0, this._overlapSize.x) / this._overlapSize.x);
+            this.checkRefreshBar();
+        };
+        ScrollPane.prototype.updateScrollBarVisible = function () {
+            if (this._vtScrollBar) {
+                if (this._viewSize.y <= this._vtScrollBar.minSize || this._vScrollNone)
+                    this._vtScrollBar.node.active = false;
+                else
+                    this.updateScrollBarVisible2(this._vtScrollBar);
             }
-            else {
-                if (!cc.director.getScheduler().isScheduled(this._showScrollBar, this))
-                    this.scheduleOnce(this._showScrollBar, 0.5);
+            if (this._hzScrollBar) {
+                if (this._viewSize.x <= this._hzScrollBar.minSize || this._hScrollNone)
+                    this._hzScrollBar.node.active = false;
+                else
+                    this.updateScrollBarVisible2(this._hzScrollBar);
             }
         };
-        ScrollPane.prototype._showScrollBar = function (dt) {
-            var val = isNaN(dt);
-            this._scrollBarVisible = val && this._viewSize.x > 0 && this._viewSize.y > 0;
-            if (this._vtScrollBar)
-                this._vtScrollBar.node.active = this._scrollBarVisible && !this._vScrollNone;
-            if (this._hzScrollBar)
-                this._hzScrollBar.node.active = this._scrollBarVisible && !this._hScrollNone;
+        ScrollPane.prototype.updateScrollBarVisible2 = function (bar) {
+            if (this._scrollBarDisplayAuto)
+                fgui.GTween.kill(bar, false, "alpha");
+            if (this._scrollBarDisplayAuto && !this._hover && this._tweening == 0 && !this._dragged && !bar.gripDragging) {
+                if (bar.node.active)
+                    fgui.GTween.to(1, 0, 0.5).setDelay(0.5).onComplete(this.__barTweenComplete, this).setTarget(bar, "alpha");
+            }
+            else {
+                bar.alpha = 1;
+                bar.node.active = true;
+            }
+        };
+        ScrollPane.prototype.__barTweenComplete = function (tweener) {
+            var bar = (tweener.target);
+            bar.alpha = 1;
+            bar.node.active = false;
         };
         ScrollPane.prototype.getLoopPartSize = function (division, axis) {
             return (this._contentSize[axis] + (axis == "x" ? this._owner.columnGap : this._owner.lineGap)) / division;
@@ -11363,23 +12433,18 @@ window.__extends = (this && this.__extends) || (function () {
                 var change = inertialScrolling ? (pos - this._containerPos[axis]) : (pos - (axis == "x" ? this._container.x : (-this._container.y)));
                 var testPageSize = Math.min(this._pageSize[axis], this._contentSize[axis] - (page + 1) * this._pageSize[axis]);
                 var delta = -pos - page * this._pageSize[axis];
-                //页面吸附策略
-                if (Math.abs(change) > this._pageSize[axis]) //如果滚动距离超过1页,则需要超过页面的一半，才能到更下一页
-                 {
+                if (Math.abs(change) > this._pageSize[axis]) {
                     if (delta > testPageSize * 0.5)
                         page++;
                 }
-                else //否则只需要页面的1/3，当然，需要考虑到左移和右移的情况
-                 {
+                else {
                     if (delta > testPageSize * (change < 0 ? 0.3 : 0.7))
                         page++;
                 }
-                //重新计算终点
                 pos = -page * this._pageSize[axis];
-                if (pos < -this._overlapSize[axis]) //最后一页未必有pageSize那么大
+                if (pos < -this._overlapSize[axis])
                     pos = -this._overlapSize[axis];
             }
-            //惯性滚动模式下，会增加判断尽量不要滚动超过一页
             if (inertialScrolling) {
                 var oldPos = this._tweenStart[axis];
                 var oldPage;
@@ -11412,13 +12477,10 @@ window.__extends = (this && this.__extends) || (function () {
             else if (pos < -this._overlapSize[axis])
                 pos = -this._overlapSize[axis];
             else {
-                //以屏幕像素为基准
                 var isMobile = cc.sys.isMobile;
                 var v2 = Math.abs(v) * this._velocityScale;
-                //在移动设备上，需要对不同分辨率做一个适配，我们的速度判断以1136分辨率为基准
                 if (isMobile)
                     v2 *= 1136 / Math.max(cc.winSize.width, cc.winSize.height);
-                //这里有一些阈值的处理，因为在低速内，不希望产生较大的滚动（甚至不滚动）
                 var ratio = 0;
                 if (this._pageMode || !isMobile) {
                     if (v2 > 500)
@@ -11434,11 +12496,7 @@ window.__extends = (this && this.__extends) || (function () {
                     v2 *= ratio;
                     v *= ratio;
                     this._velocity[axis] = v;
-                    //算法：v*（this._decelerationRate的n次幂）= 60，即在n帧后速度降为60（假设每秒60帧）。
                     duration = Math.log(60 / v2) / Math.log(this._decelerationRate) / 60;
-                    //计算距离要使用本地速度
-                    //理论公式貌似滚动的距离不够，改为经验公式
-                    //var change:number = (v/ 60 - 1) / (1 - this._decelerationRate);
                     var change = Math.floor(v * duration * 0.4);
                     pos += change;
                 }
@@ -11456,13 +12514,18 @@ window.__extends = (this && this.__extends) || (function () {
                 newDuration = ScrollPane.TWEEN_TIME_DEFAULT;
             this._tweenDuration[axis] = newDuration;
         };
+        ScrollPane.prototype.startTween = function (type) {
+            this._tweenTime.set(cc.Vec2.ZERO);
+            this._tweening = type;
+            this.updateScrollBarVisible();
+        };
         ScrollPane.prototype.killTween = function () {
-            if (this._tweening == 1) //取消类型为1的tween需立刻设置到终点
-             {
+            if (this._tweening == 1) {
                 this._container.setPosition(this._tweenStart.x + this._tweenChange.x, -(this._tweenStart.y + this._tweenChange.y));
                 this._owner.node.emit(fgui.Event.SCROLL, this._owner);
             }
             this._tweening = 0;
+            this.updateScrollBarVisible();
             this._owner.node.emit(fgui.Event.SCROLL_END, this._owner);
         };
         ScrollPane.prototype.checkRefreshBar = function () {
@@ -11524,14 +12587,13 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._tweenChange.x == 0 && this._tweenChange.y == 0) {
                 this._tweening = 0;
                 this.loopCheckingCurrent();
-                this.syncScrollBar(true);
-                this.checkRefreshBar();
+                this.updateScrollBarPos();
+                this.updateScrollBarVisible();
                 this._owner.node.emit(fgui.Event.SCROLL, this._owner);
                 this._owner.node.emit(fgui.Event.SCROLL_END, this._owner);
             }
             else {
-                this.syncScrollBar(false);
-                this.checkRefreshBar();
+                this.updateScrollBarPos();
                 this._owner.node.emit(fgui.Event.SCROLL, this._owner);
             }
             return true;
@@ -11562,16 +12624,14 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 if (this._tweening == 2 && this._bouncebackEffect) {
                     if (newValue > 20 + threshold1 && this._tweenChange[axis] > 0
-                        || newValue > threshold1 && this._tweenChange[axis] == 0) //开始回弹
-                     {
+                        || newValue > threshold1 && this._tweenChange[axis] == 0) {
                         this._tweenTime[axis] = 0;
                         this._tweenDuration[axis] = ScrollPane.TWEEN_TIME_DEFAULT;
                         this._tweenChange[axis] = -newValue + threshold1;
                         this._tweenStart[axis] = newValue;
                     }
                     else if (newValue < threshold2 - 20 && this._tweenChange[axis] < 0
-                        || newValue < threshold2 && this._tweenChange[axis] == 0) //开始回弹
-                     {
+                        || newValue < threshold2 && this._tweenChange[axis] == 0) {
                         this._tweenTime[axis] = 0;
                         this._tweenDuration[axis] = ScrollPane.TWEEN_TIME_DEFAULT;
                         this._tweenChange[axis] = threshold2 - newValue;
@@ -11594,12 +12654,12 @@ window.__extends = (this && this.__extends) || (function () {
             return newValue;
         };
         ScrollPane.easeFunc = function (t, d) {
-            return (t = t / d - 1) * t * t + 1; //cubicOut
+            return (t = t / d - 1) * t * t + 1;
         };
         ScrollPane._gestureFlag = 0;
-        ScrollPane.TWEEN_TIME_GO = 0.5; //调用SetPos(ani)时使用的缓动时间
-        ScrollPane.TWEEN_TIME_DEFAULT = 0.3; //惯性滚动的最小缓动时间
-        ScrollPane.PULL_RATIO = 0.5; //下拉过顶或者上拉过底时允许超过的距离占显示区域的比例
+        ScrollPane.TWEEN_TIME_GO = 0.5;
+        ScrollPane.TWEEN_TIME_DEFAULT = 0.3;
+        ScrollPane.PULL_RATIO = 0.5;
         ScrollPane.sHelperPoint = new cc.Vec2();
         ScrollPane.sHelperRect = new cc.Rect();
         ScrollPane.sEndPos = new cc.Vec2();
@@ -11610,7 +12670,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var Transition = /** @class */ (function () {
+    var Transition = (function () {
         function Transition(owner) {
             this._ownerBaseX = 0;
             this._ownerBaseY = 0;
@@ -11691,8 +12751,7 @@ window.__extends = (this && this.__extends) || (function () {
                     if (trans == this)
                         trans = null;
                     if (trans != null) {
-                        if (item.value.playTimes == 0) //stop
-                         {
+                        if (item.value.playTimes == 0) {
                             var j;
                             for (j = i - 1; j >= 0; j--) {
                                 var item2 = this._items[j];
@@ -11706,7 +12765,7 @@ window.__extends = (this && this.__extends) || (function () {
                             if (j < 0)
                                 item.value.stopTime = 0;
                             else
-                                trans = null; //no need to handle stop anymore
+                                trans = null;
                         }
                         else
                             item.value.stopTime = -1;
@@ -11729,7 +12788,7 @@ window.__extends = (this && this.__extends) || (function () {
             this._totalTimes = 0;
             var func = this._onComplete;
             this._onComplete = null;
-            fgui.GTween.kill(this); //delay start
+            fgui.GTween.kill(this);
             var cnt = this._items.length;
             if (this._reversed) {
                 for (var i = cnt - 1; i >= 0; i--) {
@@ -11759,8 +12818,7 @@ window.__extends = (this && this.__extends) || (function () {
             if (item.tweener != null) {
                 item.tweener.kill(setToComplete);
                 item.tweener = null;
-                if (item.type == TransitionActionType.Shake && !setToComplete) //震动必须归位，否则下次就越震越远了。
-                 {
+                if (item.type == TransitionActionType.Shake && !setToComplete) {
                     item.target._gearLocked = true;
                     item.target.setPosition(item.target.x - item.value.lastOffsetX, item.target.y - item.value.lastOffsetY);
                     item.target._gearLocked = false;
@@ -11790,11 +12848,11 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 else if (item.type == TransitionActionType.Animation) {
                     if (paused) {
-                        item.value.flag = (item.target).playing;
-                        (item.target).playing = false;
+                        item.value.flag = item.target.getProp(fgui.ObjectPropID.Playing);
+                        item.target.setProp(fgui.ObjectPropID.Playing, false);
                     }
                     else
-                        (item.target).playing = item.value.flag;
+                        item.target.setProp(fgui.ObjectPropID.Playing, item.value.flag);
                 }
                 if (item.tweener != null)
                     item.tweener.setPaused(paused);
@@ -11802,7 +12860,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         Transition.prototype.dispose = function () {
             if (this._playing)
-                fgui.GTween.kill(this); //delay start
+                fgui.GTween.kill(this);
             var cnt = this._items.length;
             for (var i = 0; i < cnt; i++) {
                 var item = this._items[i];
@@ -11973,7 +13031,7 @@ window.__extends = (this && this.__extends) || (function () {
                             }
                             else if (item.type == TransitionActionType.Animation) {
                                 if (item.target != null)
-                                    (item.target).timeScale = value;
+                                    item.target.setProp(fgui.ObjectPropID.TimeScale, value);
                             }
                         }
                     }
@@ -12165,8 +13223,8 @@ window.__extends = (this && this.__extends) || (function () {
                 if (value.flag)
                     continue;
                 target = item.target;
-                frame = target.frame;
-                playStartTime = target.playing ? 0 : -1;
+                frame = target.getProp(fgui.ObjectPropID.Frame);
+                playStartTime = target.getProp(fgui.ObjectPropID.Playing) ? 0 : -1;
                 playTotalTime = 0;
                 for (var j = i; j < cnt; j++) {
                     item = this._items[j];
@@ -12197,10 +13255,10 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 if (playStartTime >= 0)
                     playTotalTime += (this._startTime - playStartTime);
-                target.playing = playStartTime >= 0;
-                target.frame = frame;
+                target.setProp(fgui.ObjectPropID.Playing, playStartTime >= 0);
+                target.setProp(fgui.ObjectPropID.Frame, frame);
                 if (playTotalTime > 0)
-                    target.advance(playTotalTime * 1000);
+                    target.setProp(fgui.ObjectPropID.DeltaTime, playTotalTime * 1000);
             }
         };
         Transition.prototype.onDelayedPlayItem = function (tweener) {
@@ -12213,8 +13271,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         Transition.prototype.onTweenStart = function (tweener) {
             var item = tweener.target;
-            if (item.type == TransitionActionType.XY || item.type == TransitionActionType.Size) //位置和大小要到start才最终确认起始值
-             {
+            if (item.type == TransitionActionType.XY || item.type == TransitionActionType.Size) {
                 var startValue;
                 var endValue;
                 if (this._reversed) {
@@ -12228,31 +13285,47 @@ window.__extends = (this && this.__extends) || (function () {
                 if (item.type == TransitionActionType.XY) {
                     if (item.target != this._owner) {
                         if (!startValue.b1)
-                            startValue.f1 = item.target.x;
+                            tweener.startValue.x = item.target.x;
+                        else if (startValue.b3)
+                            tweener.startValue.x = startValue.f1 * this._owner.width;
                         if (!startValue.b2)
-                            startValue.f2 = item.target.y;
+                            tweener.startValue.y = item.target.y;
+                        else if (startValue.b3)
+                            tweener.startValue.y = startValue.f2 * this._owner.height;
+                        if (!endValue.b1)
+                            tweener.endValue.x = tweener.startValue.x;
+                        else if (endValue.b3)
+                            tweener.endValue.x = endValue.f1 * this._owner.width;
+                        if (!endValue.b2)
+                            tweener.endValue.y = tweener.startValue.y;
+                        else if (endValue.b3)
+                            tweener.endValue.y = endValue.f2 * this._owner.height;
                     }
                     else {
                         if (!startValue.b1)
-                            startValue.f1 = item.target.x - this._ownerBaseX;
+                            tweener.startValue.x = item.target.x - this._ownerBaseX;
                         if (!startValue.b2)
-                            startValue.f2 = item.target.y - this._ownerBaseY;
+                            tweener.startValue.y = item.target.y - this._ownerBaseY;
+                        if (!endValue.b1)
+                            tweener.endValue.x = tweener.startValue.x;
+                        if (!endValue.b2)
+                            tweener.endValue.y = tweener.startValue.y;
                     }
                 }
                 else {
                     if (!startValue.b1)
-                        startValue.f1 = item.target.width;
+                        tweener.startValue.x = item.target.width;
                     if (!startValue.b2)
-                        startValue.f2 = item.target.height;
+                        tweener.startValue.y = item.target.height;
+                    if (!endValue.b1)
+                        tweener.endValue.x = tweener.startValue.x;
+                    if (!endValue.b2)
+                        tweener.endValue.y = tweener.startValue.y;
                 }
-                if (!endValue.b1)
-                    endValue.f1 = startValue.f1;
-                if (!endValue.b2)
-                    endValue.f2 = startValue.f2;
-                tweener.startValue.x = startValue.f1;
-                tweener.startValue.y = startValue.f2;
-                tweener.endValue.x = endValue.f1;
-                tweener.endValue.y = endValue.f2;
+                if (item.tweenConfig.path) {
+                    item.value.b1 = item.value.b2 = true;
+                    tweener.setPath(item.tweenConfig.path);
+                }
             }
             this.callHook(item, false);
         };
@@ -12265,6 +13338,10 @@ window.__extends = (this && this.__extends) || (function () {
                 case TransitionActionType.Skew:
                     item.value.f1 = tweener.value.x;
                     item.value.f2 = tweener.value.y;
+                    if (item.tweenConfig.path) {
+                        item.value.f1 += tweener.startValue.x;
+                        item.value.f2 += tweener.startValue.y;
+                    }
                     break;
                 case TransitionActionType.Alpha:
                 case TransitionActionType.Rotation:
@@ -12290,7 +13367,7 @@ window.__extends = (this && this.__extends) || (function () {
             var item = tweener.target;
             item.tweener = null;
             this._totalTasks--;
-            if (tweener.allCompleted) //当整体播放结束时间在这个tween的中间时不应该调用结尾钩子
+            if (tweener.allCompleted)
                 this.callHook(item, true);
             this.checkAllComplete();
         };
@@ -12338,102 +13415,109 @@ window.__extends = (this && this.__extends) || (function () {
         };
         Transition.prototype.applyValue = function (item) {
             item.target._gearLocked = true;
+            var value = item.value;
             switch (item.type) {
                 case TransitionActionType.XY:
                     if (item.target == this._owner) {
-                        var f1, f2;
-                        if (!item.value.b1)
-                            f1 = item.target.x;
+                        if (value.b1 && value.b2)
+                            item.target.setPosition(value.f1 + this._ownerBaseX, value.f2 + this._ownerBaseY);
+                        else if (value.b1)
+                            item.target.x = value.f1 + this._ownerBaseX;
                         else
-                            f1 = item.value.f1 + this._ownerBaseX;
-                        if (!item.value.b2)
-                            f2 = item.target.y;
-                        else
-                            f2 = item.value.f2 + this._ownerBaseY;
-                        item.target.setPosition(f1, f2);
+                            item.target.y = value.f2 + this._ownerBaseY;
                     }
                     else {
-                        if (!item.value.b1)
-                            item.value.f1 = item.target.x;
-                        if (!item.value.b2)
-                            item.value.f2 = item.target.y;
-                        item.target.setPosition(item.value.f1, item.value.f2);
+                        if (value.b3) {
+                            if (value.b1 && value.b2)
+                                item.target.setPosition(value.f1 * this._owner.width, value.f2 * this._owner.height);
+                            else if (value.b1)
+                                item.target.x = value.f1 * this._owner.width;
+                            else if (value.b2)
+                                item.target.y = value.f2 * this._owner.height;
+                        }
+                        else {
+                            if (value.b1 && value.b2)
+                                item.target.setPosition(value.f1, value.f2);
+                            else if (value.b1)
+                                item.target.x = value.f1;
+                            else if (value.b2)
+                                item.target.y = value.f2;
+                        }
                     }
                     break;
                 case TransitionActionType.Size:
-                    if (!item.value.b1)
-                        item.value.f1 = item.target.width;
-                    if (!item.value.b2)
-                        item.value.f2 = item.target.height;
-                    item.target.setSize(item.value.f1, item.value.f2);
+                    if (!value.b1)
+                        value.f1 = item.target.width;
+                    if (!value.b2)
+                        value.f2 = item.target.height;
+                    item.target.setSize(value.f1, value.f2);
                     break;
                 case TransitionActionType.Pivot:
-                    item.target.setPivot(item.value.f1, item.value.f2, item.target.pivotAsAnchor);
+                    item.target.setPivot(value.f1, value.f2, item.target.pivotAsAnchor);
                     break;
                 case TransitionActionType.Alpha:
-                    item.target.alpha = item.value.f1;
+                    item.target.alpha = value.f1;
                     break;
                 case TransitionActionType.Rotation:
-                    item.target.rotation = item.value.f1;
+                    item.target.rotation = value.f1;
                     break;
                 case TransitionActionType.Scale:
-                    item.target.setScale(item.value.f1, item.value.f2);
+                    item.target.setScale(value.f1, value.f2);
                     break;
                 case TransitionActionType.Skew:
-                    item.target.setSkew(item.value.f1, item.value.f2);
+                    item.target.setSkew(value.f1, value.f2);
                     break;
                 case TransitionActionType.Color:
-                    (item.target).color = item.value.f1;
+                    item.target.setProp(fgui.ObjectPropID.Color, value.f1);
                     break;
                 case TransitionActionType.Animation:
-                    if (item.value.frame >= 0)
-                        (item.target).frame = item.value.frame;
-                    (item.target).playing = item.value.playing;
-                    (item.target).timeScale = this._timeScale;
+                    if (value.frame >= 0)
+                        item.target.setProp(fgui.ObjectPropID.Frame, value.frame);
+                    item.target.setProp(fgui.ObjectPropID.Playing, value.playing);
+                    item.target.setProp(fgui.ObjectPropID.TimeScale, this._timeScale);
                     break;
                 case TransitionActionType.Visible:
-                    item.target.visible = item.value.visible;
+                    item.target.visible = value.visible;
                     break;
                 case TransitionActionType.Transition:
                     if (this._playing) {
-                        var trans = item.value.trans;
+                        var trans = value.trans;
                         if (trans != null) {
                             this._totalTasks++;
                             var startTime = this._startTime > item.time ? (this._startTime - item.time) : 0;
                             var endTime = this._endTime >= 0 ? (this._endTime - item.time) : -1;
-                            if (item.value.stopTime >= 0 && (endTime < 0 || endTime > item.value.stopTime))
-                                endTime = item.value.stopTime;
+                            if (value.stopTime >= 0 && (endTime < 0 || endTime > value.stopTime))
+                                endTime = value.stopTime;
                             trans.timeScale = this._timeScale;
-                            trans._play(function () { this.onPlayTransCompleted(item); }.bind(this), item.value.playTimes, 0, startTime, endTime, this._reversed);
+                            trans._play(function () { this.onPlayTransCompleted(item); }.bind(this), value.playTimes, 0, startTime, endTime, this._reversed);
                         }
                     }
                     break;
                 case TransitionActionType.Sound:
                     if (this._playing && item.time >= this._startTime) {
-                        if (item.value.audioClip == null) {
-                            var pi = fgui.UIPackage.getItemByURL(item.value.sound);
+                        if (value.audioClip == null) {
+                            var pi = fgui.UIPackage.getItemByURL(value.sound);
                             if (pi)
-                                item.value.audioClip = pi.owner.getItemAsset(pi);
+                                value.audioClip = pi.owner.getItemAsset(pi);
                         }
-                        if (item.value.audioClip)
-                            fgui.GRoot.inst.playOneShotSound(item.value.audioClip, item.value.volume);
+                        if (value.audioClip)
+                            fgui.GRoot.inst.playOneShotSound(value.audioClip, value.volume);
                     }
                     break;
                 case TransitionActionType.Shake:
-                    item.target.setPosition(item.target.x - item.value.lastOffsetX + item.value.offsetX, item.target.y - item.value.lastOffsetY + item.value.offsetY);
-                    item.value.lastOffsetX = item.value.offsetX;
-                    item.value.lastOffsetY = item.value.offsetY;
+                    item.target.setPosition(item.target.x - value.lastOffsetX + value.offsetX, item.target.y - value.lastOffsetY + value.offsetY);
+                    value.lastOffsetX = value.offsetX;
+                    value.lastOffsetY = value.offsetY;
                     break;
                 case TransitionActionType.ColorFilter:
                     {
-                        //TODO: filter support
                         break;
                     }
                 case TransitionActionType.Text:
-                    item.target.text = item.value.text;
+                    item.target.text = value.text;
                     break;
                 case TransitionActionType.Icon:
-                    item.target.icon = item.value.text;
+                    item.target.icon = value.text;
                     break;
             }
             item.target._gearLocked = false;
@@ -12472,6 +13556,28 @@ window.__extends = (this && this.__extends) || (function () {
                     this.decodeValue(item, buffer, item.tweenConfig.startValue);
                     buffer.seek(curPos, 3);
                     this.decodeValue(item, buffer, item.tweenConfig.endValue);
+                    if (buffer.version >= 2) {
+                        var pathLen = buffer.readInt();
+                        if (pathLen > 0) {
+                            item.tweenConfig.path = new fgui.GPath();
+                            var pts = new Array();
+                            for (var j = 0; j < pathLen; j++) {
+                                var curveType = buffer.readByte();
+                                switch (curveType) {
+                                    case fgui.CurveType.Bezier:
+                                        pts.push(fgui.GPathPoint.newBezierPoint(buffer.readFloat(), buffer.readFloat(), buffer.readFloat(), buffer.readFloat()));
+                                        break;
+                                    case fgui.CurveType.CubicBezier:
+                                        pts.push(fgui.GPathPoint.newCubicBezierPoint(buffer.readFloat(), buffer.readFloat(), buffer.readFloat(), buffer.readFloat(), buffer.readFloat(), buffer.readFloat()));
+                                        break;
+                                    default:
+                                        pts.push(fgui.GPathPoint.newPoint(buffer.readFloat(), buffer.readFloat(), curveType));
+                                        break;
+                                }
+                            }
+                            item.tweenConfig.path.create(pts);
+                        }
+                    }
                 }
                 else {
                     if (item.time > this._totalDuration)
@@ -12483,7 +13589,6 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         Transition.prototype.decodeValue = function (item, buffer, value) {
-            var arr;
             switch (item.type) {
                 case TransitionActionType.XY:
                 case TransitionActionType.Size:
@@ -12493,6 +13598,8 @@ window.__extends = (this && this.__extends) || (function () {
                     value.b2 = buffer.readBool();
                     value.f1 = buffer.readFloat();
                     value.f2 = buffer.readFloat();
+                    if (buffer.version >= 2 && item.type == TransitionActionType.XY)
+                        value.b3 = buffer.readBool();
                     break;
                 case TransitionActionType.Alpha:
                 case TransitionActionType.Rotation:
@@ -12542,7 +13649,7 @@ window.__extends = (this && this.__extends) || (function () {
         return Transition;
     }());
     fgui.Transition = Transition;
-    var TransitionActionType = /** @class */ (function () {
+    var TransitionActionType = (function () {
         function TransitionActionType() {
         }
         TransitionActionType.XY = 0;
@@ -12564,7 +13671,7 @@ window.__extends = (this && this.__extends) || (function () {
         TransitionActionType.Unknown = 16;
         return TransitionActionType;
     }());
-    var TransitionItem = /** @class */ (function () {
+    var TransitionItem = (function () {
         function TransitionItem(type) {
             this.type = type;
             switch (type) {
@@ -12602,7 +13709,7 @@ window.__extends = (this && this.__extends) || (function () {
         }
         return TransitionItem;
     }());
-    var TweenConfig = /** @class */ (function () {
+    var TweenConfig = (function () {
         function TweenConfig() {
             this.duration = 0;
             this.repeat = 0;
@@ -12613,37 +13720,37 @@ window.__extends = (this && this.__extends) || (function () {
         }
         return TweenConfig;
     }());
-    var TValue_Visible = /** @class */ (function () {
+    var TValue_Visible = (function () {
         function TValue_Visible() {
         }
         return TValue_Visible;
     }());
-    var TValue_Animation = /** @class */ (function () {
+    var TValue_Animation = (function () {
         function TValue_Animation() {
         }
         return TValue_Animation;
     }());
-    var TValue_Sound = /** @class */ (function () {
+    var TValue_Sound = (function () {
         function TValue_Sound() {
         }
         return TValue_Sound;
     }());
-    var TValue_Transition = /** @class */ (function () {
+    var TValue_Transition = (function () {
         function TValue_Transition() {
         }
         return TValue_Transition;
     }());
-    var TValue_Shake = /** @class */ (function () {
+    var TValue_Shake = (function () {
         function TValue_Shake() {
         }
         return TValue_Shake;
     }());
-    var TValue_Text = /** @class */ (function () {
+    var TValue_Text = (function () {
         function TValue_Text() {
         }
         return TValue_Text;
     }());
-    var TValue = /** @class */ (function () {
+    var TValue = (function () {
         function TValue() {
             this.f1 = this.f2 = this.f3 = this.f4 = 0;
             this.b1 = this.b2 = true;
@@ -12653,7 +13760,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var TranslationHelper = /** @class */ (function () {
+    var TranslationHelper = (function () {
         function TranslationHelper() {
         }
         TranslationHelper.loadFromXML = function (source) {
@@ -12701,7 +13808,8 @@ window.__extends = (this && this.__extends) || (function () {
                 dataLen = buffer.readShort();
                 curPos = buffer.position;
                 buffer.seek(curPos, 0);
-                var type = buffer.readByte();
+                var baseType = buffer.readByte();
+                var type = baseType;
                 buffer.skip(4);
                 elementId = buffer.readS();
                 if (type == fgui.ObjectType.Component) {
@@ -12716,9 +13824,8 @@ window.__extends = (this && this.__extends) || (function () {
                 for (j = 0; j < gearCnt; j++) {
                     nextPos = buffer.readShort();
                     nextPos += buffer.position;
-                    if (buffer.readByte() == 6) //gearText
-                     {
-                        buffer.skip(2); //controller
+                    if (buffer.readByte() == 6) {
+                        buffer.skip(2);
                         valueCnt = buffer.readShort();
                         for (k = 0; k < valueCnt; k++) {
                             page = buffer.readS();
@@ -12731,6 +13838,20 @@ window.__extends = (this && this.__extends) || (function () {
                         }
                         if (buffer.readBool() && (value = compStrings[elementId + "-texts_def"]) != null)
                             buffer.writeS(value);
+                    }
+                    if (baseType == fgui.ObjectType.Component && buffer.version >= 2) {
+                        buffer.seek(curPos, 4);
+                        buffer.skip(2);
+                        buffer.skip(4 * buffer.readShort());
+                        var cpCount = buffer.readShort();
+                        for (var k = 0; k < cpCount; k++) {
+                            var target = buffer.readS();
+                            var propertyId = buffer.readShort();
+                            if (propertyId == 0 && (value = compStrings[elementId + "-cp-" + target]) != null)
+                                buffer.writeS(value);
+                            else
+                                buffer.skip(2);
+                        }
                     }
                     buffer.position = nextPos;
                 }
@@ -12750,6 +13871,7 @@ window.__extends = (this && this.__extends) || (function () {
                             break;
                         }
                     case fgui.ObjectType.List:
+                    case fgui.ObjectType.Tree:
                         {
                             buffer.seek(curPos, 8);
                             buffer.skip(2);
@@ -12757,13 +13879,28 @@ window.__extends = (this && this.__extends) || (function () {
                             for (j = 0; j < itemCount; j++) {
                                 nextPos = buffer.readShort();
                                 nextPos += buffer.position;
-                                buffer.skip(2); //url
+                                buffer.skip(2);
+                                if (type == fgui.ObjectType.Tree)
+                                    buffer.skip(2);
                                 if ((value = compStrings[elementId + "-" + j]) != null)
                                     buffer.writeS(value);
                                 else
                                     buffer.skip(2);
                                 if ((value = compStrings[elementId + "-" + j + "-0"]) != null)
                                     buffer.writeS(value);
+                                if (buffer.version >= 2) {
+                                    buffer.skip(6);
+                                    buffer.skip(buffer.readUshort() * 4);
+                                    var cpCount = buffer.readUshort();
+                                    for (var k = 0; k < cpCount; k++) {
+                                        var target = buffer.readS();
+                                        var propertyId = buffer.readUshort();
+                                        if (propertyId == 0 && (value = compStrings[elementId + "-" + j + "-" + target]) != null)
+                                            buffer.writeS(value);
+                                        else
+                                            buffer.skip(2);
+                                    }
+                                }
                                 buffer.position = nextPos;
                             }
                             break;
@@ -12823,40 +13960,24 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var UIConfig = /** @class */ (function () {
+    var UIConfig = (function () {
         function UIConfig() {
         }
-        //Default font name
         UIConfig.defaultFont = "Arial";
-        //When a modal window is in front, the background becomes dark.
         UIConfig.modalLayerColor = new cc.Color(0x33, 0x33, 0x33, 0x33);
         UIConfig.buttonSoundVolumeScale = 1;
-        //Scrolling step in pixels
         UIConfig.defaultScrollStep = 25;
-        //Deceleration ratio of scrollpane when its in touch dragging.
         UIConfig.defaultScrollDecelerationRate = 0.967;
-        //Default scrollbar display mode. Recommened visible for Desktop and Auto for mobile.
         UIConfig.defaultScrollBarDisplay = fgui.ScrollBarDisplayType.Visible;
-        //Allow dragging the content to scroll. Recommeded true for mobile.
         UIConfig.defaultScrollTouchEffect = true;
-        //The "rebound" effect in the scolling container. Recommeded true for mobile.
         UIConfig.defaultScrollBounceEffect = true;
-        //Max items displayed in combobox without scrolling.
         UIConfig.defaultComboBoxVisibleItemCount = 10;
-        // Pixel offsets of finger to trigger scrolling.
         UIConfig.touchScrollSensitivity = 20;
-        // Pixel offsets of finger to trigger dragging.
         UIConfig.touchDragSensitivity = 10;
-        // Pixel offsets of mouse pointer to trigger dragging.
         UIConfig.clickDragSensitivity = 2;
-        // When click the window, brings to front automatically.
         UIConfig.bringWindowToFrontOnClick = true;
         UIConfig.frameTimeForAsyncUIConstruction = 0.002;
         UIConfig.linkUnderline = true;
-        /** !#en
-        Default group name of UI node.<br/>
-        !#zh
-        UI节点默认的分组。<br/>*/
         UIConfig.defaultUIGroup = "UI";
         return UIConfig;
     }());
@@ -12890,10 +14011,9 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var UIObjectFactory = /** @class */ (function () {
+    var UIObjectFactory = (function () {
         function UIObjectFactory() {
         }
-        //for backward compatiblity
         UIObjectFactory.setPackageItemExtension = function (url, type) {
             UIObjectFactory.setExtension(url, type);
         };
@@ -12956,6 +14076,8 @@ window.__extends = (this && this.__extends) || (function () {
                     return new fgui.GScrollBar();
                 case fgui.ObjectType.ComboBox:
                     return new fgui.GComboBox();
+                case fgui.ObjectType.Tree:
+                    return new fgui.GTree();
                 default:
                     return null;
             }
@@ -12967,13 +14089,38 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var UIPackage = /** @class */ (function () {
+    var UIPackage = (function () {
         function UIPackage() {
             this._items = new Array();
             this._itemsById = {};
             this._itemsByName = {};
             this._sprites = {};
+            this._dependencies = Array();
+            this._branches = Array();
+            this._branchIndex = -1;
         }
+        Object.defineProperty(UIPackage, "branch", {
+            get: function () {
+                return UIPackage._branch;
+            },
+            set: function (value) {
+                UIPackage._branch = value;
+                for (var pkgId in UIPackage._instById) {
+                    var pkg = UIPackage._instById[pkgId];
+                    if (pkg._branches) {
+                        pkg._branchIndex = pkg._branches.indexOf(value);
+                    }
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        UIPackage.getVar = function (key) {
+            return UIPackage._vars[key];
+        };
+        UIPackage.setVar = function (key, value) {
+            UIPackage._vars[key] = value;
+        };
         UIPackage.getById = function (id) {
             return UIPackage._instById[id];
         };
@@ -13105,6 +14252,7 @@ window.__extends = (this && this.__extends) || (function () {
                 throw "FairyGUI: old package format found in '" + url + "'";
             this._url = url;
             buffer.version = buffer.readInt();
+            var ver2 = buffer.version >= 2;
             var compressed = buffer.readBool();
             this._id = buffer.readString();
             this._name = buffer.readString();
@@ -13113,6 +14261,8 @@ window.__extends = (this && this.__extends) || (function () {
             var cnt;
             var i;
             var nextPos;
+            var str;
+            var branchIncluded;
             buffer.seek(indexTablePos, 4);
             cnt = buffer.readInt();
             var stringTable = new Array(cnt);
@@ -13127,6 +14277,19 @@ window.__extends = (this && this.__extends) || (function () {
                     stringTable[index] = buffer.readString(len);
                 }
             }
+            buffer.seek(indexTablePos, 0);
+            cnt = buffer.readShort();
+            for (i = 0; i < cnt; i++)
+                this._dependencies.push({ id: buffer.readS(), name: buffer.readS() });
+            if (ver2) {
+                cnt = buffer.readShort();
+                if (cnt > 0) {
+                    this._branches = buffer.readSArray(cnt);
+                    if (UIPackage._branch)
+                        this._branchIndex = this._branches.indexOf(UIPackage._branch);
+                }
+                branchIncluded = cnt > 0;
+            }
             buffer.seek(indexTablePos, 1);
             var pi;
             url = url + "_";
@@ -13139,9 +14302,9 @@ window.__extends = (this && this.__extends) || (function () {
                 pi.type = buffer.readByte();
                 pi.id = buffer.readS();
                 pi.name = buffer.readS();
-                buffer.readS(); //path
+                buffer.readS();
                 pi.file = buffer.readS();
-                buffer.readBool(); //exported
+                buffer.readBool();
                 pi.width = buffer.readInt();
                 pi.height = buffer.readInt();
                 switch (pi.type) {
@@ -13193,6 +14356,21 @@ window.__extends = (this && this.__extends) || (function () {
                             break;
                         }
                 }
+                if (ver2) {
+                    str = buffer.readS();
+                    if (str)
+                        pi.name = str + "/" + pi.name;
+                    var branchCnt = buffer.readUbyte();
+                    if (branchCnt > 0) {
+                        if (branchIncluded)
+                            pi.branches = buffer.readSArray(branchCnt);
+                        else
+                            this._itemsById[buffer.readS()] = pi;
+                    }
+                    var highResCnt = buffer.readUbyte();
+                    if (highResCnt > 0)
+                        pi.highResolution = buffer.readSArray(highResCnt);
+                }
                 this._items.push(pi);
                 this._itemsById[pi.id] = pi;
                 if (pi.name != null)
@@ -13213,6 +14391,16 @@ window.__extends = (this && this.__extends) || (function () {
                 sprite.rect.width = buffer.readInt();
                 sprite.rect.height = buffer.readInt();
                 sprite.rotated = buffer.readBool();
+                if (ver2 && buffer.readBool()) {
+                    sprite.offset.x = buffer.readInt();
+                    sprite.offset.y = buffer.readInt();
+                    sprite.originalSize.width = buffer.readInt();
+                    sprite.originalSize.height = buffer.readInt();
+                }
+                else {
+                    sprite.originalSize.width = sprite.rect.width;
+                    sprite.originalSize.height = sprite.rect.height;
+                }
                 this._sprites[itemId] = sprite;
                 buffer.position = nextPos;
             }
@@ -13226,15 +14414,6 @@ window.__extends = (this && this.__extends) || (function () {
                         pi.hitTestData = new fgui.PixelHitTestData(buffer);
                     buffer.position = nextPos;
                 }
-            }
-            buffer.seek(indexTablePos, 0);
-            cnt = buffer.readShort();
-            this.dependencies = {};
-            for (i = 0; i < cnt; i++) {
-                var kv = {};
-                kv.id = buffer.readS();
-                kv.name = buffer.readS();
-                this.dependencies[i] = kv;
             }
         };
         UIPackage.prototype.dispose = function () {
@@ -13315,7 +14494,7 @@ window.__extends = (this && this.__extends) || (function () {
                         if (sprite != null) {
                             var atlasTexture = this.getItemAsset(sprite.atlas);
                             if (atlasTexture != null) {
-                                var sf = new cc.SpriteFrame(atlasTexture, sprite.rect, sprite.rotated, cc.Vec2.ZERO, sprite.rect.size);
+                                var sf = new cc.SpriteFrame(atlasTexture, sprite.rect, sprite.rotated, sprite.offset, sprite.originalSize);
                                 if (item.scale9Grid) {
                                     sf.insetLeft = item.scale9Grid.x;
                                     sf.insetTop = item.scale9Grid.y;
@@ -13419,7 +14598,7 @@ window.__extends = (this && this.__extends) || (function () {
             var ttf = buffer.readBool();
             var canTint = buffer.readBool();
             var resizable = buffer.readBool();
-            buffer.readBool(); //has channel
+            buffer.readBool();
             var fontSize = buffer.readInt();
             var xadvance = buffer.readInt();
             var lineHeight = buffer.readInt();
@@ -13492,19 +14671,23 @@ window.__extends = (this && this.__extends) || (function () {
         UIPackage._constructing = 0;
         UIPackage._instById = {};
         UIPackage._instByName = {};
+        UIPackage._branch = "";
+        UIPackage._vars = {};
         return UIPackage;
     }());
     fgui.UIPackage = UIPackage;
-    var AtlasSprite = /** @class */ (function () {
+    var AtlasSprite = (function () {
         function AtlasSprite() {
             this.rect = new cc.Rect();
+            this.offset = new cc.Vec2();
+            this.originalSize = new cc.Size(0, 0);
         }
         return AtlasSprite;
     }());
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var Window = /** @class */ (function (_super) {
+    var Window = (function (_super) {
         __extends(Window, _super);
         function Window() {
             var _this = _super.call(this) || this;
@@ -13769,7 +14952,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var ControllerAction = /** @class */ (function () {
+    var ControllerAction = (function () {
         function ControllerAction() {
         }
         ControllerAction.createAction = function (type) {
@@ -13808,10 +14991,9 @@ window.__extends = (this && this.__extends) || (function () {
     }());
     fgui.ControllerAction = ControllerAction;
 })(fgui || (fgui = {}));
-/// <reference path="ControllerAction.ts" />
 
 (function (fgui) {
-    var ChangePageAction = /** @class */ (function (_super) {
+    var ChangePageAction = (function (_super) {
         __extends(ChangePageAction, _super);
         function ChangePageAction() {
             return _super.call(this) || this;
@@ -13831,8 +15013,16 @@ window.__extends = (this && this.__extends) || (function () {
                 gcom = controller.parent;
             if (gcom) {
                 var cc = gcom.getController(this.controllerName);
-                if (cc && cc != controller && !cc.changing)
-                    cc.selectedPageId = this.targetPage;
+                if (cc && cc != controller && !cc.changing) {
+                    if (this.targetPage == "~1") {
+                        if (controller.selectedIndex < cc.pageCount)
+                            cc.selectedIndex = controller.selectedIndex;
+                    }
+                    else if (this.targetPage == "~2")
+                        cc.selectedPage = controller.selectedPage;
+                    else
+                        cc.selectedPageId = this.targetPage;
+                }
             }
         };
         ChangePageAction.prototype.setup = function (buffer) {
@@ -13847,7 +15037,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var PlayTransitionAction = /** @class */ (function (_super) {
+    var PlayTransitionAction = (function (_super) {
         __extends(PlayTransitionAction, _super);
         function PlayTransitionAction() {
             var _this = _super.call(this) || this;
@@ -13900,7 +15090,7 @@ window.__extends = (this && this.__extends) || (function () {
         BlendMode[BlendMode["Custom2"] = 10] = "Custom2";
         BlendMode[BlendMode["Custom3"] = 11] = "Custom3";
     })(BlendMode = fgui.BlendMode || (fgui.BlendMode = {}));
-    var BlendModeUtils = /** @class */ (function () {
+    var BlendModeUtils = (function () {
         function BlendModeUtils() {
         }
         BlendModeUtils.apply = function (node, blendMode) {
@@ -13935,7 +15125,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var Image = /** @class */ (function (_super) {
+    var Image = (function (_super) {
         __extends(Image, _super);
         function Image() {
             var _this = _super.call(this) || this;
@@ -14045,8 +15235,8 @@ window.__extends = (this && this.__extends) || (function () {
                 this.fillStart = this._fillClockwise ? 1 : 0;
             }
             else {
-                var origin_1 = this._fillOrigin;
-                switch (origin_1) {
+                var origin = this._fillOrigin;
+                switch (origin) {
                     case fgui.FillOrigin.Right:
                         this.fillOrigin = 0;
                         break;
@@ -14095,10 +15285,9 @@ window.__extends = (this && this.__extends) || (function () {
     }(cc.Sprite));
     fgui.Image = Image;
 })(fgui || (fgui = {}));
-/// <reference path="Image.ts" />
 
 (function (fgui) {
-    var Frame = /** @class */ (function () {
+    var Frame = (function () {
         function Frame() {
             this.addDelay = 0;
             this.rect = new cc.Rect();
@@ -14106,7 +15295,7 @@ window.__extends = (this && this.__extends) || (function () {
         return Frame;
     }());
     fgui.Frame = Frame;
-    var MovieClip = /** @class */ (function (_super) {
+    var MovieClip = (function (_super) {
         __extends(MovieClip, _super);
         function MovieClip() {
             var _this = _super.call(this) || this;
@@ -14120,9 +15309,9 @@ window.__extends = (this && this.__extends) || (function () {
             _this._end = 0;
             _this._times = 0;
             _this._endAt = 0;
-            _this._status = 0; //0-none, 1-next loop, 2-ending, 3-ended
+            _this._status = 0;
             _this._smoothing = true;
-            _this._frameElapsed = 0; //当前帧延迟
+            _this._frameElapsed = 0;
             _this._reversed = false;
             _this._repeatedCount = 0;
             _this.setPlaySettings();
@@ -14252,15 +15441,13 @@ window.__extends = (this && this.__extends) || (function () {
                         this._repeatedCount++;
                     }
                 }
-                if (this._frame == beginFrame && this._reversed == beginReversed) //走了一轮了
-                 {
-                    var roundTime = backupTime - timeInMiniseconds; //这就是一轮需要的时间
-                    timeInMiniseconds -= Math.floor(timeInMiniseconds / roundTime) * roundTime; //跳过
+                if (this._frame == beginFrame && this._reversed == beginReversed) {
+                    var roundTime = backupTime - timeInMiniseconds;
+                    timeInMiniseconds -= Math.floor(timeInMiniseconds / roundTime) * roundTime;
                 }
             }
             this.drawFrame();
         };
-        //从start帧开始，播放到end帧（-1表示结尾），重复times次（0表示无限循环），循环结束后，停止在endAt帧（-1表示参数end）
         MovieClip.prototype.setPlaySettings = function (start, end, times, endAt, endCallback, callbackObj) {
             if (start == undefined)
                 start = 0;
@@ -14322,18 +15509,15 @@ window.__extends = (this && this.__extends) || (function () {
                     this._repeatedCount++;
                 }
             }
-            if (this._status == 1) //new loop
-             {
+            if (this._status == 1) {
                 this._frame = this._start;
                 this._frameElapsed = 0;
                 this._status = 0;
             }
-            else if (this._status == 2) //ending
-             {
+            else if (this._status == 2) {
                 this._frame = this._endAt;
                 this._frameElapsed = 0;
-                this._status = 3; //ended
-                //play end
+                this._status = 3;
                 if (this._callback != null) {
                     var callback = this._callback;
                     var caller = this._callbackObj;
@@ -14347,12 +15531,12 @@ window.__extends = (this && this.__extends) || (function () {
                     if (this._times > 0) {
                         this._times--;
                         if (this._times == 0)
-                            this._status = 2; //ending
+                            this._status = 2;
                         else
-                            this._status = 1; //new loop
+                            this._status = 1;
                     }
                     else if (this._start != 0)
-                        this._status = 1; //new loop
+                        this._status = 1;
                 }
             }
             this.drawFrame();
@@ -14369,7 +15553,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var Event = /** @class */ (function (_super) {
+    var Event = (function (_super) {
         __extends(Event, _super);
         function Event(type, bubbles) {
             var _this = _super.call(this, type, bubbles) || this;
@@ -14451,7 +15635,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var PixelHitTest = /** @class */ (function () {
+    var PixelHitTest = (function () {
         function PixelHitTest(data, offsetX, offsetY) {
             this._data = data;
             this.offsetX = offsetX == undefined ? 0 : offsetX;
@@ -14475,7 +15659,7 @@ window.__extends = (this && this.__extends) || (function () {
         return PixelHitTest;
     }());
     fgui.PixelHitTest = PixelHitTest;
-    var PixelHitTestData = /** @class */ (function () {
+    var PixelHitTestData = (function () {
         function PixelHitTestData(ba) {
             ba.readInt();
             this.pixelWidth = ba.readInt();
@@ -14485,10 +15669,21 @@ window.__extends = (this && this.__extends) || (function () {
         return PixelHitTestData;
     }());
     fgui.PixelHitTestData = PixelHitTestData;
+    var ChildHitArea = (function () {
+        function ChildHitArea(child, reversed) {
+            this._child = child;
+            this._reversed = reversed;
+        }
+        ChildHitArea.prototype.hitTest = function (obj, x, y) {
+            return false;
+        };
+        return ChildHitArea;
+    }());
+    fgui.ChildHitArea = ChildHitArea;
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var InputProcessor = /** @class */ (function (_super) {
+    var InputProcessor = (function (_super) {
         __extends(InputProcessor, _super);
         function InputProcessor() {
             var _this = _super.call(this) || this;
@@ -14665,7 +15860,7 @@ window.__extends = (this && this.__extends) || (function () {
                 ti.target.node.dispatchEvent(evt2);
                 fgui.Event._return(evt2);
             }
-            if (cc.sys.isMobile) //on mobile platform, trigger RollOut on up event, but not on PC
+            if (cc.sys.isMobile)
                 this.handleRollOver(ti, null);
             else
                 this.handleRollOver(ti, ti.target);
@@ -14875,7 +16070,7 @@ window.__extends = (this && this.__extends) || (function () {
         return InputProcessor;
     }(cc.Component));
     fgui.InputProcessor = InputProcessor;
-    var TouchInfo = /** @class */ (function () {
+    var TouchInfo = (function () {
         function TouchInfo() {
             this.pos = new cc.Vec2();
             this.touchId = 0;
@@ -14895,10 +16090,24 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GearBase = /** @class */ (function () {
+    var GearBase = (function () {
         function GearBase(owner) {
             this._owner = owner;
         }
+        GearBase.create = function (owner, index) {
+            if (!GearBase.Classes)
+                GearBase.Classes = [
+                    fgui.GearDisplay, fgui.GearXY, fgui.GearSize, fgui.GearLook, fgui.GearColor,
+                    fgui.GearAnimation, fgui.GearText, fgui.GearIcon, fgui.GearDisplay2, fgui.GearFontSize
+                ];
+            return new (GearBase.Classes[index])(owner);
+        };
+        GearBase.prototype.dispose = function () {
+            if (this._tweenConfig != null && this._tweenConfig._tweener != null) {
+                this._tweenConfig._tweener.kill();
+                this._tweenConfig._tweener = null;
+            }
+        };
         Object.defineProperty(GearBase.prototype, "controller", {
             get: function () {
                 return this._controller;
@@ -14925,18 +16134,16 @@ window.__extends = (this && this.__extends) || (function () {
         GearBase.prototype.setup = function (buffer) {
             this._controller = this._owner.parent.getControllerAt(buffer.readShort());
             this.init();
-            var cnt;
             var i;
             var page;
+            var cnt = buffer.readShort();
             if (this instanceof fgui.GearDisplay) {
-                cnt = buffer.readShort();
-                var pages = [];
-                for (i = 0; i < cnt; i++)
-                    pages[i] = buffer.readS();
-                this.pages = pages;
+                this.pages = buffer.readSArray(cnt);
+            }
+            else if (this instanceof fgui.GearDisplay2) {
+                this.pages = buffer.readSArray(cnt);
             }
             else {
-                cnt = buffer.readShort();
                 for (i = 0; i < cnt; i++) {
                     page = buffer.readS();
                     if (page == null)
@@ -14951,6 +16158,23 @@ window.__extends = (this && this.__extends) || (function () {
                 this._tweenConfig.easeType = buffer.readByte();
                 this._tweenConfig.duration = buffer.readFloat();
                 this._tweenConfig.delay = buffer.readFloat();
+            }
+            if (buffer.version >= 2) {
+                if (this instanceof fgui.GearXY) {
+                    if (buffer.readBool()) {
+                        this.positionsInPercent = true;
+                        for (i = 0; i < cnt; i++) {
+                            page = buffer.readS();
+                            if (page == null)
+                                continue;
+                            this.addExtStatus(page, buffer);
+                        }
+                        if (buffer.readBool())
+                            this.addExtStatus(null, buffer);
+                    }
+                }
+                else if (this instanceof fgui.GearDisplay2)
+                    this.condition = buffer.readByte();
             }
         };
         GearBase.prototype.updateFromRelations = function (dx, dy) {
@@ -14967,7 +16191,7 @@ window.__extends = (this && this.__extends) || (function () {
         return GearBase;
     }());
     fgui.GearBase = GearBase;
-    var GearTweenConfig = /** @class */ (function () {
+    var GearTweenConfig = (function () {
         function GearTweenConfig() {
             this.tween = true;
             this.easeType = fgui.EaseType.QuadOut;
@@ -14978,16 +16202,15 @@ window.__extends = (this && this.__extends) || (function () {
     }());
     fgui.GearTweenConfig = GearTweenConfig;
 })(fgui || (fgui = {}));
-/// <reference path="GearBase.ts" />
 
 (function (fgui) {
-    var GearAnimation = /** @class */ (function (_super) {
+    var GearAnimation = (function (_super) {
         __extends(GearAnimation, _super);
         function GearAnimation(owner) {
             return _super.call(this, owner) || this;
         }
         GearAnimation.prototype.init = function () {
-            this._default = new GearAnimationValue(this._owner.playing, this._owner.frame);
+            this._default = new GearAnimationValue(this._owner.getProp(fgui.ObjectPropID.Playing), this._owner.getProp(fgui.ObjectPropID.Frame));
             this._storage = {};
         };
         GearAnimation.prototype.addStatus = function (pageId, buffer) {
@@ -15006,8 +16229,8 @@ window.__extends = (this && this.__extends) || (function () {
             var gv = this._storage[this._controller.selectedPageId];
             if (!gv)
                 gv = this._default;
-            this._owner.frame = gv.frame;
-            this._owner.playing = gv.playing;
+            this._owner.setProp(fgui.ObjectPropID.Playing, gv.playing);
+            this._owner.setProp(fgui.ObjectPropID.Frame, gv.frame);
             this._owner._gearLocked = false;
         };
         GearAnimation.prototype.updateState = function () {
@@ -15016,13 +16239,13 @@ window.__extends = (this && this.__extends) || (function () {
                 gv = new GearAnimationValue();
                 this._storage[this._controller.selectedPageId] = gv;
             }
-            gv.frame = this._owner.frame;
-            gv.playing = this._owner.playing;
+            gv.playing = this._owner.getProp(fgui.ObjectPropID.Playing);
+            gv.frame = this._owner.getProp(fgui.ObjectPropID.Frame);
         };
         return GearAnimation;
     }(fgui.GearBase));
     fgui.GearAnimation = GearAnimation;
-    var GearAnimationValue = /** @class */ (function () {
+    var GearAnimationValue = (function () {
         function GearAnimationValue(playing, frame) {
             if (playing === void 0) { playing = true; }
             if (frame === void 0) { frame = 0; }
@@ -15034,16 +16257,13 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GearColor = /** @class */ (function (_super) {
+    var GearColor = (function (_super) {
         __extends(GearColor, _super);
         function GearColor(owner) {
             return _super.call(this, owner) || this;
         }
         GearColor.prototype.init = function () {
-            if (this._owner["strokeColor"] != undefined)
-                this._default = new GearColorValue(this._owner.color, this._owner.strokeColor);
-            else
-                this._default = new GearColorValue(this._owner.color);
+            this._default = new GearColorValue(this._owner.getProp(fgui.ObjectPropID.Color), this._owner.getProp(fgui.ObjectPropID.OutlineColor));
             this._storage = {};
         };
         GearColor.prototype.addStatus = function (pageId, buffer) {
@@ -15062,28 +16282,25 @@ window.__extends = (this && this.__extends) || (function () {
             var gv = this._storage[this._controller.selectedPageId];
             if (!gv)
                 gv = this._default;
-            this._owner.color = gv.color;
-            if (this._owner["strokeColor"] != undefined && gv.strokeColor.getA() != 0)
-                this._owner.strokeColor = gv.strokeColor;
+            this._owner.setProp(fgui.ObjectPropID.Color, gv.color);
+            if (gv.strokeColor != null)
+                this._owner.setProp(fgui.ObjectPropID.OutlineColor, gv.strokeColor);
             this._owner._gearLocked = false;
         };
         GearColor.prototype.updateState = function () {
             var gv = this._storage[this._controller.selectedPageId];
-            if (!gv) {
-                gv = new GearColorValue(null, null);
-                this._storage[this._controller.selectedPageId] = gv;
-            }
-            gv.color = this._owner.color;
-            if (this._owner["strokeColor"] != undefined)
-                gv.strokeColor = this._owner.strokeColor;
+            if (!gv)
+                this._storage[this._controller.selectedPageId] = gv = new GearColorValue();
+            gv.color = this._owner.getProp(fgui.ObjectPropID.Color);
+            gv.strokeColor = this._owner.getProp(fgui.ObjectPropID.OutlineColor);
         };
         return GearColor;
     }(fgui.GearBase));
     fgui.GearColor = GearColor;
-    var GearColorValue = /** @class */ (function () {
+    var GearColorValue = (function () {
         function GearColorValue(color, strokeColor) {
-            if (color === void 0) { color = cc.Color.TRANSPARENT; }
-            if (strokeColor === void 0) { strokeColor = cc.Color.TRANSPARENT; }
+            if (color === void 0) { color = null; }
+            if (strokeColor === void 0) { strokeColor = null; }
             this.color = color;
             this.strokeColor = strokeColor;
         }
@@ -15092,7 +16309,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GearDisplay = /** @class */ (function (_super) {
+    var GearDisplay = (function (_super) {
         __extends(GearDisplay, _super);
         function GearDisplay(owner) {
             var _this = _super.call(this, owner) || this;
@@ -15134,7 +16351,73 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GearIcon = /** @class */ (function (_super) {
+    var GearDisplay2 = (function (_super) {
+        __extends(GearDisplay2, _super);
+        function GearDisplay2(owner) {
+            var _this = _super.call(this, owner) || this;
+            _this._visible = 0;
+            return _this;
+        }
+        GearDisplay2.prototype.init = function () {
+            this.pages = null;
+        };
+        GearDisplay2.prototype.apply = function () {
+            if (this.pages == null || this.pages.length == 0
+                || this.pages.indexOf(this._controller.selectedPageId) != -1)
+                this._visible = 1;
+            else
+                this._visible = 0;
+        };
+        GearDisplay2.prototype.evaluate = function (connected) {
+            var v = this._controller == null || this._visible > 0;
+            if (this.condition == 0)
+                v = v && connected;
+            else
+                v = v || connected;
+            return v;
+        };
+        return GearDisplay2;
+    }(fgui.GearBase));
+    fgui.GearDisplay2 = GearDisplay2;
+})(fgui || (fgui = {}));
+
+(function (fgui) {
+    var GearFontSize = (function (_super) {
+        __extends(GearFontSize, _super);
+        function GearFontSize(owner) {
+            var _this = _super.call(this, owner) || this;
+            _this._default = 0;
+            return _this;
+        }
+        GearFontSize.prototype.init = function () {
+            this._default = this._owner.getProp(fgui.ObjectPropID.FontSize);
+            this._storage = {};
+        };
+        GearFontSize.prototype.addStatus = function (pageId, buffer) {
+            if (pageId == null)
+                this._default = buffer.readInt();
+            else
+                this._storage[pageId] = buffer.readInt();
+        };
+        GearFontSize.prototype.apply = function () {
+            this._owner._gearLocked = true;
+            var data = this._storage[this._controller.selectedPageId];
+            if (data != undefined)
+                this._owner.setProp(fgui.ObjectPropID.FontSize, data);
+            else
+                this._owner.setProp(fgui.ObjectPropID.FontSize, this._default);
+            this._owner._gearLocked = false;
+        };
+        GearFontSize.prototype.updateState = function () {
+            this._storage[this._controller.selectedPageId] = this._owner.text;
+        };
+        return GearFontSize;
+    }(fgui.GearBase));
+    fgui.GearFontSize = GearFontSize;
+})(fgui || (fgui = {}));
+
+(function (fgui) {
+    var GearIcon = (function (_super) {
         __extends(GearIcon, _super);
         function GearIcon(owner) {
             return _super.call(this, owner) || this;
@@ -15167,7 +16450,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GearLook = /** @class */ (function (_super) {
+    var GearLook = (function (_super) {
         __extends(GearLook, _super);
         function GearLook(owner) {
             return _super.call(this, owner) || this;
@@ -15259,7 +16542,7 @@ window.__extends = (this && this.__extends) || (function () {
         return GearLook;
     }(fgui.GearBase));
     fgui.GearLook = GearLook;
-    var GearLookValue = /** @class */ (function () {
+    var GearLookValue = (function () {
         function GearLookValue(alpha, rotation, grayed, touchable) {
             if (alpha === void 0) { alpha = 0; }
             if (rotation === void 0) { rotation = 0; }
@@ -15275,7 +16558,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GearSize = /** @class */ (function (_super) {
+    var GearSize = (function (_super) {
         __extends(GearSize, _super);
         function GearSize(owner) {
             return _super.call(this, owner) || this;
@@ -15374,7 +16657,7 @@ window.__extends = (this && this.__extends) || (function () {
         return GearSize;
     }(fgui.GearBase));
     fgui.GearSize = GearSize;
-    var GearSizeValue = /** @class */ (function () {
+    var GearSizeValue = (function () {
         function GearSizeValue(width, height, scaleX, scaleY) {
             if (width === void 0) { width = 0; }
             if (height === void 0) { height = 0; }
@@ -15390,7 +16673,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GearText = /** @class */ (function (_super) {
+    var GearText = (function (_super) {
         __extends(GearText, _super);
         function GearText(owner) {
             return _super.call(this, owner) || this;
@@ -15423,13 +16706,16 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GearXY = /** @class */ (function (_super) {
+    var GearXY = (function (_super) {
         __extends(GearXY, _super);
         function GearXY(owner) {
             return _super.call(this, owner) || this;
         }
         GearXY.prototype.init = function () {
-            this._default = new cc.Vec2(this._owner.x, this._owner.y);
+            this._default = {
+                x: this._owner.x, y: this._owner.y,
+                px: this._owner.x / this._owner.parent.width, py: this._owner.y / this._owner.parent.height
+            };
             this._storage = {};
         };
         GearXY.prototype.addStatus = function (pageId, buffer) {
@@ -15437,29 +16723,50 @@ window.__extends = (this && this.__extends) || (function () {
             if (pageId == null)
                 gv = this._default;
             else {
-                gv = new cc.Vec2();
+                gv = {};
                 this._storage[pageId] = gv;
             }
             gv.x = buffer.readInt();
             gv.y = buffer.readInt();
         };
+        GearXY.prototype.addExtStatus = function (pageId, buffer) {
+            var gv;
+            if (pageId == null)
+                gv = this._default;
+            else
+                gv = this._storage[pageId];
+            gv.px = buffer.readFloat();
+            gv.py = buffer.readFloat();
+        };
         GearXY.prototype.apply = function () {
             var pt = this._storage[this._controller.selectedPageId];
             if (!pt)
                 pt = this._default;
-            if (this._tweenConfig && this._tweenConfig.tween && !fgui.UIPackage._constructing && !fgui.GearBase.disableAllTweenEffect) {
+            var ex;
+            var ey;
+            if (this.positionsInPercent && this._owner.parent) {
+                ex = pt.px * this._owner.parent.width;
+                ey = pt.py * this._owner.parent.height;
+            }
+            else {
+                ex = pt.x;
+                ey = pt.y;
+            }
+            if (this._tweenConfig != null && this._tweenConfig.tween && !fgui.UIPackage._constructing && !fgui.GearBase.disableAllTweenEffect) {
                 if (this._tweenConfig._tweener != null) {
-                    if (this._tweenConfig._tweener.endValue.x != pt.x || this._tweenConfig._tweener.endValue.y != pt.y) {
+                    if (this._tweenConfig._tweener.endValue.x != ex || this._tweenConfig._tweener.endValue.y != ey) {
                         this._tweenConfig._tweener.kill(true);
                         this._tweenConfig._tweener = null;
                     }
                     else
                         return;
                 }
-                if (this._owner.x != pt.x || this._owner.y != pt.y) {
+                var ox = this._owner.x;
+                var oy = this._owner.y;
+                if (ox != ex || oy != ey) {
                     if (this._owner.checkGearController(0, this._controller))
                         this._tweenConfig._displayLockToken = this._owner.addDisplayLock();
-                    this._tweenConfig._tweener = fgui.GTween.to2(this._owner.x, this._owner.y, pt.x, pt.y, this._tweenConfig.duration)
+                    this._tweenConfig._tweener = fgui.GTween.to2(ox, oy, ex, ey, this._tweenConfig.duration)
                         .setDelay(this._tweenConfig.delay)
                         .setEase(this._tweenConfig.easeType)
                         .setTarget(this)
@@ -15469,7 +16776,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
             else {
                 this._owner._gearLocked = true;
-                this._owner.setPosition(pt.x, pt.y);
+                this._owner.setPosition(ex, ey);
                 this._owner._gearLocked = false;
             }
         };
@@ -15488,14 +16795,16 @@ window.__extends = (this && this.__extends) || (function () {
         GearXY.prototype.updateState = function () {
             var pt = this._storage[this._controller.selectedPageId];
             if (!pt) {
-                pt = new cc.Vec2();
+                pt = {};
                 this._storage[this._controller.selectedPageId] = pt;
             }
             pt.x = this._owner.x;
             pt.y = this._owner.y;
+            pt.px = this._owner.x / this._owner.parent.width;
+            pt.py = this._owner.y / this._owner.parent.height;
         };
         GearXY.prototype.updateFromRelations = function (dx, dy) {
-            if (this._controller == null || this._storage == null)
+            if (this._controller == null || this._storage == null || this.positionsInPercent)
                 return;
             for (var key in this._storage) {
                 var pt = this._storage[key];
@@ -15512,550 +16821,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var TreeNode = /** @class */ (function () {
-        function TreeNode(hasChild) {
-            this._level = 0;
-            if (hasChild)
-                this._children = new Array();
-        }
-        Object.defineProperty(TreeNode.prototype, "expanded", {
-            get: function () {
-                return this._expanded;
-            },
-            set: function (value) {
-                if (this._children == null)
-                    return;
-                if (this._expanded != value) {
-                    this._expanded = value;
-                    if (this._tree != null) {
-                        if (this._expanded)
-                            this._tree._afterExpanded(this);
-                        else
-                            this._tree._afterCollapsed(this);
-                    }
-                }
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(TreeNode.prototype, "isFolder", {
-            get: function () {
-                return this._children != null;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(TreeNode.prototype, "parent", {
-            get: function () {
-                return this._parent;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(TreeNode.prototype, "data", {
-            get: function () {
-                return this._data;
-            },
-            set: function (value) {
-                this._data = value;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(TreeNode.prototype, "text", {
-            get: function () {
-                if (this._cell != null)
-                    return this._cell.text;
-                else
-                    return null;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(TreeNode.prototype, "cell", {
-            get: function () {
-                return this._cell;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        TreeNode.prototype._setCell = function (value) {
-            this._cell = value;
-        };
-        Object.defineProperty(TreeNode.prototype, "level", {
-            get: function () {
-                return this._level;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        TreeNode.prototype._setLevel = function (value) {
-            this._level = value;
-        };
-        TreeNode.prototype.addChild = function (child) {
-            this.addChildAt(child, this._children.length);
-            return child;
-        };
-        TreeNode.prototype.addChildAt = function (child, index) {
-            if (!child)
-                throw new Error("child is null");
-            var numChildren = this._children.length;
-            if (index >= 0 && index <= numChildren) {
-                if (child._parent == this) {
-                    this.setChildIndex(child, index);
-                }
-                else {
-                    if (child._parent)
-                        child._parent.removeChild(child);
-                    var cnt = this._children.length;
-                    if (index == cnt)
-                        this._children.push(child);
-                    else
-                        this._children.splice(index, 0, child);
-                    child._parent = this;
-                    child._level = this._level + 1;
-                    child._setTree(this._tree);
-                    if (this._cell != null && this._cell.parent != null && this._expanded)
-                        this._tree._afterInserted(child);
-                }
-                return child;
-            }
-            else {
-                throw new Error("Invalid child index");
-            }
-        };
-        TreeNode.prototype.removeChild = function (child) {
-            var childIndex = this._children.indexOf(child);
-            if (childIndex != -1) {
-                this.removeChildAt(childIndex);
-            }
-            return child;
-        };
-        TreeNode.prototype.removeChildAt = function (index) {
-            if (index >= 0 && index < this.numChildren) {
-                var child = this._children[index];
-                this._children.splice(index, 1);
-                child._parent = null;
-                if (this._tree != null) {
-                    child._setTree(null);
-                    this._tree._afterRemoved(child);
-                }
-                return child;
-            }
-            else {
-                throw new Error("Invalid child index");
-            }
-        };
-        TreeNode.prototype.removeChildren = function (beginIndex, endIndex) {
-            if (beginIndex === void 0) { beginIndex = 0; }
-            if (endIndex === void 0) { endIndex = -1; }
-            if (endIndex < 0 || endIndex >= this.numChildren)
-                endIndex = this.numChildren - 1;
-            for (var i = beginIndex; i <= endIndex; ++i)
-                this.removeChildAt(beginIndex);
-        };
-        TreeNode.prototype.getChildAt = function (index) {
-            if (index >= 0 && index < this.numChildren)
-                return this._children[index];
-            else
-                throw new Error("Invalid child index");
-        };
-        TreeNode.prototype.getChildIndex = function (child) {
-            return this._children.indexOf(child);
-        };
-        TreeNode.prototype.getPrevSibling = function () {
-            if (this._parent == null)
-                return null;
-            var i = this._parent._children.indexOf(this);
-            if (i <= 0)
-                return null;
-            return this._parent._children[i - 1];
-        };
-        TreeNode.prototype.getNextSibling = function () {
-            if (this._parent == null)
-                return null;
-            var i = this._parent._children.indexOf(this);
-            if (i < 0 || i >= this._parent._children.length - 1)
-                return null;
-            return this._parent._children[i + 1];
-        };
-        TreeNode.prototype.setChildIndex = function (child, index) {
-            var oldIndex = this._children.indexOf(child);
-            if (oldIndex == -1)
-                throw new Error("Not a child of this container");
-            var cnt = this._children.length;
-            if (index < 0)
-                index = 0;
-            else if (index > cnt)
-                index = cnt;
-            if (oldIndex == index)
-                return;
-            this._children.splice(oldIndex, 1);
-            this._children.splice(index, 0, child);
-            if (this._cell != null && this._cell.parent != null && this._expanded)
-                this._tree._afterMoved(child);
-        };
-        TreeNode.prototype.swapChildren = function (child1, child2) {
-            var index1 = this._children.indexOf(child1);
-            var index2 = this._children.indexOf(child2);
-            if (index1 == -1 || index2 == -1)
-                throw new Error("Not a child of this container");
-            this.swapChildrenAt(index1, index2);
-        };
-        TreeNode.prototype.swapChildrenAt = function (index1, index2) {
-            var child1 = this._children[index1];
-            var child2 = this._children[index2];
-            this.setChildIndex(child1, index2);
-            this.setChildIndex(child2, index1);
-        };
-        Object.defineProperty(TreeNode.prototype, "numChildren", {
-            get: function () {
-                return this._children.length;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(TreeNode.prototype, "tree", {
-            get: function () {
-                return this._tree;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        TreeNode.prototype._setTree = function (value) {
-            this._tree = value;
-            if (this._tree != null && this._tree.treeNodeWillExpand && this._expanded)
-                this._tree.treeNodeWillExpand(this);
-            if (this._children != null) {
-                var cnt = this._children.length;
-                for (var i = 0; i < cnt; i++) {
-                    var node = this._children[i];
-                    node._level = this._level + 1;
-                    node._setTree(value);
-                }
-            }
-        };
-        return TreeNode;
-    }());
-    fgui.TreeNode = TreeNode;
-})(fgui || (fgui = {}));
-
-(function (fgui) {
-    var TreeView = /** @class */ (function () {
-        function TreeView(list) {
-            this._list = list;
-            this._list.removeChildrenToPool();
-            this._list.on(fgui.Event.CLICK_ITEM, this.onClickItem, this);
-            this._root = new fgui.TreeNode(true);
-            this._root._setTree(this);
-            this._root._setCell(this._list);
-            this._root.expanded = true;
-            this._indent = 15;
-        }
-        ;
-        Object.defineProperty(TreeView.prototype, "list", {
-            get: function () {
-                return this._list;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(TreeView.prototype, "root", {
-            get: function () {
-                return this._root;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(TreeView.prototype, "indent", {
-            get: function () {
-                return this._indent;
-            },
-            set: function (value) {
-                this._indent = value;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        TreeView.prototype.getSelectedNode = function () {
-            if (this._list.selectedIndex != -1)
-                return this._list.getChildAt(this._list.selectedIndex).data;
-            else
-                return null;
-        };
-        TreeView.prototype.getSelection = function () {
-            var sels = this._list.getSelection();
-            var cnt = sels.length;
-            var ret = new Array();
-            for (var i = 0; i < cnt; i++) {
-                var node = this._list.getChildAt(sels[i]).data;
-                ret.push(node);
-            }
-            return ret;
-        };
-        TreeView.prototype.addSelection = function (node, scrollItToView) {
-            var parentNode = node.parent;
-            while (parentNode != null && parentNode != this._root) {
-                parentNode.expanded = true;
-                parentNode = parentNode.parent;
-            }
-            if (!node.cell)
-                return;
-            this._list.addSelection(this._list.getChildIndex(node.cell), scrollItToView);
-        };
-        TreeView.prototype.removeSelection = function (node) {
-            if (!node.cell)
-                return;
-            this._list.removeSelection(this._list.getChildIndex(node.cell));
-        };
-        TreeView.prototype.clearSelection = function () {
-            this._list.clearSelection();
-        };
-        TreeView.prototype.getNodeIndex = function (node) {
-            return this._list.getChildIndex(node.cell);
-        };
-        TreeView.prototype.updateNode = function (node) {
-            if (node.cell == null)
-                return;
-            if (this.treeNodeRender)
-                this.treeNodeRender(node);
-        };
-        TreeView.prototype.updateNodes = function (nodes) {
-            var cnt = nodes.length;
-            for (var i = 0; i < cnt; i++) {
-                var node = nodes[i];
-                if (node.cell == null)
-                    return;
-                if (this.treeNodeRender)
-                    this.treeNodeRender(node);
-            }
-        };
-        TreeView.prototype.expandAll = function (folderNode) {
-            folderNode.expanded = true;
-            var cnt = folderNode.numChildren;
-            for (var i = 0; i < cnt; i++) {
-                var node = folderNode.getChildAt(i);
-                if (node.isFolder)
-                    this.expandAll(node);
-            }
-        };
-        TreeView.prototype.collapseAll = function (folderNode) {
-            if (folderNode != this._root)
-                folderNode.expanded = false;
-            var cnt = folderNode.numChildren;
-            for (var i = 0; i < cnt; i++) {
-                var node = folderNode.getChildAt(i);
-                if (node.isFolder)
-                    this.collapseAll(node);
-            }
-        };
-        TreeView.prototype.createCell = function (node) {
-            if (this.treeNodeCreateCell)
-                node._setCell(this.treeNodeCreateCell(node));
-            else
-                node._setCell(this._list.itemPool.getObject(this._list.defaultItem));
-            node.cell.data = node;
-            var indentObj = node.cell.getChild("indent");
-            if (indentObj != null)
-                indentObj.width = (node.level - 1) * this._indent;
-            var expandButton = node.cell.getChild("expandButton");
-            if (expandButton) {
-                if (node.isFolder) {
-                    expandButton.visible = true;
-                    expandButton.onClick(this.onClickExpandButton, this);
-                    expandButton.data = node;
-                    expandButton.selected = node.expanded;
-                }
-                else
-                    expandButton.visible = false;
-            }
-            if (this.treeNodeRender)
-                this.treeNodeRender(node);
-        };
-        TreeView.prototype._afterInserted = function (node) {
-            this.createCell(node);
-            var index = this.getInsertIndexForNode(node);
-            this._list.addChildAt(node.cell, index);
-            if (this.treeNodeRender)
-                this.treeNodeRender(node);
-            if (node.isFolder && node.expanded)
-                this.checkChildren(node, index);
-        };
-        TreeView.prototype.getInsertIndexForNode = function (node) {
-            var prevNode = node.getPrevSibling();
-            if (prevNode == null)
-                prevNode = node.parent;
-            var insertIndex = this._list.getChildIndex(prevNode.cell) + 1;
-            var myLevel = node.level;
-            var cnt = this._list.numChildren;
-            for (var i = insertIndex; i < cnt; i++) {
-                var testNode = this._list.getChildAt(i).data;
-                if (testNode.level <= myLevel)
-                    break;
-                insertIndex++;
-            }
-            return insertIndex;
-        };
-        TreeView.prototype._afterRemoved = function (node) {
-            this.removeNode(node);
-        };
-        TreeView.prototype._afterExpanded = function (node) {
-            if (node != this._root && this.treeNodeWillExpand)
-                this.treeNodeWillExpand(node);
-            if (node.cell == null)
-                return;
-            if (node != this._root) {
-                if (this.treeNodeRender)
-                    this.treeNodeRender(node);
-                var expandButton = node.cell.getChild("expandButton");
-                if (expandButton)
-                    expandButton.selected = true;
-            }
-            if (node.cell.parent != null)
-                this.checkChildren(node, this._list.getChildIndex(node.cell));
-        };
-        TreeView.prototype._afterCollapsed = function (node) {
-            if (node != this._root && this.treeNodeWillExpand)
-                this.treeNodeWillExpand(node);
-            if (node.cell == null)
-                return;
-            if (node != this._root) {
-                if (this.treeNodeRender)
-                    this.treeNodeRender(node);
-                var expandButton = node.cell.getChild("expandButton");
-                if (expandButton)
-                    expandButton.selected = false;
-            }
-            if (node.cell.parent != null)
-                this.hideFolderNode(node);
-        };
-        TreeView.prototype._afterMoved = function (node) {
-            if (!node.isFolder)
-                this._list.removeChild(node.cell);
-            else
-                this.hideFolderNode(node);
-            var index = this.getInsertIndexForNode(node);
-            this._list.addChildAt(node.cell, index);
-            if (node.isFolder && node.expanded)
-                this.checkChildren(node, index);
-        };
-        TreeView.prototype.checkChildren = function (folderNode, index) {
-            var cnt = folderNode.numChildren;
-            for (var i = 0; i < cnt; i++) {
-                index++;
-                var node = folderNode.getChildAt(i);
-                if (node.cell == null)
-                    this.createCell(node);
-                if (!node.cell.parent)
-                    this._list.addChildAt(node.cell, index);
-                if (node.isFolder && node.expanded)
-                    index = this.checkChildren(node, index);
-            }
-            return index;
-        };
-        TreeView.prototype.hideFolderNode = function (folderNode) {
-            var cnt = folderNode.numChildren;
-            for (var i = 0; i < cnt; i++) {
-                var node = folderNode.getChildAt(i);
-                if (node.cell && node.cell.parent != null)
-                    this._list.removeChild(node.cell);
-                if (node.isFolder && node.expanded)
-                    this.hideFolderNode(node);
-            }
-        };
-        TreeView.prototype.removeNode = function (node) {
-            if (node.cell != null) {
-                if (node.cell.parent != null)
-                    this._list.removeChild(node.cell);
-                this._list.returnToPool(node.cell);
-                node.cell.data = null;
-                node._setCell(null);
-            }
-            if (node.isFolder) {
-                var cnt = node.numChildren;
-                for (var i = 0; i < cnt; i++) {
-                    var node2 = node.getChildAt(i);
-                    this.removeNode(node2);
-                }
-            }
-        };
-        TreeView.prototype.onClickExpandButton = function (evt) {
-            evt.stopPropagation();
-            var expandButton = fgui.GObject.cast(evt.currentTarget);
-            var node = expandButton.parent.data;
-            if (this._list.scrollPane != null) {
-                var posY = this._list.scrollPane.posY;
-                if (expandButton.selected)
-                    node.expanded = true;
-                else
-                    node.expanded = false;
-                this._list.scrollPane.posY = posY;
-                this._list.scrollPane.scrollToView(node.cell);
-            }
-            else {
-                if (expandButton.selected)
-                    node.expanded = true;
-                else
-                    node.expanded = false;
-            }
-        };
-        TreeView.prototype.onClickItem = function (item, evt) {
-            var posY;
-            if (this._list.scrollPane != null)
-                posY = this._list.scrollPane.posY;
-            var node = item.data;
-            if (this.treeNodeClick)
-                this.treeNodeClick(node, evt);
-            if (this._list.scrollPane != null) {
-                this._list.scrollPane.posY = posY;
-                if (node.cell)
-                    this._list.scrollPane.scrollToView(node.cell);
-            }
-        };
-        return TreeView;
-    }());
-    fgui.TreeView = TreeView;
-})(fgui || (fgui = {}));
-// Author: Daniele Giardini - http://www.demigiant.com
-// Created: 2014/07/19 14:11
-// 
-// License Copyright (c) Daniele Giardini.
-// This work is subject to the terms at http://dotween.demigiant.com/license.php
-// 
-// =============================================================
-// Contains Daniele Giardini's C# port of the easing equations created by Robert Penner
-// (all easing equations except for Flash, InFlash, OutFlash, InOutFlash,
-// which use some parts of Robert Penner's equations but were created by Daniele Giardini)
-// http://robertpenner.com/easing, see license below:
-// =============================================================
-//
-// TERMS OF USE - EASING EQUATIONS
-//
-// Open source under the BSD License.
-//
-// Copyright ? 2001 Robert Penner
-// All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without modification,
-// are permitted provided that the following conditions are met:
-//
-// - Redistributions of source code must retain the above copyright notice,
-// this list of conditions and the following disclaimer.
-// - Redistributions in binary form must reproduce the above copyright notice,
-// this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-// - Neither the name of the author nor the names of contributors may be used to endorse
-// or promote products derived from this software without specific prior written permission.
-// - THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-// STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-// EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-(function (fgui) {
-    var EaseManager = /** @class */ (function () {
+    var EaseManager = (function () {
         function EaseManager() {
         }
         EaseManager.evaluate = function (easeType, time, duration, overshootOrAmplitude, period) {
@@ -16192,7 +16958,7 @@ window.__extends = (this && this.__extends) || (function () {
         return EaseManager;
     }());
     fgui.EaseManager = EaseManager;
-    var Bounce = /** @class */ (function () {
+    var Bounce = (function () {
         function Bounce() {
         }
         Bounce.easeIn = function (time, duration) {
@@ -16221,7 +16987,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var EaseType = /** @class */ (function () {
+    var EaseType = (function () {
         function EaseType() {
         }
         EaseType.Linear = 0;
@@ -16262,7 +17028,338 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GTween = /** @class */ (function () {
+    var GPath = (function () {
+        function GPath() {
+            this._segments = new Array();
+            this._points = new Array();
+        }
+        Object.defineProperty(GPath.prototype, "length", {
+            get: function () {
+                return this._fullLength;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        GPath.prototype.create2 = function (pt1, pt2, pt3, pt4) {
+            var points = new Array();
+            points.push(pt1);
+            points.push(pt2);
+            if (pt3)
+                points.push(pt3);
+            if (pt4)
+                points.push(pt4);
+            this.create(points);
+        };
+        GPath.prototype.create = function (points) {
+            this._segments.length = 0;
+            this._points.length = 0;
+            this._fullLength = 0;
+            var cnt = points.length;
+            if (cnt == 0)
+                return;
+            var splinePoints = GPath.helperPoints;
+            splinePoints.length = 0;
+            var prev = points[0];
+            if (prev.curveType == fgui.CurveType.CRSpline)
+                splinePoints.push(new cc.Vec2(prev.x, prev.y));
+            for (var i = 1; i < cnt; i++) {
+                var current = points[i];
+                if (prev.curveType != fgui.CurveType.CRSpline) {
+                    var seg = new Segment();
+                    seg.type = prev.curveType;
+                    seg.ptStart = this._points.length;
+                    if (prev.curveType == fgui.CurveType.Straight) {
+                        seg.ptCount = 2;
+                        this._points.push(new cc.Vec2(prev.x, prev.y));
+                        this._points.push(new cc.Vec2(current.x, current.y));
+                    }
+                    else if (prev.curveType == fgui.CurveType.Bezier) {
+                        seg.ptCount = 3;
+                        this._points.push(new cc.Vec2(prev.x, prev.y));
+                        this._points.push(new cc.Vec2(current.x, current.y));
+                        this._points.push(new cc.Vec2(prev.control1_x, prev.control1_y));
+                    }
+                    else if (prev.curveType == fgui.CurveType.CubicBezier) {
+                        seg.ptCount = 4;
+                        this._points.push(new cc.Vec2(prev.x, prev.y));
+                        this._points.push(new cc.Vec2(current.x, current.y));
+                        this._points.push(new cc.Vec2(prev.control1_x, prev.control1_y));
+                        this._points.push(new cc.Vec2(prev.control2_x, prev.control2_y));
+                    }
+                    seg.length = fgui.ToolSet.distance(prev.x, prev.y, current.x, current.y);
+                    this._fullLength += seg.length;
+                    this._segments.push(seg);
+                }
+                if (current.curveType != fgui.CurveType.CRSpline) {
+                    if (splinePoints.length > 0) {
+                        splinePoints.push(new cc.Vec2(current.x, current.y));
+                        this.createSplineSegment();
+                    }
+                }
+                else
+                    splinePoints.push(new cc.Vec2(current.x, current.y));
+                prev = current;
+            }
+            if (splinePoints.length > 1)
+                this.createSplineSegment();
+        };
+        GPath.prototype.createSplineSegment = function () {
+            var splinePoints = GPath.helperPoints;
+            var cnt = splinePoints.length;
+            splinePoints.splice(0, 0, splinePoints[0]);
+            splinePoints.push(splinePoints[cnt]);
+            splinePoints.push(splinePoints[cnt]);
+            cnt += 3;
+            var seg = new Segment();
+            seg.type = fgui.CurveType.CRSpline;
+            seg.ptStart = this._points.length;
+            seg.ptCount = cnt;
+            this._points = this._points.concat(splinePoints);
+            seg.length = 0;
+            for (var i = 1; i < cnt; i++) {
+                seg.length += fgui.ToolSet.distance(splinePoints[i - 1].x, splinePoints[i - 1].y, splinePoints[i].x, splinePoints[i].y);
+            }
+            this._fullLength += seg.length;
+            this._segments.push(seg);
+            splinePoints.length = 0;
+        };
+        GPath.prototype.clear = function () {
+            this._segments.length = 0;
+            this._points.length = 0;
+        };
+        GPath.prototype.getPointAt = function (t, result) {
+            if (!result)
+                result = new cc.Vec2();
+            else
+                result.x = result.y = 0;
+            t = fgui.ToolSet.clamp01(t);
+            var cnt = this._segments.length;
+            if (cnt == 0) {
+                return result;
+            }
+            var seg;
+            if (t == 1) {
+                seg = this._segments[cnt - 1];
+                if (seg.type == fgui.CurveType.Straight) {
+                    result.x = fgui.ToolSet.lerp(this._points[seg.ptStart].x, this._points[seg.ptStart + 1].x, t);
+                    result.y = fgui.ToolSet.lerp(this._points[seg.ptStart].y, this._points[seg.ptStart + 1].y, t);
+                    return result;
+                }
+                else if (seg.type == fgui.CurveType.Bezier || seg.type == fgui.CurveType.CubicBezier)
+                    return this.onBezierCurve(seg.ptStart, seg.ptCount, t, result);
+                else
+                    return this.onCRSplineCurve(seg.ptStart, seg.ptCount, t, result);
+            }
+            var len = t * this._fullLength;
+            for (var i = 0; i < cnt; i++) {
+                seg = this._segments[i];
+                len -= seg.length;
+                if (len < 0) {
+                    t = 1 + len / seg.length;
+                    if (seg.type == fgui.CurveType.Straight) {
+                        result.x = fgui.ToolSet.lerp(this._points[seg.ptStart].x, this._points[seg.ptStart + 1].x, t);
+                        result.y = fgui.ToolSet.lerp(this._points[seg.ptStart].y, this._points[seg.ptStart + 1].y, t);
+                    }
+                    else if (seg.type == fgui.CurveType.Bezier || seg.type == fgui.CurveType.CubicBezier)
+                        result = this.onBezierCurve(seg.ptStart, seg.ptCount, t, result);
+                    else
+                        result = this.onCRSplineCurve(seg.ptStart, seg.ptCount, t, result);
+                    break;
+                }
+            }
+            return result;
+        };
+        Object.defineProperty(GPath.prototype, "segmentCount", {
+            get: function () {
+                return this._segments.length;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        GPath.prototype.getAnchorsInSegment = function (segmentIndex, points) {
+            if (points == null)
+                points = new Array();
+            var seg = this._segments[segmentIndex];
+            for (var i = 0; i < seg.ptCount; i++)
+                points.push(new cc.Vec2(this._points[seg.ptStart + i].x, this._points[seg.ptStart + i].y));
+            return points;
+        };
+        GPath.prototype.getPointsInSegment = function (segmentIndex, t0, t1, points, ts, pointDensity) {
+            if (points == null)
+                points = new Array();
+            if (!pointDensity || isNaN(pointDensity))
+                pointDensity = 0.1;
+            if (ts)
+                ts.push(t0);
+            var seg = this._segments[segmentIndex];
+            if (seg.type == fgui.CurveType.Straight) {
+                points.push(new cc.Vec2(fgui.ToolSet.lerp(this._points[seg.ptStart].x, this._points[seg.ptStart + 1].x, t0), fgui.ToolSet.lerp(this._points[seg.ptStart].y, this._points[seg.ptStart + 1].y, t0)));
+                points.push(new cc.Vec2(fgui.ToolSet.lerp(this._points[seg.ptStart].x, this._points[seg.ptStart + 1].x, t1), fgui.ToolSet.lerp(this._points[seg.ptStart].y, this._points[seg.ptStart + 1].y, t1)));
+            }
+            else {
+                var func;
+                if (seg.type == fgui.CurveType.Bezier || seg.type == fgui.CurveType.CubicBezier)
+                    func = this.onBezierCurve;
+                else
+                    func = this.onCRSplineCurve;
+                points.push(func.call(this, seg.ptStart, seg.ptCount, t0, new cc.Vec2()));
+                var SmoothAmount = Math.min(seg.length * pointDensity, 50);
+                for (var j = 0; j <= SmoothAmount; j++) {
+                    var t = j / SmoothAmount;
+                    if (t > t0 && t < t1) {
+                        points.push(func.call(this, seg.ptStart, seg.ptCount, t, new cc.Vec2()));
+                        if (ts != null)
+                            ts.push(t);
+                    }
+                }
+                points.push(func.call(this, seg.ptStart, seg.ptCount, t1, new cc.Vec2()));
+            }
+            if (ts != null)
+                ts.push(t1);
+            return points;
+        };
+        GPath.prototype.getAllPoints = function (points, ts, pointDensity) {
+            if (points == null)
+                points = new Array();
+            if (!pointDensity || isNaN(pointDensity))
+                pointDensity = 0.1;
+            var cnt = this._segments.length;
+            for (var i = 0; i < cnt; i++)
+                this.getPointsInSegment(i, 0, 1, points, ts, pointDensity);
+            return points;
+        };
+        GPath.prototype.onCRSplineCurve = function (ptStart, ptCount, t, result) {
+            var adjustedIndex = Math.floor(t * (ptCount - 4)) + ptStart;
+            var p0x = this._points[adjustedIndex].x;
+            var p0y = this._points[adjustedIndex].y;
+            var p1x = this._points[adjustedIndex + 1].x;
+            var p1y = this._points[adjustedIndex + 1].y;
+            var p2x = this._points[adjustedIndex + 2].x;
+            var p2y = this._points[adjustedIndex + 2].y;
+            var p3x = this._points[adjustedIndex + 3].x;
+            var p3y = this._points[adjustedIndex + 3].y;
+            var adjustedT = (t == 1) ? 1 : fgui.ToolSet.repeat(t * (ptCount - 4), 1);
+            var t0 = ((-adjustedT + 2) * adjustedT - 1) * adjustedT * 0.5;
+            var t1 = (((3 * adjustedT - 5) * adjustedT) * adjustedT + 2) * 0.5;
+            var t2 = ((-3 * adjustedT + 4) * adjustedT + 1) * adjustedT * 0.5;
+            var t3 = ((adjustedT - 1) * adjustedT * adjustedT) * 0.5;
+            result.x = p0x * t0 + p1x * t1 + p2x * t2 + p3x * t3;
+            result.y = p0y * t0 + p1y * t1 + p2y * t2 + p3y * t3;
+            return result;
+        };
+        GPath.prototype.onBezierCurve = function (ptStart, ptCount, t, result) {
+            var t2 = 1 - t;
+            var p0x = this._points[ptStart].x;
+            var p0y = this._points[ptStart].y;
+            var p1x = this._points[ptStart + 1].x;
+            var p1y = this._points[ptStart + 1].y;
+            var cp0x = this._points[ptStart + 2].x;
+            var cp0y = this._points[ptStart + 2].y;
+            if (ptCount == 4) {
+                var cp1x = this._points[ptStart + 3].x;
+                var cp1y = this._points[ptStart + 3].y;
+                result.x = t2 * t2 * t2 * p0x + 3 * t2 * t2 * t * cp0x + 3 * t2 * t * t * cp1x + t * t * t * p1x;
+                result.y = t2 * t2 * t2 * p0y + 3 * t2 * t2 * t * cp0y + 3 * t2 * t * t * cp1y + t * t * t * p1y;
+            }
+            else {
+                result.x = t2 * t2 * p0x + 2 * t2 * t * cp0x + t * t * p1x;
+                result.y = t2 * t2 * p0y + 2 * t2 * t * cp0y + t * t * p1y;
+            }
+            return result;
+        };
+        GPath.helperPoints = new Array();
+        return GPath;
+    }());
+    fgui.GPath = GPath;
+    var Segment = (function () {
+        function Segment() {
+        }
+        return Segment;
+    }());
+})(fgui || (fgui = {}));
+
+(function (fgui) {
+    var CurveType;
+    (function (CurveType) {
+        CurveType[CurveType["CRSpline"] = 0] = "CRSpline";
+        CurveType[CurveType["Bezier"] = 1] = "Bezier";
+        CurveType[CurveType["CubicBezier"] = 2] = "CubicBezier";
+        CurveType[CurveType["Straight"] = 3] = "Straight";
+    })(CurveType = fgui.CurveType || (fgui.CurveType = {}));
+    var GPathPoint = (function () {
+        function GPathPoint() {
+            this.x = 0;
+            this.y = 0;
+            this.control1_x = 0;
+            this.control1_y = 0;
+            this.control2_x = 0;
+            this.control2_y = 0;
+            this.curveType = 0;
+        }
+        GPathPoint.newPoint = function (x, y, curveType) {
+            if (x === void 0) { x = 0; }
+            if (y === void 0) { y = 0; }
+            if (curveType === void 0) { curveType = 0; }
+            var pt = new GPathPoint();
+            pt.x = x;
+            pt.y = y;
+            pt.control1_x = 0;
+            pt.control1_y = 0;
+            pt.control2_x = 0;
+            pt.control2_y = 0;
+            pt.curveType = curveType;
+            return pt;
+        };
+        GPathPoint.newBezierPoint = function (x, y, control1_x, control1_y) {
+            if (x === void 0) { x = 0; }
+            if (y === void 0) { y = 0; }
+            if (control1_x === void 0) { control1_x = 0; }
+            if (control1_y === void 0) { control1_y = 0; }
+            var pt = new GPathPoint();
+            pt.x = x;
+            pt.y = y;
+            pt.control1_x = control1_x;
+            pt.control1_y = control1_y;
+            pt.control2_x = 0;
+            pt.control2_y = 0;
+            pt.curveType = CurveType.Bezier;
+            return pt;
+        };
+        GPathPoint.newCubicBezierPoint = function (x, y, control1_x, control1_y, control2_x, control2_y) {
+            if (x === void 0) { x = 0; }
+            if (y === void 0) { y = 0; }
+            if (control1_x === void 0) { control1_x = 0; }
+            if (control1_y === void 0) { control1_y = 0; }
+            if (control2_x === void 0) { control2_x = 0; }
+            if (control2_y === void 0) { control2_y = 0; }
+            var pt = new GPathPoint();
+            pt.x = x;
+            pt.y = y;
+            pt.control1_x = control1_x;
+            pt.control1_y = control1_y;
+            pt.control2_x = control2_x;
+            pt.control2_y = control2_y;
+            pt.curveType = CurveType.CubicBezier;
+            return pt;
+        };
+        GPathPoint.prototype.clone = function () {
+            var ret = new GPathPoint();
+            ret.x = this.x;
+            ret.y = this.y;
+            ret.control1_x = this.control1_x;
+            ret.control1_y = this.control1_y;
+            ret.control2_x = this.control2_x;
+            ret.control2_y = this.control2_y;
+            ret.curveType = this.curveType;
+            return ret;
+        };
+        return GPathPoint;
+    }());
+    fgui.GPathPoint = GPathPoint;
+})(fgui || (fgui = {}));
+
+(function (fgui) {
+    var GTween = (function () {
         function GTween() {
         }
         GTween.to = function (start, end, duration) {
@@ -16290,7 +17387,7 @@ window.__extends = (this && this.__extends) || (function () {
             return fgui.TweenManager.isTweening(target, propType);
         };
         GTween.kill = function (target, complete, propType) {
-            fgui.TweenManager.killTweens(target, false, null);
+            fgui.TweenManager.killTweens(target, complete, propType);
         };
         GTween.getTween = function (target, propType) {
             return fgui.TweenManager.getTween(target, propType);
@@ -16302,7 +17399,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var GTweener = /** @class */ (function () {
+    var GTweener = (function () {
         function GTweener() {
             this._startValue = new fgui.TweenValue();
             this._endValue = new fgui.TweenValue();
@@ -16384,6 +17481,10 @@ window.__extends = (this && this.__extends) || (function () {
             enumerable: true,
             configurable: true
         });
+        GTweener.prototype.setPath = function (value) {
+            this._path = value;
+            return this;
+        };
         GTweener.prototype.setUserData = function (value) {
             this._userData = value;
             return this;
@@ -16463,9 +17564,6 @@ window.__extends = (this && this.__extends) || (function () {
             this._paused = paused;
             return this;
         };
-        /**
-         * seek position of the tween, in seconds.
-         */
         GTweener.prototype.seek = function (time) {
             if (this._killed)
                 return;
@@ -16574,6 +17672,7 @@ window.__extends = (this && this.__extends) || (function () {
             this._propType = null;
             this._userData = null;
             this._node = null;
+            this._path = null;
             this._onStart = this._onUpdate = this._onComplete = null;
             this._onStartCaller = this._onUpdateCaller = this._onCompleteCaller = null;
         };
@@ -16586,8 +17685,7 @@ window.__extends = (this && this.__extends) || (function () {
                 dt *= this._timeScale;
             if (dt == 0)
                 return;
-            if (this._ended != 0) //Maybe completed by seek
-             {
+            if (this._ended != 0) {
                 this.callCompleteCallback();
                 this._killed = true;
                 return;
@@ -16603,8 +17701,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GTweener.prototype.update = function () {
             this._ended = 0;
-            if (this._valueSize == 0) //DelayedCall
-             {
+            if (this._valueSize == 0) {
                 if (this._elapsedTime >= this._delay + this._duration)
                     this._ended = 1;
                 return;
@@ -16656,6 +17753,18 @@ window.__extends = (this && this.__extends) || (function () {
                     this._value.x = this._startValue.x;
                     this._value.y = this._startValue.y;
                 }
+            }
+            else if (this._path) {
+                var pt = GTweener.helperPoint;
+                this._path.getPointAt(this._normalizedTime, pt);
+                if (this._snapping) {
+                    pt.x = Math.round(pt.x);
+                    pt.y = Math.round(pt.y);
+                }
+                this._deltaValue.x = pt.x - this._value.x;
+                this._deltaValue.y = pt.y - this._value.y;
+                this._value.x = pt.x;
+                this._value.y = pt.y;
             }
             else {
                 for (var i = 0; i < this._valueSize; i++) {
@@ -16730,13 +17839,14 @@ window.__extends = (this && this.__extends) || (function () {
                 }
             }
         };
+        GTweener.helperPoint = new cc.Vec2();
         return GTweener;
     }());
     fgui.GTweener = GTweener;
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var TweenManager = /** @class */ (function () {
+    var TweenManager = (function () {
         function TweenManager() {
         }
         TweenManager.createTween = function () {
@@ -16828,8 +17938,7 @@ window.__extends = (this && this.__extends) || (function () {
                 }
             }
             if (freePosStart >= 0) {
-                if (TweenManager._totalActiveTweens != cnt) //new tweens added
-                 {
+                if (TweenManager._totalActiveTweens != cnt) {
                     var j = cnt;
                     cnt = TweenManager._totalActiveTweens - cnt;
                     for (i = 0; i < cnt; i++)
@@ -16848,7 +17957,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var TweenValue = /** @class */ (function () {
+    var TweenValue = (function () {
         function TweenValue() {
             this.x = this.y = this.z = this.w = 0;
         }
@@ -16906,7 +18015,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var ByteBuffer = /** @class */ (function () {
+    var ByteBuffer = (function () {
         function ByteBuffer(buffer, offset, length) {
             if (offset === void 0) { offset = 0; }
             if (length === void 0) { length = -1; }
@@ -17019,12 +18128,18 @@ window.__extends = (this && this.__extends) || (function () {
         };
         ByteBuffer.prototype.readS = function () {
             var index = this.readUshort();
-            if (index == 65534) //null
+            if (index == 65534)
                 return null;
             else if (index == 65533)
                 return "";
             else
                 return this.stringTable[index];
+        };
+        ByteBuffer.prototype.readSArray = function (cnt) {
+            var ret = new Array(cnt);
+            for (var i = 0; i < cnt; i++)
+                ret[i] = this.readS();
+            return ret;
         };
         ByteBuffer.prototype.writeS = function (value) {
             var index = this.readUshort();
@@ -17086,7 +18201,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var ColorMatrix = /** @class */ (function () {
+    var ColorMatrix = (function () {
         function ColorMatrix() {
             this.matrix = new Array(ColorMatrix.LENGTH);
             this.reset();
@@ -17096,7 +18211,6 @@ window.__extends = (this && this.__extends) || (function () {
             ret.adjustColor(p_brightness, p_contrast, p_saturation, p_hue);
             return ret;
         };
-        // public methods:
         ColorMatrix.prototype.reset = function () {
             for (var i = 0; i < ColorMatrix.LENGTH; i++) {
                 this.matrix[i] = ColorMatrix.IDENTITY_MATRIX[i];
@@ -17195,7 +18309,6 @@ window.__extends = (this && this.__extends) || (function () {
         ColorMatrix.prototype.cleanValue = function (p_val, p_limit) {
             return Math.min(p_limit, Math.max(-p_limit, p_val));
         };
-        // identity matrix constant:
         ColorMatrix.IDENTITY_MATRIX = [
             1, 0, 0, 0, 0,
             0, 1, 0, 0, 0,
@@ -17212,7 +18325,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var UBBParser = /** @class */ (function () {
+    var UBBParser = (function () {
         function UBBParser() {
             this._readPos = 0;
             this._handlers = {};
@@ -17221,10 +18334,7 @@ window.__extends = (this && this.__extends) || (function () {
             this._handlers["b"] = this.onTag_Simple;
             this._handlers["i"] = this.onTag_Simple;
             this._handlers["u"] = this.onTag_Simple;
-            //this._handlers["sup"] = this.onTag_Simple;
-            //this._handlers["sub"] = this.onTag_Simple;
             this._handlers["color"] = this.onTag_COLOR;
-            //this._handlers["font"] = this.onTag_FONT;
             this._handlers["size"] = this.onTag_SIZE;
         }
         UBBParser.prototype.onTag_URL = function (tagName, end, attr) {
@@ -17292,8 +18402,7 @@ window.__extends = (this && this.__extends) || (function () {
             var pos2;
             var result = "";
             while ((pos2 = this._text.indexOf("[", pos1)) != -1) {
-                if (this._text.charCodeAt(pos2 - 1) == 92) //\
-                 {
+                if (this._text.charCodeAt(pos2 - 1) == 92) {
                     result += this._text.substring(pos1, pos2 - 1);
                     result += "[";
                     pos1 = pos2 + 1;
@@ -17320,8 +18429,7 @@ window.__extends = (this && this.__extends) || (function () {
             var func;
             var result = "";
             while ((pos2 = this._text.indexOf("[", pos1)) != -1) {
-                if (pos2 > 0 && this._text.charCodeAt(pos2 - 1) == 92) //\
-                 {
+                if (pos2 > 0 && this._text.charCodeAt(pos2 - 1) == 92) {
                     result += this._text.substring(pos1, pos2 - 1);
                     result += "[";
                     pos1 = pos2 + 1;
@@ -17363,10 +18471,9 @@ window.__extends = (this && this.__extends) || (function () {
     }());
     fgui.UBBParser = UBBParser;
 })(fgui || (fgui = {}));
-/// <reference path="UBBParser.ts" />
 
 (function (fgui) {
-    var ToolSet = /** @class */ (function () {
+    var ToolSet = (function () {
         function ToolSet() {
         }
         ToolSet.startsWith = function (source, str, ignoreCase) {
@@ -17412,6 +18519,12 @@ window.__extends = (this && this.__extends) || (function () {
         ToolSet.toGrayed = function (c) {
             var v = c.getR() * 0.299 + c.getG() * 0.587 + c.getB() * 0.114;
             return new cc.Color(v, v, v, c.getA());
+        };
+        ToolSet.repeat = function (t, length) {
+            return t - Math.floor(t / length) * length;
+        };
+        ToolSet.distance = function (x1, y1, x2, y2) {
+            return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
         };
         return ToolSet;
     }());

@@ -197,6 +197,29 @@ namespace fgui {
             return null;
         }
 
+        public getChildByPath(path: String): GObject {
+            var arr: string[] = path.split(".");
+            var cnt: number = arr.length;
+            var gcom: GComponent = this;
+            var obj: GObject;
+            for (var i: number = 0; i < cnt; ++i) {
+                obj = gcom.getChild(arr[i]);
+                if (!obj)
+                    break;
+
+                if (i != cnt - 1) {
+                    if (!(gcom instanceof GComponent)) {
+                        obj = null;
+                        break;
+                    }
+                    else
+                        gcom = <GComponent>obj;
+                }
+            }
+
+            return obj;
+        }
+
         public getVisibleChild(name: string): GObject {
             var cnt: number = this._children.length;
             for (var i: number = 0; i < cnt; ++i) {
@@ -686,7 +709,7 @@ namespace fgui {
             else if (this._scrollPane)
                 this._scrollPane.adjustMaskContainer();
             else
-                this._container.setPosition(this._pivotCorrectX + this._alignOffset.x, this._pivotCorrectY-this._alignOffset.y);
+                this._container.setPosition(this._pivotCorrectX + this._alignOffset.x, this._pivotCorrectY - this._alignOffset.y);
         }
 
         protected handleSizeChanged(): void {
@@ -724,7 +747,6 @@ namespace fgui {
                 this._scrollPane.handleControllerChanged(c);
         }
 
-
         public hitTest(globalPt: cc.Vec2): GObject {
             if (this._touchDisabled || !this._touchable || !this._node.activeInHierarchy)
                 return null;
@@ -733,7 +755,7 @@ namespace fgui {
 
             if (this._customMask) {
                 let b = this._customMask["_hitTest"](globalPt) || false;
-                if (b == this._customMask.inverted)
+                if (!b)
                     return null;
             }
 
@@ -743,7 +765,7 @@ namespace fgui {
                 let pt: cc.Vec3 = this._node.convertToNodeSpaceAR(globalPt);
                 pt.x += this._node.anchorX * this._width;
                 pt.y += this._node.anchorY * this._height;
-                
+
                 if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
                     flag = 1;
                 else
@@ -1161,14 +1183,18 @@ namespace fgui {
             if (maskId != -1) {
                 this.setMask(this.getChildAt(maskId), buffer.readBool());
             }
+
             var hitTestId: string = buffer.readS();
+            i1 = buffer.readInt();
+            i2 = buffer.readInt();
+
             if (hitTestId != null) {
                 pi = this.packageItem.owner.getItemById(hitTestId);
-                if (pi && pi.hitTestData) {
-                    i1 = buffer.readInt();
-                    i2 = buffer.readInt();
+                if (pi && pi.hitTestData)
                     this.hitArea = new PixelHitTest(pi.hitTestData, i1, i2);
-                }
+            }
+            else if (i1 != 0 && i2 != -1) {
+                this.hitArea = new ChildHitArea(this.getChildAt(i2));
             }
 
             buffer.seek(0, 5);
@@ -1220,6 +1246,18 @@ namespace fgui {
                 var pageId: string = buffer.readS();
                 if (cc != null)
                     cc.selectedPageId = pageId;
+            }
+
+            if (buffer.version >= 2) {
+                cnt = buffer.readShort();
+                for (i = 0; i < cnt; i++) {
+                    var target: string = buffer.readS();
+                    var propertyId: number = buffer.readShort();
+                    var value: String = buffer.readS();
+                    var obj: GObject = this.getChildByPath(target);
+                    if (obj)
+                        obj.setProp(propertyId, value);
+                }
             }
         }
 

@@ -56,5 +56,13 @@ namespace fgui {
             let v = c.getR() * 0.299 + c.getG() * 0.587 + c.getB() * 0.114;
             return new cc.Color(v, v, v, c.getA());
         }
+
+        public static repeat(t: number, length: number): number {
+            return t - Math.floor(t / length) * length;
+        }
+
+        public static distance(x1: number, y1: number, x2: number, y2: number): number {
+            return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+        }
     }
 }

@@ -2,12 +2,13 @@
 namespace fgui {
 
     export class GProgressBar extends GComponent {
+        private _min: number = 0;
         private _max: number = 0;
         private _value: number = 0;
         private _titleType: ProgressTitleType;
         private _reverse: boolean;
 
-        private _titleObject: GTextField;
+        private _titleObject: GObject;
         private _aniObject: GObject;
         private _barObjectH: GObject;
         private _barObjectV: GObject;
@@ -17,8 +18,6 @@ namespace fgui {
         private _barMaxHeightDelta: number = 0;
         private _barStartX: number = 0;
         private _barStartY: number = 0;
-
-        private _tweening: boolean = false;
 
         public constructor() {
             super();
@@ -40,6 +39,17 @@ namespace fgui {
             }
         }
 
+        public get min(): number {
+            return this._min;
+        }
+
+        public set min(value: number) {
+            if (this._min != value) {
+                this._min = value;
+                this.update(this._value);
+            }
+        }
+
         public get max(): number {
             return this._max;
         }
@@ -56,33 +66,28 @@ namespace fgui {
         }
 
         public set value(value: number) {
-            if (this._tweening) {
-                GTween.kill(this, true, this.update);
-                this._tweening = false;
-            }
 
             if (this._value != value) {
+                GTween.kill(this, false, this.update);
+
                 this._value = value;
-                this.update(this._value);
+                this.update(value);
             }
         }
 
         public tweenValue(value: number, duration: number): GTweener {
-            if (this._value != value) {
-                if (this._tweening) {
-                    GTween.kill(this, false, this.update);
-                    this._tweening = false;
-                }
+            var oldValule: number;
 
-                var oldValule: number = this._value;
-                this._value = value;
-
-                this._tweening = true;
-                return GTween.to(oldValule, this._value, duration).setTarget(this, this.update).setEase(EaseType.Linear)
-                    .onComplete(function (): void { this._tweening = false; }, this);
+            var tweener: GTweener = GTween.getTween(this, this.update);
+            if (tweener != null) {
+                oldValule = tweener.value.x;
+                tweener.kill();
             }
             else
-                return null;
+                oldValule = this._value;
+
+            this._value = value;
+            return GTween.to(oldValule, this._value, duration).setTarget(this, this.update).setEase(EaseType.Linear);
         }
 
         public update(newValue: number): void {
@@ -90,19 +95,19 @@ namespace fgui {
             if (this._titleObject) {
                 switch (this._titleType) {
                     case ProgressTitleType.Percent:
-                        this._titleObject.text = Math.round(percent * 100) + "%";
+                        this._titleObject.text = Math.floor(percent * 100) + "%";
                         break;
 
                     case ProgressTitleType.ValueAndMax:
-                        this._titleObject.text = Math.round(newValue) + "/" + Math.round(this._max);
+                        this._titleObject.text = Math.floor(newValue) + "/" + Math.floor(this._max);
                         break;
 
                     case ProgressTitleType.Value:
-                        this._titleObject.text = "" + Math.round(newValue);
+                        this._titleObject.text = "" + Math.floor(newValue);
                         break;
 
                     case ProgressTitleType.Max:
-                        this._titleObject.text = "" + Math.round(this._max);
+                        this._titleObject.text = "" + Math.floor(this._max);
                         break;
                 }
             }
@@ -195,15 +200,10 @@ namespace fgui {
 
             this._value = buffer.readInt();
             this._max = buffer.readInt();
+            if (buffer.version >= 2)
+                this._min = buffer.readInt();
 
             this.update(this._value);
-        }
-
-        protected onDestroy(): void {
-            super.onDestroy();
-
-            if (this._tweening)
-                GTween.kill(this);
         }
     }
 }

@@ -10,10 +10,8 @@ namespace fgui {
         }
 
         protected init(): void {
-            if (this._owner["strokeColor"] != undefined)
-                this._default = new GearColorValue((<any>this._owner).color, (<any>this._owner).strokeColor);
-            else
-                this._default = new GearColorValue((<any>this._owner).color);
+            this._default = new GearColorValue(this._owner.getProp(ObjectPropID.Color),
+                this._owner.getProp(ObjectPropID.OutlineColor));
             this._storage = {};
         }
 
@@ -37,23 +35,20 @@ namespace fgui {
             if (!gv)
                 gv = this._default;
 
-            (<any>this._owner).color = gv.color;
-            if (this._owner["strokeColor"] != undefined && gv.strokeColor.getA() != 0)
-                (<any>this._owner).strokeColor = gv.strokeColor;
+            this._owner.setProp(ObjectPropID.Color, gv.color);
+            if (gv.strokeColor != null)
+                this._owner.setProp(ObjectPropID.OutlineColor, gv.strokeColor);
 
             this._owner._gearLocked = false;
         }
 
         public updateState(): void {
             var gv: GearColorValue = this._storage[this._controller.selectedPageId];
-            if (!gv) {
-                gv = new GearColorValue(null, null);
-                this._storage[this._controller.selectedPageId] = gv;
-            }
+            if (!gv)
+                this._storage[this._controller.selectedPageId] = gv = new GearColorValue();
 
-            gv.color = (<any>this._owner).color;
-            if (this._owner["strokeColor"] != undefined)
-                gv.strokeColor = (<any>this._owner).strokeColor;
+            gv.color = this._owner.getProp(ObjectPropID.Color);
+            gv.strokeColor = this._owner.getProp(ObjectPropID.OutlineColor);
         }
     }
 
@@ -61,7 +56,7 @@ namespace fgui {
         public color: cc.Color;
         public strokeColor: cc.Color;
 
-        public constructor(color: cc.Color = cc.Color.TRANSPARENT, strokeColor: cc.Color = cc.Color.TRANSPARENT) {
+        public constructor(color: cc.Color = null, strokeColor: cc.Color = null) {
             this.color = color;
             this.strokeColor = strokeColor;
         }

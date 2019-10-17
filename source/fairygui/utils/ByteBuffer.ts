@@ -20,7 +20,7 @@ namespace fgui {
             this._length = length;
         }
 
-        public get data():Uint8Array {
+        public get data(): Uint8Array {
             return this._bytes;
         }
 
@@ -127,6 +127,14 @@ namespace fgui {
                 return ""
             else
                 return this.stringTable[index];
+        }
+
+        public readSArray(cnt: number): Array<string> {
+            var ret: Array<string> = new Array<string>(cnt);
+            for (var i: number = 0; i < cnt; i++)
+                ret[i] = this.readS();
+
+            return ret;
         }
 
         public writeS(value: string): void {

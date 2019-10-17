@@ -52,6 +52,7 @@ namespace fgui {
         public _sizePercentInGroup: number = 0;
         public _touchDisabled: boolean = false;
         public _partner: GObjectPartner;
+        public _treeNode: GTreeNode;
 
         public static _defaultGroupIndex: number = -1;
 
@@ -77,7 +78,7 @@ namespace fgui {
             this._name = "";
 
             this._relations = new Relations(this);
-            this._gears = [];
+            this._gears = new Array<GearBase>(10);
             this._blendMode = BlendMode.Normal;
 
             this._partner = this._node.addComponent(GObjectPartner);
@@ -127,7 +128,7 @@ namespace fgui {
                 if (this._parent && !(this._parent instanceof GList)) {
                     this._parent.setBoundsChangedFlag();
                     if (this._group != null)
-                        this._group.setBoundsChangedFlag();
+                        this._group.setBoundsChangedFlag(true);
                     this._node.emit(Event.XY_CHANGED, this);
                 }
 
@@ -237,7 +238,7 @@ namespace fgui {
                     this._relations.onOwnerSizeChanged(dWidth, dHeight, this._pivotAsAnchor || !ignorePivot);
                     this._parent.setBoundsChangedFlag();
                     if (this._group != null)
-                        this._group.setBoundsChangedFlag(true);
+                        this._group.setBoundsChangedFlag();
                 }
 
                 this._node.emit(Event.SIZE_CHANGED, this);
@@ -394,7 +395,7 @@ namespace fgui {
                 this._node.opacity = this._alpha * 255;
 
                 if (this instanceof GGroup)
-                    (<GGroup>this).setChildrenAlpha();
+                    (<GGroup>this).handleAlphaChanged();
 
                 this.updateGear(3);
             }
@@ -409,11 +410,18 @@ namespace fgui {
                 this._visible = value;
 
                 this.handleVisibleChanged();
+
+                if (this._group && this._group.excludeInvisibles)
+                    this._group.setBoundsChangedFlag();
             }
         }
 
         public get _finalVisible(): boolean {
             return this._visible && this._internalVisible && (!this._group || this._group._finalVisible);
+        }
+
+        public get internalVisible3(): boolean {
+            return this._visible && this._internalVisible;
         }
 
         public get sortingOrder(): number {
@@ -439,20 +447,18 @@ namespace fgui {
         }
 
         public set tooltips(value: string) {
-            if (this._tooltips)
-				{
-                    this._node.off(fgui.Event.ROLL_OVER, this.onRollOver, this);
-                    this._node.off(fgui.Event.ROLL_OUT, this.onRollOut, this);
-				}
+            if (this._tooltips) {
+                this._node.off(fgui.Event.ROLL_OVER, this.onRollOver, this);
+                this._node.off(fgui.Event.ROLL_OUT, this.onRollOut, this);
+            }
 
-                this._tooltips = value;
+            this._tooltips = value;
 
 
-                if (this._tooltips)
-				{
-                    this._node.on(fgui.Event.ROLL_OVER, this.onRollOver, this);
-                    this._node.on(fgui.Event.ROLL_OUT, this.onRollOut, this);
-				}
+            if (this._tooltips) {
+                this._node.on(fgui.Event.ROLL_OVER, this.onRollOver, this);
+                this._node.on(fgui.Event.ROLL_OUT, this.onRollOut, this);
+            }
         }
 
         public get blendMode(): BlendMode {
@@ -480,10 +486,10 @@ namespace fgui {
         public set group(value: GGroup) {
             if (this._group != value) {
                 if (this._group != null)
-                    this._group.setBoundsChangedFlag(true);
+                    this._group.setBoundsChangedFlag();
                 this._group = value;
                 if (this._group != null)
-                    this._group.setBoundsChangedFlag(true);
+                    this._group.setBoundsChangedFlag();
             }
         }
 
@@ -493,40 +499,10 @@ namespace fgui {
 
         public getGear(index: number): GearBase {
             var gear: GearBase = this._gears[index];
-            if (gear == null) {
-                switch (index) {
-                    case 0:
-                        gear = new GearDisplay(this);
-                        break;
-                    case 1:
-                        gear = new GearXY(this);
-                        break;
-                    case 2:
-                        gear = new GearSize(this);
-                        break;
-                    case 3:
-                        gear = new GearLook(this);
-                        break;
-                    case 4:
-                        gear = new GearColor(this);
-                        break;
-                    case 5:
-                        gear = new GearAnimation(this);
-                        break;
-                    case 6:
-                        gear = new GearText(this);
-                        break;
-                    case 7:
-                        gear = new GearIcon(this);
-                        break;
-                    default:
-                        throw "FairyGUI: invalid gear index!";
-                }
-                this._gears[index] = gear;
-            }
+            if (gear == null)
+                this._gears[index] = gear = GearBase.create(this, index);
             return gear;
         }
-
 
         protected updateGear(index: number): void {
             if (this._underConstruct || this._gearLocked)
@@ -571,9 +547,15 @@ namespace fgui {
                 return;
 
             var connected: boolean = this._gears[0] == null || (<GearDisplay>this._gears[0]).connected;
+            if (this._gears[8])
+                connected = (<GearDisplay2>this._gears[8]).evaluate(connected);
+
             if (connected != this._internalVisible) {
                 this._internalVisible = connected;
                 this.handleVisibleChanged();
+
+                if (this._group && this._group.excludeInvisibles)
+                    this._group.setBoundsChangedFlag();
             }
         }
 
@@ -680,6 +662,10 @@ namespace fgui {
             return (this instanceof GList) ? <GList>this : null;
         }
 
+        public get asTree(): GTree {
+            return <GTree><any>this;
+        }
+
         public get asGraph(): GGraph {
             return (this instanceof GGraph) ? <GGraph>this : null;
         }
@@ -722,6 +708,10 @@ namespace fgui {
         public set icon(value: string) {
         }
 
+        public get treeNode(): GTreeNode {
+            return this._treeNode;
+        }
+
         public dispose(): void {
             let n = this._node;
             if (!n)
@@ -732,6 +722,12 @@ namespace fgui {
 
             this._node = null;
             n.destroy();
+
+            for (var i: number = 0; i < 10; i++) {
+                var gear: GearBase = this._gears[i];
+                if (gear != null)
+                    gear.dispose();
+            }
         }
 
         protected onEnable() {
@@ -871,7 +867,7 @@ namespace fgui {
 
         public handleControllerChanged(c: Controller): void {
             this._handlingController = true;
-            for (var i: number = 0; i < 8; i++) {
+            for (var i: number = 0; i < 10; i++) {
                 var gear: GearBase = this._gears[i];
                 if (gear != null && gear.controller == c)
                     gear.apply();
@@ -904,14 +900,14 @@ namespace fgui {
         }
 
         protected handleGrayedChanged(): void {
-
+            //nothing is base
         }
 
         public handleVisibleChanged(): void {
             this._node.active = this._finalVisible;
 
             if (this instanceof GGroup)
-                (<GGroup>this).setChildrenVisible();
+                (<GGroup>this).handleVisibleChanged();
 
             if (this._parent)
                 this._parent.setBoundsChangedFlag();
@@ -928,6 +924,45 @@ namespace fgui {
                 return this;
             else
                 return null;
+        }
+
+        public getProp(index: number): any {
+            switch (index) {
+                case ObjectPropID.Text:
+                    return this.text;
+                case ObjectPropID.Icon:
+                    return this.icon;
+                case ObjectPropID.Color:
+                    return null;
+                case ObjectPropID.OutlineColor:
+                    return null;
+                case ObjectPropID.Playing:
+                    return false;
+                case ObjectPropID.Frame:
+                    return 0;
+                case ObjectPropID.DeltaTime:
+                    return 0;
+                case ObjectPropID.TimeScale:
+                    return 1;
+                case ObjectPropID.FontSize:
+                    return 0;
+                case ObjectPropID.Selected:
+                    return false;
+                default:
+                    return undefined;
+            }
+        }
+
+        public setProp(index: number, value: any): void {
+            switch (index) {
+                case ObjectPropID.Text:
+                    this.text = value;
+                    break;
+
+                case ObjectPropID.Icon:
+                    this.icon = value;
+                    break;
+            }
         }
 
         public constructFromResource(): void {
@@ -1029,10 +1064,10 @@ namespace fgui {
         }
 
         //toolTips support
-        private onRollOver():void {
+        private onRollOver(): void {
             this.root.showTooltips(this.tooltips);
         };
-        private onRollOut():void {
+        private onRollOut(): void {
             this.root.hideTooltips();
         };
 

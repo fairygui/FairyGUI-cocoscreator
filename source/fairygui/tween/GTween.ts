@@ -36,8 +36,8 @@ namespace fgui {
             return TweenManager.isTweening(target, propType);
         }
 
-        public static kill(target: Object, complete?: Boolean, propType?: any): void {
-            TweenManager.killTweens(target, false, null);
+        public static kill(target: Object, complete?: boolean, propType?: any): void {
+            TweenManager.killTweens(target, complete, propType);
         }
 
         public static getTween(target: Object, propType?: any): GTweener {

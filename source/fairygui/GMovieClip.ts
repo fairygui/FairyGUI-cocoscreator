@@ -74,21 +74,61 @@ namespace fgui {
             this._content.grayed = this._grayed;
         }
 
+        public getProp(index: number): any {
+            switch (index) {
+                case ObjectPropID.Color:
+                    return this.color;
+                case ObjectPropID.Playing:
+                    return this.playing;
+                case ObjectPropID.Frame:
+                    return this.frame;
+                case ObjectPropID.TimeScale:
+                    return this.timeScale;
+                default:
+                    return super.getProp(index);
+            }
+        }
+
+        public setProp(index: number, value: any): void {
+            switch (index) {
+                case ObjectPropID.Color:
+                    this.color = value;
+                    break;
+                case ObjectPropID.Playing:
+                    this.playing = value;
+                    break;
+                case ObjectPropID.Frame:
+                    this.frame = value;
+                    break;
+                case ObjectPropID.TimeScale:
+                    this.timeScale = value;
+                    break;
+                case ObjectPropID.DeltaTime:
+                    this.advance(value);
+                    break;
+                default:
+                    super.setProp(index, value);
+                    break;
+            }
+        }
+
         public constructFromResource(): void {
-            this.sourceWidth = this.packageItem.width;
-            this.sourceHeight = this.packageItem.height;
+            var contentItem: PackageItem = this.packageItem.getBranch();
+            this.sourceWidth = contentItem.width;
+            this.sourceHeight = contentItem.height;
             this.initWidth = this.sourceWidth;
             this.initHeight = this.sourceHeight;
 
             this.setSize(this.sourceWidth, this.sourceHeight);
 
-            this.packageItem.load();
+            contentItem = contentItem.getHighResolution();
+            contentItem.load();
 
-            this._content.interval = this.packageItem.interval;
-            this._content.swing = this.packageItem.swing;
-            this._content.repeatDelay = this.packageItem.repeatDelay;
-            this._content.frames = this.packageItem.frames;
-            this._content.smoothing = this.packageItem.smoothing;
+            this._content.interval = contentItem.interval;
+            this._content.swing = contentItem.swing;
+            this._content.repeatDelay = contentItem.repeatDelay;
+            this._content.frames = contentItem.frames;
+            this._content.smoothing = contentItem.smoothing;
         }
 
         public setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void {

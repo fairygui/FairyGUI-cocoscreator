@@ -55,7 +55,8 @@ namespace fgui {
 
                 buffer.seek(curPos, 0);
 
-                var type: number = buffer.readByte();
+                var baseType: number = buffer.readByte();
+                var type: number = baseType;
                 buffer.skip(4);
                 elementId = buffer.readS();
 
@@ -94,6 +95,24 @@ namespace fgui {
                             buffer.writeS(value);
                     }
 
+                    if (baseType == ObjectType.Component && buffer.version >= 2) {
+                        buffer.seek(curPos, 4);
+    
+                        buffer.skip(2); //pageController
+    
+                        buffer.skip(4 * buffer.readShort());
+    
+                        var cpCount: number = buffer.readShort();
+                        for (var k: number = 0; k < cpCount; k++) {
+                            var target: string = buffer.readS();
+                            var propertyId: number = buffer.readShort();
+                            if (propertyId == 0 && (value = compStrings[elementId + "-cp-" + target]) != null)
+                                buffer.writeS(value);
+                            else
+                                buffer.skip(2);
+                        }
+                    }
+
                     buffer.position = nextPos;
                 }
 
@@ -114,6 +133,7 @@ namespace fgui {
                         }
 
                     case ObjectType.List:
+                    case ObjectType.Tree:
                         {
                             buffer.seek(curPos, 8);
                             buffer.skip(2);
@@ -123,12 +143,34 @@ namespace fgui {
                                 nextPos += buffer.position;
 
                                 buffer.skip(2); //url
+                                if (type == ObjectType.Tree)
+                                    buffer.skip(2);
+
+                                //title
                                 if ((value = compStrings[elementId + "-" + j]) != null)
                                     buffer.writeS(value);
                                 else
                                     buffer.skip(2);
+
+                                //selected title
                                 if ((value = compStrings[elementId + "-" + j + "-0"]) != null)
                                     buffer.writeS(value);
+
+                                if (buffer.version >= 2) {
+                                    buffer.skip(6);
+                                    buffer.skip(buffer.readUshort() * 4);//controllers
+
+                                    var cpCount: number = buffer.readUshort();
+                                    for (var k: number = 0; k < cpCount; k++) {
+                                        var target: string = buffer.readS();
+                                        var propertyId: number = buffer.readUshort();
+                                        if (propertyId == 0 && (value = compStrings[elementId + "-" + j + "-" + target]) != null)
+                                            buffer.writeS(value);
+                                        else
+                                            buffer.skip(2);
+                                    }
+                                }
+
                                 buffer.position = nextPos;
                             }
                             break;

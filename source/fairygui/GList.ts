@@ -304,21 +304,22 @@ namespace fgui {
                 this.clearSelection();
         }
 
-        public getSelection(): Array<number> {
-            var ret: Array<number> = new Array<number>();
+        public getSelection(result?: number[]): number[] {
+            if (!result)
+                result = new Array<number>();
             var i: number;
             if (this._virtual) {
                 for (i = 0; i < this._realNumItems; i++) {
                     var ii: ItemInfo = this._virtualItems[i];
-                    if ((ii.obj instanceof GButton) && (<any>ii.obj).selected
+                    if ((ii.obj instanceof GButton) && (<GButton>ii.obj).selected
                         || ii.obj == null && ii.selected) {
                         var j: number = i;
                         if (this._loop) {
                             j = i % this._numItems;
-                            if (ret.indexOf(j) != -1)
+                            if (result.indexOf(j) != -1)
                                 continue;
                         }
-                        ret.push(j);
+                        result.push(j);
                     }
                 }
             }
@@ -327,10 +328,10 @@ namespace fgui {
                 for (i = 0; i < cnt; i++) {
                     var obj: GButton = this._children[i].asButton;
                     if (obj != null && obj.selected)
-                        ret.push(i);
+                        result.push(i);
                 }
             }
-            return ret;
+            return result;
         }
 
         public addSelection(index: number, scrollItToView?: boolean): void {
@@ -629,6 +630,10 @@ namespace fgui {
             if (this._scrollPane && this.scrollItemToViewOnClick)
                 this._scrollPane.scrollToView(item, true);
 
+            this.dispatchItemEvent(item, evt);
+        }
+
+        protected dispatchItemEvent(item: GObject, evt: Event): void {
             this._node.emit(Event.CLICK_ITEM, item, evt);
         }
 
@@ -1495,7 +1500,7 @@ namespace fgui {
             if (deltaSize != 0 || firstItemDeltaSize != 0)
                 this._scrollPane.changeContentSizeOnScrolling(0, deltaSize, 0, firstItemDeltaSize);
 
-            if (curIndex > 0 && this.numChildren > 0 && this._container.y < 0 && this.getChildAt(0).y > -this._container.y)//最后一页没填满！
+            if (curIndex > 0 && this.numChildren > 0 && this._container.y <= 0 && this.getChildAt(0).y > -this._container.y)//最后一页没填满！
                 return true;
             else
                 return false;
@@ -1650,7 +1655,7 @@ namespace fgui {
             if (deltaSize != 0 || firstItemDeltaSize != 0)
                 this._scrollPane.changeContentSizeOnScrolling(deltaSize, 0, firstItemDeltaSize, 0);
 
-            if (curIndex > 0 && this.numChildren > 0 && this._container.x < 0 && this.getChildAt(0).x > - this._container.x)//最后一页没填满！
+            if (curIndex > 0 && this.numChildren > 0 && this._container.x <= 0 && this.getChildAt(0).x > - this._container.x)//最后一页没填满！
                 return true;
             else
                 return false;
@@ -1887,7 +1892,7 @@ namespace fgui {
                 if (this._scrollPane != null)
                     this._scrollPane.adjustMaskContainer();
                 else
-                    this._container.setPosition(this._pivotCorrectX + this._alignOffset.x, this._pivotCorrectY-this._alignOffset.y);
+                    this._container.setPosition(this._pivotCorrectX + this._alignOffset.x, this._pivotCorrectY - this._alignOffset.y);
             }
         }
 
@@ -1927,8 +1932,22 @@ namespace fgui {
                     if (child.width > maxWidth)
                         maxWidth = child.width;
                 }
-                cw = Math.ceil(maxWidth);
                 ch = curY;
+
+                if (ch <= viewHeight && this._autoResizeItem && this._scrollPane && this._scrollPane._displayInDemand && this._scrollPane.vtScrollBar) {
+                    viewWidth += this._scrollPane.vtScrollBar.width;
+                    for (i = 0; i < cnt; i++) {
+                        child = this.getChildAt(i);
+                        if (this.foldInvisibleItems && !child.visible)
+                            continue;
+
+                        child.setSize(viewWidth, child.height, true);
+                        if (child.width > maxWidth)
+                            maxWidth = child.width;
+                    }
+                }
+
+                cw = Math.ceil(maxWidth);
             }
             else if (this._layout == ListLayoutType.SingleRow) {
                 for (i = 0; i < cnt; i++) {
@@ -1946,6 +1965,20 @@ namespace fgui {
                         maxHeight = child.height;
                 }
                 cw = curX;
+
+                if (cw <= viewWidth && this._autoResizeItem && this._scrollPane && this._scrollPane._displayInDemand && this._scrollPane.hzScrollBar) {
+                    viewHeight += this._scrollPane.hzScrollBar.height;
+                    for (i = 0; i < cnt; i++) {
+                        child = this.getChildAt(i);
+                        if (this.foldInvisibleItems && !child.visible)
+                            continue;
+
+                        child.setSize(child.width, viewHeight, true);
+                        if (child.height > maxHeight)
+                            maxHeight = child.height;
+                    }
+                }
+
                 ch = Math.ceil(maxHeight);
             }
             else if (this._layout == ListLayoutType.FlowHorizontal) {
@@ -2191,14 +2224,6 @@ namespace fgui {
 
             buffer.seek(beginPos, 5);
 
-            var i: number;
-            var j: number;
-            var cnt: number;
-            var i1: number;
-            var i2: number;
-            var nextPos: number;
-            var str: string;
-
             this._layout = buffer.readByte();
             this._selectionMode = buffer.readByte();
             this._align = buffer.readByte();
@@ -2228,14 +2253,28 @@ namespace fgui {
             else
                 this.setupOverflow(overflow);
 
-            if (buffer.readBool())
+            if (buffer.readBool()) //clipSoftness
                 buffer.skip(8);
+
+            if (buffer.version >= 2) {
+                this.scrollItemToViewOnClick = buffer.readBool();
+                this.foldInvisibleItems = buffer.readBool();
+            }
 
             buffer.seek(beginPos, 8);
 
             this._defaultItem = buffer.readS();
-            var itemCount: number = buffer.readShort();
-            for (i = 0; i < itemCount; i++) {
+            this.readItems(buffer);
+        }
+
+        protected readItems(buffer: ByteBuffer): void {
+            var cnt: number;
+            var i: number;
+            var nextPos: number;
+            var str: string;
+
+            cnt = buffer.readShort();
+            for (i = 0; i < cnt; i++) {
                 nextPos = buffer.readShort();
                 nextPos += buffer.position;
 
@@ -2251,33 +2290,55 @@ namespace fgui {
                 var obj: GObject = this.getFromPool(str);
                 if (obj != null) {
                     this.addChild(obj);
-                    str = buffer.readS();
-                    if (str != null)
-                        obj.text = str;
-                    str = buffer.readS();
-                    if (str != null && (obj instanceof GButton))
-                        (<GButton>obj).selectedTitle = str;
-                    str = buffer.readS();
-                    if (str != null)
-                        obj.icon = str;
-                    str = buffer.readS();
-                    if (str != null && (obj instanceof GButton))
-                        (<GButton>obj).selectedIcon = str;
-                    str = buffer.readS();
-                    if (str != null)
-                        obj.name = str;
-                    if (obj instanceof GComponent) {
-                        cnt = buffer.readShort();
-                        for (j = 0; j < cnt; j++) {
-                            var cc: Controller = (<GComponent>obj).getController(buffer.readS());
-                            str = buffer.readS();
-                            if (cc != null)
-                                cc.selectedPageId = str;
-                        }
-                    }
+                    this.setupItem(buffer, obj);
                 }
 
                 buffer.position = nextPos;
+            }
+        }
+
+        protected setupItem(buffer: ByteBuffer, obj: GObject): void {
+            var str: string;
+
+            str = buffer.readS();
+            if (str != null)
+                obj.text = str;
+            str = buffer.readS();
+            if (str != null && (obj instanceof GButton))
+                (<GButton>obj).selectedTitle = str;
+            str = buffer.readS();
+            if (str != null)
+                obj.icon = str;
+            str = buffer.readS();
+            if (str != null && (obj instanceof GButton))
+                (<GButton>obj).selectedIcon = str;
+            str = buffer.readS();
+            if (str != null)
+                obj.name = str;
+
+            var cnt: number;
+            var i: number;
+
+            if (obj instanceof GComponent) {
+                cnt = buffer.readShort();
+                for (i = 0; i < cnt; i++) {
+                    var cc: Controller = (<GComponent>obj).getController(buffer.readS());
+                    str = buffer.readS();
+                    if (cc != null)
+                        cc.selectedPageId = str;
+                }
+
+                if (buffer.version >= 2) {
+                    cnt = buffer.readShort();
+                    for (i = 0; i < cnt; i++) {
+                        var target: string = buffer.readS();
+                        var propertyId: number = buffer.readShort();
+                        var value: String = buffer.readS();
+                        var obj2: GObject = (<GComponent>obj).getChildByPath(target);
+                        if (obj2)
+                            obj2.setProp(propertyId, value);
+                    }
+                }
             }
         }
 

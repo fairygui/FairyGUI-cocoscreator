@@ -9,19 +9,47 @@ namespace fgui {
         private _itemsByName: any;
         private _url: string;
         private _sprites: any;
-
-        public dependencies: any;
+        private _dependencies: Array<any>;
+        private _branches: Array<string>;
+        public _branchIndex: number;
 
         public static _constructing: number = 0;
 
         private static _instById: any = {};
         private static _instByName: any = {};
+        private static _branch: string = "";
+        private static _vars: any = {};
 
         public constructor() {
             this._items = new Array<PackageItem>();
             this._itemsById = {};
             this._itemsByName = {};
             this._sprites = {};
+            this._dependencies = Array<any>();
+            this._branches = Array<string>();
+            this._branchIndex = -1;
+        }
+
+        public static get branch(): string {
+            return UIPackage._branch;
+        }
+
+        public static set branch(value: string) {
+            UIPackage._branch = value;
+            for (var pkgId in UIPackage._instById) {
+                var pkg: UIPackage = UIPackage._instById[pkgId];
+                if (pkg._branches) {
+                    pkg._branchIndex = pkg._branches.indexOf(value);
+                }
+            }
+        }
+
+        public static getVar(key: string): any {
+            return UIPackage._vars[key];
+        }
+
+        public static setVar(key: string, value: any) {
+            UIPackage._vars[key] = value;
         }
 
         public static getById(id: string): UIPackage {
@@ -179,6 +207,7 @@ namespace fgui {
 
             this._url = url;
             buffer.version = buffer.readInt();
+            var ver2: boolean = buffer.version >= 2;
             var compressed: boolean = buffer.readBool();
             this._id = buffer.readString();
             this._name = buffer.readString();
@@ -188,6 +217,8 @@ namespace fgui {
             var cnt: number;
             var i: number;
             var nextPos: number;
+            var str: string;
+            var branchIncluded: boolean;
 
             buffer.seek(indexTablePos, 4);
 
@@ -205,6 +236,22 @@ namespace fgui {
                     let len = buffer.readInt();
                     stringTable[index] = buffer.readString(len);
                 }
+            }
+
+            buffer.seek(indexTablePos, 0);
+            cnt = buffer.readShort();
+            for (i = 0; i < cnt; i++)
+                this._dependencies.push({ id: buffer.readS(), name: buffer.readS() });
+
+            if (ver2) {
+                cnt = buffer.readShort();
+                if (cnt > 0) {
+                    this._branches = buffer.readSArray(cnt);
+                    if (UIPackage._branch)
+                        this._branchIndex = this._branches.indexOf(UIPackage._branch);
+                }
+
+                branchIncluded = cnt > 0;
             }
 
             buffer.seek(indexTablePos, 1);
@@ -284,6 +331,25 @@ namespace fgui {
                             break;
                         }
                 }
+
+                if (ver2) {
+                    str = buffer.readS();//branch
+                    if (str)
+                        pi.name = str + "/" + pi.name;
+
+                    var branchCnt: number = buffer.readUbyte();
+                    if (branchCnt > 0) {
+                        if (branchIncluded)
+                            pi.branches = buffer.readSArray(branchCnt);
+                        else
+                            this._itemsById[buffer.readS()] = pi;
+                    }
+
+                    var highResCnt: number = buffer.readUbyte();
+                    if (highResCnt > 0)
+                        pi.highResolution = buffer.readSArray(highResCnt);
+                }
+
                 this._items.push(pi);
                 this._itemsById[pi.id] = pi;
                 if (pi.name != null)
@@ -309,6 +375,16 @@ namespace fgui {
                 sprite.rect.width = buffer.readInt();
                 sprite.rect.height = buffer.readInt();
                 sprite.rotated = buffer.readBool();
+                if (ver2 && buffer.readBool()) {
+                    sprite.offset.x = buffer.readInt();
+                    sprite.offset.y = buffer.readInt();
+                    sprite.originalSize.width = buffer.readInt();
+                    sprite.originalSize.height = buffer.readInt();
+                }
+                else {
+                    sprite.originalSize.width = sprite.rect.width;
+                    sprite.originalSize.height = sprite.rect.height;
+                }
                 this._sprites[itemId] = sprite;
 
                 buffer.position = nextPos;
@@ -326,16 +402,6 @@ namespace fgui {
 
                     buffer.position = nextPos;
                 }
-            }
-
-            buffer.seek(indexTablePos, 0);
-            cnt = buffer.readShort();
-            this.dependencies = {};
-            for (i = 0; i < cnt; i++) {
-                let kv: any = {};
-                kv.id = buffer.readS();
-                kv.name = buffer.readS();
-                this.dependencies[i] = kv;
             }
         }
 
@@ -415,7 +481,7 @@ namespace fgui {
                         if (sprite != null) {
                             let atlasTexture: cc.Texture2D = <cc.Texture2D>this.getItemAsset(sprite.atlas);
                             if (atlasTexture != null) {
-                                let sf = new cc.SpriteFrame(atlasTexture, sprite.rect, sprite.rotated, cc.Vec2.ZERO, sprite.rect.size);
+                                let sf = new cc.SpriteFrame(atlasTexture, sprite.rect, sprite.rotated, sprite.offset, sprite.originalSize);
                                 if (item.scale9Grid) {
                                     sf.insetLeft = item.scale9Grid.x;
                                     sf.insetTop = item.scale9Grid.y;
@@ -628,12 +694,16 @@ namespace fgui {
     }
 
     class AtlasSprite {
-        public constructor() {
-            this.rect = new cc.Rect();
-        }
-
         public atlas: PackageItem;
         public rect: cc.Rect;
+        public offset: cc.Vec2;
+        public originalSize: cc.Size;
         public rotated: boolean;
+
+        public constructor() {
+            this.rect = new cc.Rect();
+            this.offset = new cc.Vec2();
+            this.originalSize = new cc.Size(0, 0);
+        }
     }
 }
