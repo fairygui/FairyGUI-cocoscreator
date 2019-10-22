@@ -335,6 +335,8 @@ namespace fgui {
             this._content.type = cc.Sprite.Type.SIMPLE;
             this._contentSourceWidth = texture.getRect().width;
             this._contentSourceHeight = texture.getRect().height;
+            if (this._autoSize)
+                this.setSize(this._contentSourceWidth, this._contentSourceHeight);
             this.updateLayout();
         }
 
