@@ -651,25 +651,25 @@ namespace fgui {
                     bg.channel = 2;
                 else if (bg.channel == 3)
                     bg.channel = 1;
-                    bg.rotated = true;
+                bg.rotated = true;
 
-                if (!ttf) {
+                if (ttf) {
+                    rect.x += mainSprite.rect.x;
+                    rect.y += mainSprite.rect.y;
+                }
+                else {
                     let sprite: AtlasSprite = this._sprites[img];
                     if (sprite) {
                         rect.set(sprite.rect);
                         bg.xOffset += sprite.offset.x;
                         bg.yOffset += sprite.offset.y;
                         if (fontSize == 0)
-                            fontSize = rect.height;
+                            fontSize = sprite.originalSize.height;
                         if (!mainTexture) {
                             sprite.atlas.load();
                             mainTexture = <cc.Texture2D>sprite.atlas.asset;
                         }
                     }
-                }
-                else {
-                    rect.x += mainSprite.rect.x;
-                    rect.y += mainSprite.rect.y;
                 }
 
                 if (!ttf) {

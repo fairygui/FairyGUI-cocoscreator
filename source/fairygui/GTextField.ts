@@ -385,11 +385,12 @@ namespace fgui {
         protected updateFontSize() {
             let font: any = this._label.font;
             if (font instanceof cc.BitmapFont) {
-                if (!(<any>font)._fntConfig.resizable)
-                    this._label.fontSize = (<any>font)._fntConfig.fontSize;
-                else
+                let fntConfig = (<any>font)._fntConfig;
+                if (fntConfig.resizable)
                     this._label.fontSize = this._fontSize;
-                this._label.lineHeight = (<any>font)._fntConfig.fontSize + this._leading + 4;
+                else
+                    this._label.fontSize = fntConfig.fontSize;
+                this._label.lineHeight = fntConfig.fontSize + (this._leading + 4) * fntConfig.fontSize / this._label.fontSize;
             }
             else {
                 this._label.fontSize = this._fontSize;
