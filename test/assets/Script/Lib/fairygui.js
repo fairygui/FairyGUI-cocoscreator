@@ -7439,6 +7439,8 @@ window.__extends = (this && this.__extends) || (function () {
             this._content.type = cc.Sprite.Type.SIMPLE;
             this._contentSourceWidth = texture.getRect().width;
             this._contentSourceHeight = texture.getRect().height;
+            if (this._autoSize)
+                this.setSize(this._contentSourceWidth, this._contentSourceHeight);
             this.updateLayout();
         };
         GLoader.prototype.onExternalLoadFailed = function () {
@@ -14494,7 +14496,7 @@ window.__extends = (this && this.__extends) || (function () {
                         if (sprite != null) {
                             var atlasTexture = this.getItemAsset(sprite.atlas);
                             if (atlasTexture != null) {
-                                var sf = new cc.SpriteFrame(atlasTexture, sprite.rect, sprite.rotated, sprite.offset, sprite.originalSize);
+                                var sf = new cc.SpriteFrame(atlasTexture, sprite.rect, sprite.rotated, new cc.Vec2(sprite.offset.x - (sprite.originalSize.width - sprite.rect.width) / 2, -(sprite.offset.y - (sprite.originalSize.height - sprite.rect.height) / 2)), sprite.originalSize);
                                 if (item.scale9Grid) {
                                     sf.insetLeft = item.scale9Grid.x;
                                     sf.insetTop = item.scale9Grid.y;
@@ -14679,7 +14681,7 @@ window.__extends = (this && this.__extends) || (function () {
     var AtlasSprite = (function () {
         function AtlasSprite() {
             this.rect = new cc.Rect();
-            this.offset = new cc.Vec2();
+            this.offset = new cc.Vec2(0, 0);
             this.originalSize = new cc.Size(0, 0);
         }
         return AtlasSprite;

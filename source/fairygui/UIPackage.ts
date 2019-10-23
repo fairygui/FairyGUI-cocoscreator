@@ -481,7 +481,9 @@ namespace fgui {
                         if (sprite != null) {
                             let atlasTexture: cc.Texture2D = <cc.Texture2D>this.getItemAsset(sprite.atlas);
                             if (atlasTexture != null) {
-                                let sf = new cc.SpriteFrame(atlasTexture, sprite.rect, sprite.rotated, sprite.offset, sprite.originalSize);
+                                let sf = new cc.SpriteFrame(atlasTexture, sprite.rect, sprite.rotated,
+                                    new cc.Vec2(sprite.offset.x - (sprite.originalSize.width - sprite.rect.width) / 2, -(sprite.offset.y - (sprite.originalSize.height - sprite.rect.height) / 2)),
+                                    sprite.originalSize);
                                 if (item.scale9Grid) {
                                     sf.insetLeft = item.scale9Grid.x;
                                     sf.insetTop = item.scale9Grid.y;
@@ -649,11 +651,14 @@ namespace fgui {
                     bg.channel = 2;
                 else if (bg.channel == 3)
                     bg.channel = 1;
+                    bg.rotated = true;
 
                 if (!ttf) {
                     let sprite: AtlasSprite = this._sprites[img];
                     if (sprite) {
                         rect.set(sprite.rect);
+                        bg.xOffset += sprite.offset.x;
+                        bg.yOffset += sprite.offset.y;
                         if (fontSize == 0)
                             fontSize = rect.height;
                         if (!mainTexture) {
@@ -702,7 +707,7 @@ namespace fgui {
 
         public constructor() {
             this.rect = new cc.Rect();
-            this.offset = new cc.Vec2();
+            this.offset = new cc.Vec2(0, 0);
             this.originalSize = new cc.Size(0, 0);
         }
     }
