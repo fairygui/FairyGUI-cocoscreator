@@ -7883,7 +7883,7 @@ window.__extends = (this && this.__extends) || (function () {
             return fgui.GTween.to(oldValule, this._value, duration).setTarget(this, this.update).setEase(fgui.EaseType.Linear);
         };
         GProgressBar.prototype.update = function (newValue) {
-            var percent = this._max != 0 ? Math.min(newValue / this._max, 1) : 0;
+            var percent = fgui.ToolSet.clamp01((newValue - this._min) / (this._max - this._min));
             if (this._titleObject) {
                 switch (this._titleType) {
                     case fgui.ProgressTitleType.Percent:
@@ -8355,11 +8355,12 @@ window.__extends = (this && this.__extends) || (function () {
         GTextField.prototype.updateFontSize = function () {
             var font = this._label.font;
             if (font instanceof cc.BitmapFont) {
-                if (!font._fntConfig.resizable)
-                    this._label.fontSize = font._fntConfig.fontSize;
-                else
+                var fntConfig = font._fntConfig;
+                if (fntConfig.resizable)
                     this._label.fontSize = this._fontSize;
-                this._label.lineHeight = font._fntConfig.fontSize + this._leading + 4;
+                else
+                    this._label.fontSize = fntConfig.fontSize;
+                this._label.lineHeight = fntConfig.fontSize + (this._leading + 4) * fntConfig.fontSize / this._label.fontSize;
             }
             else {
                 this._label.fontSize = this._fontSize;
@@ -14634,21 +14635,24 @@ window.__extends = (this && this.__extends) || (function () {
                     bg.channel = 2;
                 else if (bg.channel == 3)
                     bg.channel = 1;
-                if (!ttf) {
+                bg.rotated = true;
+                if (ttf) {
+                    rect.x += mainSprite.rect.x;
+                    rect.y += mainSprite.rect.y;
+                }
+                else {
                     var sprite = this._sprites[img];
                     if (sprite) {
                         rect.set(sprite.rect);
+                        bg.xOffset += sprite.offset.x;
+                        bg.yOffset += sprite.offset.y;
                         if (fontSize == 0)
-                            fontSize = rect.height;
+                            fontSize = sprite.originalSize.height;
                         if (!mainTexture) {
                             sprite.atlas.load();
                             mainTexture = sprite.atlas.asset;
                         }
                     }
-                }
-                else {
-                    rect.x += mainSprite.rect.x;
-                    rect.y += mainSprite.rect.y;
                 }
                 if (!ttf) {
                     if (bg.xAdvance == 0) {
