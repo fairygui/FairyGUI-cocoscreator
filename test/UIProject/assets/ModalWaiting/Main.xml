@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<component size="640,960">
-  <displayList>
-    <component id="n0" name="n0" src="jtds6" xy="166,437" size="230,36">
-      <Button title="Open Window"/>
-    </component>
-  </displayList>
-</component>

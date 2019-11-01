@@ -1,8 +1,0 @@
-{
-    "files.exclude":
-    {
-        "**/.DS_Store":true,
-        "**/.git":true,
-        "**/*.meta":true
-    }
-}
