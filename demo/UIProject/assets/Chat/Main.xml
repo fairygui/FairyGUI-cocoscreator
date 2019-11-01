@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="1136,640">
+  <displayList>
+    <image id="n5" name="n5" src="fymi17" fileName="images/3.png" xy="90,37" size="936,405"/>
+    <list id="n10" name="list" xy="104,49" size="910,376" overflow="scroll" scrollBarFlags="4" scrollBar="auto" scrollBarRes="ui://y768eypakfcb1e," defaultItem="ui://y768eypakfcb1j" autoItemSize="false">
+      <item url="ui://y768eypakfcb1h"/>
+      <item/>
+    </list>
+    <image id="n6" name="n6" src="fymi18" fileName="images/9.png" xy="93,467" size="660,59" group="n11"/>
+    <text id="n7" name="input1" xy="104,472" size="637,48" group="n11" input="true" fontSize="26" vAlign="middle" autoSize="none" singleLine="true" text=""/>
+    <component id="n8" name="btnSend1" src="fymi1b" fileName="Button.xml" xy="869,460" group="n11">
+      <Button title="Send"/>
+    </component>
+    <component id="n9" name="btnEmoji1" src="fymi19" fileName="Button2.xml" xy="771,456" group="n11"/>
+    <group id="n11" name="n11" xy="93,456" size="939,84"/>
+  </displayList>
+</component>

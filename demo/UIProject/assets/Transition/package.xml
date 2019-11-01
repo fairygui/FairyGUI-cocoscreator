@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<packageDescription id="c0hnre6o" jpegQuality="80" compressPNG="true">
+  <resources>
+    <component id="lvxr0" name="Main.xml" path="/" exported="true"/>
+    <image id="lvxr2" name="0.png" path="/images/"/>
+    <image id="lvxr3" name="0000_+.png" path="/images/"/>
+    <image id="lvxr4" name="0000_9_png.png" path="/images/"/>
+    <image id="lvxr5" name="0001_8_png.png" path="/images/"/>
+    <image id="lvxr6" name="0001_9.png" path="/images/"/>
+    <image id="lvxr7" name="0002_7_png.png" path="/images/"/>
+    <image id="lvxr8" name="0002_8.png" path="/images/"/>
+    <image id="lvxr9" name="0003_6_png.png" path="/images/"/>
+    <image id="lvxra" name="0003_7.png" path="/images/"/>
+    <image id="lvxrb" name="0004_5_png.png" path="/images/"/>
+    <image id="lvxrc" name="0004_6.png" path="/images/"/>
+    <image id="lvxrd" name="0005_4_png.png" path="/images/"/>
+    <image id="lvxre" name="0005_5.png" path="/images/"/>
+    <image id="lvxrf" name="0006_3_png.png" path="/images/"/>
+    <image id="lvxrg" name="0006_4.png" path="/images/"/>
+    <image id="lvxrh" name="0007_2_png.png" path="/images/"/>
+    <image id="lvxri" name="0007_3.png" path="/images/"/>
+    <image id="lvxrj" name="0008_1_png.png" path="/images/"/>
+    <image id="lvxrk" name="0008_2.png" path="/images/"/>
+    <image id="lvxrl" name="0009_0-_png.png" path="/images/"/>
+    <image id="lvxrm" name="0009_1.png" path="/images/"/>
+    <image id="lvxrn" name="0010_0.png" path="/images/"/>
+    <image id="lvxro" name="1.png" path="/images/"/>
+    <image id="lvxrp" name="2.png" path="/images/"/>
+    <image id="lvxrq" name="3.png" path="/images/"/>
+    <image id="lvxrr" name="4.png" path="/images/"/>
+    <sound id="lvxrs" name="BUZZ4.mp3" path="/images/"/>
+    <movieclip id="lvxrt" name="U1UIT17.jta" path="/images/"/>
+    <image id="lvxru" name="bangjile.png" path="/images/"/>
+    <image id="lvxrv" name="blood.png" path="/images/"/>
+    <image id="lvxrw" name="power.png" path="/images/"/>
+    <image id="lvxrx" name="red.png" path="/images/"/>
+    <component id="lvxry" name="BOSS.xml" path="/" exported="true"/>
+    <component id="lvxrz" name="BOSS_SKILL.xml" path="/" exported="true"/>
+    <component id="lvxr10" name="Button1.xml" path="/"/>
+    <component id="lvxr11" name="GoodHit.xml" path="/" exported="true"/>
+    <font id="lvxr12" name="number3.fnt" path="/" exported="true"/>
+    <image id="lvxr13" name="h0.png" path="/"/>
+    <image id="lvxr14" name="h1.png" path="/"/>
+    <image id="lvxr15" name="h2.png" path="/"/>
+    <image id="lvxr16" name="h3.png" path="/"/>
+    <image id="lvxr17" name="h4.png" path="/"/>
+    <image id="lvxr18" name="h5.png" path="/"/>
+    <image id="lvxr19" name="h6.png" path="/"/>
+    <image id="lvxr1a" name="h7.png" path="/"/>
+    <image id="lvxr1b" name="h8.png" path="/"/>
+    <image id="lvxr1c" name="h9.png" path="/"/>
+    <component id="lvxr1d" name="PowerUp.xml" path="/" exported="true"/>
+    <font id="lvxr1e" name="number1.fnt" path="/" exported="true"/>
+    <font id="lvxr1f" name="number2.fnt" path="/" exported="true"/>
+    <component id="lvxr1g" name="TRAP.xml" path="/" exported="true"/>
+  </resources>
+  <publish name="Transition">
+    <atlas name="Default" index="0"/>
+  </publish>
+</packageDescription>

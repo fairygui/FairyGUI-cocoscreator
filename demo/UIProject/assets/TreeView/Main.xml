@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="1136,640" bgColor="#3f3f3f">
+  <displayList>
+    <graph id="n2" name="n2" xy="277,16" size="424,594" type="rect" lineSize="2"/>
+    <list id="n0" name="tree" xy="279,18" size="419,589" overflow="scroll" scrollBarFlags="128" defaultItem="ui://5nx1f8vzpmk31" treeView="true" indent="15" clickToExpand="1">
+      <item level="0"/>
+      <item icon="ui://5nx1f8vzua5o8" level="1"/>
+      <item icon="ui://5nx1f8vzua5o8" level="1"/>
+      <item icon="ui://5nx1f8vzua5o8" level="1"/>
+      <item icon="ui://5nx1f8vzua5o8" level="1"/>
+      <item level="0"/>
+      <item icon="ui://5nx1f8vzua5o7" level="1"/>
+    </list>
+  </displayList>
+</component>

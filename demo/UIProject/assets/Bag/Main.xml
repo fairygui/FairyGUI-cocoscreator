@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="1136,640">
+  <displayList>
+    <component id="n0" name="bagBtn" src="thi7c" fileName="BagButton.xml" xy="29,505" group="n1"/>
+    <group id="n1" name="n1" xy="29,505" size="90,100" advanced="true">
+      <relation target="" sidePair="bottom-bottom"/>
+    </group>
+  </displayList>
+</component>

@@ -1,0 +1,13 @@
+info creator=UIBuilder
+common lineHeight=0
+char id=43 img=lvxr3 xoffset=0 yoffset=0 xadvance=25
+char id=57 img=lvxr6 xoffset=0 yoffset=0 xadvance=25
+char id=56 img=lvxr8 xoffset=0 yoffset=0 xadvance=25
+char id=55 img=lvxra xoffset=0 yoffset=0 xadvance=25
+char id=54 img=lvxrc xoffset=0 yoffset=0 xadvance=25
+char id=53 img=lvxre xoffset=0 yoffset=0 xadvance=25
+char id=52 img=lvxrg xoffset=0 yoffset=0 xadvance=25
+char id=51 img=lvxri xoffset=0 yoffset=0 xadvance=25
+char id=50 img=lvxrk xoffset=0 yoffset=0 xadvance=25
+char id=49 img=lvxrm xoffset=-2 yoffset=0 xadvance=20
+char id=48 img=lvxrn xoffset=0 yoffset=0 xadvance=25
