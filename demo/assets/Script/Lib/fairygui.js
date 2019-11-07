@@ -2536,6 +2536,7 @@ window.__extends = (this && this.__extends) || (function () {
             this.off(fgui.Event.DISPLAY, this.onMaskReady, this);
             if (this._maskContent instanceof fgui.GImage) {
                 this._customMask.type = cc.Mask.Type.IMAGE_STENCIL;
+                this._customMask.alphaThreshold = 0.0001;
                 this._customMask.spriteFrame = this._maskContent._content.spriteFrame;
             }
             else {

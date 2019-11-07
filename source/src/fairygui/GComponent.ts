@@ -649,6 +649,7 @@ namespace fgui {
 
             if (this._maskContent instanceof GImage) {
                 this._customMask.type = cc.Mask.Type.IMAGE_STENCIL;
+                this._customMask.alphaThreshold = 0.0001;
                 this._customMask.spriteFrame = (<GImage>this._maskContent)._content.spriteFrame;
             }
             else {
