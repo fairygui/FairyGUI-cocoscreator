@@ -10,6 +10,7 @@ export default class TransitionDemo extends cc.Component {
     private _g3: fgui.GComponent;
     private _g4: fgui.GComponent;
     private _g5: fgui.GComponent;
+    private _g6: fgui.GComponent;
 
     private _startValue: number;
     private _endValue: number;
@@ -30,6 +31,8 @@ export default class TransitionDemo extends cc.Component {
         this._g3 = fgui.UIPackage.createObject("Transition", "TRAP").asCom;
         this._g4 = fgui.UIPackage.createObject("Transition", "GoodHit").asCom;
         this._g5 = fgui.UIPackage.createObject("Transition", "PowerUp").asCom;
+        this._g6 = fgui.UIPackage.createObject("Transition", "PathDemo").asCom;
+
         //play_num_now是在编辑器里设定的名称，这里表示播放到'play_num_now'这个位置时才开始播放数字变化效果
         this._g5.getTransition("t0").setHook("play_num_now", this.__playNum.bind(this));
 
@@ -38,6 +41,7 @@ export default class TransitionDemo extends cc.Component {
         this._view.getChild("btn2").onClick(function (): void { this.__play(this._g3); }, this);
         this._view.getChild("btn3").onClick(this.__play4, this);
         this._view.getChild("btn4").onClick(this.__play5, this);
+        this._view.getChild("btn5").onClick(function (): void { this.__play(this._g6); }, this);
     }
 
     private __play(target: fgui.GComponent): void {

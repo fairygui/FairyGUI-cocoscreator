@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<packageDescription id="c0hnre6o" jpegQuality="80" compressPNG="true">
+<packageDescription id="c0hnre6o">
   <resources>
     <component id="lvxr0" name="Main.xml" path="/" exported="true"/>
     <image id="lvxr2" name="0.png" path="/images/"/>
@@ -53,6 +53,9 @@
     <font id="lvxr1e" name="number1.fnt" path="/" exported="true"/>
     <font id="lvxr1f" name="number2.fnt" path="/" exported="true"/>
     <component id="lvxr1g" name="TRAP.xml" path="/" exported="true"/>
+    <component id="sw6l1h" name="PathDemo.xml" path="/" exported="true"/>
+    <image id="sw6l1i" name="glz.jpg" path="/"/>
+    <image id="sw6l1j" name="r1.png" path="/"/>
   </resources>
   <publish name="Transition">
     <atlas name="Default" index="0"/>

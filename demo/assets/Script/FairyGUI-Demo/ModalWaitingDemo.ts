@@ -11,8 +11,6 @@ export default class ModalWaitingDemo extends cc.Component {
         fgui.UIConfig.globalModalWaiting = "ui://ModalWaiting/GlobalModalWaiting";
         fgui.UIConfig.windowModalWaiting = "ui://ModalWaiting/WindowModalWaiting";
 
-        fgui.UIObjectFactory.setExtension("ui://ModalWaiting/GlobalModalWaiting", GlobalWaiting);
-
         fgui.UIPackage.loadPackage("UI/ModalWaiting", this.onUILoaded.bind(this));
     }
 
@@ -30,26 +28,5 @@ export default class ModalWaitingDemo extends cc.Component {
         this.scheduleOnce(function(): void {
             fgui.GRoot.inst.closeModalWait();
         }, 3);
-    }
-}
-
-class GlobalWaiting extends fgui.GComponent {
-    private _obj: fgui.GObject;
-    
-    public constructor() {
-        super();
-    }
-    
-    protected onConstruct():void
-    {
-        this._obj = this.getChild("n1");
-    }
-    
-    protected onUpdate():void {
-        var i:number = this._obj.rotation;
-        i += 10;
-        if(i > 360)
-            i = i % 360;
-        this._obj.rotation = i;
     }
 }

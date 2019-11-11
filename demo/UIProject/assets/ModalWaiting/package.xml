@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<packageDescription id="16eoroa8" jpegQuality="80" compressPNG="true">
+<packageDescription id="16eoroa8">
   <resources>
     <image id="jtds0" name="0.png" path="/"/>
     <image id="jtds1" name="02.png" path="/"/>
@@ -15,6 +15,7 @@
     <component id="jtdsb" name="WindowFrame.xml" path="/"/>
     <component id="jtdsc" name="WindowModalWaiting.xml" path="/" exported="true"/>
     <movieclip id="jtdsd" name="qtm011.jta" path="/"/>
+    <image id="sw6le" name="icon_zzz.png" path="/"/>
   </resources>
   <publish name="ModalWaiting">
     <atlas name="Default" index="0"/>

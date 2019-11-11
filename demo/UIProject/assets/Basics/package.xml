@@ -223,6 +223,7 @@
     <component id="srct86" name="Slider2_grip.xml" path="/components/"/>
     <component id="srct87" name="Slider2.xml" path="/components/"/>
     <movieclip id="iwqq89" name="gz.jta" path="/images/"/>
+    <image id="sw6l8a" name="radial.png" path="/images/" scale=""/>
   </resources>
   <publish name="Basics">
     <atlas name="Default" index="0"/>
