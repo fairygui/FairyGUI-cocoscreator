@@ -9748,6 +9748,8 @@ window.__extends = (this && this.__extends) || (function () {
             cc = child.getController("leaf");
             if (cc)
                 cc.selectedIndex = node.isFolder ? 0 : 1;
+            if (node.isFolder)
+                node._cell.on(fgui.Event.TOUCH_BEGIN, this.__cellMouseDown, this);
             if (this.treeNodeRender)
                 this.treeNodeRender(node, child);
         };
@@ -9793,7 +9795,6 @@ window.__extends = (this && this.__extends) || (function () {
             var cc = node._cell.getController("expanded");
             if (cc)
                 cc.selectedIndex = 1;
-            node._cell.on(fgui.Event.TOUCH_BEGIN, this.__cellMouseDown, this);
             if (node._cell.parent != null)
                 this.checkChildren(node, this.getChildIndex(node._cell));
         };
@@ -9966,6 +9967,7 @@ window.__extends = (this && this.__extends) || (function () {
 (function (fgui) {
     var GTreeNode = (function () {
         function GTreeNode(hasChild, resURL) {
+            this._expanded = false;
             this._level = 0;
             this._resURL = resURL;
             if (hasChild)
@@ -10011,6 +10013,24 @@ window.__extends = (this && this.__extends) || (function () {
                     return this._cell.text;
                 else
                     return null;
+            },
+            set: function (value) {
+                if (this._cell != null)
+                    this._cell.text = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GTreeNode.prototype, "icon", {
+            get: function () {
+                if (this._cell != null)
+                    return this._cell.icon;
+                else
+                    return null;
+            },
+            set: function (value) {
+                if (this._cell != null)
+                    this._cell.icon = value;
             },
             enumerable: true,
             configurable: true

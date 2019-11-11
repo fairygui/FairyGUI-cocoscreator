@@ -134,6 +134,9 @@ namespace fgui {
             if (cc)
                 cc.selectedIndex = node.isFolder ? 0 : 1;
 
+            if(node.isFolder)
+                node._cell.on(Event.TOUCH_BEGIN, this.__cellMouseDown, this);
+
             if (this.treeNodeRender)
                 this.treeNodeRender(node, child);
         }
@@ -191,8 +194,6 @@ namespace fgui {
             var cc: Controller = node._cell.getController("expanded");
             if (cc)
                 cc.selectedIndex = 1;
-
-            node._cell.on(Event.TOUCH_BEGIN, this.__cellMouseDown, this);
 
             if (node._cell.parent != null)
                 this.checkChildren(node, this.getChildIndex(node._cell));

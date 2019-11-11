@@ -1245,7 +1245,8 @@ declare namespace fgui {
         expanded: boolean;
         readonly isFolder: boolean;
         readonly parent: GTreeNode;
-        readonly text: string;
+        text: string;
+        icon: string;
         readonly cell: GComponent;
         readonly level: number;
         _setLevel(value: number): void;

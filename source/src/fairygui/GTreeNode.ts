@@ -4,7 +4,7 @@ namespace fgui {
 
         private _parent: GTreeNode;
         private _children: Array<GTreeNode>;
-        private _expanded: boolean;
+        private _expanded: boolean = false;
         private _level: number = 0;
         private _tree: GTree;
 
@@ -49,6 +49,23 @@ namespace fgui {
                 return this._cell.text;
             else
                 return null;
+        }
+
+        public set text(value: string) {
+            if (this._cell != null)
+                this._cell.text = value;
+        }
+
+        public get icon(): string {
+            if (this._cell != null)
+                return this._cell.icon;
+            else
+                return null;
+        }
+
+        public set icon(value: string) {
+            if (this._cell != null)
+                this._cell.icon = value;
         }
 
         public get cell(): GComponent {
