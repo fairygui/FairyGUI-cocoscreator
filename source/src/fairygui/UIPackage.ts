@@ -651,7 +651,6 @@ namespace fgui {
                     bg.channel = 2;
                 else if (bg.channel == 3)
                     bg.channel = 1;
-                bg.rotated = true;
 
                 if (ttf) {
                     rect.x += mainSprite.rect.x;
@@ -670,9 +669,7 @@ namespace fgui {
                             mainTexture = <cc.Texture2D>sprite.atlas.asset;
                         }
                     }
-                }
 
-                if (!ttf) {
                     if (bg.xAdvance == 0) {
                         if (xadvance == 0)
                             bg.xAdvance = bg.xOffset + bg.rect.width;

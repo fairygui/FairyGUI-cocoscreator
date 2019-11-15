@@ -5,8 +5,6 @@ export default class TreeViewDemo extends cc.Component {
     private _view: fgui.GComponent;
     private _tree1: fgui.GTree;
     private _tree2: fgui.GTree;
-    private _folderURL1: string;
-    private _folderURL2: string;
     private _fileURL: string;
 
     onLoad() {
@@ -17,8 +15,6 @@ export default class TreeViewDemo extends cc.Component {
         this._view = fgui.UIPackage.createObject("TreeView", "Main").asCom;
         this._view.makeFullScreen();
         fgui.GRoot.inst.addChild(this._view);
-        this._folderURL1 = "ui://TreeView/folder_closed";
-        this._folderURL2 = "ui://TreeView/folder_opened";
         this._fileURL = "ui://TreeView/file";
 
         this._tree1 = this._view.getChild("tree").asTree;
