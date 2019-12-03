@@ -4066,7 +4066,7 @@ window.__extends = (this && this.__extends) || (function () {
         GGraph.prototype.drawRegularPolygon = function (lineSize, lineColor, fillColor, sides, startAngle, distances) {
             if (startAngle === void 0) { startAngle = 0; }
             if (distances === void 0) { distances = null; }
-            this._type = 3;
+            this._type = 4;
             this._lineSize = lineSize;
             this._lineColor = lineColor;
             this._fillColor = fillColor;
@@ -4076,7 +4076,7 @@ window.__extends = (this && this.__extends) || (function () {
             this.updateGraph();
         };
         GGraph.prototype.drawPolygon = function (lineSize, lineColor, fillColor, points) {
-            this._type = 4;
+            this._type = 3;
             this._lineSize = lineSize;
             this._lineColor = lineColor;
             this._fillColor = fillColor;
@@ -14657,7 +14657,6 @@ window.__extends = (this && this.__extends) || (function () {
                     bg.channel = 2;
                 else if (bg.channel == 3)
                     bg.channel = 1;
-                bg.rotated = true;
                 if (ttf) {
                     rect.x += mainSprite.rect.x;
                     rect.y += mainSprite.rect.y;
@@ -14675,8 +14674,6 @@ window.__extends = (this && this.__extends) || (function () {
                             mainTexture = sprite.atlas.asset;
                         }
                     }
-                }
-                if (!ttf) {
                     if (bg.xAdvance == 0) {
                         if (xadvance == 0)
                             bg.xAdvance = bg.xOffset + bg.rect.width;
