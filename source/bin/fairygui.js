@@ -13913,6 +13913,8 @@ window.__extends = (this && this.__extends) || (function () {
                                     buffer.skip(2);
                                 if ((value = compStrings[elementId + "-" + j + "-0"]) != null)
                                     buffer.writeS(value);
+                                else
+                                    buffer.skip(2);
                                 if (buffer.version >= 2) {
                                     buffer.skip(6);
                                     buffer.skip(buffer.readUshort() * 4);
