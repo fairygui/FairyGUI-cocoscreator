@@ -758,7 +758,7 @@ namespace fgui {
             return this._node.hasEventListener(Event.CLICK);
         }
 
-        public on(type: string, listener?: Function, target?: any): void {
+        public on(type: string, listener: Function, target?: any): void {
             if (type == Event.DISPLAY || type == Event.UNDISPLAY)
                 this._partner._emitDisplayEvents = true;
 

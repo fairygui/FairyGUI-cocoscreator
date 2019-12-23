@@ -379,7 +379,7 @@ declare namespace fgui {
         offClick(listener: Function, target?: any): void;
         clearClick(): void;
         hasClickListener(): boolean;
-        on(type: string, listener?: Function, target?: any): void;
+        on(type: string, listener: Function, target?: any): void;
         off(type: string, listener?: Function, target?: any): void;
         draggable: boolean;
         dragBounds: cc.Rect;
