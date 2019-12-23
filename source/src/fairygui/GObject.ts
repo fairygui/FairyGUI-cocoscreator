@@ -742,26 +742,30 @@ namespace fgui {
         protected onDestroy() {
         }
 
-        public onClick(listener: Function, target: any): void {
+        public onClick(listener: Function, target?: any): void {
             this._node.on(Event.CLICK, listener, target);
         }
 
-        public offClick(listener: Function, target: any): void {
+        public offClick(listener: Function, target?: any): void {
             this._node.off(Event.CLICK, listener, target);
+        }
+
+        public clearClick(): void {
+            this._node.off(Event.CLICK);
         }
 
         public hasClickListener(): boolean {
             return this._node.hasEventListener(Event.CLICK);
         }
 
-        public on(type: string, listener: Function, target: any): void {
+        public on(type: string, listener?: Function, target?: any): void {
             if (type == Event.DISPLAY || type == Event.UNDISPLAY)
                 this._partner._emitDisplayEvents = true;
 
             this._node.on(type, listener, target);
         }
 
-        public off(type: string, listener: Function, target: any): void {
+        public off(type: string, listener?: Function, target?: any): void {
             this._node.off(type, listener, target);
         }
 
