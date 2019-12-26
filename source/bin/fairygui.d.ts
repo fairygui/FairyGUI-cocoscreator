@@ -375,11 +375,12 @@ declare namespace fgui {
         protected onDisable(): void;
         protected onUpdate(): void;
         protected onDestroy(): void;
-        onClick(listener: Function, target: any): void;
-        offClick(listener: Function, target: any): void;
+        onClick(listener: Function, target?: any): void;
+        offClick(listener: Function, target?: any): void;
+        clearClick(): void;
         hasClickListener(): boolean;
-        on(type: string, listener: Function, target: any): void;
-        off(type: string, listener: Function, target: any): void;
+        on(type: string, listener: Function, target?: any): void;
+        off(type: string, listener?: Function, target?: any): void;
         draggable: boolean;
         dragBounds: cc.Rect;
         startDrag(touchId?: number): void;

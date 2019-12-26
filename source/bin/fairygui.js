@@ -1553,6 +1553,9 @@ window.__extends = (this && this.__extends) || (function () {
         GObject.prototype.offClick = function (listener, target) {
             this._node.off(fgui.Event.CLICK, listener, target);
         };
+        GObject.prototype.clearClick = function () {
+            this._node.off(fgui.Event.CLICK);
+        };
         GObject.prototype.hasClickListener = function () {
             return this._node.hasEventListener(fgui.Event.CLICK);
         };
