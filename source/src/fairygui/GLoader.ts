@@ -160,7 +160,7 @@ namespace fgui {
                 this.updateGear(5);
             }
         }
-        
+
         public get color(): cc.Color {
             return this._color;
         }
@@ -267,12 +267,14 @@ namespace fgui {
                     }
                     else {
                         this._content.spriteFrame = <cc.SpriteFrame>this._contentItem.asset;
-                        if (this._contentItem.scale9Grid)
-                            this._content.type = cc.Sprite.Type.SLICED;
-                        else if (this._contentItem.scaleByTile)
-                            this._content.type = cc.Sprite.Type.TILED;
-                        else
-                            this._content.type = cc.Sprite.Type.SIMPLE;
+                        if (this._content.fillMethod == 0) {
+                            if (this._contentItem.scale9Grid)
+                                this._content.type = cc.Sprite.Type.SLICED;
+                            else if (this._contentItem.scaleByTile)
+                                this._content.type = cc.Sprite.Type.TILED;
+                            else
+                                this._content.type = cc.Sprite.Type.SIMPLE;
+                        }
                         this.updateLayout();
                     }
                 }

@@ -1553,6 +1553,9 @@ window.__extends = (this && this.__extends) || (function () {
         GObject.prototype.offClick = function (listener, target) {
             this._node.off(fgui.Event.CLICK, listener, target);
         };
+        GObject.prototype.clearClick = function () {
+            this._node.off(fgui.Event.CLICK);
+        };
         GObject.prototype.hasClickListener = function () {
             return this._node.hasEventListener(fgui.Event.CLICK);
         };
@@ -7381,12 +7384,14 @@ window.__extends = (this && this.__extends) || (function () {
                     }
                     else {
                         this._content.spriteFrame = this._contentItem.asset;
-                        if (this._contentItem.scale9Grid)
-                            this._content.type = cc.Sprite.Type.SLICED;
-                        else if (this._contentItem.scaleByTile)
-                            this._content.type = cc.Sprite.Type.TILED;
-                        else
-                            this._content.type = cc.Sprite.Type.SIMPLE;
+                        if (this._content.fillMethod == 0) {
+                            if (this._contentItem.scale9Grid)
+                                this._content.type = cc.Sprite.Type.SLICED;
+                            else if (this._contentItem.scaleByTile)
+                                this._content.type = cc.Sprite.Type.TILED;
+                            else
+                                this._content.type = cc.Sprite.Type.SIMPLE;
+                        }
                         this.updateLayout();
                     }
                 }
