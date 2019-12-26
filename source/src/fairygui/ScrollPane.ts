@@ -1031,7 +1031,10 @@ namespace fgui {
             if (!this._touchEffect)
                 return;
 
-            if (ScrollPane.draggingPane != null && ScrollPane.draggingPane != this || GObject.draggingObject != null) //已经有其他拖动
+            if (GObject.draggingObject != null && GObject.draggingObject.onStage)
+                return;
+
+            if (ScrollPane.draggingPane != null && ScrollPane.draggingPane != this && ScrollPane.draggingPane._owner.onStage)
                 return;
 
             var pt: cc.Vec2 = this._owner.globalToLocal(evt.pos.x, evt.pos.y, ScrollPane.sHelperPoint);

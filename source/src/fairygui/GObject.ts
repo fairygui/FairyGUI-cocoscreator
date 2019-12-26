@@ -473,7 +473,7 @@ namespace fgui {
         }
 
         public get onStage(): boolean {
-            return this._node.activeInHierarchy;
+            return this._node && this._node.activeInHierarchy;
         }
 
         public get resourceURL(): string {

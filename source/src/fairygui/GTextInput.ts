@@ -119,7 +119,7 @@ namespace fgui {
         }
 
         public requestFocus(): void {
-            this._editBox.setFocus();
+            this._editBox.focus();
         }
 
         protected markSizeChanged(): void {

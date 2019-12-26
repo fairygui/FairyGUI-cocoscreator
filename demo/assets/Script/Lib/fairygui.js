@@ -1225,7 +1225,7 @@ window.__extends = (this && this.__extends) || (function () {
         });
         Object.defineProperty(GObject.prototype, "onStage", {
             get: function () {
-                return this._node.activeInHierarchy;
+                return this._node && this._node.activeInHierarchy;
             },
             enumerable: true,
             configurable: true
@@ -9554,7 +9554,7 @@ window.__extends = (this && this.__extends) || (function () {
             configurable: true
         });
         GTextInput.prototype.requestFocus = function () {
-            this._editBox.setFocus();
+            this._editBox.focus();
         };
         GTextInput.prototype.markSizeChanged = function () {
         };
@@ -12055,7 +12055,9 @@ window.__extends = (this && this.__extends) || (function () {
                 return;
             if (!this._touchEffect)
                 return;
-            if (ScrollPane.draggingPane != null && ScrollPane.draggingPane != this || fgui.GObject.draggingObject != null)
+            if (fgui.GObject.draggingObject != null && fgui.GObject.draggingObject.onStage)
+                return;
+            if (ScrollPane.draggingPane != null && ScrollPane.draggingPane != this && ScrollPane.draggingPane._owner.onStage)
                 return;
             var pt = this._owner.globalToLocal(evt.pos.x, evt.pos.y, ScrollPane.sHelperPoint);
             var sensitivity = fgui.UIConfig.touchScrollSensitivity;
@@ -14061,12 +14063,15 @@ window.__extends = (this && this.__extends) || (function () {
                 pi.extensionType = UIObjectFactory.extensions["ui://" + pi.owner.name + "/" + pi.name];
         };
         UIObjectFactory.newObject = function (pi) {
-            if (pi.extensionType != null)
+            if (pi.extensionType != null) {
+                UIObjectFactory.counter++;
                 return new pi.extensionType();
+            }
             else
                 return this.newObject2(pi.objectType);
         };
         UIObjectFactory.newObject2 = function (type) {
+            UIObjectFactory.counter++;
             switch (type) {
                 case fgui.ObjectType.Image:
                     return new fgui.GImage();
@@ -14109,6 +14114,7 @@ window.__extends = (this && this.__extends) || (function () {
                     return null;
             }
         };
+        UIObjectFactory.counter = 0;
         UIObjectFactory.extensions = {};
         return UIObjectFactory;
     }());

@@ -2,6 +2,8 @@
 namespace fgui {
 
     export class UIObjectFactory {
+        public static counter: number = 0;
+
         public static extensions: any = {};
         private static loaderType: any;
 
@@ -35,13 +37,18 @@ namespace fgui {
         }
 
         public static newObject(pi: PackageItem): GObject {
-            if (pi.extensionType != null)
+
+            if (pi.extensionType != null) {
+                UIObjectFactory.counter++;
                 return new pi.extensionType();
+            }
             else
                 return this.newObject2(pi.objectType);
         }
 
         public static newObject2(type: ObjectType): GObject {
+            UIObjectFactory.counter++;
+
             switch (type) {
                 case ObjectType.Image:
                     return new GImage();

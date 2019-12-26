@@ -1653,6 +1653,7 @@ declare namespace fgui {
 }
 declare namespace fgui {
     class UIObjectFactory {
+        static counter: number;
         static extensions: any;
         private static loaderType;
         constructor();
