@@ -124,7 +124,7 @@ namespace fgui {
             delete UIPackage._instByName[pkg.name];
         }
 
-        public static createObject(pkgName: string, resName: string, userClass: any = null): GObject {
+        public static createObject(pkgName: string, resName: string, userClass?: any): GObject {
             var pkg: UIPackage = UIPackage.getByName(pkgName);
             if (pkg)
                 return pkg.createObject(resName, userClass);
@@ -132,7 +132,7 @@ namespace fgui {
                 return null;
         }
 
-        public static createObjectFromURL(url: string, userClass: any = null): GObject {
+        public static createObjectFromURL(url: string, userClass?: any): GObject {
             var pi: PackageItem = UIPackage.getItemByURL(url);
             if (pi)
                 return pi.owner.internalCreateObject(pi, userClass);
@@ -426,7 +426,7 @@ namespace fgui {
             return this._url;
         }
 
-        public createObject(resName: string, userClass: any = null): GObject {
+        public createObject(resName: string, userClass?: any): GObject {
             var pi: PackageItem = this._itemsByName[resName];
             if (pi)
                 return this.internalCreateObject(pi, userClass);
@@ -434,22 +434,13 @@ namespace fgui {
                 return null;
         }
 
-        public internalCreateObject(item: PackageItem, userClass: any = null): GObject {
-            var g: GObject;
-            if (item.type == PackageItemType.Component) {
-                if (userClass != null)
-                    g = new userClass();
-                else
-                    g = UIObjectFactory.newObject(item);
-            }
-            else
-                g = UIObjectFactory.newObject(item);
+        public internalCreateObject(item: PackageItem, userClass?: any): GObject {
+            var g: GObject = UIObjectFactory.newObject(item, userClass);
 
             if (g == null)
                 return null;
 
             UIPackage._constructing++;
-            g.packageItem = item;
             g.constructFromResource();
             UIPackage._constructing--;
             return g;

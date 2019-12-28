@@ -1024,9 +1024,11 @@ namespace fgui {
         }
 
         public constructFromResource2(objectPool: Array<GObject>, poolIndex: number): void {
-            if (!this.packageItem.decoded) {
-                this.packageItem.decoded = true;
-                TranslationHelper.translateComponent(this.packageItem);
+            var contentItem:PackageItem = this.packageItem.getBranch();
+
+            if (!contentItem.decoded) {
+                contentItem.decoded = true;
+                TranslationHelper.translateComponent(contentItem);
             }
 
             var i: number;
@@ -1038,7 +1040,7 @@ namespace fgui {
             var i1: number;
             var i2: number;
 
-            var buffer: ByteBuffer = this.packageItem.rawData;
+            var buffer: ByteBuffer = contentItem.rawData;
             buffer.seek(0, 0);
 
             this._underConstruct = true;
@@ -1123,14 +1125,13 @@ namespace fgui {
                         if (pkgId != null)
                             pkg = UIPackage.getById(pkgId);
                         else
-                            pkg = this.packageItem.owner;
+                            pkg = contentItem.owner;
 
                         pi = pkg != null ? pkg.getItemById(src) : null;
                     }
 
                     if (pi != null) {
                         child = UIObjectFactory.newObject(pi);
-                        child.packageItem = pi;
                         child.constructFromResource();
                     }
                     else
@@ -1190,7 +1191,7 @@ namespace fgui {
             i2 = buffer.readInt();
 
             if (hitTestId != null) {
-                pi = this.packageItem.owner.getItemById(hitTestId);
+                pi = contentItem.owner.getItemById(hitTestId);
                 if (pi && pi.hitTestData)
                     this.hitArea = new PixelHitTest(pi.hitTestData, i1, i2);
             }
@@ -1220,7 +1221,7 @@ namespace fgui {
             this.buildNativeDisplayList();
             this.setBoundsChangedFlag();
 
-            if (this.packageItem.objectType != ObjectType.Component)
+            if (contentItem.objectType != ObjectType.Component)
                 this.constructExtension(buffer);
 
             this.onConstruct();
