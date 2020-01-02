@@ -1,9 +1,8 @@
 # FairyGUI-cocoscreator
-====
 
 A flexible UI framework for Cocos Creator, working with the FREE professional Game UI Editor: FairyGUI Editor.
 
-Official website: [www.fairygui.com](http://www.fairygui.com)
+Official website: [www.fairygui.com](https://www.fairygui.com)
 
 # 关于版本
 目前有两个主要的分支:
