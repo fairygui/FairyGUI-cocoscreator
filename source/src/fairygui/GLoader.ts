@@ -399,7 +399,7 @@ namespace fgui {
                 this._container.setContentSize(this._width, this._height);
                 this._container.setPosition(pivotCorrectX, pivotCorrectY);
                 if (this._content2 != null) {
-                    this._content2.setPosition(pivotCorrectX - this._width / 2, pivotCorrectY - this._height / 2);
+                    this._content2.setPosition(pivotCorrectX + this._width * this.pivotX, pivotCorrectY - this._height * this.pivotY);
                     this._content2.setScale(1, 1);
                 }
                 if (this._contentWidth == this._width && this._contentHeight == this._height)
@@ -441,7 +441,7 @@ namespace fgui {
 
             this._container.setContentSize(this._contentWidth, this._contentHeight);
             if (this._content2 != null) {
-                this._content2.setPosition(pivotCorrectX - this._width / 2, pivotCorrectY - this._height / 2);
+                this._content2.setPosition(pivotCorrectX + this._width * this.pivotX, pivotCorrectY - this._height * this.pivotY);
                 this._content2.setScale(sx, sy);
             }
 
