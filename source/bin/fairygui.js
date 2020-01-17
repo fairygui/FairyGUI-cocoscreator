@@ -3740,7 +3740,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._selectedIndex == val)
                     return;
                 this._selectedIndex = val;
-                if (this.selectedIndex >= 0 && this.selectedIndex < this._items.length) {
+                if (this._selectedIndex >= 0 && this._selectedIndex < this._items.length) {
                     this.text = this._items[this._selectedIndex];
                     if (this._icons != null && this._selectedIndex < this._icons.length)
                         this.icon = this._icons[this._selectedIndex];
@@ -3980,16 +3980,8 @@ window.__extends = (this && this.__extends) || (function () {
         GComboBox.prototype.onClickItem2 = function (index) {
             if (this.dropdown.parent instanceof fgui.GRoot)
                 this.dropdown.parent.hidePopup();
-            this._selectedIndex = index;
-            if (this._selectedIndex >= 0) {
-                this.text = this._items[this._selectedIndex];
-                this.icon = (this._icons != null && this._selectedIndex < this._icons.length) ? this._icons[this._selectedIndex] : null;
-            }
-            else {
-                this.text = "";
-                if (this._icons != null)
-                    this.icon = null;
-            }
+            this._selectedIndex = -1;
+            this.selectedIndex = index;
             this._node.emit(fgui.Event.STATUS_CHANGED, this);
         };
         GComboBox.prototype.onRollOver_1 = function () {
@@ -7496,7 +7488,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this._container.setContentSize(this._width, this._height);
                 this._container.setPosition(pivotCorrectX, pivotCorrectY);
                 if (this._content2 != null) {
-                    this._content2.setPosition(pivotCorrectX - this._width / 2, pivotCorrectY - this._height / 2);
+                    this._content2.setPosition(pivotCorrectX + this._width * this.pivotX, pivotCorrectY - this._height * this.pivotY);
                     this._content2.setScale(1, 1);
                 }
                 if (this._contentWidth == this._width && this._contentHeight == this._height)
@@ -7535,7 +7527,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
             this._container.setContentSize(this._contentWidth, this._contentHeight);
             if (this._content2 != null) {
-                this._content2.setPosition(pivotCorrectX - this._width / 2, pivotCorrectY - this._height / 2);
+                this._content2.setPosition(pivotCorrectX + this._width * this.pivotX, pivotCorrectY - this._height * this.pivotY);
                 this._content2.setScale(sx, sy);
             }
             var nx, ny;
@@ -15167,10 +15159,12 @@ window.__extends = (this && this.__extends) || (function () {
             _this._fillAmount = 0;
             _this._fillClockwise = false;
             _this._grayed = false;
-            _this.sizeMode = cc.Sprite.SizeMode.CUSTOM;
-            _this.trim = false;
             return _this;
         }
+        Image.prototype.onLoad = function () {
+            this.sizeMode = cc.Sprite.SizeMode.CUSTOM;
+            this.trim = false;
+        };
         Object.defineProperty(Image.prototype, "flip", {
             get: function () {
                 return this._flip;
