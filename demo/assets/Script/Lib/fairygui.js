@@ -7645,7 +7645,7 @@ window.__extends = (this && this.__extends) || (function () {
             this._shrinkOnly = buffer.readBool();
             this._autoSize = buffer.readBool();
             this._showErrorSign = buffer.readBool();
-            this._playing = buffer.readBool();
+            this.playing = buffer.readBool();
             this._frame = buffer.readInt();
             if (buffer.readBool())
                 this.color = buffer.readColor();
