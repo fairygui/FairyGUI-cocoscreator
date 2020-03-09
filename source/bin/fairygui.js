@@ -8676,12 +8676,7 @@ window.__extends = (this && this.__extends) || (function () {
                 cc.engine.on('design-resolution-changed', _this._thisOnResized);
             }
             else {
-                if (cc.sys.isMobile) {
-                    window.addEventListener('resize', _this._thisOnResized);
-                }
-                else {
-                    cc.view.on('canvas-resize', _this._thisOnResized);
-                }
+                cc.view.on('canvas-resize', _this._thisOnResized);
             }
             _this.onWinResize();
             return _this;
@@ -8705,12 +8700,7 @@ window.__extends = (this && this.__extends) || (function () {
                 cc.engine.off('design-resolution-changed', this._thisOnResized);
             }
             else {
-                if (cc.sys.isMobile) {
-                    window.removeEventListener('resize', this._thisOnResized);
-                }
-                else {
-                    cc.view.off('canvas-resize', this._thisOnResized);
-                }
+                cc.view.off('canvas-resize', this._thisOnResized);
             }
             if (this == GRoot._inst)
                 GRoot._inst = null;
