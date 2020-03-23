@@ -307,7 +307,9 @@ namespace fgui {
         }
 
         protected loadExternal(): void {
-            if (ToolSet.startsWith(this._url, "http://") || ToolSet.startsWith(this._url, "https://"))
+            if (ToolSet.startsWith(this._url, "http://")
+                || ToolSet.startsWith(this._url, "https://")
+                || ToolSet.startsWith(this._url, '/'))
                 cc.loader.load(this._url, this.onLoaded.bind(this));
             else
                 cc.loader.loadRes(this._url, cc.Asset, this.onLoaded.bind(this));
