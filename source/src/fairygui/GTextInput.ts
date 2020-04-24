@@ -92,6 +92,9 @@ namespace fgui {
 
         public set align(value: cc.Label.HorizontalAlign) {
             this._editBox.textLabel.horizontalAlign = value;
+            if (this._editBox.placeholderLabel){
+                this._editBox.placeholderLabel.horizontalAlign = value;
+            }
         }
 
         public get verticalAlign(): cc.Label.VerticalAlign {
@@ -100,6 +103,9 @@ namespace fgui {
 
         public set verticalAlign(value: cc.Label.VerticalAlign) {
             this._editBox.textLabel.verticalAlign = value;
+            if (this._editBox.placeholderLabel){
+                this._editBox.placeholderLabel.verticalAlign = value;
+            }
         }
 
         public get letterSpacing(): number {
@@ -188,6 +194,16 @@ namespace fgui {
             }
             if (buffer.readBool())
                 this.password = true;
+
+            //同步一下对齐方式
+       
+            if(this._editBox.placeholderLabel){
+                let hAlign = this._editBox.textLabel.horizontalAlign;
+                this._editBox.placeholderLabel.horizontalAlign = hAlign;
+
+                let vAlign = this._editBox.textLabel.verticalAlign;
+                this._editBox.placeholderLabel.verticalAlign = vAlign;
+            }
         }
     }
 
