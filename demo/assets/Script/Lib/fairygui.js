@@ -5927,6 +5927,7 @@ window.__extends = (this && this.__extends) || (function () {
 						}
                     }
                 }
+				this.ensureBoundsCorrect();
             },
             enumerable: true,
             configurable: true

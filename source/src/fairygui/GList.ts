@@ -1056,6 +1056,7 @@ namespace fgui {
                     }
                 }
             }
+			this.ensureBoundsCorrect();
         }
 
         public refreshVirtualList(): void {
