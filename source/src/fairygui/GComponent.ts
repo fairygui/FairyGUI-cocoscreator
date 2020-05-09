@@ -461,6 +461,7 @@ namespace fgui {
             for (var i: number = 0; i < length; i++) {
                 child = this._children[i];
                 child.handleControllerChanged(c);
+				if (child.ensureBoundsCorrect) {child.ensureBoundsCorrect();}
             }
             this._applyingController = null;
 
