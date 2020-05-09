@@ -13,6 +13,9 @@ namespace fgui {
 
         public constructor() {
             super();
+        }
+
+        protected onLoad() {
             this.sizeMode = cc.Sprite.SizeMode.CUSTOM;
             this.trim = false;
         }

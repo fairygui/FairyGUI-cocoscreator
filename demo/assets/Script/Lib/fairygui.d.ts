@@ -1832,6 +1832,7 @@ declare namespace fgui {
         private _graySpriteMaterial;
         private _spriteMaterial;
         constructor();
+        protected onLoad(): void;
         flip: FlipType;
         fillMethod: FillMethod;
         fillOrigin: FillOrigin;

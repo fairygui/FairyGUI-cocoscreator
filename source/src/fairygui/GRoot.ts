@@ -53,12 +53,7 @@ namespace fgui {
                 (<any>cc).engine.on('design-resolution-changed', this._thisOnResized);
             }
             else {
-                if (cc.sys.isMobile) {
-                    window.addEventListener('resize', <any>this._thisOnResized);
-                }
-                else {
-                    (<any>cc.view).on('canvas-resize', this._thisOnResized);
-                }
+                (<any>cc.view).on('canvas-resize', this._thisOnResized);
             }
 
             this.onWinResize();
@@ -69,12 +64,7 @@ namespace fgui {
                 (<any>cc).engine.off('design-resolution-changed', this._thisOnResized);
             }
             else {
-                if (cc.sys.isMobile) {
-                    window.removeEventListener('resize', <any>this._thisOnResized);
-                }
-                else {
-                    (<any>cc.view).off('canvas-resize', this._thisOnResized);
-                }
+                (<any>cc.view).off('canvas-resize', this._thisOnResized);
             }
 
             if (this == GRoot._inst)
