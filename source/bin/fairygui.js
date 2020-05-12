@@ -7414,7 +7414,9 @@ window.__extends = (this && this.__extends) || (function () {
                 this.setErrorState();
         };
         GLoader.prototype.loadExternal = function () {
-            if (fgui.ToolSet.startsWith(this._url, "http://") || fgui.ToolSet.startsWith(this._url, "https://"))
+            if (fgui.ToolSet.startsWith(this._url, "http://")
+                || fgui.ToolSet.startsWith(this._url, "https://")
+                || fgui.ToolSet.startsWith(this._url, '/'))
                 cc.loader.load(this._url, this.onLoaded.bind(this));
             else
                 cc.loader.loadRes(this._url, cc.Asset, this.onLoaded.bind(this));
@@ -7664,6 +7666,8 @@ window.__extends = (this && this.__extends) || (function () {
             _this._node.name = "GMovieClip";
             _this._touchDisabled = true;
             _this._content = _this._node.addComponent(fgui.MovieClip);
+            _this._content.sizeMode = cc.Sprite.SizeMode.CUSTOM;
+            _this._content.trim = false;
             return _this;
         }
         Object.defineProperty(GMovieClip.prototype, "color", {
@@ -9506,6 +9510,9 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
                 this._editBox.textLabel.horizontalAlign = value;
+                if (this._editBox.placeholderLabel) {
+                    this._editBox.placeholderLabel.horizontalAlign = value;
+                }
             },
             enumerable: true,
             configurable: true
@@ -9516,6 +9523,9 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
                 this._editBox.textLabel.verticalAlign = value;
+                if (this._editBox.placeholderLabel) {
+                    this._editBox.placeholderLabel.verticalAlign = value;
+                }
             },
             enumerable: true,
             configurable: true
@@ -9591,6 +9601,12 @@ window.__extends = (this && this.__extends) || (function () {
             }
             if (buffer.readBool())
                 this.password = true;
+            if (this._editBox.placeholderLabel) {
+                var hAlign = this._editBox.textLabel.horizontalAlign;
+                this._editBox.placeholderLabel.horizontalAlign = hAlign;
+                var vAlign = this._editBox.textLabel.verticalAlign;
+                this._editBox.placeholderLabel.verticalAlign = vAlign;
+            }
         };
         return GTextInput;
     }(fgui.GTextField));
