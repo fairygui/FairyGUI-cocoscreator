@@ -246,7 +246,7 @@ namespace fgui {
                     return target;
             }
 
-            let pt: cc.Vec3 = this._maskContainer.convertToNodeSpaceAR(globalPt);
+            let pt: cc.Vec2 = this._maskContainer.convertToNodeSpaceAR(globalPt);
             pt.x += this._maskContainer.anchorX * this._viewSize.x;
             pt.y += this._maskContainer.anchorY * this._viewSize.y;
             if (pt.x >= 0 && pt.y >= 0 && pt.x < this._viewSize.x && pt.y < this._viewSize.y)

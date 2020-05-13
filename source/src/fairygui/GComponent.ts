@@ -763,7 +763,7 @@ namespace fgui {
             let flag = 0;
 
             if (this.hitArea || this._rectMask) {
-                let pt: cc.Vec3 = this._node.convertToNodeSpaceAR(globalPt);
+                let pt: cc.Vec2 = this._node.convertToNodeSpaceAR(globalPt);
                 pt.x += this._node.anchorX * this._width;
                 pt.y += this._node.anchorY * this._height;
 
@@ -804,7 +804,7 @@ namespace fgui {
 
             if (this._opaque) {
                 if (flag == 0) {
-                    let pt: cc.Vec3 = this._node.convertToNodeSpaceAR(globalPt);
+                    let pt: cc.Vec2 = this._node.convertToNodeSpaceAR(globalPt);
                     pt.x += this._node.anchorX * this._width;
                     pt.y += this._node.anchorY * this._height;
                     if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
@@ -1024,7 +1024,7 @@ namespace fgui {
         }
 
         public constructFromResource2(objectPool: Array<GObject>, poolIndex: number): void {
-            var contentItem:PackageItem = this.packageItem.getBranch();
+            var contentItem: PackageItem = this.packageItem.getBranch();
 
             if (!contentItem.decoded) {
                 contentItem.decoded = true;

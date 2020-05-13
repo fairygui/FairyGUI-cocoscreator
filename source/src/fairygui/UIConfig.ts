@@ -22,7 +22,7 @@ namespace fgui {
 
         public static horizontalScrollBar: string;
         public static verticalScrollBar: string;
-        
+
         //Scrolling step in pixels
         public static defaultScrollStep: number = 25;
         //Deceleration ratio of scrollpane when its in touch dragging.
@@ -77,13 +77,27 @@ namespace fgui {
         _flag = true;
         if (!ext)
             ext = "bin";
-        cc.loader.addDownloadHandlers({ [ext]: cc.loader.downloader["extMap"].binary });
-        cc.loader.addLoadHandlers({
-            [ext]: function (item, callback) {
-                item._owner.rawBuffer = item.content;
-                return item.content;
-            }
-        });
+        // cc.loader.addDownloadHandlers({ [ext]: cc.loader.downloader["extMap"].binary });
+        // cc.loader.addLoadHandlers({
+        //     [ext]: function (item, callback) {
+        //         item._owner.rawBuffer = item.content;
+        //         return item.content;
+        //     }
+        // });
+        // 2.4版本中新的资源管理方式
+        // cc.assetManager.downloader.register('.bin', function (url, options, callback) {
+        //     // 下载对应资源
+        // });
+
+        // cc.assetManager.parser.register('.bin', function (file, options, callback) {
+        //     // 解析下载回来的文件
+        //     console.log("file=>", file)
+        //     console.log("options=>", options)
+
+        //     item._owner.rawBuffer = item.content;
+
+
+        // });
     };
 
     let _fontRegistry: any = {};

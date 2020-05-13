@@ -14015,19 +14015,11 @@ window.__extends = (this && this.__extends) || (function () {
     fgui.UIConfig = UIConfig;
     var _flag = false;
     fgui.addLoadHandler = function (ext) {
-        var _a, _b;
         if (_flag)
             return;
         _flag = true;
         if (!ext)
             ext = "bin";
-        cc.loader.addDownloadHandlers((_a = {}, _a[ext] = cc.loader.downloader["extMap"].binary, _a));
-        cc.loader.addLoadHandlers((_b = {},
-            _b[ext] = function (item, callback) {
-                item._owner.rawBuffer = item.content;
-                return item.content;
-            },
-            _b));
     };
     var _fontRegistry = {};
     fgui.registerFont = function (name, font) {
@@ -14174,28 +14166,26 @@ window.__extends = (this && this.__extends) || (function () {
             var pkg = UIPackage._instById[url];
             if (pkg)
                 return pkg;
-            var asset = cc.loader.getRes(url);
+            var asset = cc.resources.get(url);
             if (!asset)
                 throw "Resource '" + url + "' not ready";
-            if (!asset.rawBuffer)
+            if (!asset._buffer)
                 throw "Missing asset data. Call UIConfig.registerLoader first!";
             pkg = new UIPackage();
-            pkg.loadPackage(new fgui.ByteBuffer(asset.rawBuffer), url);
+            pkg.loadPackage(new fgui.ByteBuffer(asset._buffer), url);
             UIPackage._instById[pkg.id] = pkg;
             UIPackage._instByName[pkg.name] = pkg;
             UIPackage._instById[pkg._url] = pkg;
             return pkg;
         };
         UIPackage.loadPackage = function (url, completeCallback) {
-            cc.loader.loadRes(url, function (err, asset) {
+            cc.resources.load(url, cc.BufferAsset, function (err, asset) {
                 if (err) {
                     completeCallback(err);
                     return;
                 }
-                if (!asset.rawBuffer)
-                    throw "Missing asset data. Call UIConfig.registerLoader first!";
                 var pkg = new UIPackage();
-                pkg.loadPackage(new fgui.ByteBuffer(asset.rawBuffer), url);
+                pkg.loadPackage(new fgui.ByteBuffer(asset._buffer), url);
                 var cnt = pkg._items.length;
                 var urls = [];
                 for (var i = 0; i < cnt; i++) {
@@ -14539,7 +14529,7 @@ window.__extends = (this && this.__extends) || (function () {
                 case fgui.PackageItemType.Atlas:
                     if (!item.decoded) {
                         item.decoded = true;
-                        item.asset = cc.loader.getRes(item.file);
+                        item.asset = cc.resources.get(item.file);
                         if (!item.asset)
                             console.log("Resource '" + item.file + "' not found, please check default.res.json!");
                     }
@@ -14547,7 +14537,7 @@ window.__extends = (this && this.__extends) || (function () {
                 case fgui.PackageItemType.Sound:
                     if (!item.decoded) {
                         item.decoded = true;
-                        item.asset = cc.loader.getRes(item.file);
+                        item.asset = cc.resources.get(item.file);
                         if (!item.asset)
                             console.log("Resource '" + item.file + "' not found, please check default.res.json!");
                     }
@@ -14566,7 +14556,7 @@ window.__extends = (this && this.__extends) || (function () {
                     return null;
                 case fgui.PackageItemType.Misc:
                     if (item.file)
-                        return cc.loader.getRes(item.file);
+                        return cc.resources.get(item.file);
                     else
                         return null;
                 default:
@@ -15298,14 +15288,14 @@ window.__extends = (this && this.__extends) || (function () {
                     if (!material) {
                         material = cc.Material.getBuiltinMaterial('2d-gray-sprite');
                     }
-                    material = this._graySpriteMaterial = cc.Material.getInstantiatedMaterial(material, this);
+                    material = this._graySpriteMaterial = cc.MaterialVariant.create(material, this);
                 }
                 else {
                     material = this._spriteMaterial;
                     if (!material) {
                         material = cc.Material.getBuiltinMaterial('2d-sprite', this);
                     }
-                    material = this._spriteMaterial = cc.Material.getInstantiatedMaterial(material, this);
+                    material = this._spriteMaterial = cc.MaterialVariant.create(material, this);
                 }
                 this.setMaterial(0, material);
             },

@@ -141,14 +141,17 @@ namespace fgui {
                 if (!material) {
                     material = (<any>cc.Material).getBuiltinMaterial('2d-gray-sprite');
                 }
-                material = this._graySpriteMaterial = (<any>cc.Material).getInstantiatedMaterial(material, this);
+                // material = this._graySpriteMaterial = (<any>cc.Material).getInstantiatedMaterial(material, this);
+                material = this._graySpriteMaterial = cc.MaterialVariant.create(material, this)
             }
             else {
                 material = this._spriteMaterial;
                 if (!material) {
                     material = (<any>cc.Material).getBuiltinMaterial('2d-sprite', this);
                 }
-                material = this._spriteMaterial = (<any>cc.Material).getInstantiatedMaterial(material, this);
+                // material = this._spriteMaterial = (<any>cc.Material).getInstantiatedMaterial(material, this);
+                material = this._spriteMaterial = cc.MaterialVariant.create(material, this)
+
             }
 
             this.setMaterial(0, material);

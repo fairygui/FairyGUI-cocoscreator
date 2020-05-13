@@ -921,7 +921,7 @@ namespace fgui {
             if (this._touchDisabled || !this._touchable || !this._node.activeInHierarchy)
                 return null;
 
-            let pt: cc.Vec3 = this._node.convertToNodeSpaceAR(globalPt);
+            let pt: cc.Vec2 = this._node.convertToNodeSpaceAR(globalPt);
             pt.x += this._node.anchorX * this._width;
             pt.y += this._node.anchorY * this._height;
             if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)

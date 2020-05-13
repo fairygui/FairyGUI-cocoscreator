@@ -65,15 +65,15 @@ namespace fgui {
             if (pkg)
                 return pkg;
 
-            let asset: any = cc.loader.getRes(url);
+            let asset: any = cc.resources.get(url);
             if (!asset)
                 throw "Resource '" + url + "' not ready";
 
-            if (!asset.rawBuffer)
+            if (!asset._buffer)
                 throw "Missing asset data. Call UIConfig.registerLoader first!";
 
             pkg = new UIPackage();
-            pkg.loadPackage(new ByteBuffer(asset.rawBuffer), url);
+            pkg.loadPackage(new ByteBuffer(asset._buffer), url);
             UIPackage._instById[pkg.id] = pkg;
             UIPackage._instByName[pkg.name] = pkg;
             UIPackage._instById[pkg._url] = pkg;
@@ -81,17 +81,17 @@ namespace fgui {
         }
 
         public static loadPackage(url: string, completeCallback: ((error: any) => void) | null): void {
-            cc.loader.loadRes(url, function (err, asset) {
+            cc.resources.load(url, cc.BufferAsset, function (err, asset: any) {
                 if (err) {
                     completeCallback(err);
                     return;
                 }
 
-                if (!asset.rawBuffer)
-                    throw "Missing asset data. Call UIConfig.registerLoader first!";
+                // if (!asset.rawBuffer)
+                //     throw "Missing asset data. Call UIConfig.registerLoader first!";
 
                 let pkg: UIPackage = new UIPackage();
-                pkg.loadPackage(new ByteBuffer(asset.rawBuffer), url);
+                pkg.loadPackage(new ByteBuffer(asset._buffer), url);
                 let cnt: number = pkg._items.length;
                 let urls = [];
                 for (var i: number = 0; i < cnt; i++) {
@@ -490,7 +490,7 @@ namespace fgui {
                 case PackageItemType.Atlas:
                     if (!item.decoded) {
                         item.decoded = true;
-                        item.asset = cc.loader.getRes(item.file);
+                        item.asset = cc.resources.get(item.file);
                         if (!item.asset)
                             console.log("Resource '" + item.file + "' not found, please check default.res.json!");
                     }
@@ -499,7 +499,7 @@ namespace fgui {
                 case PackageItemType.Sound:
                     if (!item.decoded) {
                         item.decoded = true;
-                        item.asset = cc.loader.getRes(item.file);
+                        item.asset = cc.resources.get(item.file);
                         if (!item.asset)
                             console.log("Resource '" + item.file + "' not found, please check default.res.json!");
                     }
@@ -521,7 +521,7 @@ namespace fgui {
 
                 case PackageItemType.Misc:
                     if (item.file)
-                        return cc.loader.getRes(item.file);
+                        return cc.resources.get(item.file);
                     else
                         return null;
 
