@@ -1,7 +1,8 @@
 import HitTestDemo from "./HitTestDemo";
 import EmojiParser from "./EmojiParser";
+import { _decorator, Component } from "cc";
 
-const { ccclass, property } = cc._decorator;
+const { ccclass, property } = _decorator;
 
 class Message {
     public sender: string;
@@ -11,7 +12,7 @@ class Message {
 }
 
 @ccclass
-export default class ChatDemo extends cc.Component {
+export default class ChatDemo extends Component {
     private _view: fgui.GComponent;
     private _list: fgui.GList;
     private _input: fgui.GTextInput;

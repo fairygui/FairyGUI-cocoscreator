@@ -40,7 +40,7 @@ namespace fgui {
             this._mode = ButtonMode.Common;
             this._title = "";
             this._icon = "";
-            this._sound = UIConfig.buttonSound;
+            this.sound = UIConfig.buttonSound;
             this._soundVolumeScale = UIConfig.buttonSoundVolumeScale;
             this._changeStateOnClick = true;
             this._downEffect = 0;
@@ -365,7 +365,7 @@ namespace fgui {
             this._mode = buffer.readByte();
             var str: string = buffer.readS();
             if (str)
-                this._sound = str;
+                this.sound = str;
             this._soundVolumeScale = buffer.readFloat();
             this._downEffect = buffer.readByte();
             this._downEffectValue = buffer.readFloat();
@@ -426,7 +426,7 @@ namespace fgui {
 
             str = buffer.readS();
             if (str != null)
-                this._sound = str;
+                this.sound = str;
             if (buffer.readBool())
                 this._soundVolumeScale = buffer.readFloat();
 
@@ -462,7 +462,7 @@ namespace fgui {
         }
 
         private onTouchBegin_1(evt: Event): void {
-            if (evt.button != cc.Event.EventMouse.BUTTON_LEFT)
+            if (evt.button != EventMouse.BUTTON_LEFT)
                 return;
 
             this._down = true;
@@ -484,7 +484,7 @@ namespace fgui {
         }
 
         private onTouchEnd_1(evt: Event): void {
-            if (evt.button != cc.Event.EventMouse.BUTTON_LEFT)
+            if (evt.button != EventMouse.BUTTON_LEFT)
                 return;
 
             if (this._down) {

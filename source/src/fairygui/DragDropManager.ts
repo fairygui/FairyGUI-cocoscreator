@@ -38,7 +38,7 @@ namespace fgui {
             this._sourceData = sourceData;
             this._agent.url = icon;
             GRoot.inst.addChild(this._agent);
-            let pt: cc.Vec2 = GRoot.inst.getTouchPosition(touchId);
+            let pt: cc.Vec3 = GRoot.inst.getTouchPosition(touchId);
             pt = GRoot.inst.globalToLocal(pt.x, pt.y);
             this._agent.setPosition(pt.x, pt.y);
             this._agent.startDrag(touchId);

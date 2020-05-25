@@ -1,9 +1,15 @@
 {
-  "ver": "1.0.5",
-  "uuid": "31ce92e3-13f5-4a99-b6a4-dffec4511294",
-  "isPlugin": false,
-  "loadPluginInWeb": true,
-  "loadPluginInNative": true,
-  "loadPluginInEditor": false,
-  "subMetas": {}
+  "ver": "2.0.14",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "5c9fe451-ac02-4f52-96fa-ebc07fdfbac1",
+  "files": [
+    ".js",
+    ".trans"
+  ],
+  "subMetas": {},
+  "userData": {
+    "importAsPlugin": false,
+    "moduleId": "project:///assets/Script/FairyGUI-Demo/ListEffectDemo.js"
+  }
 }

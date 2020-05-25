@@ -1,9 +1,15 @@
 {
-  "ver": "1.0.5",
-  "uuid": "23975d13-56bb-4c2a-a1f3-523f010279a5",
-  "isPlugin": false,
-  "loadPluginInWeb": true,
-  "loadPluginInNative": true,
-  "loadPluginInEditor": false,
-  "subMetas": {}
+  "ver": "2.0.14",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "8901037d-133b-4f3b-b0a3-b410ebfebb6b",
+  "files": [
+    ".js",
+    ".trans"
+  ],
+  "subMetas": {},
+  "userData": {
+    "importAsPlugin": false,
+    "moduleId": "project:///assets/Script/FairyGUI-Demo/JoystickDemo.js"
+  }
 }

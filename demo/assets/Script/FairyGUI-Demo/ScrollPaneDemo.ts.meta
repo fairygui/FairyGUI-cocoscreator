@@ -1,9 +1,15 @@
 {
-  "ver": "1.0.5",
-  "uuid": "93cd65dd-1b7f-4d85-b66d-39610f0f8669",
-  "isPlugin": false,
-  "loadPluginInWeb": true,
-  "loadPluginInNative": true,
-  "loadPluginInEditor": false,
-  "subMetas": {}
+  "ver": "2.0.14",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "320fd81c-3c86-451e-8cf3-4c3d4117706a",
+  "files": [
+    ".js",
+    ".trans"
+  ],
+  "subMetas": {},
+  "userData": {
+    "importAsPlugin": false,
+    "moduleId": "project:///assets/Script/FairyGUI-Demo/ScrollPaneDemo.js"
+  }
 }

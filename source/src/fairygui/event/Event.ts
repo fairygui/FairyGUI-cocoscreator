@@ -34,7 +34,7 @@ namespace fgui {
         public static CLICK_ITEM: string = "fui_click_item";
 
         public initiator: GObject;
-        public pos: cc.Vec2 = new cc.Vec2();
+        public pos: cc.Vec3 = new cc.Vec3();
         public touch: cc.Touch;
         public touchId: number = 0;
         public clickCount: number = 0;

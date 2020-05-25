@@ -1,4 +1,3 @@
-const { ccclass, property } = cc._decorator;
 
 import BasicDemo from "./BasicsDemo";
 import TransitionDemo from "./TransitionDemo";
@@ -15,9 +14,10 @@ import HitTestDemo from "./HitTestDemo";
 import ChatDemo from "./ChatDemo";
 import ScrollPaneDemo from "./ScrollPaneDemo";
 import TreeViewDemo from "./TreeViewDemo";
-
+import { _decorator, Component } from "cc";
+const { ccclass, property } = _decorator;
 @ccclass
-export default class MainMenu extends cc.Component {
+export default class MainMenu extends Component {
     private _view: fgui.GComponent;
 
     onLoad() {
@@ -82,8 +82,8 @@ export default class MainMenu extends cc.Component {
         this._view.dispose();
     }
 
-    startDemo(demoClass: typeof cc.Component): void {
-        let demo: cc.Component = this.addComponent(demoClass);
+    startDemo(demoClass: typeof Component): void {
+        let demo: Component = this.addComponent(demoClass);
         this.node.emit("start_demo", demo);
         this.destroy();
     }

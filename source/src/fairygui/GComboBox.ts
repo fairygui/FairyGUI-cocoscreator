@@ -451,7 +451,7 @@ namespace fgui {
         }
 
         private onTouchBegin_1(evt: Event): void {
-            if (evt.button != cc.Event.EventMouse.BUTTON_LEFT)
+            if (evt.button != EventMouse.BUTTON_LEFT)
                 return;
 
             if ((evt.initiator instanceof GTextInput) && (<GTextInput>evt.initiator).editable)
@@ -465,7 +465,7 @@ namespace fgui {
         }
 
         private onTouchEnd_1(evt: Event): void {
-            if (evt.button != cc.Event.EventMouse.BUTTON_LEFT)
+            if (evt.button != EventMouse.BUTTON_LEFT)
                 return;
 
             if (this._down) {

@@ -1,9 +1,15 @@
 {
-  "ver": "1.0.5",
-  "uuid": "7fe1190d-cd42-4f62-be01-9a89f6572f4e",
-  "isPlugin": false,
-  "loadPluginInWeb": true,
-  "loadPluginInNative": true,
-  "loadPluginInEditor": false,
-  "subMetas": {}
+  "ver": "2.0.14",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "8eef02c6-87c5-4165-85ec-d749133fd46f",
+  "files": [
+    ".js",
+    ".trans"
+  ],
+  "subMetas": {},
+  "userData": {
+    "importAsPlugin": false,
+    "moduleId": "project:///assets/Script/FairyGUI-Demo/EmojiParser.js"
+  }
 }

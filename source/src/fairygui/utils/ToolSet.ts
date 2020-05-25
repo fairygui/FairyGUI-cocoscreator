@@ -53,8 +53,8 @@ namespace fgui {
         }
 
         public static toGrayed(c: cc.Color): cc.Color {
-            let v = c.getR() * 0.299 + c.getG() * 0.587 + c.getB() * 0.114;
-            return new cc.Color(v, v, v, c.getA());
+            let v = c.r * 0.299 + c.g * 0.587 + c.b * 0.114;
+            return new cc.Color(v, v, v, c.a);
         }
 
         public static repeat(t: number, length: number): number {

@@ -1,7 +1,9 @@
-const { ccclass, property } = cc._decorator;
+import { _decorator, Component } from "cc";
+
+const { ccclass, property } = _decorator;
 
 @ccclass
-export default class TreeViewDemo extends cc.Component {
+export default class TreeViewDemo extends Component {
     private _view: fgui.GComponent;
     private _tree1: fgui.GTree;
     private _tree2: fgui.GTree;

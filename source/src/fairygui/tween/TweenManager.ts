@@ -9,8 +9,8 @@ namespace fgui {
         public static createTween(): GTweener {
             if (!TweenManager._root) {
                 TweenManager._root = new cc.Node("[TweenManager]");
-                cc.game["addPersistRootNode"](TweenManager._root);
-                cc.director.getScheduler().schedule(TweenManager.update, TweenManager._root, 0, false);
+                cc.game.addPersistRootNode(TweenManager._root);
+                cc.director.getScheduler().schedule(TweenManager.update, TweenManager._root, 0, cc.macro.REPEAT_FOREVER, 0, false);
             }
 
             var tweener: GTweener;

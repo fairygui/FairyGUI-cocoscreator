@@ -23,12 +23,13 @@ namespace fgui {
         protected _blendMode: BlendMode;
         protected _pixelSnapping: boolean = false;
         protected _dragTesting: boolean = false;
-        protected _dragStartPoint: cc.Vec2;
+        protected _dragStartPoint: cc.Vec3;
 
         protected _relations: Relations;
         protected _group: GGroup;
         protected _gears: GearBase[];
         protected _node: cc.Node;
+        public uiCom: cc.UITransformComponent;
         protected _dragBounds: cc.Rect;
 
         public sourceWidth: number = 0;
@@ -58,9 +59,10 @@ namespace fgui {
 
         public constructor() {
             this._node = new cc.Node();
+            this.uiCom = this._node.addComponent(cc.UITransformComponent);
             if (GObject._defaultGroupIndex == -1) {
                 GObject._defaultGroupIndex = 0;
-                let groups: Array<string> = (<any>cc.game).groupList;
+                let groups: Array<string> = cc.game.groupList;
                 let cnt = groups.length;
                 for (let i = 0; i < cnt; i++) {
                     if (groups[i].toLowerCase() == UIConfig.defaultUIGroup.toLowerCase()) {
@@ -70,7 +72,7 @@ namespace fgui {
                 }
             }
             this._node["$gobj"] = this;
-            this._node.groupIndex = GObject._defaultGroupIndex;
+            this._node.layer = GObject._defaultGroupIndex;
             this._node.setAnchorPoint(0, 1);
             this._node.on(cc.Node.EventType.ANCHOR_CHANGED, this.handleAnchorChanged, this);
 
@@ -253,32 +255,32 @@ namespace fgui {
         }
 
         public get actualWidth(): number {
-            return this.width * Math.abs(this._node.scaleX);
+            return this.width * Math.abs(this._node.scale.x);
         }
 
         public get actualHeight(): number {
-            return this.height * Math.abs(this._node.scaleY);
+            return this.height * Math.abs(this._node.scale.y);
         }
 
         public get scaleX(): number {
-            return this._node.scaleX;
+            return this._node.scale.x;
         }
 
         public set scaleX(value: number) {
-            this.setScale(value, this._node.scaleY);
+            this.setScale(value, this._node.scale.y);
         }
 
         public get scaleY(): number {
-            return this._node.scaleY;
+            return this._node.scale.y;
         }
 
         public set scaleY(value: number) {
-            this.setScale(this._node.scaleX, value);
+            this.setScale(this._node.scale.x, value);
         }
 
         public setScale(sx: number, sy: number) {
-            if (this._node.scaleX != sx || this._node.scaleY != sy) {
-                this._node.setScale(sx, sy);
+            if (this._node.scale.x != sx || this._node.scale.y != sy) {
+                this._node.setScale(sx, sy, this._node.scale.z);
 
                 this.updateGear(2);
             }
@@ -304,8 +306,8 @@ namespace fgui {
             if (this._skewX != xv || this._skewY != yv) {
                 this._skewX = xv;
                 this._skewY = yv;
-                this._node.skewX = xv;
-                this._node.skewY = yv;
+                var rot = this._node.eulerAngles;
+                this._node.setRotationFromEuler(xv, yv, rot.z);
             }
         }
 
@@ -373,13 +375,14 @@ namespace fgui {
         }
 
         public get rotation(): number {
-            return -this._node.angle;
+            return -this._node.eulerAngles.z;
         }
 
         public set rotation(value: number) {
             value = -value;
-            if (this._node.angle != value) {
-                this._node.angle = value;
+            var rot = this._node.eulerAngles;
+            if (rot.z != value) {
+                this._node.setRotationFromEuler(rot.x, rot.y, value);
                 this.updateGear(3);
             }
         }
@@ -392,15 +395,16 @@ namespace fgui {
             if (this._alpha != value) {
                 this._alpha = value;
 
-                this._node.opacity = this._alpha * 255;
-
+                this.setAlpha(this._alpha * 255);
                 if (this instanceof GGroup)
                     (<GGroup>this).handleAlphaChanged();
 
                 this.updateGear(3);
             }
         }
+        public setAlpha(_alpha) {
 
+        }
         public get visible(): boolean {
             return this._visible;
         }
@@ -690,8 +694,9 @@ namespace fgui {
             return <GMovieClip><any>this;
         }
 
-        public static cast(obj: cc.Node): GObject {
-            return obj["$gobj"];
+        public static cast(obj: Object | null): GObject {
+            if (obj)
+                return obj["$gobj"];
         }
 
         public get text(): string {
@@ -735,7 +740,9 @@ namespace fgui {
 
         protected onDisable() {
         }
+        protected onStart() {
 
+        }
         protected onUpdate() {
         }
 
@@ -803,10 +810,10 @@ namespace fgui {
             return GObject.draggingObject == this;
         }
 
-        public localToGlobal(ax?: number, ay?: number, resultPoint?: cc.Vec2): cc.Vec2 {
+        public localToGlobal(ax?: number, ay?: number, resultPoint?: cc.Vec3): cc.Vec3 {
             if (ax == undefined) ax = 0;
             if (ay == undefined) ay = 0;
-            let pt = resultPoint || new cc.Vec2();
+            let pt = resultPoint || new cc.Vec3();
             pt.x = ax;
             pt.y = ay;
             pt.y = -pt.y;
@@ -815,27 +822,29 @@ namespace fgui {
                 pt.y += (1 - this.node.anchorY) * this._height;
             }
 
-            let v3 = this._node.convertToWorldSpaceAR(pt);
+            let v3 = this.uiCom.convertToWorldSpaceAR(pt);
             pt.x = v3.x;
             pt.y = GRoot.inst.height - v3.y;
+            pt.z = 0;
             return pt;
         }
 
-        public globalToLocal(ax?: number, ay?: number, resultPoint?: cc.Vec2): cc.Vec2 {
+        public globalToLocal(ax?: number, ay?: number, resultPoint?: cc.Vec3): cc.Vec3 {
             if (ax == undefined) ax = 0;
             if (ay == undefined) ay = 0;
-            let pt = resultPoint || new cc.Vec2();
+            let pt = resultPoint || new cc.Vec3();
             pt.x = ax;
             pt.y = GRoot.inst.height - ay;
 
-            let v3 = this._node.convertToNodeSpaceAR(pt);
+            let v3 = this.uiCom.convertToNodeSpaceAR(pt);
             pt.x = v3.x;
             pt.y = v3.y;
             if (!this._pivotAsAnchor) {
-                pt.x -= this._node.anchorX * this._width;
-                pt.y += (1 - this._node.anchorY) * this._height;
+                pt.x += this._node.anchorX * this._width;
+                pt.y -= (1 - this._node.anchorY) * this._height;
             }
             pt.y = -pt.y;
+            pt.z = 0;
             return pt;
         }
 
@@ -845,7 +854,7 @@ namespace fgui {
             if (aw == undefined) aw = 0;
             if (ah == undefined) ah = 0;
             let ret = resultRect || new cc.Rect();
-            var pt: cc.Vec2 = this.localToGlobal(ax, ay);
+            var pt: cc.Vec3 = this.localToGlobal(ax, ay);
             ret.x = pt.x;
             ret.y = pt.y;
             pt = this.localToGlobal(ax + aw, ay + ah, pt);
@@ -860,7 +869,7 @@ namespace fgui {
             if (aw == undefined) aw = 0;
             if (ah == undefined) ah = 0;
             let ret = resultRect || new cc.Rect();
-            var pt: cc.Vec2 = this.globalToLocal(ax, ay);
+            var pt: cc.Vec3 = this.globalToLocal(ax, ay);
             ret.x = pt.x;
             ret.y = pt.y;
             pt = this.globalToLocal(ax + aw, ay + ah, pt);
@@ -896,7 +905,7 @@ namespace fgui {
                 xv = Math.round(xv);
                 yv = Math.round(yv);
             }
-            this._node.setPosition(xv, yv);
+            this._node.setPosition(xv, yv, 0);
         }
 
         protected handleSizeChanged(): void {
@@ -917,11 +926,11 @@ namespace fgui {
                 this._parent.setBoundsChangedFlag();
         }
 
-        public hitTest(globalPt: cc.Vec2): GObject {
+        public hitTest(globalPt: cc.Vec3): GObject {
             if (this._touchDisabled || !this._touchable || !this._node.activeInHierarchy)
                 return null;
 
-            let pt: cc.Vec3 = this._node.convertToNodeSpaceAR(globalPt);
+            let pt: cc.Vec3 = this.uiCom.convertToNodeSpaceAR(globalPt);
             pt.x += this._node.anchorX * this._width;
             pt.y += this._node.anchorY * this._height;
             if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
@@ -1078,9 +1087,9 @@ namespace fgui {
 
         //drag support
         //-------------------------------------------------------------------
-        private static sGlobalDragStart: cc.Vec2 = new cc.Vec2();
+        private static sGlobalDragStart: cc.Vec3 = new cc.Vec3();
         private static sGlobalRect: cc.Rect = new cc.Rect();
-        private static sHelperPoint: cc.Vec2 = new cc.Vec2();
+        private static sHelperPoint: cc.Vec3 = new cc.Vec3();
         private static sDragHelperRect: cc.Rect = new cc.Rect();
         private static sUpdateInDragging: boolean;
         private static sDragQuery: boolean = false;
@@ -1131,7 +1140,7 @@ namespace fgui {
 
         private onTouchBegin_0(evt: Event): void {
             if (this._dragStartPoint == null)
-                this._dragStartPoint = new cc.Vec2();
+                this._dragStartPoint = new cc.Vec3();
 
             this._dragStartPoint.set(evt.pos);
             this._dragTesting = true;
@@ -1179,7 +1188,7 @@ namespace fgui {
                 }
 
                 GObject.sUpdateInDragging = true;
-                var pt: cc.Vec2 = this.parent.globalToLocal(xx, yy, GObject.sHelperPoint);
+                var pt: cc.Vec3 = this.parent.globalToLocal(xx, yy, GObject.sHelperPoint);
                 this.setPosition(Math.round(pt.x), Math.round(pt.y));
                 GObject.sUpdateInDragging = false;
 
@@ -1208,7 +1217,9 @@ namespace fgui {
         public onClickLink(evt: Event, text: string) {
             this.node.emit(Event.LINK, text, evt);
         }
-
+        protected start() {
+            this.node["$gobj"].onStart();
+        }
         protected onEnable() {
             this.node["$gobj"].onEnable();
 

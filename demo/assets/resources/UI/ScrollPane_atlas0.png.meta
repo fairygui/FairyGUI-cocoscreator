@@ -1,12 +1,40 @@
 {
-  "ver": "2.3.3",
-  "uuid": "894b9df4-697c-4c5f-b200-1548351a8203",
-  "type": "raw",
-  "wrapMode": "clamp",
-  "filterMode": "bilinear",
-  "premultiplyAlpha": false,
-  "genMipmaps": false,
-  "packable": true,
-  "platformSettings": {},
-  "subMetas": {}
+  "ver": "1.0.17",
+  "importer": "image",
+  "imported": true,
+  "uuid": "7320b549-d77a-4ad9-b0c2-0136523e4741",
+  "files": [
+    ".png",
+    ".json"
+  ],
+  "subMetas": {
+    "6c48a": {
+      "importer": "texture",
+      "uuid": "7320b549-d77a-4ad9-b0c2-0136523e4741@6c48a",
+      "displayName": "ScrollPane_atlas0",
+      "id": "6c48a",
+      "name": "texture",
+      "ver": "1.0.19",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "premultiplyAlpha": false,
+        "anisotropy": 1,
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "7320b549-d77a-4ad9-b0c2-0136523e4741"
+      }
+    }
+  },
+  "userData": {
+    "type": "texture",
+    "redirect": "7320b549-d77a-4ad9-b0c2-0136523e4741@6c48a"
+  }
 }

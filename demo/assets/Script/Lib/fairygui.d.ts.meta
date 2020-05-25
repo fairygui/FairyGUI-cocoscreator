@@ -1,5 +1,9 @@
 {
-  "ver": "2.0.0",
-  "uuid": "a4b69c58-2c25-4704-aee4-19af6e93c647",
-  "subMetas": {}
+  "ver": "2.0.14",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "2cdbcd13-fb0f-4fae-9cb3-654f7caa67de",
+  "files": [],
+  "subMetas": {},
+  "userData": {}
 }

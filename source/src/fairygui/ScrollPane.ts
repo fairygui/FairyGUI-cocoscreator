@@ -5,6 +5,7 @@ namespace fgui {
         private _owner: GComponent;
         private _container: cc.Node;
         private _maskContainer: cc.Node;
+        private _maskTran: cc.UITransformComponent;
 
         private _scrollType: number;
         private _scrollStep: number;
@@ -30,15 +31,15 @@ namespace fgui {
         private _xPos: number;
         private _yPos: number;
 
-        private _viewSize: cc.Vec2;
-        private _contentSize: cc.Vec2;
-        private _overlapSize: cc.Vec2;
-        private _pageSize: cc.Vec2;
-        private _containerPos: cc.Vec2;
-        private _beginTouchPos: cc.Vec2;
-        private _lastTouchPos: cc.Vec2;
-        private _lastTouchGlobalPos: cc.Vec2;
-        private _velocity: cc.Vec2;
+        private _viewSize: cc.Vec3;
+        private _contentSize: cc.Vec3;
+        private _overlapSize: cc.Vec3;
+        private _pageSize: cc.Vec3;
+        private _containerPos: cc.Vec3;
+        private _beginTouchPos: cc.Vec3;
+        private _lastTouchPos: cc.Vec3;
+        private _lastTouchGlobalPos: cc.Vec3;
+        private _velocity: cc.Vec3;
         private _velocityScale: number;
         private _lastMoveTime: number;
         private _isHoldAreaDone: boolean;
@@ -51,10 +52,10 @@ namespace fgui {
         private _hover: boolean;
 
         private _tweening: number;
-        private _tweenTime: cc.Vec2;
-        private _tweenDuration: cc.Vec2;
-        private _tweenStart: cc.Vec2;
-        private _tweenChange: cc.Vec2;
+        private _tweenTime: cc.Vec3;
+        private _tweenDuration: cc.Vec3;
+        private _tweenStart: cc.Vec3;
+        private _tweenChange: cc.Vec3;
 
         private _pageController: Controller;
 
@@ -70,18 +71,19 @@ namespace fgui {
         public static TWEEN_TIME_DEFAULT: number = 0.3; //惯性滚动的最小缓动时间
         public static PULL_RATIO: number = 0.5; //下拉过顶或者上拉过底时允许超过的距离占显示区域的比例
 
-        private static sHelperPoint: cc.Vec2 = new cc.Vec2();
+        private static sHelperPoint: cc.Vec3 = new cc.Vec3();
         private static sHelperRect: cc.Rect = new cc.Rect();
-        private static sEndPos: cc.Vec2 = new cc.Vec2();
-        private static sOldChange: cc.Vec2 = new cc.Vec2();
+        private static sEndPos: cc.Vec3 = new cc.Vec3();
+        private static sOldChange: cc.Vec3 = new cc.Vec3();
 
         public setup(buffer: ByteBuffer): void {
             this._owner = <GComponent>(this.node["$gobj"]);
 
             this._maskContainer = new cc.Node("ScrollPane");
+            this._maskTran = this._maskContainer.addComponent(cc.UITransformComponent);
+
             this._maskContainer.setAnchorPoint(0, 1);
             this._maskContainer.parent = this._owner.node;
-
             this._container = this._owner._container;
             this._container.parent = this._maskContainer;
 
@@ -93,19 +95,19 @@ namespace fgui {
             this._tweening = 0;
             this._footerLockedSize = 0;
             this._headerLockedSize = 0;
-            this._viewSize = new cc.Vec2();
-            this._contentSize = new cc.Vec2();
-            this._pageSize = new cc.Vec2(1, 1);
-            this._overlapSize = new cc.Vec2();
-            this._tweenTime = new cc.Vec2();
-            this._tweenStart = new cc.Vec2();
-            this._tweenDuration = new cc.Vec2();
-            this._tweenChange = new cc.Vec2();
-            this._velocity = new cc.Vec2();
-            this._containerPos = new cc.Vec2();
-            this._beginTouchPos = new cc.Vec2();
-            this._lastTouchPos = new cc.Vec2();
-            this._lastTouchGlobalPos = new cc.Vec2();
+            this._viewSize = new cc.Vec3();
+            this._contentSize = new cc.Vec3();
+            this._pageSize = new cc.Vec3(1, 1);
+            this._overlapSize = new cc.Vec3();
+            this._tweenTime = new cc.Vec3();
+            this._tweenStart = new cc.Vec3();
+            this._tweenDuration = new cc.Vec3();
+            this._tweenChange = new cc.Vec3();
+            this._velocity = new cc.Vec3();
+            this._containerPos = new cc.Vec3();
+            this._beginTouchPos = new cc.Vec3();
+            this._lastTouchPos = new cc.Vec3();
+            this._lastTouchGlobalPos = new cc.Vec3();
             this._scrollStep = UIConfig.defaultScrollStep;
             this._mouseWheelStep = this._scrollStep * 2;
             this._decelerationRate = UIConfig.defaultScrollDecelerationRate;
@@ -149,7 +151,7 @@ namespace fgui {
                 this._bouncebackEffect = UIConfig.defaultScrollBounceEffect;
             this._inertiaDisabled = (flags & 256) != 0;
             if ((flags & 512) == 0)
-                this._maskContainer.addComponent(cc.Mask);
+                this._maskContainer.addComponent(cc.MaskComponent);
             this._floating = (flags & 1024) != 0;
 
             if (scrollBarDisplay == ScrollBarDisplayType.Default)
@@ -210,7 +212,7 @@ namespace fgui {
             this.setSize(this._owner.width, this._owner.height);
         }
 
-        protected onDestroy(): void {
+        protected onDestroy(): void {            
             this._pageController = null;
 
             if (this._hzScrollBar != null)
@@ -223,7 +225,7 @@ namespace fgui {
                 this._footer.dispose();
         }
 
-        public hitTest(globalPt: cc.Vec2): GObject {
+        public hitTest(globalPt: cc.Vec3): GObject {
             let target: GObject;
             if (this._vtScrollBar) {
                 target = this._vtScrollBar.hitTest(globalPt);
@@ -246,7 +248,7 @@ namespace fgui {
                     return target;
             }
 
-            let pt: cc.Vec3 = this._maskContainer.convertToNodeSpaceAR(globalPt);
+            let pt: cc.Vec3 = this._maskTran.convertToNodeSpaceAR(globalPt);
             pt.x += this._maskContainer.anchorX * this._viewSize.x;
             pt.y += this._maskContainer.anchorY * this._viewSize.y;
             if (pt.x >= 0 && pt.y >= 0 && pt.x < this._viewSize.x && pt.y < this._viewSize.y)
@@ -495,11 +497,11 @@ namespace fgui {
         }
 
         public get scrollingPosX(): number {
-            return ToolSet.clamp(-this._container.x, 0, this._overlapSize.x);
+            return ToolSet.clamp(-this._container.position.x, 0, this._overlapSize.x);
         }
 
         public get scrollingPosY(): number {
-            return ToolSet.clamp(-(-this._container.y), 0, this._overlapSize.y);
+            return ToolSet.clamp(-(-this._container.position.y), 0, this._overlapSize.y);
         }
 
         public scrollTop(ani?: boolean): void {
@@ -607,13 +609,13 @@ namespace fgui {
 
         public isChildInView(obj: GObject): boolean {
             if (this._overlapSize.y > 0) {
-                var dist: number = obj.y + (-this._container.y);
+                var dist: number = obj.y + (-this._container.position.y);
                 if (dist < -obj.height || dist > this._viewSize.y)
                     return false;
             }
 
             if (this._overlapSize.x > 0) {
-                dist = obj.x + this._container.x;
+                dist = obj.x + this._container.position.x;
                 if (dist < -obj.width || dist > this._viewSize.x)
                     return false;
             }
@@ -633,8 +635,8 @@ namespace fgui {
             if (this._headerLockedSize == size)
                 return;
 
-            let cx: number = this._container.x;
-            let cy: number = -this._container.y;
+            let cx: number = this._container.position.x;
+            let cy: number = -this._container.position.y;
             let cr: number = this._refreshBarAxis == "x" ? cx : cy;
 
             this._headerLockedSize = size;
@@ -642,7 +644,7 @@ namespace fgui {
             if (!this._refreshEventDispatching && cr >= 0) {
                 this._tweenStart.x = cx;
                 this._tweenStart.y = cy;
-                this._tweenChange.set(cc.Vec2.ZERO);
+                this._tweenChange.set(cc.Vec3.ZERO);
                 this._tweenChange[this._refreshBarAxis] = this._headerLockedSize - this._tweenStart[this._refreshBarAxis];
                 this._tweenDuration.x = this._tweenDuration.y = ScrollPane.TWEEN_TIME_DEFAULT;
                 this.startTween(2);
@@ -653,8 +655,8 @@ namespace fgui {
             if (this._footerLockedSize == size)
                 return;
 
-            let cx: number = this._container.x;
-            let cy: number = -this._container.y;
+            let cx: number = this._container.position.x;
+            let cy: number = -this._container.position.y;
             let cr: number = this._refreshBarAxis == "x" ? cx : cy;
 
             this._footerLockedSize = size;
@@ -662,7 +664,7 @@ namespace fgui {
             if (!this._refreshEventDispatching && cr <= -this._overlapSize[this._refreshBarAxis]) {
                 this._tweenStart.x = cx;
                 this._tweenStart.y = cy;
-                this._tweenChange.set(cc.Vec2.ZERO);
+                this._tweenChange.set(cc.Vec3.ZERO);
                 var max: number = this._overlapSize[this._refreshBarAxis];
                 if (max == 0)
                     max = Math.max(this._contentSize[this._refreshBarAxis] + this._footerLockedSize - this._viewSize[this._refreshBarAxis], 0);
@@ -712,9 +714,9 @@ namespace fgui {
             this._maskContainer.setAnchorPoint(this._owner._alignOffset.x / this._viewSize.x, 1 - this._owner._alignOffset.y / this._viewSize.y);
 
             if (this._owner._customMask)
-                this._maskContainer.setPosition(mx + this._owner._alignOffset.x, -this._owner._alignOffset.y);
+                this._maskContainer.setPosition(mx + this._owner._alignOffset.x, -this._owner._alignOffset.y, 0);
             else
-                this._maskContainer.setPosition(this._owner._pivotCorrectX + mx + this._owner._alignOffset.x, this._owner._pivotCorrectY - this._owner._alignOffset.y);
+                this._maskContainer.setPosition(this._owner._pivotCorrectX + mx + this._owner._alignOffset.x, this._owner._pivotCorrectY - this._owner._alignOffset.y, 0);
         }
 
         public setSize(aWidth: number, aHeight: number): void {
@@ -793,38 +795,52 @@ namespace fgui {
             else if (this._tweening == 2) {
                 //重新调整起始位置，确保能够顺滑滚下去
                 if (deltaPosX != 0) {
-                    this._container.x -= deltaPosX;
+                    var p = this._container.position;
+                    var x = p.x;
+                    x -= deltaPosX;
+                    this._container.setPosition(x, p.y, p.z);
                     this._tweenStart.x -= deltaPosX;
-                    this._xPos = -this._container.x;
+                    this._xPos = -x;
                 }
                 if (deltaPosY != 0) {
-                    this._container.y += deltaPosY;
+                    var p = this._container.position;
+                    var y = p.y;
+                    y -= deltaPosY;
+                    this._container.setPosition(p.x, y, p.z);
                     this._tweenStart.y -= deltaPosY;
-                    this._yPos = -(-this._container.y);
+                    this._yPos = -(-y);
                 }
             }
             else if (this._dragged) {
                 if (deltaPosX != 0) {
-                    this._container.x -= deltaPosX;
+                    var p = this._container.position;
+                    var x = p.x;
+                    x -= deltaPosX;
+                    this._container.setPosition(x, p.y, p.z);
                     this._containerPos.x -= deltaPosX;
-                    this._xPos = -this._container.x;
+                    this._xPos = -x;
                 }
                 if (deltaPosY != 0) {
-                    this._container.y += deltaPosY;
+                    var p = this._container.position;
+                    var y = p.y;
+                    y -= deltaPosY;
+                    this._container.setPosition(p.x, y, p.z);
                     this._containerPos.y -= deltaPosY;
-                    this._yPos = -(-this._container.y);
+                    this._yPos = -(-y);
                 }
             }
             else {
                 //如果原来滚动位置是贴边，加入处理继续贴边。
                 if (deltaWidth != 0 && isRightmost) {
                     this._xPos = this._overlapSize.x;
-                    this._container.x = -this._xPos;
+                    var p = this._container.position;
+                    this._container.setPosition(-this._xPos, p.y, p.z)
                 }
 
                 if (deltaHeight != 0 && isBottom) {
                     this._yPos = this._overlapSize.y;
-                    this._container.y = this._yPos;
+                    var p = this._container.position;
+                    this._container.setPosition(p.z, this._yPos, p.z)
                 }
             }
 
@@ -890,11 +906,11 @@ namespace fgui {
                 max += this._footerLockedSize;
 
             if (this._refreshBarAxis == "x")
-                this._container.setPosition(ToolSet.clamp(this._container.x, -max, this._headerLockedSize),
-                    -ToolSet.clamp((-this._container.y), -this._overlapSize.y, 0));
+                this._container.setPosition(ToolSet.clamp(this._container.position.x, -max, this._headerLockedSize),
+                    -ToolSet.clamp((-this._container.position.y), -this._overlapSize.y, 0), 0);
             else
-                this._container.setPosition(ToolSet.clamp(this._container.x, -this._overlapSize.x, 0),
-                    -ToolSet.clamp((-this._container.y), -max, this._headerLockedSize));
+                this._container.setPosition(ToolSet.clamp(this._container.position.x, -this._overlapSize.x, 0),
+                    -ToolSet.clamp((-this._container.position.y), -max, this._headerLockedSize), 0);
 
             if (this._header != null) {
                 if (this._refreshBarAxis == "x")
@@ -957,26 +973,26 @@ namespace fgui {
             if (this._aniFlag == 1 && !this._dragged) {
                 var posX: number;
                 var posY: number;
-
+                var _pos = this._container.position;
                 if (this._overlapSize.x > 0)
                     posX = -Math.floor(this._xPos);
                 else {
-                    if (this._container.x != 0)
-                        this._container.x = 0;
+                    if (_pos.x != 0)
+                        this._container.setPosition(0, _pos.y, _pos.z);
                     posX = 0;
                 }
                 if (this._overlapSize.y > 0)
                     posY = -Math.floor(this._yPos);
                 else {
-                    if (this._container.y != 0)
-                        this._container.y = 0;
+                    if (_pos.y != 0)
+                        this._container.setPosition(_pos.z, 0, _pos.z);
                     posY = 0;
                 }
 
-                if (posX != this._container.x || posY != (-this._container.y)) {
+                if (posX != this._container.position.x || posY != (-this._container.position.y)) {
                     this._tweenDuration.x = this._tweenDuration.y = ScrollPane.TWEEN_TIME_GO;
-                    this._tweenStart.x = this._container.x;
-                    this._tweenStart.y = (-this._container.y);
+                    this._tweenStart.x = this._container.position.x;
+                    this._tweenStart.y = (-this._container.position.y);
                     this._tweenChange.x = posX - this._tweenStart.x;
                     this._tweenChange.y = posY - this._tweenStart.y;
                     this.startTween(1);
@@ -988,7 +1004,7 @@ namespace fgui {
                 if (this._tweening != 0)
                     this.killTween();
 
-                this._container.setPosition(Math.floor(-this._xPos), -Math.floor(-this._yPos));
+                this._container.setPosition(Math.floor(-this._xPos), -Math.floor(-this._yPos), 0);
 
                 this.loopCheckingCurrent();
             }
@@ -1011,15 +1027,15 @@ namespace fgui {
             else
                 this._dragged = false;
 
-            var pt: cc.Vec2 = this._owner.globalToLocal(evt.pos.x, evt.pos.y, ScrollPane.sHelperPoint);
+            var pt: cc.Vec3 = this._owner.globalToLocal(evt.pos.x, evt.pos.y, ScrollPane.sHelperPoint);
 
-            this._containerPos.x = this._container.x;
-            this._containerPos.y = -this._container.y;
+            this._containerPos.x = this._container.position.x;
+            this._containerPos.y = -this._container.position.y;
             this._beginTouchPos.set(pt);
             this._lastTouchPos.set(pt);
             this._lastTouchGlobalPos.set(evt.pos);
             this._isHoldAreaDone = false;
-            this._velocity.set(cc.Vec2.ZERO);;
+            this._velocity.set(cc.Vec3.ZERO);;
             this._velocityScale = 1;
             this._lastMoveTime = ToolSet.getTime();
         }
@@ -1037,7 +1053,7 @@ namespace fgui {
             if (ScrollPane.draggingPane != null && ScrollPane.draggingPane != this && ScrollPane.draggingPane._owner.onStage)
                 return;
 
-            var pt: cc.Vec2 = this._owner.globalToLocal(evt.pos.x, evt.pos.y, ScrollPane.sHelperPoint);
+            var pt: cc.Vec3 = this._owner.globalToLocal(evt.pos.x, evt.pos.y, ScrollPane.sHelperPoint);
 
             var sensitivity: number = UIConfig.touchScrollSensitivity;
             var diff: number, diff2: number;
@@ -1098,45 +1114,52 @@ namespace fgui {
             var newPosY: number = Math.floor(this._containerPos.y + pt.y - this._beginTouchPos.y);
 
             if (sv) {
+                var { x, y, z } = this._container.position;
                 if (newPosY > 0) {
                     if (!this._bouncebackEffect)
-                        this._container.y = 0;
-                    else if (this._header != null && this._header.maxHeight != 0)
-                        this._container.y = -Math.floor(Math.min(newPosY * 0.5, this._header.maxHeight));
-                    else
-                        this._container.y = -Math.floor(Math.min(newPosY * 0.5, this._viewSize.y * ScrollPane.PULL_RATIO));
+                        y = 0;
+                    else if (this._header != null && this._header.maxHeight != 0) {
+                        y = -Math.floor(Math.min(newPosY * 0.5, this._header.maxHeight));
+                    }
+                    else {
+                        y = -Math.floor(Math.min(newPosY * 0.5, this._viewSize.y * ScrollPane.PULL_RATIO));
+                    }
                 }
                 else if (newPosY < -this._overlapSize.y) {
                     if (!this._bouncebackEffect)
-                        this._container.y = this._overlapSize.y;
+                        y = this._overlapSize.y;
                     else if (this._footer != null && this._footer.maxHeight > 0)
-                        this._container.y = -Math.floor(Math.max((newPosY + this._overlapSize.y) * 0.5, -this._footer.maxHeight) - this._overlapSize.y);
+                        y = -Math.floor(Math.max((newPosY + this._overlapSize.y) * 0.5, -this._footer.maxHeight) - this._overlapSize.y);
                     else
-                        this._container.y = -Math.floor(Math.max((newPosY + this._overlapSize.y) * 0.5, -this._viewSize.y * ScrollPane.PULL_RATIO) - this._overlapSize.y);
+                        y = -Math.floor(Math.max((newPosY + this._overlapSize.y) * 0.5, -this._viewSize.y * ScrollPane.PULL_RATIO) - this._overlapSize.y);
                 }
                 else
-                    this._container.y = -newPosY;
+                    y = -newPosY;
+                this._container.setPosition(x, y, z);
+
             }
 
             if (sh) {
+                var { x, y, z } = this._container.position;
                 if (newPosX > 0) {
                     if (!this._bouncebackEffect)
-                        this._container.x = 0;
+                        x = 0;
                     else if (this._header != null && this._header.maxWidth != 0)
-                        this._container.x = Math.floor(Math.min(newPosX * 0.5, this._header.maxWidth));
+                        x = Math.floor(Math.min(newPosX * 0.5, this._header.maxWidth));
                     else
-                        this._container.x = Math.floor(Math.min(newPosX * 0.5, this._viewSize.x * ScrollPane.PULL_RATIO));
+                        x = Math.floor(Math.min(newPosX * 0.5, this._viewSize.x * ScrollPane.PULL_RATIO));
                 }
                 else if (newPosX < 0 - this._overlapSize.x) {
                     if (!this._bouncebackEffect)
-                        this._container.x = -this._overlapSize.x;
+                        x = -this._overlapSize.x;
                     else if (this._footer != null && this._footer.maxWidth > 0)
-                        this._container.x = Math.floor(Math.max((newPosX + this._overlapSize.x) * 0.5, -this._footer.maxWidth) - this._overlapSize.x);
+                        x = Math.floor(Math.max((newPosX + this._overlapSize.x) * 0.5, -this._footer.maxWidth) - this._overlapSize.x);
                     else
-                        this._container.x = Math.floor(Math.max((newPosX + this._overlapSize.x) * 0.5, -this._viewSize.x * ScrollPane.PULL_RATIO) - this._overlapSize.x);
+                        x = Math.floor(Math.max((newPosX + this._overlapSize.x) * 0.5, -this._viewSize.x * ScrollPane.PULL_RATIO) - this._overlapSize.x);
                 }
                 else
-                    this._container.x = newPosX;
+                    x = newPosX;
+                this._container.setPosition(x, y, z);
             }
 
 
@@ -1178,17 +1201,17 @@ namespace fgui {
 
             //同步更新pos值
             if (this._overlapSize.x > 0)
-                this._xPos = ToolSet.clamp(-this._container.x, 0, this._overlapSize.x);
+                this._xPos = ToolSet.clamp(-this._container.position.x, 0, this._overlapSize.x);
             if (this._overlapSize.y > 0)
-                this._yPos = ToolSet.clamp(-(-this._container.y), 0, this._overlapSize.y);
+                this._yPos = ToolSet.clamp(-(-this._container.position.y), 0, this._overlapSize.y);
 
             //循环滚动特别检查
             if (this._loop != 0) {
-                newPosX = this._container.x;
-                newPosY = (-this._container.y);
+                newPosX = this._container.position.x;
+                newPosY = (-this._container.position.y);
                 if (this.loopCheckingCurrent()) {
-                    this._containerPos.x += this._container.x - newPosX;
-                    this._containerPos.y += (-this._container.y) - newPosY;
+                    this._containerPos.x += this._container.position.x - newPosX;
+                    this._containerPos.y += (-this._container.position.y) - newPosY;
                 }
             }
 
@@ -1217,24 +1240,24 @@ namespace fgui {
 
             this._dragged = false;
 
-            this._tweenStart.x = this._container.x;
-            this._tweenStart.y = -this._container.y;
+            this._tweenStart.x = this._container.position.x;
+            this._tweenStart.y = -this._container.position.y;
 
             ScrollPane.sEndPos.set(this._tweenStart);
             var flag: boolean = false;
-            if (this._container.x > 0) {
+            if (this._container.position.x > 0) {
                 ScrollPane.sEndPos.x = 0;
                 flag = true;
             }
-            else if (this._container.x < -this._overlapSize.x) {
+            else if (this._container.position.x < -this._overlapSize.x) {
                 ScrollPane.sEndPos.x = -this._overlapSize.x;
                 flag = true;
             }
-            if ((-this._container.y) > 0) {
+            if ((-this._container.position.y) > 0) {
                 ScrollPane.sEndPos.y = 0;
                 flag = true;
             }
-            else if ((-this._container.y) < -this._overlapSize.y) {
+            else if ((-this._container.position.y) < -this._overlapSize.y) {
                 ScrollPane.sEndPos.y = -this._overlapSize.y;
                 flag = true;
             }
@@ -1341,10 +1364,10 @@ namespace fgui {
 
         private updateScrollBarPos(): void {
             if (this._vtScrollBar != null)
-                this._vtScrollBar.setScrollPerc(this._overlapSize.y == 0 ? 0 : ToolSet.clamp(this._container.y, 0, this._overlapSize.y) / this._overlapSize.y);
+                this._vtScrollBar.setScrollPerc(this._overlapSize.y == 0 ? 0 : ToolSet.clamp(this._container.position.y, 0, this._overlapSize.y) / this._overlapSize.y);
 
             if (this._hzScrollBar != null)
-                this._hzScrollBar.setScrollPerc(this._overlapSize.x == 0 ? 0 : ToolSet.clamp(-this._container.x, 0, this._overlapSize.x) / this._overlapSize.x);
+                this._hzScrollBar.setScrollPerc(this._overlapSize.x == 0 ? 0 : ToolSet.clamp(-this._container.position.x, 0, this._overlapSize.x) / this._overlapSize.x);
 
             this.checkRefreshBar();
         }
@@ -1413,13 +1436,13 @@ namespace fgui {
             }
 
             if (changed) {
-                this._container.setPosition(Math.floor(-this._xPos), -Math.floor(-this._yPos));
+                this._container.setPosition(Math.floor(-this._xPos), -Math.floor(-this._yPos), 0);
             }
 
             return changed;
         }
 
-        private loopCheckingTarget(endPos: cc.Vec2): void {
+        private loopCheckingTarget(endPos: cc.Vec3): void {
             if (this._loop == 1)
                 this.loopCheckingTarget2(endPos, "x");
 
@@ -1427,7 +1450,7 @@ namespace fgui {
                 this.loopCheckingTarget2(endPos, "y");
         }
 
-        private loopCheckingTarget2(endPos: cc.Vec2, axis: string): void {
+        private loopCheckingTarget2(endPos: cc.Vec3, axis: string): void {
             var halfSize: number;
             var tmp: number;
             if (endPos[axis] > 0) {
@@ -1473,24 +1496,24 @@ namespace fgui {
                     changed = true;
                 }
             }
-
             if (changed) {
+                var { x, y, z } = this._container.position;
                 if (axis == "x")
-                    this._container.x = -Math.floor(pos);
+                    x = -Math.floor(pos);
                 else
-                    this._container.y = Math.floor(pos);
+                    y = Math.floor(pos);
+                this._container.setPosition(x, y, z);
             }
-
             return value;
         }
 
-        private alignPosition(pos: cc.Vec2, inertialScrolling: boolean): void {
+        private alignPosition(pos: cc.Vec3, inertialScrolling: boolean): void {
             if (this._pageMode) {
                 pos.x = this.alignByPage(pos.x, "x", inertialScrolling);
                 pos.y = this.alignByPage(pos.y, "y", inertialScrolling);
             }
             else if (this._snapToItem) {
-                var pt: cc.Vec2 = this._owner.getSnappingPosition(-pos.x, -pos.y, ScrollPane.sHelperPoint);
+                var pt: cc.Vec3 = this._owner.getSnappingPosition(-pos.x, -pos.y, ScrollPane.sHelperPoint);
                 if (pos.x < 0 && pos.x > -this._overlapSize.x)
                     pos.x = -pt.x;
                 if (pos.y < 0 && pos.y > -this._overlapSize.y)
@@ -1507,7 +1530,7 @@ namespace fgui {
                 page = Math.ceil(this._contentSize[axis] / this._pageSize[axis]) - 1;
             else {
                 page = Math.floor(-pos / this._pageSize[axis]);
-                var change: number = inertialScrolling ? (pos - this._containerPos[axis]) : (pos - (axis == "x" ? this._container.x : (-this._container.y)));
+                var change: number = inertialScrolling ? (pos - this._containerPos[axis]) : (pos - (axis == "x" ? this._container.position.x : (-this._container.position.y)));
                 var testPageSize: number = Math.min(this._pageSize[axis], this._contentSize[axis] - (page + 1) * this._pageSize[axis]);
                 var delta: number = -pos - page * this._pageSize[axis];
 
@@ -1552,7 +1575,7 @@ namespace fgui {
             return pos;
         }
 
-        private updateTargetAndDuration(orignPos: cc.Vec2, resultPos: cc.Vec2): void {
+        private updateTargetAndDuration(orignPos: cc.Vec3, resultPos: cc.Vec3): void {
             resultPos.x = this.updateTargetAndDuration2(orignPos.x, "x");
             resultPos.y = this.updateTargetAndDuration2(orignPos.y, "y");
         }
@@ -1568,9 +1591,10 @@ namespace fgui {
                 //以屏幕像素为基准
                 var isMobile: boolean = cc.sys.isMobile;
                 var v2: number = Math.abs(v) * this._velocityScale;
+                const winSize = cc.director.getWinSize();
                 //在移动设备上，需要对不同分辨率做一个适配，我们的速度判断以1136分辨率为基准
                 if (isMobile)
-                    v2 *= 1136 / Math.max(cc.winSize.width, cc.winSize.height);
+                    v2 *= 1136 / Math.max(winSize.width, winSize.height);
                 //这里有一些阈值的处理，因为在低速内，不希望产生较大的滚动（甚至不滚动）
                 var ratio: number = 0;
 
@@ -1620,7 +1644,7 @@ namespace fgui {
         }
 
         private startTween(type: number): void {
-            this._tweenTime.set(cc.Vec2.ZERO);
+            this._tweenTime.set(cc.Vec3.ZERO);
             this._tweening = type;
             this.updateScrollBarVisible();
         }
@@ -1628,7 +1652,8 @@ namespace fgui {
         private killTween(): void {
             if (this._tweening == 1) //取消类型为1的tween需立刻设置到终点
             {
-                this._container.setPosition(this._tweenStart.x + this._tweenChange.x, -(this._tweenStart.y + this._tweenChange.y));
+                this._container.setPosition(this._tweenStart.x + this._tweenChange.x,
+                    -(this._tweenStart.y + this._tweenChange.y), 0);
                 this._owner.node.emit(Event.SCROLL, this._owner);
             }
 
@@ -1643,11 +1668,11 @@ namespace fgui {
             if (this._header == null && this._footer == null)
                 return;
 
-            var pos: number = (this._refreshBarAxis == "x" ? this._container.x : (-this._container.y));
+            var pos: number = (this._refreshBarAxis == "x" ? this._container.position.x : (-this._container.position.y));
             if (this._header != null) {
                 if (pos > 0) {
                     this._header.node.active = true;
-                    var pt: cc.Vec2 = ScrollPane.sHelperPoint;
+                    var pt: cc.Vec3 = ScrollPane.sHelperPoint;
                     pt.x = this._header.width;
                     pt.y = this._header.height;
                     pt[this._refreshBarAxis] = pos;
@@ -1694,7 +1719,7 @@ namespace fgui {
             var nx: number = this.runTween("x", dt);
             var ny: number = this.runTween("y", dt);
 
-            this._container.setPosition(nx, -ny);
+            this._container.setPosition(nx, -ny, 0);
 
             if (this._tweening == 2) {
                 if (this._overlapSize.x > 0)
@@ -1781,7 +1806,7 @@ namespace fgui {
                 }
             }
             else
-                newValue = (axis == "x" ? this._container.x : (-this._container.y));
+                newValue = (axis == "x" ? this._container.position.x : (-this._container.position.y));
 
             return newValue;
         }

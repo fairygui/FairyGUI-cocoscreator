@@ -81,17 +81,17 @@ namespace fgui {
         }
 
         public static loadPackage(url: string, completeCallback: ((error: any) => void) | null): void {
-            cc.loader.loadRes(url, function (err, asset) {
+            cc.loader.loadRes(url, cc.Asset, (err, asset) => {
                 if (err) {
                     completeCallback(err);
                     return;
                 }
 
-                if (!asset.rawBuffer)
+                if (!asset["rawBuffer"])
                     throw "Missing asset data. Call UIConfig.registerLoader first!";
 
                 let pkg: UIPackage = new UIPackage();
-                pkg.loadPackage(new ByteBuffer(asset.rawBuffer), url);
+                pkg.loadPackage(new ByteBuffer(asset["rawBuffer"]), url);
                 let cnt: number = pkg._items.length;
                 let urls = [];
                 for (var i: number = 0; i < cnt; i++) {
@@ -197,9 +197,7 @@ namespace fgui {
             return UIPackage.getItemURL(pkgName, srcName);
         }
 
-        public static setStringsSource(source: string): void {
-            TranslationHelper.loadFromXML(source);
-        }
+
 
         private loadPackage(buffer: ByteBuffer, url: string): void {
             if (buffer.readUint() != 0x46475549)
@@ -472,9 +470,14 @@ namespace fgui {
                         if (sprite != null) {
                             let atlasTexture: cc.Texture2D = <cc.Texture2D>this.getItemAsset(sprite.atlas);
                             if (atlasTexture != null) {
-                                let sf = new cc.SpriteFrame(atlasTexture, sprite.rect, sprite.rotated,
-                                    new cc.Vec2(sprite.offset.x - (sprite.originalSize.width - sprite.rect.width) / 2, -(sprite.offset.y - (sprite.originalSize.height - sprite.rect.height) / 2)),
-                                    sprite.originalSize);
+                                let sf = new cc.SpriteFrame();
+
+                                sf.texture = atlasTexture;
+                                sf.rect = sprite.rect;
+                                sf.rotated = sprite.rotated;
+                                sf.offset = new cc.Vec2(sprite.offset.x - (sprite.originalSize.width - sprite.rect.width) / 2, -(sprite.offset.y - (sprite.originalSize.height - sprite.rect.height) / 2));
+                                sf.originalSize = sprite.originalSize
+
                                 if (item.scale9Grid) {
                                     sf.insetLeft = item.scale9Grid.x;
                                     sf.insetTop = item.scale9Grid.y;
@@ -490,9 +493,14 @@ namespace fgui {
                 case PackageItemType.Atlas:
                     if (!item.decoded) {
                         item.decoded = true;
-                        item.asset = cc.loader.getRes(item.file);
-                        if (!item.asset)
+                        var asset = cc.loader.getRes(item.file);
+                        if (!asset)
                             console.log("Resource '" + item.file + "' not found, please check default.res.json!");
+                        if (asset instanceof cc.Texture2D) {
+                            item.asset = asset;
+                        } else if (asset instanceof cc.ImageAsset) {
+                            item.asset = asset._texture;
+                        }
                     }
                     return item.asset;
 
@@ -572,9 +580,15 @@ namespace fgui {
                     let atlasTexture: cc.Texture2D = <cc.Texture2D>this.getItemAsset(sprite.atlas);
                     if (atlasTexture != null) {
                         let sx: number = item.width / frame.rect.width;
-                        frame.texture = new cc.SpriteFrame(atlasTexture, sprite.rect, sprite.rotated,
-                            new cc.Vec2(frame.rect.x - (item.width - frame.rect.width) / 2, -(frame.rect.y - (item.height - frame.rect.height) / 2)),
-                            new cc.Size(item.width, item.height));
+
+                        let sf = new cc.SpriteFrame();
+
+                        sf.texture = atlasTexture;
+                        sf.rect = sprite.rect;
+                        sf.rotated = sprite.rotated;
+                        sf.offset = new cc.Vec2(frame.rect.x - (item.width - frame.rect.width) / 2, -(frame.rect.y - (item.height - frame.rect.height) / 2))
+                        sf.originalSize = new cc.Size(item.width, item.height);
+                        frame.texture = sf;
                     }
                 }
                 item.frames[i] = frame;
@@ -584,16 +598,16 @@ namespace fgui {
         }
 
         private loadFont(item: PackageItem): void {
-            var font: any = new cc.LabelAtlas();
+            var font = new cc.LabelAtlas();
             item.asset = font;
 
-            font._fntConfig = {
+            font.fntConfig = {
                 commonHeight: 0,
                 fontSize: 0,
                 kerningDict: {},
                 fontDefDictionary: {}
             };
-            let dict = font._fntConfig.fontDefDictionary;
+            let dict = font.fntConfig.fontDefDictionary;
 
             var buffer: ByteBuffer = item.rawData;
 
@@ -611,6 +625,7 @@ namespace fgui {
             var mainSprite: AtlasSprite = this._sprites[item.id];
             if (mainSprite != null)
                 mainTexture = <cc.Texture2D>(this.getItemAsset(mainSprite.atlas));
+            console.log(mainSprite);
 
             buffer.seek(0, 1);
 
@@ -644,8 +659,16 @@ namespace fgui {
                     bg.channel = 1;
 
                 if (ttf) {
-                    rect.x += mainSprite.rect.x;
-                    rect.y += mainSprite.rect.y;
+                    if (mainSprite.rotated) {
+                        var y = rect.y;
+                        var x = rect.x;
+                        rect.x = mainSprite.rect.x + mainSprite.rect.height - rect.height - y;
+                        rect.y = mainSprite.rect.y + x;
+                        console.log(rect.x, rect.y);
+                    } else {
+                        rect.x += mainSprite.rect.x;
+                        rect.y += mainSprite.rect.y;
+                    }
                 }
                 else {
                     let sprite: AtlasSprite = this._sprites[img];
@@ -674,28 +697,33 @@ namespace fgui {
 
 
             font.fontSize = fontSize;
-            font._fntConfig.fontSize = fontSize;
-            font._fntConfig.commonHeight = lineHeight == 0 ? fontSize : lineHeight;
-            font._fntConfig.resizable = resizable;
-            font._fntConfig.canTint = canTint;
+            font.fntConfig.fontSize = fontSize;
+            font.fntConfig.commonHeight = lineHeight == 0 ? fontSize : lineHeight;
+            font.fntConfig.resizable = resizable;
+            font.fntConfig.canTint = canTint;
 
             let spriteFrame = new cc.SpriteFrame();
-            spriteFrame.setTexture(mainTexture);
+            spriteFrame.texture = mainTexture;
+            // if (mainSprite) {
+            //     spriteFrame.rotated = mainSprite.rotated;
+            //     spriteFrame.offset = new cc.Vec2(mainSprite.offset.x - (mainSprite.originalSize.width - mainSprite.rect.width) / 2, -(mainSprite.offset.y - (mainSprite.originalSize.height - mainSprite.rect.height) / 2));
+            //     spriteFrame.originalSize = mainSprite.originalSize;
+            // }
+            
             font.spriteFrame = spriteFrame;
-            font.onLoad();
         }
     }
 
     class AtlasSprite {
         public atlas: PackageItem;
         public rect: cc.Rect;
-        public offset: cc.Vec2;
+        public offset: cc.Vec3;
         public originalSize: cc.Size;
         public rotated: boolean;
 
         public constructor() {
             this.rect = new cc.Rect();
-            this.offset = new cc.Vec2(0, 0);
+            this.offset = new cc.Vec3(0, 0);
             this.originalSize = new cc.Size(0, 0);
         }
     }

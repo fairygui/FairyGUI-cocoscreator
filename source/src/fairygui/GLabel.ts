@@ -42,7 +42,17 @@ namespace fgui {
         public set text(value: string) {
             this.title = value;
         }
-
+        setAlpha(val: number) {
+            var tf: GTextField = this.getTextField();
+            if (tf != null) {
+                var c = tf.color;
+                if (c.a != val) {
+                    c.a = val;
+                    tf.color = c;
+                    this.updateGear(4);
+                }
+            }
+        }
         public get titleColor(): cc.Color {
             var tf: GTextField = this.getTextField();
             if (tf != null)

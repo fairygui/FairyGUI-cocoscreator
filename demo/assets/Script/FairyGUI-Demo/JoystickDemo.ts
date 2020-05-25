@@ -1,9 +1,10 @@
 import JoystickModule from "./JoystickModule"
+import { _decorator, Component } from "cc";
 
-const { ccclass, property } = cc._decorator;
+const { ccclass, property } = _decorator;
 
 @ccclass
-export default class JoystickDemo extends cc.Component {
+export default class JoystickDemo extends Component {
     private _view: fgui.GComponent;
     private _joystick: JoystickModule;
     private _text: fgui.GTextField;

@@ -40,7 +40,11 @@ namespace fgui {
         public set clickToExpand(value: number) {
             this._clickToExpand = value;
         }
-
+        public dispose() {
+            super.dispose();
+            this.treeNodeRender = null;
+            this.treeNodeWillExpand = null;
+        }
         public getSelectedNode(): GTreeNode {
             if (this.selectedIndex != -1)
                 return this.getChildAt(this.selectedIndex)._treeNode;
@@ -134,7 +138,7 @@ namespace fgui {
             if (cc)
                 cc.selectedIndex = node.isFolder ? 0 : 1;
 
-            if(node.isFolder)
+            if (node.isFolder)
                 node._cell.on(Event.TOUCH_BEGIN, this.__cellMouseDown, this);
 
             if (this.treeNodeRender)
@@ -281,7 +285,7 @@ namespace fgui {
             for (var i: number = 0; i < cnt; i++) {
                 var node: GTreeNode = folderNode.getChildAt(i);
                 if (node._cell)
-                    this.removeChild(node._cell);
+                    this.removeChildToPool(node._cell);
                 if (node.isFolder && node.expanded)
                     this.hideFolderNode(node);
             }
@@ -290,7 +294,7 @@ namespace fgui {
         private removeNode(node: GTreeNode): void {
             if (node._cell != null) {
                 if (node._cell.parent != null)
-                    this.removeChild(node._cell);
+                    this.removeChildToPool(node._cell);
                 this.returnToPool(node._cell);
                 node._cell._treeNode = null;
                 node._cell = null;

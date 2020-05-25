@@ -54,6 +54,7 @@ namespace fgui {
 
         public dispose(): void {
             this._pool.clear();
+            this.off(fgui.Event.CLICK_ITEM);
             super.dispose();
         }
 
@@ -791,9 +792,9 @@ namespace fgui {
             }
         }
 
-        public getSnappingPosition(xValue: number, yValue: number, resultPoint?: cc.Vec2): cc.Vec2 {
+        public getSnappingPosition(xValue: number, yValue: number, resultPoint?: cc.Vec3): cc.Vec3 {
             if (this._virtual) {
-                resultPoint = resultPoint || new cc.Vec2();
+                resultPoint = resultPoint || new cc.Vec3();
 
                 var saved: number;
                 var index: number;
@@ -1500,7 +1501,7 @@ namespace fgui {
             if (deltaSize != 0 || firstItemDeltaSize != 0)
                 this._scrollPane.changeContentSizeOnScrolling(0, deltaSize, 0, firstItemDeltaSize);
 
-            if (curIndex > 0 && this.numChildren > 0 && this._container.y <= 0 && this.getChildAt(0).y > -this._container.y)//最后一页没填满！
+            if (curIndex > 0 && this.numChildren > 0 && this._container.position.y <= 0 && this.getChildAt(0).y > -this._container.position.y)//最后一页没填满！
                 return true;
             else
                 return false;
@@ -1655,7 +1656,7 @@ namespace fgui {
             if (deltaSize != 0 || firstItemDeltaSize != 0)
                 this._scrollPane.changeContentSizeOnScrolling(deltaSize, 0, firstItemDeltaSize, 0);
 
-            if (curIndex > 0 && this.numChildren > 0 && this._container.x <= 0 && this.getChildAt(0).x > - this._container.x)//最后一页没填满！
+            if (curIndex > 0 && this.numChildren > 0 && this._container.position.x <= 0 && this.getChildAt(0).x > - this._container.position.x)//最后一页没填满！
                 return true;
             else
                 return false;
@@ -1892,7 +1893,8 @@ namespace fgui {
                 if (this._scrollPane != null)
                     this._scrollPane.adjustMaskContainer();
                 else
-                    this._container.setPosition(this._pivotCorrectX + this._alignOffset.x, this._pivotCorrectY - this._alignOffset.y);
+                    this._container.setPosition(this._pivotCorrectX + this._alignOffset.x,
+                        this._pivotCorrectY - this._alignOffset.y, 0);
             }
         }
 

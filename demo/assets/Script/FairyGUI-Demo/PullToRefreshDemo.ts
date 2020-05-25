@@ -1,9 +1,10 @@
 import ScrollPaneHeader from "./ScrollPaneHeader"
+import { _decorator, Component } from "cc";
 
-const { ccclass, property } = cc._decorator;
+const { ccclass, property } = _decorator;
 
 @ccclass
-export default class PullToRefreshDemo extends cc.Component {
+export default class PullToRefreshDemo extends Component {
     private _view: fgui.GComponent;
     private _list1: fgui.GList;
     private _list2: fgui.GList;

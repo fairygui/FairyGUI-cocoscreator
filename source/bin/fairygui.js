@@ -45,6 +45,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         AsyncOperation.prototype.internalCreateObject = function (item) {
             this._node = new cc.Node("[AsyncCreating:" + item.name + "]");
+            this._node.addComponent(cc.UITransformComponent);
             this._node.parent = cc.director.getScene();
             this._node.on("#", this.completed, this);
             this._node.addComponent(AsyncOperationRunner).init(item);
@@ -776,6 +777,7 @@ window.__extends = (this && this.__extends) || (function () {
             this._sizePercentInGroup = 0;
             this._touchDisabled = false;
             this._node = new cc.Node();
+            this.uiCom = this._node.addComponent(cc.UITransformComponent);
             if (GObject._defaultGroupIndex == -1) {
                 GObject._defaultGroupIndex = 0;
                 var groups = cc.game.groupList;
@@ -788,7 +790,7 @@ window.__extends = (this && this.__extends) || (function () {
                 }
             }
             this._node["$gobj"] = this;
-            this._node.groupIndex = GObject._defaultGroupIndex;
+            this._node.layer = GObject._defaultGroupIndex;
             this._node.setAnchorPoint(0, 1);
             this._node.on(cc.Node.EventType.ANCHOR_CHANGED, this.handleAnchorChanged, this);
             this._id = this._node.uuid;
@@ -972,41 +974,41 @@ window.__extends = (this && this.__extends) || (function () {
         };
         Object.defineProperty(GObject.prototype, "actualWidth", {
             get: function () {
-                return this.width * Math.abs(this._node.scaleX);
+                return this.width * Math.abs(this._node.scale.x);
             },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "actualHeight", {
             get: function () {
-                return this.height * Math.abs(this._node.scaleY);
+                return this.height * Math.abs(this._node.scale.y);
             },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "scaleX", {
             get: function () {
-                return this._node.scaleX;
+                return this._node.scale.x;
             },
             set: function (value) {
-                this.setScale(value, this._node.scaleY);
+                this.setScale(value, this._node.scale.y);
             },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "scaleY", {
             get: function () {
-                return this._node.scaleY;
+                return this._node.scale.y;
             },
             set: function (value) {
-                this.setScale(this._node.scaleX, value);
+                this.setScale(this._node.scale.x, value);
             },
             enumerable: true,
             configurable: true
         });
         GObject.prototype.setScale = function (sx, sy) {
-            if (this._node.scaleX != sx || this._node.scaleY != sy) {
-                this._node.setScale(sx, sy);
+            if (this._node.scale.x != sx || this._node.scale.y != sy) {
+                this._node.setScale(sx, sy, this._node.scale.z);
                 this.updateGear(2);
             }
         };
@@ -1034,8 +1036,8 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._skewX != xv || this._skewY != yv) {
                 this._skewX = xv;
                 this._skewY = yv;
-                this._node.skewX = xv;
-                this._node.skewY = yv;
+                var rot = this._node.eulerAngles;
+                this._node.setRotationFromEuler(xv, yv, rot.z);
             }
         };
         Object.defineProperty(GObject.prototype, "pivotX", {
@@ -1115,12 +1117,13 @@ window.__extends = (this && this.__extends) || (function () {
         });
         Object.defineProperty(GObject.prototype, "rotation", {
             get: function () {
-                return -this._node.angle;
+                return -this._node.eulerAngles.z;
             },
             set: function (value) {
                 value = -value;
-                if (this._node.angle != value) {
-                    this._node.angle = value;
+                var rot = this._node.eulerAngles;
+                if (rot.z != value) {
+                    this._node.setRotationFromEuler(rot.x, rot.y, value);
                     this.updateGear(3);
                 }
             },
@@ -1134,7 +1137,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 if (this._alpha != value) {
                     this._alpha = value;
-                    this._node.opacity = this._alpha * 255;
+                    this.setAlpha(this._alpha * 255);
                     if (this instanceof fgui.GGroup)
                         this.handleAlphaChanged();
                     this.updateGear(3);
@@ -1143,6 +1146,8 @@ window.__extends = (this && this.__extends) || (function () {
             enumerable: true,
             configurable: true
         });
+        GObject.prototype.setAlpha = function (_alpha) {
+        };
         Object.defineProperty(GObject.prototype, "visible", {
             get: function () {
                 return this._visible;
@@ -1497,7 +1502,8 @@ window.__extends = (this && this.__extends) || (function () {
             configurable: true
         });
         GObject.cast = function (obj) {
-            return obj["$gobj"];
+            if (obj)
+                return obj["$gobj"];
         };
         Object.defineProperty(GObject.prototype, "text", {
             get: function () {
@@ -1541,6 +1547,8 @@ window.__extends = (this && this.__extends) || (function () {
         GObject.prototype.onEnable = function () {
         };
         GObject.prototype.onDisable = function () {
+        };
+        GObject.prototype.onStart = function () {
         };
         GObject.prototype.onUpdate = function () {
         };
@@ -1609,7 +1617,7 @@ window.__extends = (this && this.__extends) || (function () {
                 ax = 0;
             if (ay == undefined)
                 ay = 0;
-            var pt = resultPoint || new cc.Vec2();
+            var pt = resultPoint || new cc.Vec3();
             pt.x = ax;
             pt.y = ay;
             pt.y = -pt.y;
@@ -1617,9 +1625,10 @@ window.__extends = (this && this.__extends) || (function () {
                 pt.x -= this.node.anchorX * this._width;
                 pt.y += (1 - this.node.anchorY) * this._height;
             }
-            var v3 = this._node.convertToWorldSpaceAR(pt);
+            var v3 = this.uiCom.convertToWorldSpaceAR(pt);
             pt.x = v3.x;
             pt.y = fgui.GRoot.inst.height - v3.y;
+            pt.z = 0;
             return pt;
         };
         GObject.prototype.globalToLocal = function (ax, ay, resultPoint) {
@@ -1627,17 +1636,18 @@ window.__extends = (this && this.__extends) || (function () {
                 ax = 0;
             if (ay == undefined)
                 ay = 0;
-            var pt = resultPoint || new cc.Vec2();
+            var pt = resultPoint || new cc.Vec3();
             pt.x = ax;
             pt.y = fgui.GRoot.inst.height - ay;
-            var v3 = this._node.convertToNodeSpaceAR(pt);
+            var v3 = this.uiCom.convertToNodeSpaceAR(pt);
             pt.x = v3.x;
             pt.y = v3.y;
             if (!this._pivotAsAnchor) {
-                pt.x -= this._node.anchorX * this._width;
-                pt.y += (1 - this._node.anchorY) * this._height;
+                pt.x += this._node.anchorX * this._width;
+                pt.y -= (1 - this._node.anchorY) * this._height;
             }
             pt.y = -pt.y;
+            pt.z = 0;
             return pt;
         };
         GObject.prototype.localToGlobalRect = function (ax, ay, aw, ah, resultRect) {
@@ -1700,7 +1710,7 @@ window.__extends = (this && this.__extends) || (function () {
                 xv = Math.round(xv);
                 yv = Math.round(yv);
             }
-            this._node.setPosition(xv, yv);
+            this._node.setPosition(xv, yv, 0);
         };
         GObject.prototype.handleSizeChanged = function () {
             this._node.setContentSize(this._width, this._height);
@@ -1717,7 +1727,7 @@ window.__extends = (this && this.__extends) || (function () {
         GObject.prototype.hitTest = function (globalPt) {
             if (this._touchDisabled || !this._touchable || !this._node.activeInHierarchy)
                 return null;
-            var pt = this._node.convertToNodeSpaceAR(globalPt);
+            var pt = this.uiCom.convertToNodeSpaceAR(globalPt);
             pt.x += this._node.anchorX * this._width;
             pt.y += this._node.anchorY * this._height;
             if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
@@ -1883,7 +1893,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GObject.prototype.onTouchBegin_0 = function (evt) {
             if (this._dragStartPoint == null)
-                this._dragStartPoint = new cc.Vec2();
+                this._dragStartPoint = new cc.Vec3();
             this._dragStartPoint.set(evt.pos);
             this._dragTesting = true;
             evt.captureTouch();
@@ -1934,9 +1944,9 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         GObject._defaultGroupIndex = -1;
-        GObject.sGlobalDragStart = new cc.Vec2();
+        GObject.sGlobalDragStart = new cc.Vec3();
         GObject.sGlobalRect = new cc.Rect();
-        GObject.sHelperPoint = new cc.Vec2();
+        GObject.sHelperPoint = new cc.Vec3();
         GObject.sDragHelperRect = new cc.Rect();
         GObject.sDragQuery = false;
         return GObject;
@@ -1955,6 +1965,9 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GObjectPartner.prototype.onClickLink = function (evt, text) {
             this.node.emit(fgui.Event.LINK, text, evt);
+        };
+        GObjectPartner.prototype.start = function () {
+            this.node["$gobj"].onStart();
         };
         GObjectPartner.prototype.onEnable = function () {
             this.node["$gobj"].onEnable();
@@ -1990,8 +2003,9 @@ window.__extends = (this && this.__extends) || (function () {
             _this._controllers = new Array();
             _this._transitions = new Array();
             _this._margin = new fgui.Margin();
-            _this._alignOffset = new cc.Vec2();
+            _this._alignOffset = new cc.Vec3();
             _this._container = new cc.Node("Container");
+            _this._container.addComponent(cc.UITransformComponent);
             _this._container.setAnchorPoint(0, 1);
             _this._node.addChild(_this._container);
             return _this;
@@ -2486,9 +2500,8 @@ window.__extends = (this && this.__extends) || (function () {
         });
         GComponent.prototype.setMask = function (value, inverted) {
             if (this._maskContent) {
-                this._maskContent.node.off(cc.Node.EventType.POSITION_CHANGED, this.onMaskContentChanged, this);
+                this._maskContent.node.off(cc.Node.EventType.TRANSFORM_CHANGED, this.onMaskContentChanged, this);
                 this._maskContent.node.off(cc.Node.EventType.SIZE_CHANGED, this.onMaskContentChanged, this);
-                this._maskContent.node.off(cc.Node.EventType.SCALE_CHANGED, this.onMaskContentChanged, this);
                 this._maskContent.node.off(cc.Node.EventType.ANCHOR_CHANGED, this.onMaskContentChanged, this);
                 this._maskContent.visible = true;
             }
@@ -2498,17 +2511,17 @@ window.__extends = (this && this.__extends) || (function () {
                     return;
                 if (!this._customMask) {
                     var maskNode = new cc.Node("Mask");
+                    maskNode.addComponent(cc.UITransformComponent);
                     maskNode.parent = this._node;
                     if (this._scrollPane)
                         this._container.parent.parent = maskNode;
                     else
                         this._container.parent = maskNode;
-                    this._customMask = maskNode.addComponent(cc.Mask);
+                    this._customMask = maskNode.addComponent(cc.MaskComponent);
                 }
                 value.visible = false;
-                value.node.on(cc.Node.EventType.POSITION_CHANGED, this.onMaskContentChanged, this);
+                value.node.on(cc.Node.EventType.TRANSFORM_CHANGED, this.onMaskContentChanged, this);
                 value.node.on(cc.Node.EventType.SIZE_CHANGED, this.onMaskContentChanged, this);
-                value.node.on(cc.Node.EventType.SCALE_CHANGED, this.onMaskContentChanged, this);
                 value.node.on(cc.Node.EventType.ANCHOR_CHANGED, this.onMaskContentChanged, this);
                 this._customMask.inverted = inverted;
                 if (this._node.activeInHierarchy)
@@ -2519,7 +2532,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._scrollPane)
                     this._scrollPane.adjustMaskContainer();
                 else
-                    this._container.setPosition(0, 0);
+                    this._container.setPosition(0, 0, 0);
             }
             else if (this._customMask) {
                 if (this._scrollPane)
@@ -2531,33 +2544,31 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._scrollPane)
                     this._scrollPane.adjustMaskContainer();
                 else
-                    this._container.setPosition(this._pivotCorrectX, this._pivotCorrectY);
+                    this._container.setPosition(this._pivotCorrectX, this._pivotCorrectY, 0);
             }
         };
         GComponent.prototype.onMaskReady = function () {
             this.off(fgui.Event.DISPLAY, this.onMaskReady, this);
             if (this._maskContent instanceof fgui.GImage) {
-                this._customMask.type = cc.Mask.Type.IMAGE_STENCIL;
-                this._customMask.alphaThreshold = 0.0001;
-                this._customMask.spriteFrame = this._maskContent._content.spriteFrame;
+                throw new Error("暂时不支持mask 为图片");
             }
             else {
                 if (this._maskContent.type == fgui.GraphType.Ellipse)
-                    this._customMask.type = cc.Mask.Type.ELLIPSE;
-                else
-                    this._customMask.type = cc.Mask.Type.RECT;
+                    this._customMask.type = cc.MaskComponent.Type.ELLIPSE;
+                else if (this._maskContent.type == fgui.GraphType.Rect)
+                    this._customMask.type = cc.MaskComponent.Type.RECT;
             }
         };
         GComponent.prototype.onMaskContentChanged = function () {
             var maskNode = this._customMask.node;
             var contentNode = this._maskContent.node;
-            var w = contentNode.width * contentNode.scaleX;
-            var h = contentNode.height * contentNode.scaleY;
+            var w = contentNode.width * contentNode.scale.x;
+            var h = contentNode.height * contentNode.scale.y;
             maskNode.setContentSize(w, h);
-            var left = contentNode.x - contentNode.anchorX * w;
-            var top = contentNode.y - contentNode.anchorY * h;
+            var left = contentNode.position.x - contentNode.anchorX * w;
+            var top = contentNode.position.y - contentNode.anchorY * h;
             maskNode.setAnchorPoint(-left / maskNode.width, -top / maskNode.height);
-            maskNode.setPosition(this._pivotCorrectX, this._pivotCorrectY);
+            maskNode.setPosition(this._pivotCorrectX, this._pivotCorrectY, 0);
         };
         Object.defineProperty(GComponent.prototype, "_pivotCorrectX", {
             get: function () {
@@ -2588,25 +2599,25 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GComponent.prototype.setupOverflow = function (overflow) {
             if (overflow == fgui.OverflowType.Hidden)
-                this._rectMask = this._container.addComponent(cc.Mask);
+                this._rectMask = this._container.addComponent(cc.MaskComponent);
             if (!this._margin.isNone)
                 this.handleSizeChanged();
         };
         GComponent.prototype.handleAnchorChanged = function () {
             _super.prototype.handleAnchorChanged.call(this);
             if (this._customMask)
-                this._customMask.node.setPosition(this._pivotCorrectX, this._pivotCorrectY);
+                this._customMask.node.setPosition(this._pivotCorrectX, this._pivotCorrectY, 0);
             else if (this._scrollPane)
                 this._scrollPane.adjustMaskContainer();
             else
-                this._container.setPosition(this._pivotCorrectX + this._alignOffset.x, this._pivotCorrectY - this._alignOffset.y);
+                this._container.setPosition(this._pivotCorrectX + this._alignOffset.x, this._pivotCorrectY - this._alignOffset.y, 0);
         };
         GComponent.prototype.handleSizeChanged = function () {
             _super.prototype.handleSizeChanged.call(this);
             if (this._customMask)
-                this._customMask.node.setPosition(this._pivotCorrectX, this._pivotCorrectY);
+                this._customMask.node.setPosition(this._pivotCorrectX, this._pivotCorrectY, 0);
             else if (!this._scrollPane)
-                this._container.setPosition(this._pivotCorrectX, this._pivotCorrectY);
+                this._container.setPosition(this._pivotCorrectX, this._pivotCorrectY, 0);
             if (this._scrollPane)
                 this._scrollPane.onOwnerSizeChanged();
             else
@@ -2634,13 +2645,13 @@ window.__extends = (this && this.__extends) || (function () {
                 return null;
             var target;
             if (this._customMask) {
-                var b = this._customMask["_hitTest"](globalPt) || false;
+                var b = this._customMask.isHit(cc.v2(globalPt.x, globalPt.y)) || false;
                 if (!b)
                     return null;
             }
             var flag = 0;
             if (this.hitArea || this._rectMask) {
-                var pt = this._node.convertToNodeSpaceAR(globalPt);
+                var pt = this.uiCom.convertToNodeSpaceAR(globalPt);
                 pt.x += this._node.anchorX * this._width;
                 pt.y += this._node.anchorY * this._height;
                 if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
@@ -2650,8 +2661,8 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this.hitArea && !this.hitArea.hitTest(this, pt.x, pt.y))
                     return null;
                 if (this._rectMask) {
-                    pt.x += this._container.x;
-                    pt.y += this._container.y;
+                    pt.x += this._container.position.x;
+                    pt.y += this._container.position.y;
                     var clippingSize = this._container.getContentSize();
                     if (pt.x < 0 || pt.y < 0 || pt.x >= clippingSize.width || pt.y >= clippingSize.height)
                         return null;
@@ -2672,7 +2683,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
             if (this._opaque) {
                 if (flag == 0) {
-                    var pt = this._node.convertToNodeSpaceAR(globalPt);
+                    var pt = this.uiCom.convertToNodeSpaceAR(globalPt);
                     pt.x += this._node.anchorX * this._width;
                     pt.y += this._node.anchorY * this._height;
                     if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
@@ -2792,7 +2803,7 @@ window.__extends = (this && this.__extends) || (function () {
         });
         GComponent.prototype.getSnappingPosition = function (xValue, yValue, resultPoint) {
             if (!resultPoint)
-                resultPoint = new cc.Vec2();
+                resultPoint = new cc.Vec3();
             var cnt = this._children.length;
             if (cnt == 0) {
                 resultPoint.x = 0;
@@ -3080,7 +3091,7 @@ window.__extends = (this && this.__extends) || (function () {
             _this._mode = fgui.ButtonMode.Common;
             _this._title = "";
             _this._icon = "";
-            _this._sound = fgui.UIConfig.buttonSound;
+            _this.sound = fgui.UIConfig.buttonSound;
             _this._soundVolumeScale = fgui.UIConfig.buttonSoundVolumeScale;
             _this._changeStateOnClick = true;
             _this._downEffect = 0;
@@ -3423,7 +3434,7 @@ window.__extends = (this && this.__extends) || (function () {
             this._mode = buffer.readByte();
             var str = buffer.readS();
             if (str)
-                this._sound = str;
+                this.sound = str;
             this._soundVolumeScale = buffer.readFloat();
             this._downEffect = buffer.readByte();
             this._downEffectValue = buffer.readFloat();
@@ -3475,7 +3486,7 @@ window.__extends = (this && this.__extends) || (function () {
             this._relatedPageId = buffer.readS();
             str = buffer.readS();
             if (str != null)
-                this._sound = str;
+                this.sound = str;
             if (buffer.readBool())
                 this._soundVolumeScale = buffer.readFloat();
             this.selected = buffer.readBool();
@@ -3501,7 +3512,7 @@ window.__extends = (this && this.__extends) || (function () {
             this.setState(this._selected ? GButton.DOWN : GButton.UP);
         };
         GButton.prototype.onTouchBegin_1 = function (evt) {
-            if (evt.button != cc.Event.EventMouse.BUTTON_LEFT)
+            if (evt.button != fgui.EventMouse.BUTTON_LEFT)
                 return;
             this._down = true;
             evt.captureTouch();
@@ -3519,7 +3530,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         GButton.prototype.onTouchEnd_1 = function (evt) {
-            if (evt.button != cc.Event.EventMouse.BUTTON_LEFT)
+            if (evt.button != fgui.EventMouse.BUTTON_LEFT)
                 return;
             if (this._down) {
                 this._down = false;
@@ -3997,7 +4008,7 @@ window.__extends = (this && this.__extends) || (function () {
             this.setState(fgui.GButton.UP);
         };
         GComboBox.prototype.onTouchBegin_1 = function (evt) {
-            if (evt.button != cc.Event.EventMouse.BUTTON_LEFT)
+            if (evt.button != fgui.EventMouse.BUTTON_LEFT)
                 return;
             if ((evt.initiator instanceof fgui.GTextInput) && evt.initiator.editable)
                 return;
@@ -4007,7 +4018,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this.showDropdown();
         };
         GComboBox.prototype.onTouchEnd_1 = function (evt) {
-            if (evt.button != cc.Event.EventMouse.BUTTON_LEFT)
+            if (evt.button != fgui.EventMouse.BUTTON_LEFT)
                 return;
             if (this._down) {
                 this._down = false;
@@ -4025,6 +4036,19 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
+    var GGraphicsComponent = (function (_super) {
+        __extends(GGraphicsComponent, _super);
+        function GGraphicsComponent() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        GGraphicsComponent.prototype.onLoad = function () {
+            _super.prototype.onLoad.call(this);
+            if (this.handleOnLoad)
+                this.handleOnLoad();
+        };
+        return GGraphicsComponent;
+    }(cc.GraphicsComponent));
+    fgui.GGraphicsComponent = GGraphicsComponent;
     var GGraph = (function (_super) {
         __extends(GGraph, _super);
         function GGraph() {
@@ -4038,7 +4062,6 @@ window.__extends = (this && this.__extends) || (function () {
             _this._cornerRadius = null;
             _this._sides = 3;
             _this._startAngle = 0;
-            _this._content = _this._node.addComponent(cc.Graphics);
             return _this;
         }
         GGraph.prototype.drawRect = function (lineSize, lineColor, fillColor, corner) {
@@ -4115,16 +4138,35 @@ window.__extends = (this && this.__extends) || (function () {
             enumerable: true,
             configurable: true
         });
+        GGraph.prototype.onGraphicsLoaded = function () {
+            if (this._needUpdate) {
+                if (this._type != 0)
+                    this.updateGraph();
+            }
+        };
         GGraph.prototype.updateGraph = function () {
+            var w = this._width;
+            var h = this._height;
+            if (w == 0 || h == 0) {
+                if (this._hasContent) {
+                    this._hasContent = false;
+                    if (this._content)
+                        this._content.clear();
+                }
+                return;
+            }
+            this._needUpdate = true;
+            if (!this._content) {
+                this._content = this._node.addComponent(GGraphicsComponent);
+                this._content.handleOnLoad = this.onGraphicsLoaded.bind(this);
+            }
+            if (!this._content.model)
+                return;
             var ctx = this._content;
             if (this._hasContent) {
                 this._hasContent = false;
                 ctx.clear();
             }
-            var w = this._width;
-            var h = this._height;
-            if (w == 0 || h == 0)
-                return;
             var px = -this.pivotX * this._width;
             var py = this.pivotY * this._height;
             ctx.lineWidth = this._lineSize;
@@ -4148,7 +4190,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._polygonPoints = [];
                 var radius = Math.min(this._width, this._height) / 2;
                 this._polygonPoints.length = 0;
-                var angle = cc.misc.degreesToRadians(this._startAngle);
+                var angle = this._startAngle * cc.macro.RAD;
                 var deltaAngle = 2 * Math.PI / this._sides;
                 var dist;
                 for (var i = 0; i < this._sides; i++) {
@@ -4170,6 +4212,7 @@ window.__extends = (this && this.__extends) || (function () {
                 ctx.stroke();
             ctx.fill();
             this._hasContent = true;
+            this._needUpdate = false;
         };
         GGraph.prototype.drawPath = function (ctx, points, px, py) {
             var cnt = points.length;
@@ -4661,17 +4704,24 @@ window.__extends = (this && this.__extends) || (function () {
         }
         Object.defineProperty(GImage.prototype, "color", {
             get: function () {
-                return this._node.color;
+                return this._content.color;
             },
             set: function (value) {
-                if (this._node.color != value) {
-                    this._node.color = value;
+                if (this._content.color != value) {
+                    this._content.color = value;
                     this.updateGear(4);
                 }
             },
             enumerable: true,
             configurable: true
         });
+        GImage.prototype.setAlpha = function (val) {
+            var c = this.color;
+            if (c.a != val) {
+                c.a = val;
+                this.color = c;
+            }
+        };
         Object.defineProperty(GImage.prototype, "flip", {
             get: function () {
                 return this._content.flip;
@@ -4732,9 +4782,9 @@ window.__extends = (this && this.__extends) || (function () {
             contentItem = contentItem.getHighResolution();
             contentItem.load();
             if (contentItem.scale9Grid)
-                this._content.type = cc.Sprite.Type.SLICED;
+                this._content.type = cc.SpriteComponent.Type.SLICED;
             else if (contentItem.scaleByTile)
-                this._content.type = cc.Sprite.Type.TILED;
+                this._content.type = cc.SpriteComponent.Type.TILED;
             this._content.spriteFrame = contentItem.asset;
         };
         GImage.prototype.handleGrayedChanged = function () {
@@ -4816,6 +4866,17 @@ window.__extends = (this && this.__extends) || (function () {
             enumerable: true,
             configurable: true
         });
+        GLabel.prototype.setAlpha = function (val) {
+            var tf = this.getTextField();
+            if (tf != null) {
+                var c = tf.color;
+                if (c.a != val) {
+                    c.a = val;
+                    tf.color = c;
+                    this.updateGear(4);
+                }
+            }
+        };
         Object.defineProperty(GLabel.prototype, "titleColor", {
             get: function () {
                 var tf = this.getTextField();
@@ -4993,6 +5054,7 @@ window.__extends = (this && this.__extends) || (function () {
         }
         GList.prototype.dispose = function () {
             this._pool.clear();
+            this.off(fgui.Event.CLICK_ITEM);
             _super.prototype.dispose.call(this);
         };
         Object.defineProperty(GList.prototype, "layout", {
@@ -5707,7 +5769,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GList.prototype.getSnappingPosition = function (xValue, yValue, resultPoint) {
             if (this._virtual) {
-                resultPoint = resultPoint || new cc.Vec2();
+                resultPoint = resultPoint || new cc.Vec3();
                 var saved;
                 var index;
                 if (this._layout == fgui.ListLayoutType.SingleColumn || this._layout == fgui.ListLayoutType.FlowHorizontal) {
@@ -6313,7 +6375,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
             if (deltaSize != 0 || firstItemDeltaSize != 0)
                 this._scrollPane.changeContentSizeOnScrolling(0, deltaSize, 0, firstItemDeltaSize);
-            if (curIndex > 0 && this.numChildren > 0 && this._container.y <= 0 && this.getChildAt(0).y > -this._container.y)
+            if (curIndex > 0 && this.numChildren > 0 && this._container.position.y <= 0 && this.getChildAt(0).y > -this._container.position.y)
                 return true;
             else
                 return false;
@@ -6446,7 +6508,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
             if (deltaSize != 0 || firstItemDeltaSize != 0)
                 this._scrollPane.changeContentSizeOnScrolling(deltaSize, 0, firstItemDeltaSize, 0);
-            if (curIndex > 0 && this.numChildren > 0 && this._container.x <= 0 && this.getChildAt(0).x > -this._container.x)
+            if (curIndex > 0 && this.numChildren > 0 && this._container.position.x <= 0 && this.getChildAt(0).x > -this._container.position.x)
                 return true;
             else
                 return false;
@@ -6646,7 +6708,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._scrollPane != null)
                     this._scrollPane.adjustMaskContainer();
                 else
-                    this._container.setPosition(this._pivotCorrectX + this._alignOffset.x, this._pivotCorrectY - this._alignOffset.y);
+                    this._container.setPosition(this._pivotCorrectX + this._alignOffset.x, this._pivotCorrectY - this._alignOffset.y, 0);
             }
         };
         GList.prototype.updateBounds = function () {
@@ -7126,6 +7188,7 @@ window.__extends = (this && this.__extends) || (function () {
             _this._showErrorSign = true;
             _this._color = cc.Color.WHITE;
             _this._container = new cc.Node("Image");
+            _this._container.addComponent(cc.UITransformComponent);
             _this._container.setAnchorPoint(0, 1);
             _this._node.addChild(_this._container);
             _this._content = _this._container.addComponent(fgui.MovieClip);
@@ -7267,7 +7330,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._color != value) {
                     this._color = value;
                     this.updateGear(4);
-                    this._container.color = value;
+                    this._content.color = value;
                 }
             },
             enumerable: true,
@@ -7337,7 +7400,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.url = null;
                 this._content.spriteFrame = value;
-                this._content.type = cc.Sprite.Type.SIMPLE;
+                this._content.type = cc.SpriteComponent.Type.SIMPLE;
                 if (value != null) {
                     this._contentSourceWidth = value.getRect().width;
                     this._contentSourceHeight = value.getRect().height;
@@ -7377,11 +7440,11 @@ window.__extends = (this && this.__extends) || (function () {
                         this._content.spriteFrame = this._contentItem.asset;
                         if (this._content.fillMethod == 0) {
                             if (this._contentItem.scale9Grid)
-                                this._content.type = cc.Sprite.Type.SLICED;
+                                this._content.type = cc.SpriteComponent.Type.SLICED;
                             else if (this._contentItem.scaleByTile)
-                                this._content.type = cc.Sprite.Type.TILED;
+                                this._content.type = cc.SpriteComponent.Type.TILED;
                             else
-                                this._content.type = cc.Sprite.Type.SIMPLE;
+                                this._content.type = cc.SpriteComponent.Type.SIMPLE;
                         }
                         this.updateLayout();
                     }
@@ -7429,14 +7492,22 @@ window.__extends = (this && this.__extends) || (function () {
                 return;
             if (asset instanceof cc.SpriteFrame)
                 this.onExternalLoadSuccess(asset);
-            else if (asset instanceof cc.Texture2D)
-                this.onExternalLoadSuccess(new cc.SpriteFrame(asset));
+            else if (asset instanceof cc.Texture2D) {
+                var sp = new cc.SpriteFrame();
+                sp.texture = asset;
+                this.onExternalLoadSuccess(sp);
+            }
+            else if (asset instanceof cc.ImageAsset) {
+                var sp = new cc.SpriteFrame();
+                sp.texture = asset._texture;
+                this.onExternalLoadSuccess(sp);
+            }
         };
         GLoader.prototype.freeExternal = function (texture) {
         };
         GLoader.prototype.onExternalLoadSuccess = function (texture) {
             this._content.spriteFrame = texture;
-            this._content.type = cc.Sprite.Type.SIMPLE;
+            this._content.type = cc.SpriteComponent.Type.SIMPLE;
             this._contentSourceWidth = texture.getRect().width;
             this._contentSourceHeight = texture.getRect().height;
             if (this._autoSize)
@@ -7488,7 +7559,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this.setSize(this._contentWidth, this._contentHeight);
                 this._updatingLayout = false;
                 this._container.setContentSize(this._width, this._height);
-                this._container.setPosition(pivotCorrectX, pivotCorrectY);
+                this._container.setPosition(pivotCorrectX, pivotCorrectY, 0);
                 if (this._content2 != null) {
                     this._content2.setPosition(pivotCorrectX + this._width * this.pivotX, pivotCorrectY - this._height * this.pivotY);
                     this._content2.setScale(1, 1);
@@ -7546,7 +7617,7 @@ window.__extends = (this && this.__extends) || (function () {
             else
                 ny = this._height - this._contentHeight;
             ny = -ny;
-            this._container.setPosition(pivotCorrectX + nx, pivotCorrectY + ny);
+            this._container.setPosition(pivotCorrectX + nx, pivotCorrectY + ny, 1);
         };
         GLoader.prototype.clearContent = function () {
             this.clearErrorState();
@@ -7585,7 +7656,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (obj)
                     return obj;
             }
-            var pt = this._node.convertToNodeSpaceAR(globalPt);
+            var pt = this.uiCom.convertToNodeSpaceAR(globalPt);
             pt.x += this._node.anchorX * this._width;
             pt.y += this._node.anchorY * this._height;
             if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
@@ -7666,7 +7737,7 @@ window.__extends = (this && this.__extends) || (function () {
             _this._node.name = "GMovieClip";
             _this._touchDisabled = true;
             _this._content = _this._node.addComponent(fgui.MovieClip);
-            _this._content.sizeMode = cc.Sprite.SizeMode.CUSTOM;
+            _this._content.sizeMode = cc.SpriteComponent.SizeMode.CUSTOM;
             _this._content.trim = false;
             return _this;
         }
@@ -7675,8 +7746,8 @@ window.__extends = (this && this.__extends) || (function () {
                 return cc.Color.WHITE;
             },
             set: function (value) {
-                if (this._node.color != value) {
-                    this._node.color = value;
+                if (this._content.color != value) {
+                    this._content.color = value;
                     this.updateGear(4);
                 }
             },
@@ -8010,7 +8081,8 @@ window.__extends = (this && this.__extends) || (function () {
             return _this;
         }
         GTextField.prototype.createRenderer = function () {
-            this._label = this._node.addComponent(cc.Label);
+            this._label = this._node.addComponent(cc.LabelComponent);
+            this._label.string = "";
             this.autoSize = fgui.AutoSizeType.Both;
         };
         Object.defineProperty(GTextField.prototype, "text", {
@@ -8117,12 +8189,12 @@ window.__extends = (this && this.__extends) || (function () {
         });
         Object.defineProperty(GTextField.prototype, "letterSpacing", {
             get: function () {
-                return this._label["spacingX"];
+                return this._label.spacingX;
             },
             set: function (value) {
-                if (this._label["spacingX"] != value) {
+                if (this._label.spacingX != value) {
                     this.markSizeChanged();
-                    this._label["spacingX"] = value;
+                    this._label.spacingX = value;
                 }
             },
             enumerable: true,
@@ -8176,7 +8248,7 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 else {
                     if (!this._outline) {
-                        this._outline = this._node.addComponent(cc.LabelOutline);
+                        this._outline = this._node.addComponent(cc.LabelOutlineComponent);
                         this.updateStrokeColor();
                     }
                     else
@@ -8304,10 +8376,7 @@ window.__extends = (this && this.__extends) || (function () {
         });
         GTextField.prototype.ensureSizeCorrect = function () {
             if (this._sizeDirty) {
-                if (this._label["_forceUpdateRenderData"])
-                    this._label["_forceUpdateRenderData"]();
-                else
-                    this._label["_updateRenderData"](true);
+                this._label.updateRenderData();
                 this._sizeDirty = false;
             }
         };
@@ -8332,13 +8401,20 @@ window.__extends = (this && this.__extends) || (function () {
                     label.font = font;
             }
         };
+        GTextField.prototype.setAlpha = function (val) {
+            var c = this._label.color;
+            if (c.a != val) {
+                this.color = c;
+            }
+        };
         GTextField.prototype.assignFontColor = function (label, value) {
             var font = label.font;
-            if ((font instanceof cc.BitmapFont) && !(font._fntConfig.canTint))
+            if ((font instanceof cc.BitmapFont) && !(font.fntConfig.canTint))
                 value = cc.Color.WHITE;
             if (this._grayed)
                 value = fgui.ToolSet.toGrayed(value);
-            label.node.color = value;
+            if (label instanceof cc.LabelComponent)
+                label.color = value;
         };
         GTextField.prototype.updateFont = function () {
             this.assignFont(this._label, this._realFont);
@@ -8357,7 +8433,7 @@ window.__extends = (this && this.__extends) || (function () {
         GTextField.prototype.updateFontSize = function () {
             var font = this._label.font;
             if (font instanceof cc.BitmapFont) {
-                var fntConfig = font._fntConfig;
+                var fntConfig = font.fntConfig;
                 if (fntConfig.resizable)
                     this._label.fontSize = this._fontSize;
                 else
@@ -8371,17 +8447,17 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GTextField.prototype.updateOverflow = function () {
             if (this._autoSize == fgui.AutoSizeType.Both)
-                this._label.overflow = cc.Label.Overflow.NONE;
+                this._label.overflow = cc.LabelComponent.Overflow.NONE;
             else if (this._autoSize == fgui.AutoSizeType.Height) {
-                this._label.overflow = cc.Label.Overflow.RESIZE_HEIGHT;
+                this._label.overflow = cc.LabelComponent.Overflow.RESIZE_HEIGHT;
                 this._node.width = this._width;
             }
             else if (this._autoSize == fgui.AutoSizeType.Shrink) {
-                this._label.overflow = cc.Label.Overflow.SHRINK;
+                this._label.overflow = cc.LabelComponent.Overflow.SHRINK;
                 this._node.setContentSize(this._width, this._height);
             }
             else {
-                this._label.overflow = cc.Label.Overflow.CLAMP;
+                this._label.overflow = cc.LabelComponent.Overflow.CLAMP;
                 this._node.setContentSize(this._width, this._height);
             }
         };
@@ -8513,7 +8589,7 @@ window.__extends = (this && this.__extends) || (function () {
             return _this;
         }
         GRichTextField.prototype.createRenderer = function () {
-            this._richText = this._node.addComponent(cc.RichText);
+            this._richText = this._node.addComponent(cc.RichTextComponent);
             this._richText.handleTouchEvent = false;
             this.autoSize = fgui.AutoSizeType.None;
             this._richText.imageAtlas = GRichTextField.imageAtlas;
@@ -8530,7 +8606,7 @@ window.__extends = (this && this.__extends) || (function () {
         });
         Object.defineProperty(GRichTextField.prototype, "verticalAlign", {
             get: function () {
-                return cc.Label.VerticalAlign.TOP;
+                return cc.VerticalTextAlignment.TOP;
             },
             set: function (value) {
             },
@@ -8635,8 +8711,8 @@ window.__extends = (this && this.__extends) || (function () {
             var fontSize = this._fontSize;
             var font = this._richText.font;
             if (font instanceof cc.BitmapFont) {
-                if (!font._fntConfig.resizable)
-                    fontSize = font._fntConfig.fontSize;
+                if (!font.fntConfig.resizable)
+                    fontSize = font.fntConfig.fontSize;
             }
             this._richText.fontSize = fontSize;
             this._richText.lineHeight = fontSize + this._leading;
@@ -8665,6 +8741,8 @@ window.__extends = (this && this.__extends) || (function () {
         function GRoot() {
             var _this = _super.call(this) || this;
             _this._node.name = "GRoot";
+            _this._node.addComponent(cc.CanvasComponent);
+            _this._node.setAnchorPoint(0.5, 0.5);
             _this.opaque = false;
             _this._volumeScale = 1;
             _this._popupStack = new Array();
@@ -8676,13 +8754,6 @@ window.__extends = (this && this.__extends) || (function () {
             _this._thisOnResized = _this.onWinResize.bind(_this);
             _this._inputProcessor = _this.node.addComponent(fgui.InputProcessor);
             _this._inputProcessor._captureCallback = _this.onTouchBegin_1;
-            if (CC_EDITOR) {
-                cc.engine.on('design-resolution-changed', _this._thisOnResized);
-            }
-            else {
-                cc.view.on('canvas-resize', _this._thisOnResized);
-            }
-            _this.onWinResize();
             return _this;
         }
         Object.defineProperty(GRoot, "inst", {
@@ -8696,16 +8767,16 @@ window.__extends = (this && this.__extends) || (function () {
         });
         GRoot.create = function () {
             GRoot._inst = new GRoot();
-            GRoot._inst.node.parent = cc.director.getScene();
+            var sc = cc.director.getScene();
+            GRoot._inst.node.setParent(sc);
             return GRoot._inst;
         };
+        GRoot.prototype.onStart = function () {
+            cc.view.on('canvas-resize', this._thisOnResized);
+            this.onWinResize();
+        };
         GRoot.prototype.onDestroy = function () {
-            if (CC_EDITOR) {
-                cc.engine.off('design-resolution-changed', this._thisOnResized);
-            }
-            else {
-                cc.view.off('canvas-resize', this._thisOnResized);
-            }
+            cc.view.off('canvas-resize', this._thisOnResized);
             if (this == GRoot._inst)
                 GRoot._inst = null;
         };
@@ -8828,7 +8899,7 @@ window.__extends = (this && this.__extends) || (function () {
             configurable: true
         });
         GRoot.prototype.getPopupPosition = function (popup, target, downward, result) {
-            var pos = result ? result : new cc.Vec2();
+            var pos = result ? result : new cc.Vec3();
             var sizeW = 0, sizeH = 0;
             if (target) {
                 pos = target.localToGlobal();
@@ -8966,7 +9037,18 @@ window.__extends = (this && this.__extends) || (function () {
         GRoot.prototype.playOneShotSound = function (clip, volumeScale) {
             if (volumeScale === undefined)
                 volumeScale = 1;
-            cc.audioEngine.play(clip, false, this._volumeScale * volumeScale);
+            if (!this.audioEngine) {
+                this.audioEngine = this.node.addComponent(cc.AudioSourceComponent);
+            }
+            if (!clip || clip.isValid) {
+                return;
+            }
+            if (this.audioEngine.isValid) {
+                this.audioEngine.clip = clip;
+                this.audioEngine.volume = this._volumeScale * volumeScale;
+                this.audioEngine.loop = false;
+                this.audioEngine.play();
+            }
         };
         GRoot.prototype.adjustModalLayer = function () {
             var cnt = this.numChildren;
@@ -9016,11 +9098,8 @@ window.__extends = (this && this.__extends) || (function () {
             var size = cc.view.getCanvasSize();
             size.width /= cc.view.getScaleX();
             size.height /= cc.view.getScaleY();
-            var pos = cc.view.getViewportRect().origin;
-            pos.x = pos.x / cc.view.getScaleX();
-            pos.y = pos.y / cc.view.getScaleY();
             this.setSize(size.width, size.height);
-            this._node.setPosition(-pos.x, this._height - pos.y);
+            this._node.setPosition(size.width / 2, size.height / 2, 0);
             this.updateContentScaleLevel();
         };
         GRoot.prototype.handlePositionChanged = function () {
@@ -9048,7 +9127,7 @@ window.__extends = (this && this.__extends) || (function () {
         function GScrollBar() {
             var _this = _super.call(this) || this;
             _this._node.name = "GScrollBar";
-            _this._dragOffset = new cc.Vec2();
+            _this._dragOffset = new cc.Vec3();
             _this._scrollPerc = 0;
             return _this;
         }
@@ -9118,7 +9197,7 @@ window.__extends = (this && this.__extends) || (function () {
             this.on(fgui.Event.TOUCH_BEGIN, this.onBarTouchBegin, this);
         };
         GScrollBar.prototype.onGripTouchDown = function (evt) {
-            evt.stopPropagation();
+            evt.propagationStopped = true;
             evt.captureTouch();
             this._gripDragging = true;
             this._target.updateScrollBarVisible();
@@ -9146,14 +9225,14 @@ window.__extends = (this && this.__extends) || (function () {
             this._target.updateScrollBarVisible();
         };
         GScrollBar.prototype.onClickArrow1 = function (evt) {
-            evt.stopPropagation();
+            evt.propagationStopped = true;
             if (this._vertical)
                 this._target.scrollUp();
             else
                 this._target.scrollLeft();
         };
         GScrollBar.prototype.onClickArrow2 = function (evt) {
-            evt.stopPropagation();
+            evt.propagationStopped = true;
             if (this._vertical)
                 this._target.scrollDown();
             else
@@ -9174,7 +9253,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._target.scrollRight(4);
             }
         };
-        GScrollBar.sScrollbarHelperPoint = new cc.Vec2();
+        GScrollBar.sScrollbarHelperPoint = new cc.Vec3();
         return GScrollBar;
     }(fgui.GComponent));
     fgui.GScrollBar = GScrollBar;
@@ -9201,7 +9280,7 @@ window.__extends = (this && this.__extends) || (function () {
             _this._titleType = fgui.ProgressTitleType.Percent;
             _this._value = 50;
             _this._max = 100;
-            _this._clickPos = new cc.Vec2();
+            _this._clickPos = new cc.Vec3();
             return _this;
         }
         Object.defineProperty(GSlider.prototype, "titleType", {
@@ -9372,7 +9451,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GSlider.prototype.onGripTouchBegin = function (evt) {
             this.canDrag = true;
-            evt.stopPropagation();
+            evt.propagationStopped = true;
             evt.captureTouch();
             this._clickPos = this.globalToLocal(evt.pos.x, evt.pos.y);
             this._clickPercent = fgui.ToolSet.clamp01((this._value - this._min) / (this._max - this._min));
@@ -9411,7 +9490,7 @@ window.__extends = (this && this.__extends) || (function () {
                 percent += delta;
             this.updateWithPercent(percent, true);
         };
-        GSlider.sSilderHelperPoint = new cc.Vec2();
+        GSlider.sSilderHelperPoint = new cc.Vec3();
         return GSlider;
     }(fgui.GComponent));
     fgui.GSlider = GSlider;
@@ -9429,7 +9508,7 @@ window.__extends = (this && this.__extends) || (function () {
         GTextInput.prototype.createRenderer = function () {
             this._editBox = this._node.addComponent(MyEditBox);
             this._editBox.maxLength = -1;
-            this._editBox["_updateTextLabel"]();
+            this._editBox.updateTextLabel();
             this._node.on('text-changed', this.onTextChanged, this);
             this.on(fgui.Event.TOUCH_END, this.onTouchEnd1, this);
             this.autoSize = fgui.AutoSizeType.None;
@@ -9463,12 +9542,12 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (val) {
                 this._promptText = val;
                 var newCreate = !this._editBox.placeholderLabel;
-                this._editBox["_updatePlaceholderLabel"]();
+                this._editBox.updatePlaceholderLabel();
                 if (newCreate)
                     this.assignFont(this._editBox.placeholderLabel, this._realFont);
                 this._editBox.placeholderLabel.string = fgui.UBBParser.inst.parse(this._promptText, true);
                 if (fgui.UBBParser.inst.lastColor) {
-                    var c = this._editBox.placeholderLabel.node.color;
+                    var c = this._editBox.placeholderLabel.color;
                     if (!c)
                         c = new cc.Color();
                     c.fromHEX(fgui.UBBParser.inst.lastColor);
@@ -9495,11 +9574,11 @@ window.__extends = (this && this.__extends) || (function () {
         });
         Object.defineProperty(GTextInput.prototype, "password", {
             get: function () {
-                return this._editBox.inputFlag == cc.EditBox.InputFlag.PASSWORD;
+                return this._editBox.inputFlag == cc.EditBoxComponent.InputFlag.PASSWORD;
                 ;
             },
             set: function (val) {
-                this._editBox.inputFlag = val ? cc.EditBox.InputFlag.PASSWORD : cc.EditBox.InputFlag.DEFAULT;
+                this._editBox.inputFlag = val ? cc.EditBoxComponent.InputFlag.PASSWORD : cc.EditBoxComponent.InputFlag.DEFAULT;
             },
             enumerable: true,
             configurable: true
@@ -9541,10 +9620,10 @@ window.__extends = (this && this.__extends) || (function () {
         });
         Object.defineProperty(GTextInput.prototype, "singleLine", {
             get: function () {
-                return this._editBox.inputMode != cc.EditBox.InputMode.ANY;
+                return this._editBox.inputMode != cc.EditBoxComponent.InputMode.ANY;
             },
             set: function (value) {
-                this._editBox.inputMode = value ? cc.EditBox.InputMode.SINGLE_LINE : cc.EditBox.InputMode.ANY;
+                this._editBox.inputMode = value ? cc.EditBoxComponent.InputMode.SINGLE_LINE : cc.EditBoxComponent.InputMode.ANY;
             },
             enumerable: true,
             configurable: true
@@ -9620,21 +9699,27 @@ window.__extends = (this && this.__extends) || (function () {
         };
         MyEditBox.prototype._syncSize = function () {
             var size = this.node.getContentSize();
-            var impl = this["_impl"];
+            var impl = this._impl;
             impl.setSize(size.width, size.height);
             if (this.textLabel)
                 this.textLabel.node.setContentSize(size.width, size.height);
             if (this.placeholderLabel)
                 this.placeholderLabel.node.setContentSize(size.width, size.height);
         };
+        MyEditBox.prototype.updateTextLabel = function () {
+            _super.prototype._updateTextLabel.call(this);
+        };
+        MyEditBox.prototype.updatePlaceholderLabel = function () {
+            _super.prototype._updatePlaceholderLabel.call(this);
+        };
         MyEditBox.prototype.openKeyboard = function (touch) {
-            var impl = this["_impl"];
+            var impl = this._impl;
             if (impl) {
                 impl.beginEditing();
             }
         };
         return MyEditBox;
-    }(cc.EditBox));
+    }(cc.EditBoxComponent));
 })(fgui || (fgui = {}));
 
 (function (fgui) {
@@ -9675,6 +9760,11 @@ window.__extends = (this && this.__extends) || (function () {
             enumerable: true,
             configurable: true
         });
+        GTree.prototype.dispose = function () {
+            _super.prototype.dispose.call(this);
+            this.treeNodeRender = null;
+            this.treeNodeWillExpand = null;
+        };
         GTree.prototype.getSelectedNode = function () {
             if (this.selectedIndex != -1)
                 return this.getChildAt(this.selectedIndex)._treeNode;
@@ -9869,7 +9959,7 @@ window.__extends = (this && this.__extends) || (function () {
             for (var i = 0; i < cnt; i++) {
                 var node = folderNode.getChildAt(i);
                 if (node._cell)
-                    this.removeChild(node._cell);
+                    this.removeChildToPool(node._cell);
                 if (node.isFolder && node.expanded)
                     this.hideFolderNode(node);
             }
@@ -9877,7 +9967,7 @@ window.__extends = (this && this.__extends) || (function () {
         GTree.prototype.removeNode = function (node) {
             if (node._cell != null) {
                 if (node._cell.parent != null)
-                    this.removeChild(node._cell);
+                    this.removeChildToPool(node._cell);
                 this.returnToPool(node._cell);
                 node._cell._treeNode = null;
                 node._cell = null;
@@ -11155,6 +11245,7 @@ window.__extends = (this && this.__extends) || (function () {
         ScrollPane.prototype.setup = function (buffer) {
             this._owner = (this.node["$gobj"]);
             this._maskContainer = new cc.Node("ScrollPane");
+            this._maskTran = this._maskContainer.addComponent(cc.UITransformComponent);
             this._maskContainer.setAnchorPoint(0, 1);
             this._maskContainer.parent = this._owner.node;
             this._container = this._owner._container;
@@ -11167,19 +11258,19 @@ window.__extends = (this && this.__extends) || (function () {
             this._tweening = 0;
             this._footerLockedSize = 0;
             this._headerLockedSize = 0;
-            this._viewSize = new cc.Vec2();
-            this._contentSize = new cc.Vec2();
-            this._pageSize = new cc.Vec2(1, 1);
-            this._overlapSize = new cc.Vec2();
-            this._tweenTime = new cc.Vec2();
-            this._tweenStart = new cc.Vec2();
-            this._tweenDuration = new cc.Vec2();
-            this._tweenChange = new cc.Vec2();
-            this._velocity = new cc.Vec2();
-            this._containerPos = new cc.Vec2();
-            this._beginTouchPos = new cc.Vec2();
-            this._lastTouchPos = new cc.Vec2();
-            this._lastTouchGlobalPos = new cc.Vec2();
+            this._viewSize = new cc.Vec3();
+            this._contentSize = new cc.Vec3();
+            this._pageSize = new cc.Vec3(1, 1);
+            this._overlapSize = new cc.Vec3();
+            this._tweenTime = new cc.Vec3();
+            this._tweenStart = new cc.Vec3();
+            this._tweenDuration = new cc.Vec3();
+            this._tweenChange = new cc.Vec3();
+            this._velocity = new cc.Vec3();
+            this._containerPos = new cc.Vec3();
+            this._beginTouchPos = new cc.Vec3();
+            this._lastTouchPos = new cc.Vec3();
+            this._lastTouchGlobalPos = new cc.Vec3();
             this._scrollStep = fgui.UIConfig.defaultScrollStep;
             this._mouseWheelStep = this._scrollStep * 2;
             this._decelerationRate = fgui.UIConfig.defaultScrollDecelerationRate;
@@ -11218,7 +11309,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this._bouncebackEffect = fgui.UIConfig.defaultScrollBounceEffect;
             this._inertiaDisabled = (flags & 256) != 0;
             if ((flags & 512) == 0)
-                this._maskContainer.addComponent(cc.Mask);
+                this._maskContainer.addComponent(cc.MaskComponent);
             this._floating = (flags & 1024) != 0;
             if (scrollBarDisplay == fgui.ScrollBarDisplayType.Default)
                 scrollBarDisplay = fgui.UIConfig.defaultScrollBarDisplay;
@@ -11303,7 +11394,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (target)
                     return target;
             }
-            var pt = this._maskContainer.convertToNodeSpaceAR(globalPt);
+            var pt = this._maskTran.convertToNodeSpaceAR(globalPt);
             pt.x += this._maskContainer.anchorX * this._viewSize.x;
             pt.y += this._maskContainer.anchorY * this._viewSize.y;
             if (pt.x >= 0 && pt.y >= 0 && pt.x < this._viewSize.x && pt.y < this._viewSize.y)
@@ -11594,14 +11685,14 @@ window.__extends = (this && this.__extends) || (function () {
         });
         Object.defineProperty(ScrollPane.prototype, "scrollingPosX", {
             get: function () {
-                return fgui.ToolSet.clamp(-this._container.x, 0, this._overlapSize.x);
+                return fgui.ToolSet.clamp(-this._container.position.x, 0, this._overlapSize.x);
             },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "scrollingPosY", {
             get: function () {
-                return fgui.ToolSet.clamp(-(-this._container.y), 0, this._overlapSize.y);
+                return fgui.ToolSet.clamp(-(-this._container.position.y), 0, this._overlapSize.y);
             },
             enumerable: true,
             configurable: true
@@ -11704,12 +11795,12 @@ window.__extends = (this && this.__extends) || (function () {
         };
         ScrollPane.prototype.isChildInView = function (obj) {
             if (this._overlapSize.y > 0) {
-                var dist = obj.y + (-this._container.y);
+                var dist = obj.y + (-this._container.position.y);
                 if (dist < -obj.height || dist > this._viewSize.y)
                     return false;
             }
             if (this._overlapSize.x > 0) {
-                dist = obj.x + this._container.x;
+                dist = obj.x + this._container.position.x;
                 if (dist < -obj.width || dist > this._viewSize.x)
                     return false;
             }
@@ -11724,14 +11815,14 @@ window.__extends = (this && this.__extends) || (function () {
         ScrollPane.prototype.lockHeader = function (size) {
             if (this._headerLockedSize == size)
                 return;
-            var cx = this._container.x;
-            var cy = -this._container.y;
+            var cx = this._container.position.x;
+            var cy = -this._container.position.y;
             var cr = this._refreshBarAxis == "x" ? cx : cy;
             this._headerLockedSize = size;
             if (!this._refreshEventDispatching && cr >= 0) {
                 this._tweenStart.x = cx;
                 this._tweenStart.y = cy;
-                this._tweenChange.set(cc.Vec2.ZERO);
+                this._tweenChange.set(cc.Vec3.ZERO);
                 this._tweenChange[this._refreshBarAxis] = this._headerLockedSize - this._tweenStart[this._refreshBarAxis];
                 this._tweenDuration.x = this._tweenDuration.y = ScrollPane.TWEEN_TIME_DEFAULT;
                 this.startTween(2);
@@ -11740,14 +11831,14 @@ window.__extends = (this && this.__extends) || (function () {
         ScrollPane.prototype.lockFooter = function (size) {
             if (this._footerLockedSize == size)
                 return;
-            var cx = this._container.x;
-            var cy = -this._container.y;
+            var cx = this._container.position.x;
+            var cy = -this._container.position.y;
             var cr = this._refreshBarAxis == "x" ? cx : cy;
             this._footerLockedSize = size;
             if (!this._refreshEventDispatching && cr <= -this._overlapSize[this._refreshBarAxis]) {
                 this._tweenStart.x = cx;
                 this._tweenStart.y = cy;
-                this._tweenChange.set(cc.Vec2.ZERO);
+                this._tweenChange.set(cc.Vec3.ZERO);
                 var max = this._overlapSize[this._refreshBarAxis];
                 if (max == 0)
                     max = Math.max(this._contentSize[this._refreshBarAxis] + this._footerLockedSize - this._viewSize[this._refreshBarAxis], 0);
@@ -11791,9 +11882,9 @@ window.__extends = (this && this.__extends) || (function () {
                 mx = Math.floor(this._owner.margin.left + this._vtScrollBar.width);
             this._maskContainer.setAnchorPoint(this._owner._alignOffset.x / this._viewSize.x, 1 - this._owner._alignOffset.y / this._viewSize.y);
             if (this._owner._customMask)
-                this._maskContainer.setPosition(mx + this._owner._alignOffset.x, -this._owner._alignOffset.y);
+                this._maskContainer.setPosition(mx + this._owner._alignOffset.x, -this._owner._alignOffset.y, 0);
             else
-                this._maskContainer.setPosition(this._owner._pivotCorrectX + mx + this._owner._alignOffset.x, this._owner._pivotCorrectY - this._owner._alignOffset.y);
+                this._maskContainer.setPosition(this._owner._pivotCorrectX + mx + this._owner._alignOffset.x, this._owner._pivotCorrectY - this._owner._alignOffset.y, 0);
         };
         ScrollPane.prototype.setSize = function (aWidth, aHeight) {
             if (this._hzScrollBar) {
@@ -11859,36 +11950,50 @@ window.__extends = (this && this.__extends) || (function () {
             }
             else if (this._tweening == 2) {
                 if (deltaPosX != 0) {
-                    this._container.x -= deltaPosX;
+                    var p = this._container.position;
+                    var x = p.x;
+                    x -= deltaPosX;
+                    this._container.setPosition(x, p.y, p.z);
                     this._tweenStart.x -= deltaPosX;
-                    this._xPos = -this._container.x;
+                    this._xPos = -x;
                 }
                 if (deltaPosY != 0) {
-                    this._container.y += deltaPosY;
+                    var p = this._container.position;
+                    var y = p.y;
+                    y -= deltaPosY;
+                    this._container.setPosition(p.x, y, p.z);
                     this._tweenStart.y -= deltaPosY;
-                    this._yPos = -(-this._container.y);
+                    this._yPos = -(-y);
                 }
             }
             else if (this._dragged) {
                 if (deltaPosX != 0) {
-                    this._container.x -= deltaPosX;
+                    var p = this._container.position;
+                    var x = p.x;
+                    x -= deltaPosX;
+                    this._container.setPosition(x, p.y, p.z);
                     this._containerPos.x -= deltaPosX;
-                    this._xPos = -this._container.x;
+                    this._xPos = -x;
                 }
                 if (deltaPosY != 0) {
-                    this._container.y += deltaPosY;
+                    var p = this._container.position;
+                    var y = p.y;
+                    y -= deltaPosY;
+                    this._container.setPosition(p.x, y, p.z);
                     this._containerPos.y -= deltaPosY;
-                    this._yPos = -(-this._container.y);
+                    this._yPos = -(-y);
                 }
             }
             else {
                 if (deltaWidth != 0 && isRightmost) {
                     this._xPos = this._overlapSize.x;
-                    this._container.x = -this._xPos;
+                    var p = this._container.position;
+                    this._container.setPosition(-this._xPos, p.y, p.z);
                 }
                 if (deltaHeight != 0 && isBottom) {
                     this._yPos = this._overlapSize.y;
-                    this._container.y = this._yPos;
+                    var p = this._container.position;
+                    this._container.setPosition(p.z, this._yPos, p.z);
                 }
             }
             if (this._pageMode)
@@ -11943,9 +12048,9 @@ window.__extends = (this && this.__extends) || (function () {
             else
                 max += this._footerLockedSize;
             if (this._refreshBarAxis == "x")
-                this._container.setPosition(fgui.ToolSet.clamp(this._container.x, -max, this._headerLockedSize), -fgui.ToolSet.clamp((-this._container.y), -this._overlapSize.y, 0));
+                this._container.setPosition(fgui.ToolSet.clamp(this._container.position.x, -max, this._headerLockedSize), -fgui.ToolSet.clamp((-this._container.position.y), -this._overlapSize.y, 0), 0);
             else
-                this._container.setPosition(fgui.ToolSet.clamp(this._container.x, -this._overlapSize.x, 0), -fgui.ToolSet.clamp((-this._container.y), -max, this._headerLockedSize));
+                this._container.setPosition(fgui.ToolSet.clamp(this._container.position.x, -this._overlapSize.x, 0), -fgui.ToolSet.clamp((-this._container.position.y), -max, this._headerLockedSize), 0);
             if (this._header != null) {
                 if (this._refreshBarAxis == "x")
                     this._header.height = this._viewSize.y;
@@ -11995,24 +12100,25 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._aniFlag == 1 && !this._dragged) {
                 var posX;
                 var posY;
+                var _pos = this._container.position;
                 if (this._overlapSize.x > 0)
                     posX = -Math.floor(this._xPos);
                 else {
-                    if (this._container.x != 0)
-                        this._container.x = 0;
+                    if (_pos.x != 0)
+                        this._container.setPosition(0, _pos.y, _pos.z);
                     posX = 0;
                 }
                 if (this._overlapSize.y > 0)
                     posY = -Math.floor(this._yPos);
                 else {
-                    if (this._container.y != 0)
-                        this._container.y = 0;
+                    if (_pos.y != 0)
+                        this._container.setPosition(_pos.z, 0, _pos.z);
                     posY = 0;
                 }
-                if (posX != this._container.x || posY != (-this._container.y)) {
+                if (posX != this._container.position.x || posY != (-this._container.position.y)) {
                     this._tweenDuration.x = this._tweenDuration.y = ScrollPane.TWEEN_TIME_GO;
-                    this._tweenStart.x = this._container.x;
-                    this._tweenStart.y = (-this._container.y);
+                    this._tweenStart.x = this._container.position.x;
+                    this._tweenStart.y = (-this._container.position.y);
                     this._tweenChange.x = posX - this._tweenStart.x;
                     this._tweenChange.y = posY - this._tweenStart.y;
                     this.startTween(1);
@@ -12023,7 +12129,7 @@ window.__extends = (this && this.__extends) || (function () {
             else {
                 if (this._tweening != 0)
                     this.killTween();
-                this._container.setPosition(Math.floor(-this._xPos), -Math.floor(-this._yPos));
+                this._container.setPosition(Math.floor(-this._xPos), -Math.floor(-this._yPos), 0);
                 this.loopCheckingCurrent();
             }
             if (this._pageMode)
@@ -12041,13 +12147,13 @@ window.__extends = (this && this.__extends) || (function () {
             else
                 this._dragged = false;
             var pt = this._owner.globalToLocal(evt.pos.x, evt.pos.y, ScrollPane.sHelperPoint);
-            this._containerPos.x = this._container.x;
-            this._containerPos.y = -this._container.y;
+            this._containerPos.x = this._container.position.x;
+            this._containerPos.y = -this._container.position.y;
             this._beginTouchPos.set(pt);
             this._lastTouchPos.set(pt);
             this._lastTouchGlobalPos.set(evt.pos);
             this._isHoldAreaDone = false;
-            this._velocity.set(cc.Vec2.ZERO);
+            this._velocity.set(cc.Vec3.ZERO);
             ;
             this._velocityScale = 1;
             this._lastMoveTime = fgui.ToolSet.getTime();
@@ -12108,44 +12214,50 @@ window.__extends = (this && this.__extends) || (function () {
             var newPosX = Math.floor(this._containerPos.x + pt.x - this._beginTouchPos.x);
             var newPosY = Math.floor(this._containerPos.y + pt.y - this._beginTouchPos.y);
             if (sv) {
+                var _a = this._container.position, x = _a.x, y = _a.y, z = _a.z;
                 if (newPosY > 0) {
                     if (!this._bouncebackEffect)
-                        this._container.y = 0;
-                    else if (this._header != null && this._header.maxHeight != 0)
-                        this._container.y = -Math.floor(Math.min(newPosY * 0.5, this._header.maxHeight));
-                    else
-                        this._container.y = -Math.floor(Math.min(newPosY * 0.5, this._viewSize.y * ScrollPane.PULL_RATIO));
+                        y = 0;
+                    else if (this._header != null && this._header.maxHeight != 0) {
+                        y = -Math.floor(Math.min(newPosY * 0.5, this._header.maxHeight));
+                    }
+                    else {
+                        y = -Math.floor(Math.min(newPosY * 0.5, this._viewSize.y * ScrollPane.PULL_RATIO));
+                    }
                 }
                 else if (newPosY < -this._overlapSize.y) {
                     if (!this._bouncebackEffect)
-                        this._container.y = this._overlapSize.y;
+                        y = this._overlapSize.y;
                     else if (this._footer != null && this._footer.maxHeight > 0)
-                        this._container.y = -Math.floor(Math.max((newPosY + this._overlapSize.y) * 0.5, -this._footer.maxHeight) - this._overlapSize.y);
+                        y = -Math.floor(Math.max((newPosY + this._overlapSize.y) * 0.5, -this._footer.maxHeight) - this._overlapSize.y);
                     else
-                        this._container.y = -Math.floor(Math.max((newPosY + this._overlapSize.y) * 0.5, -this._viewSize.y * ScrollPane.PULL_RATIO) - this._overlapSize.y);
+                        y = -Math.floor(Math.max((newPosY + this._overlapSize.y) * 0.5, -this._viewSize.y * ScrollPane.PULL_RATIO) - this._overlapSize.y);
                 }
                 else
-                    this._container.y = -newPosY;
+                    y = -newPosY;
+                this._container.setPosition(x, y, z);
             }
             if (sh) {
+                var _b = this._container.position, x = _b.x, y = _b.y, z = _b.z;
                 if (newPosX > 0) {
                     if (!this._bouncebackEffect)
-                        this._container.x = 0;
+                        x = 0;
                     else if (this._header != null && this._header.maxWidth != 0)
-                        this._container.x = Math.floor(Math.min(newPosX * 0.5, this._header.maxWidth));
+                        x = Math.floor(Math.min(newPosX * 0.5, this._header.maxWidth));
                     else
-                        this._container.x = Math.floor(Math.min(newPosX * 0.5, this._viewSize.x * ScrollPane.PULL_RATIO));
+                        x = Math.floor(Math.min(newPosX * 0.5, this._viewSize.x * ScrollPane.PULL_RATIO));
                 }
                 else if (newPosX < 0 - this._overlapSize.x) {
                     if (!this._bouncebackEffect)
-                        this._container.x = -this._overlapSize.x;
+                        x = -this._overlapSize.x;
                     else if (this._footer != null && this._footer.maxWidth > 0)
-                        this._container.x = Math.floor(Math.max((newPosX + this._overlapSize.x) * 0.5, -this._footer.maxWidth) - this._overlapSize.x);
+                        x = Math.floor(Math.max((newPosX + this._overlapSize.x) * 0.5, -this._footer.maxWidth) - this._overlapSize.x);
                     else
-                        this._container.x = Math.floor(Math.max((newPosX + this._overlapSize.x) * 0.5, -this._viewSize.x * ScrollPane.PULL_RATIO) - this._overlapSize.x);
+                        x = Math.floor(Math.max((newPosX + this._overlapSize.x) * 0.5, -this._viewSize.x * ScrollPane.PULL_RATIO) - this._overlapSize.x);
                 }
                 else
-                    this._container.x = newPosX;
+                    x = newPosX;
+                this._container.setPosition(x, y, z);
             }
             var now = fgui.ToolSet.getTime();
             var deltaTime = Math.max(now - this._lastMoveTime, 1 / 60);
@@ -12177,15 +12289,15 @@ window.__extends = (this && this.__extends) || (function () {
             this._lastTouchGlobalPos.y = evt.pos.y;
             this._lastMoveTime = now;
             if (this._overlapSize.x > 0)
-                this._xPos = fgui.ToolSet.clamp(-this._container.x, 0, this._overlapSize.x);
+                this._xPos = fgui.ToolSet.clamp(-this._container.position.x, 0, this._overlapSize.x);
             if (this._overlapSize.y > 0)
-                this._yPos = fgui.ToolSet.clamp(-(-this._container.y), 0, this._overlapSize.y);
+                this._yPos = fgui.ToolSet.clamp(-(-this._container.position.y), 0, this._overlapSize.y);
             if (this._loop != 0) {
-                newPosX = this._container.x;
-                newPosY = (-this._container.y);
+                newPosX = this._container.position.x;
+                newPosY = (-this._container.position.y);
                 if (this.loopCheckingCurrent()) {
-                    this._containerPos.x += this._container.x - newPosX;
-                    this._containerPos.y += (-this._container.y) - newPosY;
+                    this._containerPos.x += this._container.position.x - newPosX;
+                    this._containerPos.y += (-this._container.position.y) - newPosY;
                 }
             }
             ScrollPane.draggingPane = this;
@@ -12206,23 +12318,23 @@ window.__extends = (this && this.__extends) || (function () {
                 return;
             }
             this._dragged = false;
-            this._tweenStart.x = this._container.x;
-            this._tweenStart.y = -this._container.y;
+            this._tweenStart.x = this._container.position.x;
+            this._tweenStart.y = -this._container.position.y;
             ScrollPane.sEndPos.set(this._tweenStart);
             var flag = false;
-            if (this._container.x > 0) {
+            if (this._container.position.x > 0) {
                 ScrollPane.sEndPos.x = 0;
                 flag = true;
             }
-            else if (this._container.x < -this._overlapSize.x) {
+            else if (this._container.position.x < -this._overlapSize.x) {
                 ScrollPane.sEndPos.x = -this._overlapSize.x;
                 flag = true;
             }
-            if ((-this._container.y) > 0) {
+            if ((-this._container.position.y) > 0) {
                 ScrollPane.sEndPos.y = 0;
                 flag = true;
             }
-            else if ((-this._container.y) < -this._overlapSize.y) {
+            else if ((-this._container.position.y) < -this._overlapSize.y) {
                 ScrollPane.sEndPos.y = -this._overlapSize.y;
                 flag = true;
             }
@@ -12314,9 +12426,9 @@ window.__extends = (this && this.__extends) || (function () {
         };
         ScrollPane.prototype.updateScrollBarPos = function () {
             if (this._vtScrollBar != null)
-                this._vtScrollBar.setScrollPerc(this._overlapSize.y == 0 ? 0 : fgui.ToolSet.clamp(this._container.y, 0, this._overlapSize.y) / this._overlapSize.y);
+                this._vtScrollBar.setScrollPerc(this._overlapSize.y == 0 ? 0 : fgui.ToolSet.clamp(this._container.position.y, 0, this._overlapSize.y) / this._overlapSize.y);
             if (this._hzScrollBar != null)
-                this._hzScrollBar.setScrollPerc(this._overlapSize.x == 0 ? 0 : fgui.ToolSet.clamp(-this._container.x, 0, this._overlapSize.x) / this._overlapSize.x);
+                this._hzScrollBar.setScrollPerc(this._overlapSize.x == 0 ? 0 : fgui.ToolSet.clamp(-this._container.position.x, 0, this._overlapSize.x) / this._overlapSize.x);
             this.checkRefreshBar();
         };
         ScrollPane.prototype.updateScrollBarVisible = function () {
@@ -12376,7 +12488,7 @@ window.__extends = (this && this.__extends) || (function () {
                 }
             }
             if (changed) {
-                this._container.setPosition(Math.floor(-this._xPos), -Math.floor(-this._yPos));
+                this._container.setPosition(Math.floor(-this._xPos), -Math.floor(-this._yPos), 0);
             }
             return changed;
         };
@@ -12431,10 +12543,12 @@ window.__extends = (this && this.__extends) || (function () {
                 }
             }
             if (changed) {
+                var _a = this._container.position, x = _a.x, y = _a.y, z = _a.z;
                 if (axis == "x")
-                    this._container.x = -Math.floor(pos);
+                    x = -Math.floor(pos);
                 else
-                    this._container.y = Math.floor(pos);
+                    y = Math.floor(pos);
+                this._container.setPosition(x, y, z);
             }
             return value;
         };
@@ -12459,7 +12573,7 @@ window.__extends = (this && this.__extends) || (function () {
                 page = Math.ceil(this._contentSize[axis] / this._pageSize[axis]) - 1;
             else {
                 page = Math.floor(-pos / this._pageSize[axis]);
-                var change = inertialScrolling ? (pos - this._containerPos[axis]) : (pos - (axis == "x" ? this._container.x : (-this._container.y)));
+                var change = inertialScrolling ? (pos - this._containerPos[axis]) : (pos - (axis == "x" ? this._container.position.x : (-this._container.position.y)));
                 var testPageSize = Math.min(this._pageSize[axis], this._contentSize[axis] - (page + 1) * this._pageSize[axis]);
                 var delta = -pos - page * this._pageSize[axis];
                 if (Math.abs(change) > this._pageSize[axis]) {
@@ -12508,8 +12622,9 @@ window.__extends = (this && this.__extends) || (function () {
             else {
                 var isMobile = cc.sys.isMobile;
                 var v2 = Math.abs(v) * this._velocityScale;
+                var winSize = cc.director.getWinSize();
                 if (isMobile)
-                    v2 *= 1136 / Math.max(cc.winSize.width, cc.winSize.height);
+                    v2 *= 1136 / Math.max(winSize.width, winSize.height);
                 var ratio = 0;
                 if (this._pageMode || !isMobile) {
                     if (v2 > 500)
@@ -12544,13 +12659,13 @@ window.__extends = (this && this.__extends) || (function () {
             this._tweenDuration[axis] = newDuration;
         };
         ScrollPane.prototype.startTween = function (type) {
-            this._tweenTime.set(cc.Vec2.ZERO);
+            this._tweenTime.set(cc.Vec3.ZERO);
             this._tweening = type;
             this.updateScrollBarVisible();
         };
         ScrollPane.prototype.killTween = function () {
             if (this._tweening == 1) {
-                this._container.setPosition(this._tweenStart.x + this._tweenChange.x, -(this._tweenStart.y + this._tweenChange.y));
+                this._container.setPosition(this._tweenStart.x + this._tweenChange.x, -(this._tweenStart.y + this._tweenChange.y), 0);
                 this._owner.node.emit(fgui.Event.SCROLL, this._owner);
             }
             this._tweening = 0;
@@ -12560,7 +12675,7 @@ window.__extends = (this && this.__extends) || (function () {
         ScrollPane.prototype.checkRefreshBar = function () {
             if (this._header == null && this._footer == null)
                 return;
-            var pos = (this._refreshBarAxis == "x" ? this._container.x : (-this._container.y));
+            var pos = (this._refreshBarAxis == "x" ? this._container.position.x : (-this._container.position.y));
             if (this._header != null) {
                 if (pos > 0) {
                     this._header.node.active = true;
@@ -12604,7 +12719,7 @@ window.__extends = (this && this.__extends) || (function () {
                 return;
             var nx = this.runTween("x", dt);
             var ny = this.runTween("y", dt);
-            this._container.setPosition(nx, -ny);
+            this._container.setPosition(nx, -ny, 0);
             if (this._tweening == 2) {
                 if (this._overlapSize.x > 0)
                     this._xPos = fgui.ToolSet.clamp(-nx, 0, this._overlapSize.x);
@@ -12679,7 +12794,7 @@ window.__extends = (this && this.__extends) || (function () {
                 }
             }
             else
-                newValue = (axis == "x" ? this._container.x : (-this._container.y));
+                newValue = (axis == "x" ? this._container.position.x : (-this._container.position.y));
             return newValue;
         };
         ScrollPane.easeFunc = function (t, d) {
@@ -12689,10 +12804,10 @@ window.__extends = (this && this.__extends) || (function () {
         ScrollPane.TWEEN_TIME_GO = 0.5;
         ScrollPane.TWEEN_TIME_DEFAULT = 0.3;
         ScrollPane.PULL_RATIO = 0.5;
-        ScrollPane.sHelperPoint = new cc.Vec2();
+        ScrollPane.sHelperPoint = new cc.Vec3();
         ScrollPane.sHelperRect = new cc.Rect();
-        ScrollPane.sEndPos = new cc.Vec2();
-        ScrollPane.sOldChange = new cc.Vec2();
+        ScrollPane.sEndPos = new cc.Vec3();
+        ScrollPane.sOldChange = new cc.Vec3();
         return ScrollPane;
     }(cc.Component));
     fgui.ScrollPane = ScrollPane;
@@ -14009,7 +14124,7 @@ window.__extends = (this && this.__extends) || (function () {
         UIConfig.bringWindowToFrontOnClick = true;
         UIConfig.frameTimeForAsyncUIConstruction = 0.002;
         UIConfig.linkUnderline = true;
-        UIConfig.defaultUIGroup = "UI";
+        UIConfig.defaultUIGroup = "UI_2D";
         return UIConfig;
     }());
     fgui.UIConfig = UIConfig;
@@ -14187,15 +14302,15 @@ window.__extends = (this && this.__extends) || (function () {
             return pkg;
         };
         UIPackage.loadPackage = function (url, completeCallback) {
-            cc.loader.loadRes(url, function (err, asset) {
+            cc.loader.loadRes(url, cc.Asset, function (err, asset) {
                 if (err) {
                     completeCallback(err);
                     return;
                 }
-                if (!asset.rawBuffer)
+                if (!asset["rawBuffer"])
                     throw "Missing asset data. Call UIConfig.registerLoader first!";
                 var pkg = new UIPackage();
-                pkg.loadPackage(new fgui.ByteBuffer(asset.rawBuffer), url);
+                pkg.loadPackage(new fgui.ByteBuffer(asset["rawBuffer"]), url);
                 var cnt = pkg._items.length;
                 var urls = [];
                 for (var i = 0; i < cnt; i++) {
@@ -14284,9 +14399,6 @@ window.__extends = (this && this.__extends) || (function () {
             var pkgName = url.substr(pos1 + 2, pos2 - pos1 - 2);
             var srcName = url.substr(pos2 + 1);
             return UIPackage.getItemURL(pkgName, srcName);
-        };
-        UIPackage.setStringsSource = function (source) {
-            fgui.TranslationHelper.loadFromXML(source);
         };
         UIPackage.prototype.loadPackage = function (buffer, url) {
             if (buffer.readUint() != 0x46475549)
@@ -14524,7 +14636,12 @@ window.__extends = (this && this.__extends) || (function () {
                         if (sprite != null) {
                             var atlasTexture = this.getItemAsset(sprite.atlas);
                             if (atlasTexture != null) {
-                                var sf = new cc.SpriteFrame(atlasTexture, sprite.rect, sprite.rotated, new cc.Vec2(sprite.offset.x - (sprite.originalSize.width - sprite.rect.width) / 2, -(sprite.offset.y - (sprite.originalSize.height - sprite.rect.height) / 2)), sprite.originalSize);
+                                var sf = new cc.SpriteFrame();
+                                sf.texture = atlasTexture;
+                                sf.rect = sprite.rect;
+                                sf.rotated = sprite.rotated;
+                                sf.offset = new cc.Vec2(sprite.offset.x - (sprite.originalSize.width - sprite.rect.width) / 2, -(sprite.offset.y - (sprite.originalSize.height - sprite.rect.height) / 2));
+                                sf.originalSize = sprite.originalSize;
                                 if (item.scale9Grid) {
                                     sf.insetLeft = item.scale9Grid.x;
                                     sf.insetTop = item.scale9Grid.y;
@@ -14539,9 +14656,15 @@ window.__extends = (this && this.__extends) || (function () {
                 case fgui.PackageItemType.Atlas:
                     if (!item.decoded) {
                         item.decoded = true;
-                        item.asset = cc.loader.getRes(item.file);
-                        if (!item.asset)
+                        var asset = cc.loader.getRes(item.file);
+                        if (!asset)
                             console.log("Resource '" + item.file + "' not found, please check default.res.json!");
+                        if (asset instanceof cc.Texture2D) {
+                            item.asset = asset;
+                        }
+                        else if (asset instanceof cc.ImageAsset) {
+                            item.asset = asset._texture;
+                        }
                     }
                     return item.asset;
                 case fgui.PackageItemType.Sound:
@@ -14606,7 +14729,13 @@ window.__extends = (this && this.__extends) || (function () {
                     var atlasTexture = this.getItemAsset(sprite.atlas);
                     if (atlasTexture != null) {
                         var sx = item.width / frame.rect.width;
-                        frame.texture = new cc.SpriteFrame(atlasTexture, sprite.rect, sprite.rotated, new cc.Vec2(frame.rect.x - (item.width - frame.rect.width) / 2, -(frame.rect.y - (item.height - frame.rect.height) / 2)), new cc.Size(item.width, item.height));
+                        var sf = new cc.SpriteFrame();
+                        sf.texture = atlasTexture;
+                        sf.rect = sprite.rect;
+                        sf.rotated = sprite.rotated;
+                        sf.offset = new cc.Vec2(frame.rect.x - (item.width - frame.rect.width) / 2, -(frame.rect.y - (item.height - frame.rect.height) / 2));
+                        sf.originalSize = new cc.Size(item.width, item.height);
+                        frame.texture = sf;
                     }
                 }
                 item.frames[i] = frame;
@@ -14616,13 +14745,13 @@ window.__extends = (this && this.__extends) || (function () {
         UIPackage.prototype.loadFont = function (item) {
             var font = new cc.LabelAtlas();
             item.asset = font;
-            font._fntConfig = {
+            font.fntConfig = {
                 commonHeight: 0,
                 fontSize: 0,
                 kerningDict: {},
                 fontDefDictionary: {}
             };
-            var dict = font._fntConfig.fontDefDictionary;
+            var dict = font.fntConfig.fontDefDictionary;
             var buffer = item.rawData;
             buffer.seek(0, 0);
             var ttf = buffer.readBool();
@@ -14636,6 +14765,7 @@ window.__extends = (this && this.__extends) || (function () {
             var mainSprite = this._sprites[item.id];
             if (mainSprite != null)
                 mainTexture = (this.getItemAsset(mainSprite.atlas));
+            console.log(mainSprite);
             buffer.seek(0, 1);
             var bg = null;
             var cnt = buffer.readInt();
@@ -14663,8 +14793,17 @@ window.__extends = (this && this.__extends) || (function () {
                 else if (bg.channel == 3)
                     bg.channel = 1;
                 if (ttf) {
-                    rect.x += mainSprite.rect.x;
-                    rect.y += mainSprite.rect.y;
+                    if (mainSprite.rotated) {
+                        var y = rect.y;
+                        var x = rect.x;
+                        rect.x = mainSprite.rect.x + mainSprite.rect.height - rect.height - y;
+                        rect.y = mainSprite.rect.y + x;
+                        console.log(rect.x, rect.y);
+                    }
+                    else {
+                        rect.x += mainSprite.rect.x;
+                        rect.y += mainSprite.rect.y;
+                    }
                 }
                 else {
                     var sprite = this._sprites[img];
@@ -14689,14 +14828,13 @@ window.__extends = (this && this.__extends) || (function () {
                 buffer.position = nextPos;
             }
             font.fontSize = fontSize;
-            font._fntConfig.fontSize = fontSize;
-            font._fntConfig.commonHeight = lineHeight == 0 ? fontSize : lineHeight;
-            font._fntConfig.resizable = resizable;
-            font._fntConfig.canTint = canTint;
+            font.fntConfig.fontSize = fontSize;
+            font.fntConfig.commonHeight = lineHeight == 0 ? fontSize : lineHeight;
+            font.fntConfig.resizable = resizable;
+            font.fntConfig.canTint = canTint;
             var spriteFrame = new cc.SpriteFrame();
-            spriteFrame.setTexture(mainTexture);
+            spriteFrame.texture = mainTexture;
             font.spriteFrame = spriteFrame;
-            font.onLoad();
         };
         UIPackage._constructing = 0;
         UIPackage._instById = {};
@@ -14709,7 +14847,7 @@ window.__extends = (this && this.__extends) || (function () {
     var AtlasSprite = (function () {
         function AtlasSprite() {
             this.rect = new cc.Rect();
-            this.offset = new cc.Vec2(0, 0);
+            this.offset = new cc.Vec3(0, 0);
             this.originalSize = new cc.Size(0, 0);
         }
         return AtlasSprite;
@@ -15125,7 +15263,7 @@ window.__extends = (this && this.__extends) || (function () {
         }
         BlendModeUtils.apply = function (node, blendMode) {
             var f = BlendModeUtils.factors[blendMode];
-            var renderers = node.getComponentsInChildren(cc.RenderComponent);
+            var renderers = node.getComponentsInChildren(cc.RenderableComponent);
             renderers.forEach(function (element) {
                 element.srcBlendFactor = f[0];
                 element.dstBlendFactor = f[1];
@@ -15136,18 +15274,18 @@ window.__extends = (this && this.__extends) || (function () {
             BlendModeUtils.factors[blendMode][1] = dstFactor;
         };
         BlendModeUtils.factors = [
-            [cc.macro.SRC_ALPHA, cc.macro.ONE_MINUS_SRC_ALPHA],
-            [cc.macro.ONE, cc.macro.ONE],
-            [cc.macro.SRC_ALPHA, cc.macro.ONE],
-            [cc.macro.DST_COLOR, cc.macro.ONE_MINUS_SRC_ALPHA],
-            [cc.macro.ONE, cc.macro.ONE_MINUS_SRC_COLOR],
-            [cc.macro.ZERO, cc.macro.ONE_MINUS_SRC_ALPHA],
-            [cc.macro.ZERO, cc.macro.SRC_ALPHA],
-            [cc.macro.ONE_MINUS_DST_ALPHA, cc.macro.DST_ALPHA],
-            [cc.macro.ONE, cc.macro.ZERO],
-            [cc.macro.SRC_ALPHA, cc.macro.ONE_MINUS_SRC_ALPHA],
-            [cc.macro.SRC_ALPHA, cc.macro.ONE_MINUS_SRC_ALPHA],
-            [cc.macro.SRC_ALPHA, cc.macro.ONE_MINUS_SRC_ALPHA],
+            [cc.GFXBlendFactor.SRC_ALPHA, cc.GFXBlendFactor.ONE_MINUS_SRC_ALPHA],
+            [cc.GFXBlendFactor.ONE, cc.GFXBlendFactor.ONE],
+            [cc.GFXBlendFactor.SRC_ALPHA, cc.GFXBlendFactor.ONE],
+            [cc.GFXBlendFactor.DST_COLOR, cc.GFXBlendFactor.ONE_MINUS_SRC_ALPHA],
+            [cc.GFXBlendFactor.ONE, cc.GFXBlendFactor.ONE_MINUS_SRC_COLOR],
+            [cc.GFXBlendFactor.ZERO, cc.GFXBlendFactor.ONE_MINUS_SRC_ALPHA],
+            [cc.GFXBlendFactor.ZERO, cc.GFXBlendFactor.SRC_ALPHA],
+            [cc.GFXBlendFactor.ONE_MINUS_DST_ALPHA, cc.GFXBlendFactor.DST_ALPHA],
+            [cc.GFXBlendFactor.ONE, cc.GFXBlendFactor.ZERO],
+            [cc.GFXBlendFactor.SRC_ALPHA, cc.GFXBlendFactor.ONE_MINUS_SRC_ALPHA],
+            [cc.GFXBlendFactor.SRC_ALPHA, cc.GFXBlendFactor.ONE_MINUS_SRC_ALPHA],
+            [cc.GFXBlendFactor.SRC_ALPHA, cc.GFXBlendFactor.ONE_MINUS_SRC_ALPHA],
         ];
         return BlendModeUtils;
     }());
@@ -15168,7 +15306,7 @@ window.__extends = (this && this.__extends) || (function () {
             return _this;
         }
         Image.prototype.onLoad = function () {
-            this.sizeMode = cc.Sprite.SizeMode.CUSTOM;
+            this.sizeMode = cc.SpriteComponent.SizeMode.CUSTOM;
             this.trim = false;
         };
         Object.defineProperty(Image.prototype, "flip", {
@@ -15185,7 +15323,7 @@ window.__extends = (this && this.__extends) || (function () {
                         sy = -1;
                     if (sx != 1 || sy != 1)
                         this.node.setAnchorPoint(0.5, 0.5);
-                    this.node.setScale(sx, sy);
+                    this.node.setScale(sx, sy, 1);
                 }
             },
             enumerable: true,
@@ -15199,16 +15337,16 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._fillMethod != value) {
                     this._fillMethod = value;
                     if (this._fillMethod != 0) {
-                        this.type = cc.Sprite.Type.FILLED;
+                        this.type = cc.SpriteComponent.Type.FILLED;
                         if (this._fillMethod <= 3)
                             this.fillType = this._fillMethod - 1;
                         else
-                            this.fillType = cc.Sprite.FillType.RADIAL;
+                            this.fillType = cc.SpriteComponent.FillType.RADIAL;
                         this.fillCenter = new cc.Vec2(0.5, 0.5);
                         this.setupFill();
                     }
                     else {
-                        this.type = cc.Sprite.Type.SIMPLE;
+                        this.type = cc.SpriteComponent.Type.SIMPLE;
                     }
                 }
             },
@@ -15292,29 +15430,14 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._grayed == value)
                     return;
                 this._grayed = value;
-                var material;
-                if (value) {
-                    material = this._graySpriteMaterial;
-                    if (!material) {
-                        material = cc.Material.getBuiltinMaterial('2d-gray-sprite');
-                    }
-                    material = this._graySpriteMaterial = cc.Material.getInstantiatedMaterial(material, this);
-                }
-                else {
-                    material = this._spriteMaterial;
-                    if (!material) {
-                        material = cc.Material.getBuiltinMaterial('2d-sprite', this);
-                    }
-                    material = this._spriteMaterial = cc.Material.getInstantiatedMaterial(material, this);
-                }
-                this.setMaterial(0, material);
+                this.grayscale = value;
             },
             enumerable: true,
             configurable: true
         });
         ;
         return Image;
-    }(cc.Sprite));
+    }(cc.SpriteComponent));
     fgui.Image = Image;
 })(fgui || (fgui = {}));
 
@@ -15363,7 +15486,7 @@ window.__extends = (this && this.__extends) || (function () {
                         this._endAt = this._frameCount - 1;
                     if (this._frame < 0 || this._frame > this._frameCount - 1)
                         this._frame = this._frameCount - 1;
-                    this.type = cc.Sprite.Type.SIMPLE;
+                    this.type = cc.SpriteComponent.Type.SIMPLE;
                     this.drawFrame();
                     this._frameElapsed = 0;
                     this._repeatedCount = 0;
@@ -15589,7 +15712,7 @@ window.__extends = (this && this.__extends) || (function () {
         __extends(Event, _super);
         function Event(type, bubbles) {
             var _this = _super.call(this, type, bubbles) || this;
-            _this.pos = new cc.Vec2();
+            _this.pos = new cc.Vec3();
             _this.touchId = 0;
             _this.clickCount = 0;
             _this.button = 0;
@@ -15667,6 +15790,143 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
+    var EventMouse = (function (_super) {
+        __extends(EventMouse, _super);
+        function EventMouse(eventType, bubbles, prevLoc) {
+            var _this = _super.call(this, fgui.Event.MOUSE, bubbles) || this;
+            _this.movementX = 0;
+            _this.movementY = 0;
+            _this._button = EventMouse.BUTTON_MISSING;
+            _this._x = 0;
+            _this._y = 0;
+            _this._prevX = 0;
+            _this._prevY = 0;
+            _this._scrollX = 0;
+            _this._scrollY = 0;
+            _this.eventType = eventType;
+            if (prevLoc) {
+                _this._prevX = prevLoc.x;
+                _this._prevY = prevLoc.y;
+            }
+            return _this;
+        }
+        EventMouse.prototype.setScrollData = function (scrollX, scrollY) {
+            this._scrollX = scrollX;
+            this._scrollY = scrollY;
+        };
+        EventMouse.prototype.getScrollX = function () {
+            return this._scrollX;
+        };
+        EventMouse.prototype.getScrollY = function () {
+            return this._scrollY;
+        };
+        EventMouse.prototype.setLocation = function (x, y) {
+            this._x = x;
+            this._y = y;
+        };
+        EventMouse.prototype.getLocation = function (out) {
+            if (!out) {
+                out = new cc.Vec2();
+            }
+            cc.Vec2.set(out, this._x, this._y);
+            return out;
+        };
+        EventMouse.prototype.getLocationInView = function (out) {
+            if (!out) {
+                out = new cc.Vec2();
+            }
+            cc.Vec2.set(out, this._x, cc.view._designResolutionSize.height - this._y);
+            return out;
+        };
+        EventMouse.prototype.getUILocation = function (out) {
+            if (!out) {
+                out = new cc.Vec2();
+            }
+            cc.Vec2.set(out, this._x, this._y);
+            cc.view["_convertPointWithScale"](out);
+            return out;
+        };
+        EventMouse.prototype.getPreviousLocation = function (out) {
+            if (!out) {
+                out = new cc.Vec2();
+            }
+            cc.Vec2.set(out, this._prevX, this._prevY);
+            return out;
+        };
+        EventMouse.prototype.getUIPreviousLocation = function (out) {
+            if (!out) {
+                out = new cc.Vec2();
+            }
+            cc.Vec2.set(out, this._prevX, this._prevY);
+            cc.view["_convertPointWithScale"](out);
+            return out;
+        };
+        EventMouse.prototype.getDelta = function (out) {
+            if (!out) {
+                out = new cc.Vec2();
+            }
+            cc.Vec2.set(out, this._x - this._prevX, this._y - this._prevY);
+            return out;
+        };
+        EventMouse.prototype.getDeltaX = function () {
+            return this._x - this._prevX;
+        };
+        EventMouse.prototype.getDeltaY = function () {
+            return this._y - this._prevY;
+        };
+        EventMouse.prototype.getUIDelta = function (out) {
+            if (!out) {
+                out = new cc.Vec2();
+            }
+            cc.Vec2.set(out, (this._x - this._prevX) / cc.view.getScaleX(), (this._y - this._prevY) / cc.view.getScaleY());
+            return out;
+        };
+        EventMouse.prototype.getUIDeltaX = function () {
+            return (this._x - this._prevX) / cc.view.getScaleX();
+        };
+        EventMouse.prototype.getUIDeltaY = function () {
+            return (this._y - this._prevY) / cc.view.getScaleY();
+        };
+        EventMouse.prototype.setButton = function (button) {
+            this._button = button;
+        };
+        EventMouse.prototype.getButton = function () {
+            return this._button;
+        };
+        EventMouse.prototype.getLocationX = function () {
+            return this._x;
+        };
+        EventMouse.prototype.getLocationY = function () {
+            return this._y;
+        };
+        EventMouse.prototype.getUILocationX = function () {
+            var viewport = cc.view.getViewportRect();
+            return (this._x - viewport.x) / cc.view.getScaleX();
+        };
+        EventMouse.prototype.getUILocationY = function () {
+            var viewport = cc.view.getViewportRect();
+            return (this._y - viewport.y) / cc.view.getScaleY();
+        };
+        EventMouse.NONE = 0;
+        EventMouse.DOWN = 1;
+        EventMouse.UP = 2;
+        EventMouse.MOVE = 3;
+        EventMouse.SCROLL = 4;
+        EventMouse.BUTTON_MISSING = -1;
+        EventMouse.BUTTON_LEFT = 0;
+        EventMouse.BUTTON_RIGHT = 2;
+        EventMouse.BUTTON_MIDDLE = 1;
+        EventMouse.BUTTON_4 = 3;
+        EventMouse.BUTTON_5 = 4;
+        EventMouse.BUTTON_6 = 5;
+        EventMouse.BUTTON_7 = 6;
+        EventMouse.BUTTON_8 = 7;
+        return EventMouse;
+    }(cc.Event));
+    fgui.EventMouse = EventMouse;
+})(fgui || (fgui = {}));
+
+(function (fgui) {
     var PixelHitTest = (function () {
         function PixelHitTest(data, offsetX, offsetY) {
             this._data = data;
@@ -15722,7 +15982,7 @@ window.__extends = (this && this.__extends) || (function () {
             _this._touches = new Array();
             _this._rollOutChain = new Array();
             _this._rollOverChain = new Array();
-            _this._touchPos = new cc.Vec2();
+            _this._touchPos = new cc.Vec3();
             return _this;
         }
         InputProcessor.prototype.onLoad = function () {
@@ -15738,7 +15998,7 @@ window.__extends = (this && this.__extends) || (function () {
             node.on(cc.Node.EventType.MOUSE_MOVE, this.mouseMoveHandler, this);
             node.on(cc.Node.EventType.MOUSE_UP, this.mouseUpHandler, this);
             node.on(cc.Node.EventType.MOUSE_WHEEL, this.mouseWheelHandler, this);
-            this._touchListener = this.node["_touchListener"];
+            this._touchListener = this.node.eventProcessor.touchListener;
         };
         InputProcessor.prototype.onDisable = function () {
             var node = this.node;
@@ -15771,7 +16031,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (ti.touchId != -1 && (touchId == -1 || ti.touchId == touchId))
                     return ti.pos;
             }
-            return cc.Vec2.ZERO;
+            return cc.Vec3.ZERO;
         };
         InputProcessor.prototype.getTouchTarget = function () {
             var cnt = this._touches.length;
@@ -15827,7 +16087,7 @@ window.__extends = (this && this.__extends) || (function () {
             fgui.Event._return(evt);
         };
         InputProcessor.prototype.touchBeginHandler = function (touch, evt) {
-            var ti = this.updateInfo(touch.getID(), touch.getLocation(), touch);
+            var ti = this.updateInfo(touch.getID(), touch.getUILocation(), touch);
             this._touchListener.setSwallowTouches(ti.target != this._owner);
             this.setBegin(ti);
             var evt2 = this.getEvent(ti, ti.target, fgui.Event.TOUCH_BEGIN, true);
@@ -15838,7 +16098,7 @@ window.__extends = (this && this.__extends) || (function () {
             return true;
         };
         InputProcessor.prototype.touchMoveHandler = function (touch, evt) {
-            var ti = this.updateInfo(touch.getID(), touch.getLocation(), touch);
+            var ti = this.updateInfo(touch.getID(), touch.getUILocation(), touch);
             this.handleRollOver(ti, ti.target);
             if (ti.began) {
                 var evt2 = this.getEvent(ti, ti.target, fgui.Event.TOUCH_MOVE, false);
@@ -15863,7 +16123,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         InputProcessor.prototype.touchEndHandler = function (touch, evt) {
-            var ti = this.updateInfo(touch.getID(), touch.getLocation(), touch);
+            var ti = this.updateInfo(touch.getID(), touch.getUILocation(), touch);
             this.setEnd(ti);
             var evt2 = this.getEvent(ti, ti.target, fgui.Event.TOUCH_END, false);
             var cnt = ti.touchMonitors.length;
@@ -15879,7 +16139,7 @@ window.__extends = (this && this.__extends) || (function () {
             ti.touchMonitors.length = 0;
             if (ti.target && ti.target.node != null) {
                 if (ti.target instanceof fgui.GRichTextField)
-                    ti.target.node.getComponent(cc.RichText)["_onTouchEnded"](evt2);
+                    ti.target.node.getComponent(cc.RichTextComponent)["_onTouchEnded"](evt2);
                 evt2.unuse();
                 evt2.type = fgui.Event.TOUCH_END;
                 evt2.bubbles = true;
@@ -15901,7 +16161,7 @@ window.__extends = (this && this.__extends) || (function () {
             ti.button = -1;
         };
         InputProcessor.prototype.touchCancelHandler = function (touch, evt) {
-            var ti = this.updateInfo(touch.getID(), touch.getLocation(), touch);
+            var ti = this.updateInfo(touch.getID(), touch.getUILocation(), touch);
             var evt2 = this.getEvent(ti, ti.target, fgui.Event.TOUCH_END, false);
             var cnt = ti.touchMonitors.length;
             for (var i = 0; i < cnt; i++) {
@@ -15934,10 +16194,10 @@ window.__extends = (this && this.__extends) || (function () {
         InputProcessor.prototype.mouseMoveHandler = function (evt) {
             var ti = this.getInfo(0, false);
             if (ti
-                && Math.abs(ti.pos.x - evt.getLocationX()) < 1
-                && Math.abs(ti.pos.y - (fgui.GRoot.inst.height - evt.getLocationY())) < 1)
+                && Math.abs(ti.pos.x - evt.getUILocationX()) < 1
+                && Math.abs(ti.pos.y - (fgui.GRoot.inst.height - evt.getUILocationY())) < 1)
                 return;
-            ti = this.updateInfo(0, evt.getLocation());
+            ti = this.updateInfo(0, evt.getUILocation());
             this.handleRollOver(ti, ti.target);
             if (ti.began) {
                 var evt2 = this.getEvent(ti, ti.target, fgui.Event.TOUCH_MOVE, false);
@@ -15961,18 +16221,21 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         InputProcessor.prototype.mouseWheelHandler = function (evt) {
-            var ti = this.updateInfo(0, evt.getLocation());
+            var ti = this.updateInfo(0, evt.getUILocation());
             ti.mouseWheelDelta = Math.max(evt.getScrollX(), evt.getScrollY());
             var evt2 = this.getEvent(ti, ti.target, fgui.Event.MOUSE_WHEEL, true);
             ti.target.node.dispatchEvent(evt2);
             fgui.Event._return(evt2);
         };
-        InputProcessor.prototype.updateInfo = function (touchId, pos, touch) {
-            var camera = cc.Camera.findCamera(this.node);
-            if (camera)
-                camera.getScreenToWorldPoint(pos, this._touchPos);
-            else
+        InputProcessor.prototype.updateInfo = function (touchId, pos2d, touch) {
+            var camera = this.findCamera(this.node);
+            var pos = new cc.Vec3(pos2d.x, pos2d.y, 0);
+            if (camera) {
+                camera.screenToWorld(pos, this._touchPos);
+            }
+            else {
                 this._touchPos.set(pos);
+            }
             var target = this._owner.hitTest(this._touchPos);
             if (!target)
                 target = this._owner;
@@ -15980,9 +16243,18 @@ window.__extends = (this && this.__extends) || (function () {
             ti.target = target;
             ti.pos.x = pos.x;
             ti.pos.y = fgui.GRoot.inst.height - pos.y;
-            ti.button = cc.Event.EventMouse.BUTTON_LEFT;
+            ti.button = fgui.EventMouse.BUTTON_LEFT;
             ti.touch = touch;
             return ti;
+        };
+        InputProcessor.prototype.findCamera = function (node) {
+            var p = node;
+            while (p) {
+                var cam = p.getComponent(cc.CameraComponent);
+                if (cam)
+                    return cam;
+                p = p.parent;
+            }
         };
         InputProcessor.prototype.getInfo = function (touchId, createIfNotExisits) {
             if (createIfNotExisits === undefined)
@@ -16104,12 +16376,12 @@ window.__extends = (this && this.__extends) || (function () {
     fgui.InputProcessor = InputProcessor;
     var TouchInfo = (function () {
         function TouchInfo() {
-            this.pos = new cc.Vec2();
+            this.pos = new cc.Vec3();
             this.touchId = 0;
             this.clickCount = 0;
             this.mouseWheelDelta = 0;
             this.button = -1;
-            this.downPos = new cc.Vec2();
+            this.downPos = new cc.Vec3();
             this.began = false;
             this.clickCancelled = false;
             this.lastClickTime = 0;
@@ -17093,7 +17365,7 @@ window.__extends = (this && this.__extends) || (function () {
             splinePoints.length = 0;
             var prev = points[0];
             if (prev.curveType == fgui.CurveType.CRSpline)
-                splinePoints.push(new cc.Vec2(prev.x, prev.y));
+                splinePoints.push(new cc.Vec3(prev.x, prev.y));
             for (var i = 1; i < cnt; i++) {
                 var current = points[i];
                 if (prev.curveType != fgui.CurveType.CRSpline) {
@@ -17102,21 +17374,21 @@ window.__extends = (this && this.__extends) || (function () {
                     seg.ptStart = this._points.length;
                     if (prev.curveType == fgui.CurveType.Straight) {
                         seg.ptCount = 2;
-                        this._points.push(new cc.Vec2(prev.x, prev.y));
-                        this._points.push(new cc.Vec2(current.x, current.y));
+                        this._points.push(new cc.Vec3(prev.x, prev.y));
+                        this._points.push(new cc.Vec3(current.x, current.y));
                     }
                     else if (prev.curveType == fgui.CurveType.Bezier) {
                         seg.ptCount = 3;
-                        this._points.push(new cc.Vec2(prev.x, prev.y));
-                        this._points.push(new cc.Vec2(current.x, current.y));
-                        this._points.push(new cc.Vec2(prev.control1_x, prev.control1_y));
+                        this._points.push(new cc.Vec3(prev.x, prev.y));
+                        this._points.push(new cc.Vec3(current.x, current.y));
+                        this._points.push(new cc.Vec3(prev.control1_x, prev.control1_y));
                     }
                     else if (prev.curveType == fgui.CurveType.CubicBezier) {
                         seg.ptCount = 4;
-                        this._points.push(new cc.Vec2(prev.x, prev.y));
-                        this._points.push(new cc.Vec2(current.x, current.y));
-                        this._points.push(new cc.Vec2(prev.control1_x, prev.control1_y));
-                        this._points.push(new cc.Vec2(prev.control2_x, prev.control2_y));
+                        this._points.push(new cc.Vec3(prev.x, prev.y));
+                        this._points.push(new cc.Vec3(current.x, current.y));
+                        this._points.push(new cc.Vec3(prev.control1_x, prev.control1_y));
+                        this._points.push(new cc.Vec3(prev.control2_x, prev.control2_y));
                     }
                     seg.length = fgui.ToolSet.distance(prev.x, prev.y, current.x, current.y);
                     this._fullLength += seg.length;
@@ -17124,12 +17396,12 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 if (current.curveType != fgui.CurveType.CRSpline) {
                     if (splinePoints.length > 0) {
-                        splinePoints.push(new cc.Vec2(current.x, current.y));
+                        splinePoints.push(new cc.Vec3(current.x, current.y));
                         this.createSplineSegment();
                     }
                 }
                 else
-                    splinePoints.push(new cc.Vec2(current.x, current.y));
+                    splinePoints.push(new cc.Vec3(current.x, current.y));
                 prev = current;
             }
             if (splinePoints.length > 1)
@@ -17161,7 +17433,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GPath.prototype.getPointAt = function (t, result) {
             if (!result)
-                result = new cc.Vec2();
+                result = new cc.Vec3();
             else
                 result.x = result.y = 0;
             t = fgui.ToolSet.clamp01(t);
@@ -17213,7 +17485,7 @@ window.__extends = (this && this.__extends) || (function () {
                 points = new Array();
             var seg = this._segments[segmentIndex];
             for (var i = 0; i < seg.ptCount; i++)
-                points.push(new cc.Vec2(this._points[seg.ptStart + i].x, this._points[seg.ptStart + i].y));
+                points.push(new cc.Vec3(this._points[seg.ptStart + i].x, this._points[seg.ptStart + i].y));
             return points;
         };
         GPath.prototype.getPointsInSegment = function (segmentIndex, t0, t1, points, ts, pointDensity) {
@@ -17225,8 +17497,8 @@ window.__extends = (this && this.__extends) || (function () {
                 ts.push(t0);
             var seg = this._segments[segmentIndex];
             if (seg.type == fgui.CurveType.Straight) {
-                points.push(new cc.Vec2(fgui.ToolSet.lerp(this._points[seg.ptStart].x, this._points[seg.ptStart + 1].x, t0), fgui.ToolSet.lerp(this._points[seg.ptStart].y, this._points[seg.ptStart + 1].y, t0)));
-                points.push(new cc.Vec2(fgui.ToolSet.lerp(this._points[seg.ptStart].x, this._points[seg.ptStart + 1].x, t1), fgui.ToolSet.lerp(this._points[seg.ptStart].y, this._points[seg.ptStart + 1].y, t1)));
+                points.push(new cc.Vec3(fgui.ToolSet.lerp(this._points[seg.ptStart].x, this._points[seg.ptStart + 1].x, t0), fgui.ToolSet.lerp(this._points[seg.ptStart].y, this._points[seg.ptStart + 1].y, t0)));
+                points.push(new cc.Vec3(fgui.ToolSet.lerp(this._points[seg.ptStart].x, this._points[seg.ptStart + 1].x, t1), fgui.ToolSet.lerp(this._points[seg.ptStart].y, this._points[seg.ptStart + 1].y, t1)));
             }
             else {
                 var func;
@@ -17234,17 +17506,17 @@ window.__extends = (this && this.__extends) || (function () {
                     func = this.onBezierCurve;
                 else
                     func = this.onCRSplineCurve;
-                points.push(func.call(this, seg.ptStart, seg.ptCount, t0, new cc.Vec2()));
+                points.push(func.call(this, seg.ptStart, seg.ptCount, t0, new cc.Vec3()));
                 var SmoothAmount = Math.min(seg.length * pointDensity, 50);
                 for (var j = 0; j <= SmoothAmount; j++) {
                     var t = j / SmoothAmount;
                     if (t > t0 && t < t1) {
-                        points.push(func.call(this, seg.ptStart, seg.ptCount, t, new cc.Vec2()));
+                        points.push(func.call(this, seg.ptStart, seg.ptCount, t, new cc.Vec3()));
                         if (ts != null)
                             ts.push(t);
                     }
                 }
-                points.push(func.call(this, seg.ptStart, seg.ptCount, t1, new cc.Vec2()));
+                points.push(func.call(this, seg.ptStart, seg.ptCount, t1, new cc.Vec3()));
             }
             if (ts != null)
                 ts.push(t1);
@@ -17871,7 +18143,7 @@ window.__extends = (this && this.__extends) || (function () {
                 }
             }
         };
-        GTweener.helperPoint = new cc.Vec2();
+        GTweener.helperPoint = new cc.Vec3();
         return GTweener;
     }());
     fgui.GTweener = GTweener;
@@ -17884,8 +18156,8 @@ window.__extends = (this && this.__extends) || (function () {
         TweenManager.createTween = function () {
             if (!TweenManager._root) {
                 TweenManager._root = new cc.Node("[TweenManager]");
-                cc.game["addPersistRootNode"](TweenManager._root);
-                cc.director.getScheduler().schedule(TweenManager.update, TweenManager._root, 0, false);
+                cc.game.addPersistRootNode(TweenManager._root);
+                cc.director.getScheduler().schedule(TweenManager.update, TweenManager._root, 0, cc.macro.REPEAT_FOREVER, 0, false);
             }
             var tweener;
             var cnt = TweenManager._tweenerPool.length;
@@ -18549,8 +18821,8 @@ window.__extends = (this && this.__extends) || (function () {
             return currentTime.getMilliseconds() / 1000;
         };
         ToolSet.toGrayed = function (c) {
-            var v = c.getR() * 0.299 + c.getG() * 0.587 + c.getB() * 0.114;
-            return new cc.Color(v, v, v, c.getA());
+            var v = c.r * 0.299 + c.g * 0.587 + c.b * 0.114;
+            return new cc.Color(v, v, v, c.a);
         };
         ToolSet.repeat = function (t, length) {
             return t - Math.floor(t / length) * length;

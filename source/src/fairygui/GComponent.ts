@@ -7,7 +7,7 @@ namespace fgui {
         private _sortingChildCount: number = 0;
         private _opaque: boolean;
         private _applyingController: Controller;
-        private _rectMask: cc.Mask;
+        private _rectMask: cc.MaskComponent;
         private _maskContent: GObject;
 
         protected _margin: Margin;
@@ -22,8 +22,8 @@ namespace fgui {
         public _transitions: Array<Transition>;
         public _container: cc.Node;
         public _scrollPane: ScrollPane;
-        public _alignOffset: cc.Vec2;
-        public _customMask: cc.Mask;
+        public _alignOffset: cc.Vec3;
+        public _customMask: cc.MaskComponent;
 
         public constructor() {
             super();
@@ -33,9 +33,10 @@ namespace fgui {
             this._controllers = new Array<Controller>();
             this._transitions = new Array<Transition>();
             this._margin = new Margin();
-            this._alignOffset = new cc.Vec2();
+            this._alignOffset = new cc.Vec3();
 
             this._container = new cc.Node("Container");
+            this._container.addComponent(cc.UITransformComponent);
             this._container.setAnchorPoint(0, 1);
             this._node.addChild(this._container);
         }
@@ -589,9 +590,8 @@ namespace fgui {
 
         public setMask(value: GObject, inverted: boolean): void {
             if (this._maskContent) {
-                this._maskContent.node.off(cc.Node.EventType.POSITION_CHANGED, this.onMaskContentChanged, this);
+                this._maskContent.node.off(cc.Node.EventType.TRANSFORM_CHANGED, this.onMaskContentChanged, this);
                 this._maskContent.node.off(cc.Node.EventType.SIZE_CHANGED, this.onMaskContentChanged, this);
-                this._maskContent.node.off(cc.Node.EventType.SCALE_CHANGED, this.onMaskContentChanged, this);
                 this._maskContent.node.off(cc.Node.EventType.ANCHOR_CHANGED, this.onMaskContentChanged, this);
                 this._maskContent.visible = true;
             }
@@ -603,18 +603,19 @@ namespace fgui {
 
                 if (!this._customMask) {
                     let maskNode: cc.Node = new cc.Node("Mask");
+                    maskNode.addComponent(cc.UITransformComponent);
+
                     maskNode.parent = this._node;
                     if (this._scrollPane)
                         this._container.parent.parent = maskNode;
                     else
                         this._container.parent = maskNode;
-                    this._customMask = maskNode.addComponent(cc.Mask);
+                    this._customMask = maskNode.addComponent(cc.MaskComponent);
                 }
 
                 value.visible = false;
-                value.node.on(cc.Node.EventType.POSITION_CHANGED, this.onMaskContentChanged, this);
+                value.node.on(cc.Node.EventType.TRANSFORM_CHANGED, this.onMaskContentChanged, this);
                 value.node.on(cc.Node.EventType.SIZE_CHANGED, this.onMaskContentChanged, this);
-                value.node.on(cc.Node.EventType.SCALE_CHANGED, this.onMaskContentChanged, this);
                 value.node.on(cc.Node.EventType.ANCHOR_CHANGED, this.onMaskContentChanged, this);
 
                 this._customMask.inverted = inverted;
@@ -627,7 +628,7 @@ namespace fgui {
                 if (this._scrollPane)
                     this._scrollPane.adjustMaskContainer();
                 else
-                    this._container.setPosition(0, 0);
+                    this._container.setPosition(0, 0, 0);
             }
             else if (this._customMask) {
                 if (this._scrollPane)
@@ -640,7 +641,7 @@ namespace fgui {
                 if (this._scrollPane)
                     this._scrollPane.adjustMaskContainer();
                 else
-                    this._container.setPosition(this._pivotCorrectX, this._pivotCorrectY);
+                    this._container.setPosition(this._pivotCorrectX, this._pivotCorrectY, 0);
             }
         }
 
@@ -648,31 +649,32 @@ namespace fgui {
             this.off(Event.DISPLAY, this.onMaskReady, this);
 
             if (this._maskContent instanceof GImage) {
-                this._customMask.type = cc.Mask.Type.IMAGE_STENCIL;
-                this._customMask.alphaThreshold = 0.0001;
-                this._customMask.spriteFrame = (<GImage>this._maskContent)._content.spriteFrame;
+                // this._customMask.type = cc.MaskComponent.Type.GRAPHICS_STENCIL;
+                // this._customMask.segments = 0.0001;
+                // this._customMask.graphics = (<GImage>this._maskContent)._content;
+                throw new Error("暂时不支持mask 为图片");
             }
             else {
                 if ((<GGraph>this._maskContent).type == GraphType.Ellipse)
-                    this._customMask.type = cc.Mask.Type.ELLIPSE;
-                else
-                    this._customMask.type = cc.Mask.Type.RECT;
+                    this._customMask.type = cc.MaskComponent.Type.ELLIPSE;
+                else if ((<GGraph>this._maskContent).type == GraphType.Rect)
+                    this._customMask.type = cc.MaskComponent.Type.RECT;
             }
         }
 
         private onMaskContentChanged() {
             let maskNode: cc.Node = this._customMask.node;
             let contentNode: cc.Node = this._maskContent.node;
-            let w: number = contentNode.width * contentNode.scaleX;
-            let h: number = contentNode.height * contentNode.scaleY;
+            let w: number = contentNode.width * contentNode.scale.x;
+            let h: number = contentNode.height * contentNode.scale.y;
 
             maskNode.setContentSize(w, h);
 
-            let left: number = contentNode.x - contentNode.anchorX * w;
-            let top: number = contentNode.y - contentNode.anchorY * h;
+            let left: number = contentNode.position.x - contentNode.anchorX * w;
+            let top: number = contentNode.position.y - contentNode.anchorY * h;
             maskNode.setAnchorPoint(-left / maskNode.width, -top / maskNode.height);
 
-            maskNode.setPosition(this._pivotCorrectX, this._pivotCorrectY);
+            maskNode.setPosition(this._pivotCorrectX, this._pivotCorrectY, 0);
         }
 
         public get _pivotCorrectX(): number {
@@ -696,7 +698,7 @@ namespace fgui {
 
         protected setupOverflow(overflow: OverflowType): void {
             if (overflow == OverflowType.Hidden)
-                this._rectMask = this._container.addComponent(cc.Mask);
+                this._rectMask = this._container.addComponent(cc.MaskComponent);
 
             if (!this._margin.isNone)
                 this.handleSizeChanged();
@@ -706,20 +708,20 @@ namespace fgui {
             super.handleAnchorChanged();
 
             if (this._customMask)
-                this._customMask.node.setPosition(this._pivotCorrectX, this._pivotCorrectY);
+                this._customMask.node.setPosition(this._pivotCorrectX, this._pivotCorrectY, 0);
             else if (this._scrollPane)
                 this._scrollPane.adjustMaskContainer();
             else
-                this._container.setPosition(this._pivotCorrectX + this._alignOffset.x, this._pivotCorrectY - this._alignOffset.y);
+                this._container.setPosition(this._pivotCorrectX + this._alignOffset.x, this._pivotCorrectY - this._alignOffset.y, 0);
         }
 
         protected handleSizeChanged(): void {
             super.handleSizeChanged();
 
             if (this._customMask)
-                this._customMask.node.setPosition(this._pivotCorrectX, this._pivotCorrectY);
+                this._customMask.node.setPosition(this._pivotCorrectX, this._pivotCorrectY, 0);
             else if (!this._scrollPane)
-                this._container.setPosition(this._pivotCorrectX, this._pivotCorrectY);
+                this._container.setPosition(this._pivotCorrectX, this._pivotCorrectY, 0);
 
             if (this._scrollPane)
                 this._scrollPane.onOwnerSizeChanged();
@@ -748,14 +750,15 @@ namespace fgui {
                 this._scrollPane.handleControllerChanged(c);
         }
 
-        public hitTest(globalPt: cc.Vec2): GObject {
+        public hitTest(globalPt: cc.Vec3): GObject {
             if (this._touchDisabled || !this._touchable || !this._node.activeInHierarchy)
                 return null;
 
             let target: GObject;
 
             if (this._customMask) {
-                let b = this._customMask["_hitTest"](globalPt) || false;
+
+                let b = this._customMask.isHit(cc.v2(globalPt.x, globalPt.y)) || false;
                 if (!b)
                     return null;
             }
@@ -763,7 +766,7 @@ namespace fgui {
             let flag = 0;
 
             if (this.hitArea || this._rectMask) {
-                let pt: cc.Vec3 = this._node.convertToNodeSpaceAR(globalPt);
+                let pt: cc.Vec3 = this.uiCom.convertToNodeSpaceAR(globalPt);
                 pt.x += this._node.anchorX * this._width;
                 pt.y += this._node.anchorY * this._height;
 
@@ -776,8 +779,8 @@ namespace fgui {
                     return null;
 
                 if (this._rectMask) {
-                    pt.x += this._container.x;
-                    pt.y += this._container.y;
+                    pt.x += this._container.position.x;
+                    pt.y += this._container.position.y;
 
                     let clippingSize: cc.Size = this._container.getContentSize();
 
@@ -804,7 +807,7 @@ namespace fgui {
 
             if (this._opaque) {
                 if (flag == 0) {
-                    let pt: cc.Vec3 = this._node.convertToNodeSpaceAR(globalPt);
+                    let pt: cc.Vec3 = this.uiCom.convertToNodeSpaceAR(globalPt);
                     pt.x += this._node.anchorX * this._width;
                     pt.y += this._node.anchorY * this._height;
                     if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
@@ -932,9 +935,9 @@ namespace fgui {
                 this.height = value + this._margin.top + this._margin.bottom;
         }
 
-        public getSnappingPosition(xValue: number, yValue: number, resultPoint?: cc.Vec2): cc.Vec2 {
+        public getSnappingPosition(xValue: number, yValue: number, resultPoint?: cc.Vec3): cc.Vec3 {
             if (!resultPoint)
-                resultPoint = new cc.Vec2();
+                resultPoint = new cc.Vec3();
 
             var cnt: number = this._children.length;
             if (cnt == 0) {
@@ -1024,7 +1027,7 @@ namespace fgui {
         }
 
         public constructFromResource2(objectPool: Array<GObject>, poolIndex: number): void {
-            var contentItem:PackageItem = this.packageItem.getBranch();
+            var contentItem: PackageItem = this.packageItem.getBranch();
 
             if (!contentItem.decoded) {
                 contentItem.decoded = true;

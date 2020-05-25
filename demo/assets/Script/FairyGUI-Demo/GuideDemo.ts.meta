@@ -1,9 +1,15 @@
 {
-  "ver": "1.0.5",
-  "uuid": "90538cdc-568e-410b-82fb-bcd69ee53050",
-  "isPlugin": false,
-  "loadPluginInWeb": true,
-  "loadPluginInNative": true,
-  "loadPluginInEditor": false,
-  "subMetas": {}
+  "ver": "2.0.14",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "23de8769-6bf4-4309-b15f-dada82818ef8",
+  "files": [
+    ".js",
+    ".trans"
+  ],
+  "subMetas": {},
+  "userData": {
+    "importAsPlugin": false,
+    "moduleId": "project:///assets/Script/FairyGUI-Demo/GuideDemo.js"
+  }
 }

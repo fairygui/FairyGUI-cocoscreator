@@ -1,9 +1,10 @@
 import MailItem from "./MailItem"
+import { _decorator, Component } from "cc";
 
-const { ccclass, property } = cc._decorator;
+const { ccclass, property } = _decorator;
 
 @ccclass
-export default class VirtualListDemo extends cc.Component {
+export default class VirtualListDemo extends Component {
     private _view: fgui.GComponent;
     private _list: fgui.GList;
 

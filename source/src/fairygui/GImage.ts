@@ -13,17 +13,23 @@ namespace fgui {
         }
 
         public get color(): cc.Color {
-            return this._node.color;
+            return this._content.color;
         }
 
         public set color(value: cc.Color) {
-            if (this._node.color != value) {
-                this._node.color = value;
+            if (this._content.color != value) {
+                this._content.color = value;
 
                 this.updateGear(4);
             }
         }
-
+        public setAlpha(val: number) {
+            var c = this.color;
+            if (c.a != val) {
+                c.a = val;
+                this.color = c;
+            }
+        }
         public get flip(): FlipType {
             return this._content.flip;
         }
@@ -76,9 +82,9 @@ namespace fgui {
             contentItem.load();
 
             if (contentItem.scale9Grid)
-                this._content.type = cc.Sprite.Type.SLICED;
+                this._content.type = cc.SpriteComponent.Type.SLICED;
             else if (contentItem.scaleByTile)
-                this._content.type = cc.Sprite.Type.TILED;
+                this._content.type = cc.SpriteComponent.Type.TILED;
             this._content.spriteFrame = <cc.SpriteFrame>contentItem.asset;
         }
 

@@ -1,5 +1,6 @@
+import { Vec3, EventTarget } from "cc";
 
-export default class JoystickModule extends cc.EventTarget {
+export default class JoystickModule extends EventTarget {
     private _InitX: number;
     private _InitY: number;
     private _startStageX: number;
@@ -12,7 +13,7 @@ export default class JoystickModule extends cc.EventTarget {
     private _center: fgui.GObject;
     private _touchId: number;
     private _tweener: fgui.GTweener;
-    private _curPos: cc.Vec2;
+    private _curPos: Vec3;
 
     public static JoystickMoving: string = "JoystickMoving";
     public static JoystickUp: string = "JoystickUp";
@@ -33,7 +34,7 @@ export default class JoystickModule extends cc.EventTarget {
         this._touchId = -1;
         this.radius = 150;
 
-        this._curPos = new cc.Vec2();
+        this._curPos = new Vec3();
 
         this._touchArea.on(fgui.Event.TOUCH_BEGIN, this.onTouchDown, this);
         this._touchArea.on(fgui.Event.TOUCH_MOVE, this.onTouchMove, this);

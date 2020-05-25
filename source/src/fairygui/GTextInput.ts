@@ -2,7 +2,7 @@
 namespace fgui {
 
     export class GTextInput extends GTextField {
-        public _editBox: cc.EditBox;
+        public _editBox: MyEditBox;
 
         private _promptText: string;
 
@@ -16,7 +16,7 @@ namespace fgui {
         protected createRenderer() {
             this._editBox = this._node.addComponent(MyEditBox);
             this._editBox.maxLength = -1;
-            this._editBox["_updateTextLabel"]();
+            this._editBox.updateTextLabel();
 
             this._node.on('text-changed', this.onTextChanged, this);
             this.on(Event.TOUCH_END, this.onTouchEnd1, this);
@@ -45,13 +45,13 @@ namespace fgui {
         public set promptText(val: string) {
             this._promptText = val;
             let newCreate: boolean = !this._editBox.placeholderLabel;
-            this._editBox["_updatePlaceholderLabel"]();
+            this._editBox.updatePlaceholderLabel();
             if (newCreate)
                 this.assignFont(this._editBox.placeholderLabel, this._realFont);
             this._editBox.placeholderLabel.string = UBBParser.inst.parse(this._promptText, true);
 
             if (UBBParser.inst.lastColor) {
-                let c = this._editBox.placeholderLabel.node.color;
+                let c = this._editBox.placeholderLabel.color;
                 if (!c)
                     c = new cc.Color();
                 c.fromHEX(UBBParser.inst.lastColor);
@@ -79,31 +79,31 @@ namespace fgui {
         }
 
         public get password(): boolean {
-            return this._editBox.inputFlag == cc.EditBox.InputFlag.PASSWORD;;
+            return this._editBox.inputFlag == cc.EditBoxComponent.InputFlag.PASSWORD;;
         }
 
         public set password(val: boolean) {
-            this._editBox.inputFlag = val ? cc.EditBox.InputFlag.PASSWORD : cc.EditBox.InputFlag.DEFAULT;
+            this._editBox.inputFlag = val ? cc.EditBoxComponent.InputFlag.PASSWORD : cc.EditBoxComponent.InputFlag.DEFAULT;
         }
 
-        public get align(): cc.Label.HorizontalAlign {
+        public get align(): cc.HorizontalTextAlignment {
             return this._editBox.textLabel.horizontalAlign;
         }
 
-        public set align(value: cc.Label.HorizontalAlign) {
+        public set align(value: cc.HorizontalTextAlignment) {
             this._editBox.textLabel.horizontalAlign = value;
-            if (this._editBox.placeholderLabel){
+            if (this._editBox.placeholderLabel) {
                 this._editBox.placeholderLabel.horizontalAlign = value;
             }
         }
 
-        public get verticalAlign(): cc.Label.VerticalAlign {
+        public get verticalAlign(): cc.VerticalTextAlignment {
             return this._editBox.textLabel.verticalAlign;
         }
 
-        public set verticalAlign(value: cc.Label.VerticalAlign) {
+        public set verticalAlign(value: cc.VerticalTextAlignment) {
             this._editBox.textLabel.verticalAlign = value;
-            if (this._editBox.placeholderLabel){
+            if (this._editBox.placeholderLabel) {
                 this._editBox.placeholderLabel.verticalAlign = value;
             }
         }
@@ -117,11 +117,11 @@ namespace fgui {
         }
 
         public get singleLine(): boolean {
-            return this._editBox.inputMode != cc.EditBox.InputMode.ANY;
+            return this._editBox.inputMode != cc.EditBoxComponent.InputMode.ANY;
         }
 
         public set singleLine(value: boolean) {
-            this._editBox.inputMode = value ? cc.EditBox.InputMode.SINGLE_LINE : cc.EditBox.InputMode.ANY;
+            this._editBox.inputMode = value ? cc.EditBoxComponent.InputMode.SINGLE_LINE : cc.EditBoxComponent.InputMode.ANY;
         }
 
         public requestFocus(): void {
@@ -196,8 +196,8 @@ namespace fgui {
                 this.password = true;
 
             //同步一下对齐方式
-       
-            if(this._editBox.placeholderLabel){
+
+            if (this._editBox.placeholderLabel) {
                 let hAlign = this._editBox.textLabel.horizontalAlign;
                 this._editBox.placeholderLabel.horizontalAlign = hAlign;
 
@@ -207,14 +207,14 @@ namespace fgui {
         }
     }
 
-    class MyEditBox extends cc.EditBox {
+    class MyEditBox extends cc.EditBoxComponent {
         _registerEvent() {
             //取消掉原来的事件处理
         }
 
         _syncSize() {
             let size = this.node.getContentSize();
-            let impl = this["_impl"];
+            let impl = this._impl;
 
             impl.setSize(size.width, size.height);
 
@@ -223,9 +223,14 @@ namespace fgui {
             if (this.placeholderLabel)
                 this.placeholderLabel.node.setContentSize(size.width, size.height);
         }
-
+        public updateTextLabel() {
+            super._updateTextLabel();
+        }
+        public updatePlaceholderLabel() {
+            super._updatePlaceholderLabel();
+        }
         public openKeyboard(touch: any) {
-            let impl = this["_impl"];
+            let impl = this._impl;
             if (impl) {
                 impl.beginEditing();
             }

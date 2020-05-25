@@ -1,9 +1,15 @@
 {
-  "ver": "1.0.5",
-  "uuid": "f2349c19-dd3c-44f0-912a-c3792a43ff32",
-  "isPlugin": false,
-  "loadPluginInWeb": true,
-  "loadPluginInNative": true,
-  "loadPluginInEditor": false,
-  "subMetas": {}
+  "ver": "2.0.14",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "816bde10-9459-429c-b55f-cc23ef2566be",
+  "files": [
+    ".js",
+    ".trans"
+  ],
+  "subMetas": {},
+  "userData": {
+    "importAsPlugin": false,
+    "moduleId": "project:///assets/Script/FairyGUI-Demo/ModalWaitingDemo.js"
+  }
 }

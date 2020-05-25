@@ -15,6 +15,7 @@ namespace fgui {
         private _thisOnResized: Function;
 
         private static _inst: GRoot;
+        audioEngine: cc.AudioSourceComponent;
 
         public static get inst(): GRoot {
             if (!GRoot._inst)
@@ -25,7 +26,8 @@ namespace fgui {
 
         public static create(): GRoot {
             GRoot._inst = new GRoot();
-            GRoot._inst.node.parent = cc.director.getScene();
+            var sc: any = cc.director.getScene();
+            GRoot._inst.node.setParent(sc);
 
             return GRoot._inst;
         }
@@ -34,6 +36,8 @@ namespace fgui {
             super();
 
             this._node.name = "GRoot";
+            this._node.addComponent(cc.CanvasComponent);
+            this._node.setAnchorPoint(0.5, 0.5);
             this.opaque = false;
             this._volumeScale = 1;
             this._popupStack = new Array<GObject>();
@@ -49,29 +53,31 @@ namespace fgui {
             this._inputProcessor = this.node.addComponent(InputProcessor);
             this._inputProcessor._captureCallback = this.onTouchBegin_1;
 
-            if (CC_EDITOR) {
-                (<any>cc).engine.on('design-resolution-changed', this._thisOnResized);
-            }
-            else {
-                (<any>cc.view).on('canvas-resize', this._thisOnResized);
-            }
+            // if (EDITOR) {
+            //     (<any>cc).engine.on('design-resolution-changed', this._thisOnResized);
+            // }
+            // else {
+            // }
+
+        }
+        protected onStart() {
+            cc.view.on('canvas-resize', this._thisOnResized);
 
             this.onWinResize();
         }
-
         protected onDestroy(): void {
-            if (CC_EDITOR) {
-                (<any>cc).engine.off('design-resolution-changed', this._thisOnResized);
-            }
-            else {
-                (<any>cc.view).off('canvas-resize', this._thisOnResized);
-            }
+            // if (CC_EDITOR) {
+            //     (<any>cc).engine.off('design-resolution-changed', this._thisOnResized);
+            // }
+            // else {
+            // }
+            cc.view.off('canvas-resize', this._thisOnResized);
 
             if (this == GRoot._inst)
                 GRoot._inst = null;
         }
 
-        public getTouchPosition(touchId?: number): cc.Vec2 {
+        public getTouchPosition(touchId?: number): cc.Vec3 {
             return this._inputProcessor.getTouchPosition(touchId);
         }
 
@@ -192,8 +198,8 @@ namespace fgui {
             return this._modalWaitPane && this._modalWaitPane.node.activeInHierarchy;
         }
 
-        public getPopupPosition(popup: GObject, target?: GObject, downward?: any, result?: cc.Vec2): cc.Vec2 {
-            let pos = result ? result : new cc.Vec2();
+        public getPopupPosition(popup: GObject, target?: GObject, downward?: any, result?: cc.Vec3): cc.Vec3 {
+            let pos = result ? result : new cc.Vec3();
             var sizeW: number = 0, sizeH: number = 0;
             if (target) {
                 pos = target.localToGlobal();
@@ -307,7 +313,7 @@ namespace fgui {
 
             this._tooltipWin = tooltipWin;
 
-            let pt: cc.Vec2 = this.getTouchPosition();
+            let pt: cc.Vec3 = this.getTouchPosition();
             pt.x += 10;
             pt.y += 20;
 
@@ -346,7 +352,18 @@ namespace fgui {
 
         public playOneShotSound(clip: cc.AudioClip, volumeScale?: number) {
             if (volumeScale === undefined) volumeScale = 1;
-            cc.audioEngine.play(clip, false, this._volumeScale * volumeScale);
+            if (!this.audioEngine) {
+                this.audioEngine = this.node.addComponent(cc.AudioSourceComponent);
+            }
+            if (!clip || clip.isValid) {
+                return;
+            }
+            if (this.audioEngine.isValid) {
+                this.audioEngine.clip = clip;
+                this.audioEngine.volume = this._volumeScale * volumeScale
+                this.audioEngine.loop = false;
+                this.audioEngine.play();
+            }
         }
 
         private adjustModalLayer(): void {
@@ -405,13 +422,13 @@ namespace fgui {
             size.width /= cc.view.getScaleX();
             size.height /= cc.view.getScaleY();
 
-            let pos = cc.view.getViewportRect().origin;
-            pos.x = pos.x / cc.view.getScaleX();
-            pos.y = pos.y / cc.view.getScaleY();
+            // let pos = cc.view.getViewportRect().origin;
+            // pos.x = pos.x / cc.view.getScaleX();
+            // pos.y = pos.y / cc.view.getScaleY();
 
             this.setSize(size.width, size.height);
-            this._node.setPosition(-pos.x, this._height - pos.y);
-
+            // this._node.setPosition(-pos.x, this._height - pos.y, 0);
+            this._node.setPosition(size.width / 2, size.height / 2, 0);
             this.updateContentScaleLevel();
         }
 
