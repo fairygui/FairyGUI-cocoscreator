@@ -1,9 +1,15 @@
 {
-  "ver": "1.0.5",
-  "uuid": "c5ddcac7-cb54-4a94-a7d5-723aef47c2b4",
-  "isPlugin": false,
-  "loadPluginInWeb": true,
-  "loadPluginInNative": true,
-  "loadPluginInEditor": false,
-  "subMetas": {}
+  "ver": "2.0.14",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "119c79cc-7406-49a7-9b98-0092c621a1c1",
+  "files": [
+    ".js",
+    ".trans"
+  ],
+  "subMetas": {},
+  "userData": {
+    "importAsPlugin": false,
+    "moduleId": "project:///assets/Script/FairyGUI-Demo/HitTestDemo.js"
+  }
 }

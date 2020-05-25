@@ -1,12 +1,40 @@
 {
-  "ver": "2.3.3",
-  "uuid": "c0a4a596-0b9e-47d7-939c-1be706f93aa6",
-  "type": "raw",
-  "wrapMode": "clamp",
-  "filterMode": "bilinear",
-  "premultiplyAlpha": false,
-  "genMipmaps": false,
-  "packable": true,
-  "platformSettings": {},
-  "subMetas": {}
+  "ver": "1.0.17",
+  "importer": "image",
+  "imported": true,
+  "uuid": "c02d294f-9ad3-4d1e-bf4a-ef0d9c861364",
+  "files": [
+    ".png",
+    ".json"
+  ],
+  "subMetas": {
+    "6c48a": {
+      "importer": "texture",
+      "uuid": "c02d294f-9ad3-4d1e-bf4a-ef0d9c861364@6c48a",
+      "displayName": "LoopList_atlas0",
+      "id": "6c48a",
+      "name": "texture",
+      "ver": "1.0.19",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "premultiplyAlpha": false,
+        "anisotropy": 1,
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "c02d294f-9ad3-4d1e-bf4a-ef0d9c861364"
+      }
+    }
+  },
+  "userData": {
+    "type": "texture",
+    "redirect": "c02d294f-9ad3-4d1e-bf4a-ef0d9c861364@6c48a"
+  }
 }

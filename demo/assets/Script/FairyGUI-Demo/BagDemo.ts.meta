@@ -1,9 +1,15 @@
 {
-  "ver": "1.0.5",
-  "uuid": "a81c4aef-80da-474c-98d9-436f7235cab5",
-  "isPlugin": false,
-  "loadPluginInWeb": true,
-  "loadPluginInNative": true,
-  "loadPluginInEditor": false,
-  "subMetas": {}
+  "ver": "2.0.14",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "f022d495-b1a7-4af6-98e5-0ec75ddfea2b",
+  "files": [
+    ".js",
+    ".trans"
+  ],
+  "subMetas": {},
+  "userData": {
+    "importAsPlugin": false,
+    "moduleId": "project:///assets/Script/FairyGUI-Demo/BagDemo.js"
+  }
 }

@@ -1,9 +1,15 @@
 {
-  "ver": "1.0.5",
-  "uuid": "b454caaf-7b67-45fe-b210-a2c566087d00",
-  "isPlugin": false,
-  "loadPluginInWeb": true,
-  "loadPluginInNative": true,
-  "loadPluginInEditor": false,
-  "subMetas": {}
+  "ver": "2.0.14",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "76087b0d-b4f9-462a-b7e8-33a4760f5e88",
+  "files": [
+    ".js",
+    ".trans"
+  ],
+  "subMetas": {},
+  "userData": {
+    "importAsPlugin": false,
+    "moduleId": "project:///assets/Script/FairyGUI-Demo/TestWin.js"
+  }
 }

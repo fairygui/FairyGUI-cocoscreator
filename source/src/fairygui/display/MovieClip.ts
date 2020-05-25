@@ -58,7 +58,7 @@ namespace fgui {
                 if (this._frame < 0 || this._frame > this._frameCount - 1)
                     this._frame = this._frameCount - 1;
 
-                this.type = cc.Sprite.Type.SIMPLE;
+                this.type = cc.SpriteComponent.Type.SIMPLE;
                 this.drawFrame();
 
                 this._frameElapsed = 0;

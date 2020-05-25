@@ -1,9 +1,15 @@
 {
-  "ver": "1.0.5",
-  "uuid": "be98d962-04e5-4c6c-be47-f3093ef2e116",
-  "isPlugin": false,
-  "loadPluginInWeb": true,
-  "loadPluginInNative": true,
-  "loadPluginInEditor": false,
-  "subMetas": {}
+  "ver": "2.0.14",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "8ff3395a-42f3-42d3-b37f-6cfc8f33f2b6",
+  "files": [
+    ".js",
+    ".trans"
+  ],
+  "subMetas": {},
+  "userData": {
+    "importAsPlugin": false,
+    "moduleId": "project:///assets/Script/FairyGUI-Demo/TransitionDemo.js"
+  }
 }

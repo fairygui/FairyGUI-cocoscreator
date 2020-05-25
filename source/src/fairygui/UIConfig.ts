@@ -66,7 +66,7 @@ namespace fgui {
 		Default group name of UI node.<br/>
 		!#zh
 		UI节点默认的分组。<br/>*/
-        public static defaultUIGroup: string = "UI";
+        public static defaultUIGroup: string = "UI_2D";
     }
 
     let _flag: boolean = false;

@@ -1,9 +1,15 @@
 {
-  "ver": "1.0.5",
-  "uuid": "d32a5df2-ddad-4544-b725-0c8b6ed4fe3c",
-  "isPlugin": false,
-  "loadPluginInWeb": true,
-  "loadPluginInNative": true,
-  "loadPluginInEditor": false,
-  "subMetas": {}
+  "ver": "2.0.14",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "dcd01b95-09d9-4e59-b75a-441b17f9ff69",
+  "files": [
+    ".js",
+    ".trans"
+  ],
+  "subMetas": {},
+  "userData": {
+    "importAsPlugin": false,
+    "moduleId": "project:///assets/Script/FairyGUI-Demo/TreeViewDemo.js"
+  }
 }

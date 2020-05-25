@@ -17,23 +17,23 @@ namespace fgui {
 
     export class BlendModeUtils {
         private static factors: any = [
-            [cc.macro.SRC_ALPHA, cc.macro.ONE_MINUS_SRC_ALPHA], //normal
-            [cc.macro.ONE, cc.macro.ONE], //none
-            [cc.macro.SRC_ALPHA, cc.macro.ONE], //add
-            [cc.macro.DST_COLOR, cc.macro.ONE_MINUS_SRC_ALPHA], //mul
-            [cc.macro.ONE, cc.macro.ONE_MINUS_SRC_COLOR], //screen
-            [cc.macro.ZERO, cc.macro.ONE_MINUS_SRC_ALPHA], //erase
-            [cc.macro.ZERO, cc.macro.SRC_ALPHA], //mask
-            [cc.macro.ONE_MINUS_DST_ALPHA, cc.macro.DST_ALPHA], //below
-            [cc.macro.ONE, cc.macro.ZERO], //off
-            [cc.macro.SRC_ALPHA, cc.macro.ONE_MINUS_SRC_ALPHA], //custom1
-            [cc.macro.SRC_ALPHA, cc.macro.ONE_MINUS_SRC_ALPHA], //custom2
-            [cc.macro.SRC_ALPHA, cc.macro.ONE_MINUS_SRC_ALPHA], //custom2
+            [cc.GFXBlendFactor.SRC_ALPHA, cc.GFXBlendFactor.ONE_MINUS_SRC_ALPHA], //normal
+            [cc.GFXBlendFactor.ONE, cc.GFXBlendFactor.ONE], //none
+            [cc.GFXBlendFactor.SRC_ALPHA, cc.GFXBlendFactor.ONE], //add
+            [cc.GFXBlendFactor.DST_COLOR, cc.GFXBlendFactor.ONE_MINUS_SRC_ALPHA], //mul
+            [cc.GFXBlendFactor.ONE, cc.GFXBlendFactor.ONE_MINUS_SRC_COLOR], //screen
+            [cc.GFXBlendFactor.ZERO, cc.GFXBlendFactor.ONE_MINUS_SRC_ALPHA], //erase
+            [cc.GFXBlendFactor.ZERO, cc.GFXBlendFactor.SRC_ALPHA], //mask
+            [cc.GFXBlendFactor.ONE_MINUS_DST_ALPHA, cc.GFXBlendFactor.DST_ALPHA], //below
+            [cc.GFXBlendFactor.ONE, cc.GFXBlendFactor.ZERO], //off
+            [cc.GFXBlendFactor.SRC_ALPHA, cc.GFXBlendFactor.ONE_MINUS_SRC_ALPHA], //custom1
+            [cc.GFXBlendFactor.SRC_ALPHA, cc.GFXBlendFactor.ONE_MINUS_SRC_ALPHA], //custom2
+            [cc.GFXBlendFactor.SRC_ALPHA, cc.GFXBlendFactor.ONE_MINUS_SRC_ALPHA], //custom2
         ];
 
         public static apply(node: cc.Node, blendMode: BlendMode) {
             let f = BlendModeUtils.factors[<number>blendMode];
-            let renderers = node.getComponentsInChildren(cc.RenderComponent);
+            let renderers = node.getComponentsInChildren(cc.RenderableComponent);
             renderers.forEach(element => {
                 (<any>element).srcBlendFactor = f[0];
                 (<any>element).dstBlendFactor = f[1];

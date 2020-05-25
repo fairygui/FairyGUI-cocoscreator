@@ -12,14 +12,14 @@ namespace fgui {
         private _scrollPerc: number;
         private _fixedGripSize: boolean;
 
-        private _dragOffset: cc.Vec2;
+        private _dragOffset: cc.Vec3;
         private _gripDragging: boolean;
 
         public constructor() {
             super();
 
             this._node.name = "GScrollBar";
-            this._dragOffset = new cc.Vec2();
+            this._dragOffset = new cc.Vec3();
             this._scrollPerc = 0;
         }
 
@@ -95,7 +95,7 @@ namespace fgui {
         }
 
         private onGripTouchDown(evt: Event): void {
-            evt.stopPropagation();
+            evt.propagationStopped = true;
             evt.captureTouch();
 
             this._gripDragging = true;
@@ -106,12 +106,12 @@ namespace fgui {
             this._dragOffset.y -= this._grip.y;
         }
 
-        private static sScrollbarHelperPoint: cc.Vec2 = new cc.Vec2();
+        private static sScrollbarHelperPoint: cc.Vec3 = new cc.Vec3();
         private onGripTouchMove(evt: Event): void {
             if (!this.onStage)
                 return;
 
-            var pt: cc.Vec2 = this.globalToLocal(evt.pos.x, evt.pos.y, GScrollBar.sScrollbarHelperPoint);
+            var pt: cc.Vec3 = this.globalToLocal(evt.pos.x, evt.pos.y, GScrollBar.sScrollbarHelperPoint);
             if (this._vertical) {
                 var curY: number = pt.y - this._dragOffset.y;
                 this._target.setPercY((curY - this._bar.y) / (this._bar.height - this._grip.height), false);
@@ -131,7 +131,7 @@ namespace fgui {
         }
 
         private onClickArrow1(evt: Event): void {
-            evt.stopPropagation();
+            evt.propagationStopped = true;
 
             if (this._vertical)
                 this._target.scrollUp();
@@ -140,7 +140,7 @@ namespace fgui {
         }
 
         private onClickArrow2(evt: Event): void {
-            evt.stopPropagation();
+            evt.propagationStopped = true;
 
             if (this._vertical)
                 this._target.scrollDown();
@@ -149,7 +149,7 @@ namespace fgui {
         }
 
         private onBarTouchBegin(evt: Event): void {
-            var pt: cc.Vec2 = this._grip.globalToLocal(evt.pos.x, evt.pos.y, GScrollBar.sScrollbarHelperPoint);
+            var pt: cc.Vec3 = this._grip.globalToLocal(evt.pos.x, evt.pos.y, GScrollBar.sScrollbarHelperPoint);
             if (this._vertical) {
                 if (pt.y < 0)
                     this._target.scrollUp(4);

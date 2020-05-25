@@ -1,9 +1,10 @@
 import { WindowA, WindowB } from "./TestWin";
+import { _decorator, Component, Rect, Vec2, Color } from "cc";
 
-const { ccclass, property } = cc._decorator;
+const { ccclass, property } = _decorator;
 
 @ccclass
-export default class BasicDemo extends cc.Component {
+export default class BasicDemo extends Component {
     private _view: fgui.GComponent;
     private _backBtn: fgui.GObject;
     private _demoContainer: fgui.GComponent;
@@ -217,7 +218,7 @@ export default class BasicDemo extends cc.Component {
         var btnD: fgui.GObject = obj.getChild("d");
         btnD.draggable = true;
         var bounds: fgui.GObject = obj.getChild("bounds");
-        var rect: cc.Rect = bounds.localToGlobalRect(0, 0, bounds.width, bounds.height);
+        var rect: Rect = bounds.localToGlobalRect(0, 0, bounds.width, bounds.height);
         rect = fgui.GRoot.inst.globalToLocalRect(rect.x, rect.y, rect.width, rect.height, rect);
 
         //因为这时候面板还在从右往左动，所以rect不准确，需要用相对位置算出最终停下来的范围
@@ -237,7 +238,7 @@ export default class BasicDemo extends cc.Component {
     }
 
     //------------------------------
-    private startPos: cc.Vec2 = new cc.Vec2();
+    private startPos: Vec2 = new Vec2();
     private playDepth(): void {
         var obj: fgui.GComponent = this._demoObjects["Depth"];
         var testContainer: fgui.GComponent = obj.getChild("n22").asCom;
@@ -269,7 +270,7 @@ export default class BasicDemo extends cc.Component {
         this.startPos.y += 10;
         graph.setPosition(this.startPos.x, this.startPos.y);
         graph.setSize(150, 150);
-        graph.drawRect(1, cc.Color.BLACK, cc.Color.RED);
+        graph.drawRect(1, Color.BLACK, Color.RED);
 
         var obj: fgui.GComponent = this._demoObjects["Depth"];
         obj.getChild("n22").asCom.addChild(graph);
@@ -281,7 +282,7 @@ export default class BasicDemo extends cc.Component {
         this.startPos.y += 10;
         graph.setPosition(this.startPos.x, this.startPos.y);
         graph.setSize(150, 150);
-        graph.drawRect(1, cc.Color.BLACK, cc.Color.GREEN);
+        graph.drawRect(1, Color.BLACK, Color.GREEN);
         graph.sortingOrder = 200;
 
         var obj: fgui.GComponent = this._demoObjects["Depth"];
@@ -294,7 +295,7 @@ export default class BasicDemo extends cc.Component {
         var list1: fgui.GList = obj.getChild("list1").asList;
         list1.removeChildrenToPool();
         var testNames: Array<string> = ["苹果手机操作系统", "安卓手机操作系统", "微软手机操作系统", "微软桌面操作系统", "苹果桌面操作系统", "未知操作系统"];
-        var testColors: Array<cc.Color> = [cc.Color.YELLOW, cc.Color.RED, cc.Color.WHITE, cc.Color.BLUE];
+        var testColors: Array<Color> = [Color.YELLOW, Color.RED, Color.WHITE, Color.BLUE];
         var cnt: number = testNames.length;
         for (var i: number = 0; i < cnt; i++) {
             var item: fgui.GButton = list1.addItemFromPool().asButton;

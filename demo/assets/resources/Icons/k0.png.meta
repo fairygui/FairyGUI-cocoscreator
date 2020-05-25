@@ -1,12 +1,73 @@
 {
-  "ver": "2.3.3",
-  "uuid": "b8dd3521-57fa-4104-a365-83006df6bb45",
-  "type": "raw",
-  "wrapMode": "clamp",
-  "filterMode": "bilinear",
-  "premultiplyAlpha": false,
-  "genMipmaps": false,
-  "packable": true,
-  "platformSettings": {},
-  "subMetas": {}
+  "ver": "1.0.17",
+  "importer": "image",
+  "imported": true,
+  "uuid": "d5eafd8c-1345-410c-9404-bdb7b08487a3",
+  "files": [
+    ".png",
+    ".json"
+  ],
+  "subMetas": {
+    "6c48a": {
+      "importer": "texture",
+      "uuid": "d5eafd8c-1345-410c-9404-bdb7b08487a3@6c48a",
+      "displayName": "k0",
+      "id": "6c48a",
+      "name": "texture",
+      "ver": "1.0.19",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "wrapModeS": "clamp-to-edge",
+        "wrapModeT": "clamp-to-edge",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "premultiplyAlpha": false,
+        "anisotropy": 1,
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "d5eafd8c-1345-410c-9404-bdb7b08487a3"
+      }
+    },
+    "f9941": {
+      "importer": "sprite-frame",
+      "uuid": "d5eafd8c-1345-410c-9404-bdb7b08487a3@f9941",
+      "displayName": "k0",
+      "id": "f9941",
+      "name": "spriteFrame",
+      "ver": "1.0.8",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "trimType": "auto",
+        "trimThreshold": 1,
+        "rotated": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 0,
+        "trimY": 0,
+        "width": 48,
+        "height": 48,
+        "rawWidth": 48,
+        "rawHeight": 48,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "d5eafd8c-1345-410c-9404-bdb7b08487a3@6c48a",
+        "atlasUuid": ""
+      }
+    }
+  },
+  "userData": {
+    "type": "sprite-frame",
+    "redirect": "d5eafd8c-1345-410c-9404-bdb7b08487a3@f9941"
+  }
 }

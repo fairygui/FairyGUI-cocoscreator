@@ -5,7 +5,7 @@ const ts = require('gulp-typescript');
 const tsProject = ts.createProject('tsconfig.json');
 const inject = require('gulp-inject-string');
 
-gulp.task('buildJs', () => {
+gulp.task('buildJs', function () {
     return tsProject.src()
         .pipe(tsProject())
         .js.pipe(inject.replace('var fgui;', ''))
@@ -15,14 +15,19 @@ gulp.task('buildJs', () => {
         .pipe(gulp.dest('./bin'));
 })
 
-gulp.task("buildDts", ["buildJs"], () => {
+gulp.task("buildDts", gulp.series("buildJs"), function () {
     return tsProject.src()
         .pipe(tsProject())
         .dts.pipe(inject.append('import fairygui = fgui;'))
         .pipe(gulp.dest('./bin'));
 });
-
-gulp.task("build", ["buildDts"], () => {
+gulp.task("copy", function () {
     return gulp.src('bin/**/*')
         .pipe(gulp.dest('../demo/assets/Script/Lib/'))
+});
+
+gulp.task("build", gulp.series("buildDts","copy"), function () {
+    return new Promise((ok,err)=>{
+        ok();
+    })
 });

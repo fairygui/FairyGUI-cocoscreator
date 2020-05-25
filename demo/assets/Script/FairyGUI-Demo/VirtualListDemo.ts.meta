@@ -1,9 +1,15 @@
 {
-  "ver": "1.0.5",
-  "uuid": "04692b2f-bc65-42ef-8faf-49a9f967e38b",
-  "isPlugin": false,
-  "loadPluginInWeb": true,
-  "loadPluginInNative": true,
-  "loadPluginInEditor": false,
-  "subMetas": {}
+  "ver": "2.0.14",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "8f9865f2-388d-461c-8203-7570fca81d99",
+  "files": [
+    ".js",
+    ".trans"
+  ],
+  "subMetas": {},
+  "userData": {
+    "importAsPlugin": false,
+    "moduleId": "project:///assets/Script/FairyGUI-Demo/VirtualListDemo.js"
+  }
 }

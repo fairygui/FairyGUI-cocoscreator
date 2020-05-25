@@ -1,9 +1,15 @@
 {
-  "ver": "1.0.5",
-  "uuid": "f3c5a269-849c-4427-9e1d-028bb03d518f",
-  "isPlugin": false,
-  "loadPluginInWeb": true,
-  "loadPluginInNative": true,
-  "loadPluginInEditor": false,
-  "subMetas": {}
+  "ver": "2.0.14",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "b7826779-40f9-4602-ad18-24d4b9c7075f",
+  "files": [
+    ".js",
+    ".trans"
+  ],
+  "subMetas": {},
+  "userData": {
+    "importAsPlugin": false,
+    "moduleId": "project:///assets/Script/FairyGUI-Demo/CooldownDemo.js"
+  }
 }

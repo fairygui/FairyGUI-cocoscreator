@@ -4,11 +4,10 @@ namespace fgui {
     export class InputProcessor extends cc.Component {
         private _owner: GComponent;
         private _touchListener: any;
-        private _touchPos: cc.Vec2;
+        private _touchPos: cc.Vec3;
         private _touches: Array<TouchInfo>;
         private _rollOutChain: Array<GObject>;
         private _rollOverChain: Array<GObject>;
-
         public _captureCallback: (evt: Event) => void;
 
         public constructor() {
@@ -17,9 +16,10 @@ namespace fgui {
             this._touches = new Array<TouchInfo>();
             this._rollOutChain = new Array<GObject>();
             this._rollOverChain = new Array<GObject>();
-            this._touchPos = new cc.Vec2();
-        }
+            this._touchPos = new cc.Vec3();
 
+        }
+        
         onLoad() {
             this._owner = <GComponent>this.node["$gobj"];
         }
@@ -36,7 +36,7 @@ namespace fgui {
             node.on(cc.Node.EventType.MOUSE_UP, this.mouseUpHandler, this);
             node.on(cc.Node.EventType.MOUSE_WHEEL, this.mouseWheelHandler, this);
 
-            this._touchListener = this.node["_touchListener"];
+            this._touchListener = this.node.eventProcessor.touchListener;
         }
 
         onDisable() {
@@ -65,7 +65,7 @@ namespace fgui {
             return touchIds;
         }
 
-        public getTouchPosition(touchId?: number): cc.Vec2 {
+        public getTouchPosition(touchId?: number): cc.Vec3 {
             if (touchId === undefined) touchId = -1;
             let cnt = this._touches.length;
             for (let i = 0; i < cnt; i++) {
@@ -73,7 +73,7 @@ namespace fgui {
                 if (ti.touchId != -1 && (touchId == -1 || ti.touchId == touchId))
                     return ti.pos;
             }
-            return cc.Vec2.ZERO;
+            return cc.Vec3.ZERO;
         }
 
         public getTouchTarget(): GObject {
@@ -146,7 +146,7 @@ namespace fgui {
         }
 
         private touchBeginHandler(touch: cc.Touch, evt: cc.Event): Boolean {
-            let ti: TouchInfo = this.updateInfo(touch.getID(), touch.getLocation(), touch);
+            let ti: TouchInfo = this.updateInfo(touch.getID(), touch.getUILocation(), touch);
             this._touchListener.setSwallowTouches(ti.target != this._owner);
             this.setBegin(ti);
 
@@ -163,7 +163,7 @@ namespace fgui {
         }
 
         private touchMoveHandler(touch: cc.Touch, evt: cc.Event): void {
-            let ti = this.updateInfo(touch.getID(), touch.getLocation(), touch);
+            let ti = this.updateInfo(touch.getID(), touch.getUILocation(), touch);
             this.handleRollOver(ti, ti.target);
 
             if (ti.began) {
@@ -194,7 +194,7 @@ namespace fgui {
         }
 
         private touchEndHandler(touch: cc.Touch, evt: cc.Event): void {
-            let ti = this.updateInfo(touch.getID(), touch.getLocation(), touch);
+            let ti = this.updateInfo(touch.getID(), touch.getUILocation(), touch);
             this.setEnd(ti);
 
             let evt2 = this.getEvent(ti, ti.target, Event.TOUCH_END, false);
@@ -214,7 +214,7 @@ namespace fgui {
 
             if (ti.target && ti.target.node != null) {
                 if (ti.target instanceof GRichTextField)
-                    ti.target.node.getComponent(cc.RichText)["_onTouchEnded"](evt2);
+                    ti.target.node.getComponent(cc.RichTextComponent)["_onTouchEnded"](<any>evt2);
 
                 evt2.unuse();
                 evt2.type = Event.TOUCH_END;
@@ -242,7 +242,7 @@ namespace fgui {
         }
 
         private touchCancelHandler(touch: cc.Touch, evt: cc.Event): void {
-            let ti = this.updateInfo(touch.getID(), touch.getLocation(), touch);
+            let ti = this.updateInfo(touch.getID(), touch.getUILocation(), touch);
 
             let evt2 = this.getEvent(ti, ti.target, Event.TOUCH_END, false);
 
@@ -272,24 +272,24 @@ namespace fgui {
             ti.button = -1;
         }
 
-        private mouseDownHandler(evt: cc.Event.EventMouse) {
+        private mouseDownHandler(evt: EventMouse) {
             let ti = this.getInfo(0, true);
             ti.button = evt.getButton();
         }
 
-        private mouseUpHandler(evt: cc.Event.EventMouse) {
+        private mouseUpHandler(evt: EventMouse) {
             let ti = this.getInfo(0, true);
             ti.button = evt.getButton();
         }
 
-        private mouseMoveHandler(evt: cc.Event.EventMouse) {
+        private mouseMoveHandler(evt: EventMouse) {
             let ti = this.getInfo(0, false);
             if (ti
-                && Math.abs(ti.pos.x - evt.getLocationX()) < 1
-                && Math.abs(ti.pos.y - (GRoot.inst.height - evt.getLocationY())) < 1)
+                && Math.abs(ti.pos.x - evt.getUILocationX()) < 1
+                && Math.abs(ti.pos.y - (GRoot.inst.height - evt.getUILocationY())) < 1)
                 return;
 
-            ti = this.updateInfo(0, evt.getLocation());
+            ti = this.updateInfo(0, evt.getUILocation());
             this.handleRollOver(ti, ti.target);
 
             if (ti.began) {
@@ -318,8 +318,8 @@ namespace fgui {
             }
         }
 
-        private mouseWheelHandler(evt: cc.Event.EventMouse) {
-            let ti = this.updateInfo(0, evt.getLocation());
+        private mouseWheelHandler(evt: EventMouse) {
+            let ti = this.updateInfo(0, evt.getUILocation());
             ti.mouseWheelDelta = Math.max(evt.getScrollX(), evt.getScrollY());
 
             let evt2 = this.getEvent(ti, ti.target, Event.MOUSE_WHEEL, true);
@@ -327,12 +327,16 @@ namespace fgui {
             Event._return(evt2);
         }
 
-        private updateInfo(touchId: number, pos: cc.Vec2, touch?: cc.Touch): TouchInfo {
-            let camera = cc.Camera.findCamera(this.node);
-            if (camera)
-                camera.getScreenToWorldPoint(pos, this._touchPos);
-            else
+        private updateInfo(touchId: number, pos2d: cc.Vec2, touch?: cc.Touch): TouchInfo {
+            let camera = this.findCamera(this.node);
+            var pos = new cc.Vec3(pos2d.x, pos2d.y, 0);
+            if (camera) {
+                camera.screenToWorld(pos, this._touchPos);
+            }
+            else {
                 this._touchPos.set(pos);
+            }
+
             let target = this._owner.hitTest(this._touchPos);
             if (!target)
                 target = this._owner;
@@ -341,10 +345,19 @@ namespace fgui {
             ti.target = target;
             ti.pos.x = pos.x;
             ti.pos.y = GRoot.inst.height - pos.y;
-            ti.button = cc.Event.EventMouse.BUTTON_LEFT;
+            ti.button = EventMouse.BUTTON_LEFT;
             ti.touch = touch;
 
             return ti;
+        }
+        findCamera(node: cc.Node) {
+            var p = node;
+            while (p) {
+                var cam = p.getComponent(cc.CameraComponent);
+                if (cam) return cam;
+                p = p.parent;
+            }
+
         }
 
         private getInfo(touchId: number, createIfNotExisits?: boolean): TouchInfo {
@@ -491,12 +504,12 @@ namespace fgui {
 
         public target: GObject;
         public touch: cc.Touch;
-        public pos: cc.Vec2 = new cc.Vec2();
+        public pos: cc.Vec3 = new cc.Vec3();
         public touchId: number = 0;
         public clickCount: number = 0;
         public mouseWheelDelta: number = 0;
         public button: number = -1;
-        public downPos: cc.Vec2 = new cc.Vec2();
+        public downPos: cc.Vec3 = new cc.Vec3();
         public began: boolean = false;
         public clickCancelled: boolean = false;
         public lastClickTime: number = 0;

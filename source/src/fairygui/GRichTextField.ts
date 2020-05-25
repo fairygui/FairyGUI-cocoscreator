@@ -19,7 +19,7 @@ namespace fgui {
     }
 
     export class GRichTextField extends GTextField {
-        public _richText: cc.RichText;
+        public _richText: cc.RichTextComponent;
 
         private _bold: boolean;
         private _italics: boolean;
@@ -39,25 +39,25 @@ namespace fgui {
         }
 
         protected createRenderer() {
-            this._richText = this._node.addComponent(cc.RichText);
+            this._richText = this._node.addComponent(cc.RichTextComponent);
             this._richText.handleTouchEvent = false;
             this.autoSize = AutoSizeType.None;
             this._richText.imageAtlas = GRichTextField.imageAtlas;
         }
 
-        public get align(): cc.Label.HorizontalAlign {
-            return <cc.Label.HorizontalAlign><any>this._richText.horizontalAlign;
+        public get align(): cc.HorizontalTextAlignment {
+            return this._richText.horizontalAlign;
         }
 
-        public set align(value: cc.Label.HorizontalAlign) {
-            this._richText.horizontalAlign = <cc.macro.TextAlignment><any>value;
+        public set align(value: cc.HorizontalTextAlignment) {
+            this._richText.horizontalAlign = value;
         }
 
-        public get verticalAlign(): cc.Label.VerticalAlign {
-            return cc.Label.VerticalAlign.TOP;
+        public get verticalAlign(): cc.VerticalTextAlignment {
+            return cc.VerticalTextAlignment.TOP;
         }
 
-        public set verticalAlign(value: cc.Label.VerticalAlign) {
+        public set verticalAlign(value: cc.VerticalTextAlignment) {
             //not supported
         }
 
@@ -164,8 +164,8 @@ namespace fgui {
             let fontSize: number = this._fontSize;
             let font: any = this._richText.font;
             if (font instanceof cc.BitmapFont) {
-                if (!(<any>font)._fntConfig.resizable)
-                    fontSize = (<any>font)._fntConfig.fontSize;
+                if (!font.fntConfig.resizable)
+                    fontSize = font.fntConfig.fontSize;
             }
 
             this._richText.fontSize = fontSize;

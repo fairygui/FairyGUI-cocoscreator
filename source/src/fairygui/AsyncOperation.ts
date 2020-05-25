@@ -41,7 +41,8 @@ namespace fgui {
 
         private internalCreateObject(item: PackageItem): void {
             this._node = new cc.Node("[AsyncCreating:" + item.name + "]");
-            this._node.parent = cc.director.getScene();
+            this._node.addComponent(cc.UITransformComponent);
+            this._node.parent = <any>cc.director.getScene();
             this._node.on("#", this.completed, this);
             this._node.addComponent(AsyncOperationRunner).init(item);
         }

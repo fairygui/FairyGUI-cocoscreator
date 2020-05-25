@@ -1,14 +1,14 @@
 namespace fgui {
     export class GPath {
         private _segments: Array<Segment>;
-        private _points: Array<cc.Vec2>;
+        private _points: Array<cc.Vec3>;
         private _fullLength: number;
 
-        private static helperPoints: Array<cc.Vec2> = new Array<cc.Vec2>();
+        private static helperPoints: Array<cc.Vec3> = new Array<cc.Vec3>();
 
         constructor() {
             this._segments = new Array<Segment>();
-            this._points = new Array<cc.Vec2>();
+            this._points = new Array<cc.Vec3>();
         }
 
         public get length(): number {
@@ -35,12 +35,12 @@ namespace fgui {
             if (cnt == 0)
                 return;
 
-            var splinePoints: Array<cc.Vec2> = GPath.helperPoints;
+            var splinePoints: Array<cc.Vec3> = GPath.helperPoints;
             splinePoints.length = 0;
 
             var prev: GPathPoint = points[0];
             if (prev.curveType == CurveType.CRSpline)
-                splinePoints.push(new cc.Vec2(prev.x, prev.y));
+                splinePoints.push(new cc.Vec3(prev.x, prev.y));
 
             for (var i: number = 1; i < cnt; i++) {
                 var current: GPathPoint = points[i];
@@ -51,21 +51,21 @@ namespace fgui {
                     seg.ptStart = this._points.length;
                     if (prev.curveType == CurveType.Straight) {
                         seg.ptCount = 2;
-                        this._points.push(new cc.Vec2(prev.x, prev.y));
-                        this._points.push(new cc.Vec2(current.x, current.y));
+                        this._points.push(new cc.Vec3(prev.x, prev.y));
+                        this._points.push(new cc.Vec3(current.x, current.y));
                     }
                     else if (prev.curveType == CurveType.Bezier) {
                         seg.ptCount = 3;
-                        this._points.push(new cc.Vec2(prev.x, prev.y));
-                        this._points.push(new cc.Vec2(current.x, current.y));
-                        this._points.push(new cc.Vec2(prev.control1_x, prev.control1_y));
+                        this._points.push(new cc.Vec3(prev.x, prev.y));
+                        this._points.push(new cc.Vec3(current.x, current.y));
+                        this._points.push(new cc.Vec3(prev.control1_x, prev.control1_y));
                     }
                     else if (prev.curveType == CurveType.CubicBezier) {
                         seg.ptCount = 4;
-                        this._points.push(new cc.Vec2(prev.x, prev.y));
-                        this._points.push(new cc.Vec2(current.x, current.y));
-                        this._points.push(new cc.Vec2(prev.control1_x, prev.control1_y));
-                        this._points.push(new cc.Vec2(prev.control2_x, prev.control2_y));
+                        this._points.push(new cc.Vec3(prev.x, prev.y));
+                        this._points.push(new cc.Vec3(current.x, current.y));
+                        this._points.push(new cc.Vec3(prev.control1_x, prev.control1_y));
+                        this._points.push(new cc.Vec3(prev.control2_x, prev.control2_y));
                     }
                     seg.length = ToolSet.distance(prev.x, prev.y, current.x, current.y);
                     this._fullLength += seg.length;
@@ -74,12 +74,12 @@ namespace fgui {
 
                 if (current.curveType != CurveType.CRSpline) {
                     if (splinePoints.length > 0) {
-                        splinePoints.push(new cc.Vec2(current.x, current.y));
+                        splinePoints.push(new cc.Vec3(current.x, current.y));
                         this.createSplineSegment();
                     }
                 }
                 else
-                    splinePoints.push(new cc.Vec2(current.x, current.y));
+                    splinePoints.push(new cc.Vec3(current.x, current.y));
 
                 prev = current;
             }
@@ -89,7 +89,7 @@ namespace fgui {
         }
 
         private createSplineSegment(): void {
-            var splinePoints: Array<cc.Vec2> = GPath.helperPoints;
+            var splinePoints: Array<cc.Vec3> = GPath.helperPoints;
             var cnt: number = splinePoints.length;
             splinePoints.splice(0, 0, splinePoints[0]);
             splinePoints.push(splinePoints[cnt]);
@@ -118,9 +118,9 @@ namespace fgui {
             this._points.length = 0;
         }
 
-        public getPointAt(t: number, result?: cc.Vec2): cc.Vec2 {
+        public getPointAt(t: number, result?: cc.Vec3): cc.Vec3 {
             if (!result)
-                result = new cc.Vec2();
+                result = new cc.Vec3();
             else
                 result.x = result.y = 0;
 
@@ -174,20 +174,20 @@ namespace fgui {
             return this._segments.length;
         }
 
-        public getAnchorsInSegment(segmentIndex: number, points?: Array<cc.Vec2>): Array<cc.Vec2> {
+        public getAnchorsInSegment(segmentIndex: number, points?: Array<cc.Vec3>): Array<cc.Vec3> {
             if (points == null)
-                points = new Array<cc.Vec2>();
+                points = new Array<cc.Vec3>();
 
             var seg: Segment = this._segments[segmentIndex];
             for (var i: number = 0; i < seg.ptCount; i++)
-                points.push(new cc.Vec2(this._points[seg.ptStart + i].x, this._points[seg.ptStart + i].y));
+                points.push(new cc.Vec3(this._points[seg.ptStart + i].x, this._points[seg.ptStart + i].y));
 
             return points;
         }
 
-        public getPointsInSegment(segmentIndex: number, t0: number, t1: number, points?: Array<cc.Vec2>, ts?: Array<number>, pointDensity?: number): Array<cc.Vec2> {
+        public getPointsInSegment(segmentIndex: number, t0: number, t1: number, points?: Array<cc.Vec3>, ts?: Array<number>, pointDensity?: number): Array<cc.Vec3> {
             if (points == null)
-                points = new Array<cc.Vec2>();
+                points = new Array<cc.Vec3>();
             if (!pointDensity || isNaN(pointDensity))
                 pointDensity = 0.1;
 
@@ -195,9 +195,9 @@ namespace fgui {
                 ts.push(t0);
             var seg: Segment = this._segments[segmentIndex];
             if (seg.type == CurveType.Straight) {
-                points.push(new cc.Vec2(ToolSet.lerp(this._points[seg.ptStart].x, this._points[seg.ptStart + 1].x, t0),
+                points.push(new cc.Vec3(ToolSet.lerp(this._points[seg.ptStart].x, this._points[seg.ptStart + 1].x, t0),
                     ToolSet.lerp(this._points[seg.ptStart].y, this._points[seg.ptStart + 1].y, t0)));
-                points.push(new cc.Vec2(ToolSet.lerp(this._points[seg.ptStart].x, this._points[seg.ptStart + 1].x, t1),
+                points.push(new cc.Vec3(ToolSet.lerp(this._points[seg.ptStart].x, this._points[seg.ptStart + 1].x, t1),
                     ToolSet.lerp(this._points[seg.ptStart].y, this._points[seg.ptStart + 1].y, t1)));
             }
             else {
@@ -207,17 +207,17 @@ namespace fgui {
                 else
                     func = this.onCRSplineCurve;
 
-                points.push(func.call(this, seg.ptStart, seg.ptCount, t0, new cc.Vec2()));
+                points.push(func.call(this, seg.ptStart, seg.ptCount, t0, new cc.Vec3()));
                 var SmoothAmount: number = Math.min(seg.length * pointDensity, 50);
                 for (var j: number = 0; j <= SmoothAmount; j++) {
                     var t: number = j / SmoothAmount;
                     if (t > t0 && t < t1) {
-                        points.push(func.call(this, seg.ptStart, seg.ptCount, t, new cc.Vec2()));
+                        points.push(func.call(this, seg.ptStart, seg.ptCount, t, new cc.Vec3()));
                         if (ts != null)
                             ts.push(t);
                     }
                 }
-                points.push(func.call(this, seg.ptStart, seg.ptCount, t1, new cc.Vec2()));
+                points.push(func.call(this, seg.ptStart, seg.ptCount, t1, new cc.Vec3()));
             }
 
             if (ts != null)
@@ -226,9 +226,9 @@ namespace fgui {
             return points;
         }
 
-        public getAllPoints(points?: Array<cc.Vec2>, ts?: Array<number>, pointDensity?: number): Array<cc.Vec2> {
+        public getAllPoints(points?: Array<cc.Vec3>, ts?: Array<number>, pointDensity?: number): Array<cc.Vec3> {
             if (points == null)
-                points = new Array<cc.Vec2>();
+                points = new Array<cc.Vec3>();
             if (!pointDensity || isNaN(pointDensity))
                 pointDensity = 0.1;
 
@@ -239,7 +239,7 @@ namespace fgui {
             return points;
         }
 
-        private onCRSplineCurve(ptStart: number, ptCount: number, t: number, result: cc.Vec2): cc.Vec2 {
+        private onCRSplineCurve(ptStart: number, ptCount: number, t: number, result: cc.Vec3): cc.Vec3 {
             var adjustedIndex: number = Math.floor(t * (ptCount - 4)) + ptStart; //Since the equation works with 4 points, we adjust the starting point depending on t to return a point on the specific segment
 
             var p0x: number = this._points[adjustedIndex].x;
@@ -264,7 +264,7 @@ namespace fgui {
             return result;
         }
 
-        private onBezierCurve(ptStart: number, ptCount: number, t: number, result: cc.Vec2): cc.Vec2 {
+        private onBezierCurve(ptStart: number, ptCount: number, t: number, result: cc.Vec3): cc.Vec3 {
             var t2: number = 1 - t;
             var p0x: number = this._points[ptStart].x;
             var p0y: number = this._points[ptStart].y;

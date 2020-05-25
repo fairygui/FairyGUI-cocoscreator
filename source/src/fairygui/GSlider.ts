@@ -17,7 +17,7 @@ namespace fgui {
         private _barMaxWidthDelta: number = 0;
         private _barMaxHeightDelta: number = 0;
         private _gripObject: GObject;
-        private _clickPos: cc.Vec2;
+        private _clickPos: cc.Vec3;
         private _clickPercent: number = 0;
         private _barStartX: number = 0;
         private _barStartY: number = 0;
@@ -32,7 +32,7 @@ namespace fgui {
             this._titleType = ProgressTitleType.Percent;
             this._value = 50;
             this._max = 100;
-            this._clickPos = new cc.Vec2();
+            this._clickPos = new cc.Vec3();
         }
 
         public get titleType(): ProgressTitleType {
@@ -213,20 +213,20 @@ namespace fgui {
 
         private onGripTouchBegin(evt: Event): void {
             this.canDrag = true;
-            evt.stopPropagation();
+            evt.propagationStopped = true;
             evt.captureTouch();
 
             this._clickPos = this.globalToLocal(evt.pos.x, evt.pos.y);
             this._clickPercent = ToolSet.clamp01((this._value - this._min) / (this._max - this._min));
         }
 
-        private static sSilderHelperPoint: cc.Vec2 = new cc.Vec2();
+        private static sSilderHelperPoint: cc.Vec3 = new cc.Vec3();
         private onGripTouchMove(evt: Event): void {
             if (!this.canDrag) {
                 return;
             }
 
-            var pt: cc.Vec2 = this.globalToLocal(evt.pos.x, evt.pos.y, GSlider.sSilderHelperPoint);
+            var pt: cc.Vec3 = this.globalToLocal(evt.pos.x, evt.pos.y, GSlider.sSilderHelperPoint);
             var deltaX: number = pt.x - this._clickPos.x;
             var deltaY: number = pt.y - this._clickPos.y;
             if (this._reverse) {
@@ -246,7 +246,7 @@ namespace fgui {
             if (!this.changeOnClick)
                 return;
 
-            var pt: cc.Vec2 = this._gripObject.globalToLocal(evt.pos.x, evt.pos.y, GSlider.sSilderHelperPoint);
+            var pt: cc.Vec3 = this._gripObject.globalToLocal(evt.pos.x, evt.pos.y, GSlider.sSilderHelperPoint);
             var percent: number = ToolSet.clamp01((this._value - this._min) / (this._max - this._min));
             var delta: number;
             if (this._barObjectH)

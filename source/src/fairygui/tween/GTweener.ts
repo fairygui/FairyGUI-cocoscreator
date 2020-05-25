@@ -37,7 +37,7 @@ namespace fgui {
         private _elapsedTime: number;
         private _normalizedTime: number;
 
-        private static helperPoint: cc.Vec2 = new cc.Vec2();
+        private static helperPoint: cc.Vec3 = new cc.Vec3();
 
         public constructor() {
             this._startValue = new TweenValue();
@@ -415,7 +415,7 @@ namespace fgui {
                 }
             }
             else if (this._path) {
-                var pt: cc.Vec2 = GTweener.helperPoint;
+                var pt: cc.Vec3 = GTweener.helperPoint;
                 this._path.getPointAt(this._normalizedTime, pt);
                 if (this._snapping) {
                     pt.x = Math.round(pt.x);

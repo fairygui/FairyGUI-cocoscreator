@@ -4,6 +4,7 @@ namespace fgui {
 
         public static loadFromXML(source: string): void {
             TranslationHelper.strings = {};
+            //TODO
             var xml: any = new cc["SAXParser"]().parse(source).documentElement;
             var nodes: any = xml.childNodes;
             var length1: number = nodes.length;

@@ -1,8 +1,11 @@
 {
-  "ver": "1.2.2",
-  "uuid": "273f3851-48de-424c-ae15-3c5828f29c13",
-  "optimizationPolicy": "AUTO",
-  "asyncLoadAssets": false,
-  "readonly": false,
-  "subMetas": {}
+  "ver": "1.0.28",
+  "importer": "prefab",
+  "imported": true,
+  "uuid": "f2cb1b53-6310-4e26-8042-484a92f82681",
+  "files": [
+    ".json"
+  ],
+  "subMetas": {},
+  "userData": {}
 }

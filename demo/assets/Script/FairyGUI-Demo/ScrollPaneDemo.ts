@@ -1,7 +1,9 @@
-const { ccclass, property } = cc._decorator;
+import { _decorator, Component } from "cc";
+
+const { ccclass, property } = _decorator;
 
 @ccclass
-export default class ScrollPaneDemo extends cc.Component {
+export default class ScrollPaneDemo extends Component {
     private _view: fgui.GComponent;
     private _list: fgui.GList;
 

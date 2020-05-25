@@ -1,9 +1,15 @@
 {
-  "ver": "1.0.5",
-  "uuid": "c7330305-57ab-408d-803f-c31a17cd8d2d",
-  "isPlugin": false,
-  "loadPluginInWeb": true,
-  "loadPluginInNative": true,
-  "loadPluginInEditor": false,
-  "subMetas": {}
+  "ver": "2.0.14",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "6e3e05a7-8b08-48c6-8100-18f6839a14e9",
+  "files": [
+    ".js",
+    ".trans"
+  ],
+  "subMetas": {},
+  "userData": {
+    "importAsPlugin": false,
+    "moduleId": "project:///assets/Script/FairyGUI-Demo/BasicsDemo.js"
+  }
 }

@@ -12,7 +12,7 @@ namespace fgui {
             this._content = this._node.addComponent(MovieClip);
 
             //需要这里设置，等Image中的onLoad设置就太晚，图片尺寸会使用第一帧尺寸。
-            this._content.sizeMode = cc.Sprite.SizeMode.CUSTOM;
+            this._content.sizeMode = cc.SpriteComponent.SizeMode.CUSTOM;
             this._content.trim = false;
         }
 
@@ -21,8 +21,8 @@ namespace fgui {
         }
 
         public set color(value: cc.Color) {
-            if (this._node.color != value) {
-                this._node.color = value;
+            if (this._content.color != value) {
+                this._content.color = value;
                 this.updateGear(4);
             }
         }

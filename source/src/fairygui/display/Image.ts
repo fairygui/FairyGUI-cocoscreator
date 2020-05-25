@@ -1,6 +1,6 @@
 namespace fgui {
 
-    export class Image extends cc.Sprite {
+    export class Image extends cc.SpriteComponent {
         private _flip: FlipType = FlipType.None;
 
         private _fillMethod: FillMethod = FillMethod.None;
@@ -8,15 +8,14 @@ namespace fgui {
         private _fillAmount: number = 0;
         private _fillClockwise: boolean = false;
         private _grayed: boolean = false;
-        private _graySpriteMaterial: cc.Material;
-        private _spriteMaterial: cc.Material;
+
 
         public constructor() {
             super();
         }
 
         protected onLoad() {
-            this.sizeMode = cc.Sprite.SizeMode.CUSTOM;
+            this.sizeMode = cc.SpriteComponent.SizeMode.CUSTOM;
             this.trim = false;
         }
 
@@ -35,7 +34,7 @@ namespace fgui {
                     sy = -1;
                 if (sx != 1 || sy != 1)
                     this.node.setAnchorPoint(0.5, 0.5);
-                this.node.setScale(sx, sy);
+                this.node.setScale(sx, sy, 1);
             }
         }
 
@@ -47,17 +46,17 @@ namespace fgui {
             if (this._fillMethod != value) {
                 this._fillMethod = value;
                 if (this._fillMethod != 0) {
-                    this.type = cc.Sprite.Type.FILLED;
+                    this.type = cc.SpriteComponent.Type.FILLED;
                     if (this._fillMethod <= 3)
-                        this.fillType = <cc.Sprite.FillType><number>this._fillMethod - 1;
+                        this.fillType = this._fillMethod - 1;
                     else
-                        this.fillType = cc.Sprite.FillType.RADIAL;
+                        this.fillType = cc.SpriteComponent.FillType.RADIAL;
                     this.fillCenter = new cc.Vec2(0.5, 0.5);
 
                     this.setupFill();
                 }
                 else {
-                    this.type = cc.Sprite.Type.SIMPLE;
+                    this.type = cc.SpriteComponent.Type.SIMPLE;
                 }
             }
         }
@@ -135,31 +134,7 @@ namespace fgui {
                 return;
 
             this._grayed = value;
-            let material;
-            if (value) {
-                material = this._graySpriteMaterial;
-                if (!material) {
-                    material = (<any>cc.Material).getBuiltinMaterial('2d-gray-sprite');
-                }
-                if ((<any>cc.Material).getInstantiatedMaterial) {
-                    material = this._graySpriteMaterial = (<any>cc.Material).getInstantiatedMaterial(material, this);
-                } else {
-                    material = this._graySpriteMaterial = (<any>cc.Material).create(material, this);
-                }
-            }
-            else {
-                material = this._spriteMaterial;
-                if (!material) {
-                    material = (<any>cc.Material).getBuiltinMaterial('2d-sprite', this);
-                }
-                if ((<any>cc.Material).getInstantiatedMaterial) {
-                    material = this._spriteMaterial = (<any>cc.Material).getInstantiatedMaterial(material, this);
-                } else {
-                    material = this._spriteMaterial = (<any>cc.Material).create(material, this);
-                }
-            }
-
-            this.setMaterial(0, material);
+            this.grayscale = value;
         };
     }
 }

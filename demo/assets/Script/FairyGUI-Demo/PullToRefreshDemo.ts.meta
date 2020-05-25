@@ -1,9 +1,15 @@
 {
-  "ver": "1.0.5",
-  "uuid": "d80b3852-aa4c-426b-8193-84fa83c10348",
-  "isPlugin": false,
-  "loadPluginInWeb": true,
-  "loadPluginInNative": true,
-  "loadPluginInEditor": false,
-  "subMetas": {}
+  "ver": "2.0.14",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "0aae1c9c-0051-4fcc-b8fa-76fd01b4a3c1",
+  "files": [
+    ".js",
+    ".trans"
+  ],
+  "subMetas": {},
+  "userData": {
+    "importAsPlugin": false,
+    "moduleId": "project:///assets/Script/FairyGUI-Demo/PullToRefreshDemo.js"
+  }
 }

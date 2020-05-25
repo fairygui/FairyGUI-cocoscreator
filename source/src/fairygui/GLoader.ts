@@ -43,6 +43,8 @@ namespace fgui {
             this._color = cc.Color.WHITE;
 
             this._container = new cc.Node("Image");
+            this._container.addComponent(cc.UITransformComponent);
+
             this._container.setAnchorPoint(0, 1);
             this._node.addChild(this._container);
 
@@ -169,7 +171,8 @@ namespace fgui {
             if (this._color != value) {
                 this._color = value;
                 this.updateGear(4);
-                this._container.color = value;
+                this._content.color = value;
+                // this._container.color = value;
             }
         }
 
@@ -225,7 +228,7 @@ namespace fgui {
             this.url = null;
 
             this._content.spriteFrame = value;
-            this._content.type = cc.Sprite.Type.SIMPLE;
+            this._content.type = cc.SpriteComponent.Type.SIMPLE;
             if (value != null) {
                 this._contentSourceWidth = value.getRect().width;
                 this._contentSourceHeight = value.getRect().height;
@@ -269,11 +272,11 @@ namespace fgui {
                         this._content.spriteFrame = <cc.SpriteFrame>this._contentItem.asset;
                         if (this._content.fillMethod == 0) {
                             if (this._contentItem.scale9Grid)
-                                this._content.type = cc.Sprite.Type.SLICED;
+                                this._content.type = cc.SpriteComponent.Type.SLICED;
                             else if (this._contentItem.scaleByTile)
-                                this._content.type = cc.Sprite.Type.TILED;
+                                this._content.type = cc.SpriteComponent.Type.TILED;
                             else
-                                this._content.type = cc.Sprite.Type.SIMPLE;
+                                this._content.type = cc.SpriteComponent.Type.SIMPLE;
                         }
                         this.updateLayout();
                     }
@@ -327,8 +330,15 @@ namespace fgui {
 
             if (asset instanceof cc.SpriteFrame)
                 this.onExternalLoadSuccess(<cc.SpriteFrame>asset);
-            else if (asset instanceof cc.Texture2D)
-                this.onExternalLoadSuccess(new cc.SpriteFrame(asset));
+            else if (asset instanceof cc.Texture2D) {
+                var sp = new cc.SpriteFrame();
+                sp.texture = asset;
+                this.onExternalLoadSuccess(sp);
+            } else if (asset instanceof cc.ImageAsset) {
+                var sp = new cc.SpriteFrame();
+                sp.texture = asset._texture;
+                this.onExternalLoadSuccess(sp);
+            }
         }
 
         protected freeExternal(texture: cc.SpriteFrame): void {
@@ -336,7 +346,7 @@ namespace fgui {
 
         protected onExternalLoadSuccess(texture: cc.SpriteFrame): void {
             this._content.spriteFrame = texture;
-            this._content.type = cc.Sprite.Type.SIMPLE;
+            this._content.type = cc.SpriteComponent.Type.SIMPLE;
             this._contentSourceWidth = texture.getRect().width;
             this._contentSourceHeight = texture.getRect().height;
             if (this._autoSize)
@@ -399,7 +409,7 @@ namespace fgui {
                 this._updatingLayout = false;
 
                 this._container.setContentSize(this._width, this._height);
-                this._container.setPosition(pivotCorrectX, pivotCorrectY);
+                this._container.setPosition(pivotCorrectX, pivotCorrectY, 0);
                 if (this._content2 != null) {
                     this._content2.setPosition(pivotCorrectX + this._width * this.pivotX, pivotCorrectY - this._height * this.pivotY);
                     this._content2.setScale(1, 1);
@@ -461,7 +471,7 @@ namespace fgui {
             else
                 ny = this._height - this._contentHeight;
             ny = -ny;
-            this._container.setPosition(pivotCorrectX + nx, pivotCorrectY + ny);
+            this._container.setPosition(pivotCorrectX + nx, pivotCorrectY + ny, 1);
         }
 
         private clearContent(): void {
@@ -500,7 +510,7 @@ namespace fgui {
             this._content.grayed = this._grayed;
         }
 
-        public hitTest(globalPt: cc.Vec2): GObject {
+        public hitTest(globalPt: cc.Vec3): GObject {
             if (this._touchDisabled || !this._touchable || !this._node.activeInHierarchy)
                 return null;
 
@@ -510,7 +520,7 @@ namespace fgui {
                     return obj;
             }
 
-            let pt: cc.Vec3 = this._node.convertToNodeSpaceAR(globalPt);
+            let pt: cc.Vec3 = this.uiCom.convertToNodeSpaceAR(globalPt);
             pt.x += this._node.anchorX * this._width;
             pt.y += this._node.anchorY * this._height;
             if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)

@@ -1,12 +1,40 @@
 {
-  "ver": "2.3.3",
-  "uuid": "2f46c221-220f-4401-ae35-031b34af25fc",
-  "type": "raw",
-  "wrapMode": "clamp",
-  "filterMode": "bilinear",
-  "premultiplyAlpha": false,
-  "genMipmaps": false,
-  "packable": true,
-  "platformSettings": {},
-  "subMetas": {}
+  "ver": "1.0.17",
+  "importer": "image",
+  "imported": true,
+  "uuid": "10c3b162-0683-4ff0-903a-48833ee1b386",
+  "files": [
+    ".png",
+    ".json"
+  ],
+  "subMetas": {
+    "6c48a": {
+      "importer": "texture",
+      "uuid": "10c3b162-0683-4ff0-903a-48833ee1b386@6c48a",
+      "displayName": "Joystick_atlas0",
+      "id": "6c48a",
+      "name": "texture",
+      "ver": "1.0.19",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "premultiplyAlpha": false,
+        "anisotropy": 1,
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "10c3b162-0683-4ff0-903a-48833ee1b386"
+      }
+    }
+  },
+  "userData": {
+    "type": "texture",
+    "redirect": "10c3b162-0683-4ff0-903a-48833ee1b386@6c48a"
+  }
 }

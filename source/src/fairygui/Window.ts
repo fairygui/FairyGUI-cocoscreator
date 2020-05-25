@@ -167,7 +167,7 @@ namespace fgui {
 
         protected layoutModalWaitPane(): void {
             if (this._contentArea != null) {
-                var pt: cc.Vec2 = this._frame.localToGlobal();
+                var pt: cc.Vec3 = this._frame.localToGlobal();
                 pt = this.globalToLocal(pt.x, pt.y, pt);
                 this._modalWaitPane.setPosition(pt.x + this._contentArea.x, pt.y + this._contentArea.y);
                 this._modalWaitPane.setSize(this._contentArea.width, this._contentArea.height);

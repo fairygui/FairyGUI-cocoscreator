@@ -1,12 +1,13 @@
-const { ccclass, property } = cc._decorator;
 
 import MainMenu from "./MainMenu";
+import { Component, _decorator } from "cc";
+const { ccclass, property } = _decorator;
 
 @ccclass
-export default class DemoEntry extends cc.Component {
+export default class DemoEntry extends Component {
 
     private _closeButton: fgui.GObject;
-    private _currentDemo: cc.Component;
+    private _currentDemo: Component;
 
     onLoad() {
         fgui.addLoadHandler();

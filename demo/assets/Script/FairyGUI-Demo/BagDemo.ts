@@ -1,7 +1,9 @@
-const { ccclass, property } = cc._decorator;
+import { _decorator, Component } from "cc";
+
+const { ccclass, property } = _decorator;
 
 @ccclass
-export default class BagDemo extends cc.Component {
+export default class BagDemo extends Component {
     private _view: fgui.GComponent;
     private _bagWindow: fgui.Window;
 

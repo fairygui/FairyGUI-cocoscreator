@@ -1,9 +1,10 @@
-import {TestWin} from "./TestWin"
+import { TestWin } from "./TestWin"
+import { _decorator, Component } from "cc";
 
-const {ccclass, property} = cc._decorator;
+const { ccclass, property } = _decorator;
 
 @ccclass
-export default class ModalWaitingDemo extends cc.Component {
+export default class ModalWaitingDemo extends Component {
     private _view: fgui.GComponent;
     private _testWin: TestWin;
 
@@ -15,17 +16,19 @@ export default class ModalWaitingDemo extends cc.Component {
     }
 
     onUILoaded() {
-        this._view = fgui.UIPackage.createObject("ModalWaiting","Main").asCom;
-        this._view.setSize(fgui.GRoot.inst.width,fgui.GRoot.inst.height);
+        this._view = fgui.UIPackage.createObject("ModalWaiting", "Main").asCom;
+        this._view.setSize(fgui.GRoot.inst.width, fgui.GRoot.inst.height);
         fgui.GRoot.inst.addChild(this._view);
 
         this._testWin = new TestWin();
         this._testWin.center();
-        this._view.getChild("n0").onClick( function(): void { this._testWin.show(); }, this);
-        
+        this._view.getChild("n0").onClick(function (): void {
+            this._testWin.show();
+        }, this);
+
         //这里模拟一个要锁住全屏的等待过程
         fgui.GRoot.inst.showModalWait();
-        this.scheduleOnce(function(): void {
+        this.scheduleOnce(function (): void {
             fgui.GRoot.inst.closeModalWait();
         }, 3);
     }

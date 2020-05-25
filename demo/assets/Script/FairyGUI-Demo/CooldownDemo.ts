@@ -1,7 +1,9 @@
-const {ccclass, property} = cc._decorator;
+import { _decorator, Component } from "cc";
+
+const {ccclass, property} = _decorator;
 
 @ccclass
-export default class CooldownDemo extends cc.Component {
+export default class CooldownDemo extends Component {
     private _view: fgui.GComponent;
 	private _btn0: fgui.GProgressBar;
 	private _btn1:fgui.GProgressBar;

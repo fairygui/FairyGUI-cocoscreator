@@ -2,7 +2,7 @@
 namespace fgui {
 
     export class GTextField extends GObject {
-        public _label: cc.Label;
+        public _label: cc.LabelComponent;
 
         protected _font: string;
         protected _realFont: string | cc.Font;
@@ -16,7 +16,7 @@ namespace fgui {
         protected _autoSize: AutoSizeType;
         protected _updatingSize: boolean;
         protected _sizeDirty: boolean;
-        protected _outline: cc.LabelOutline;
+        protected _outline: cc.LabelOutlineComponent;
 
         public constructor() {
             super();
@@ -41,7 +41,8 @@ namespace fgui {
         }
 
         protected createRenderer() {
-            this._label = this._node.addComponent(cc.Label);
+            this._label = this._node.addComponent(cc.LabelComponent);
+            this._label.string = "";
             this.autoSize = AutoSizeType.Both;
         }
 
@@ -112,19 +113,19 @@ namespace fgui {
             }
         }
 
-        public get align(): cc.Label.HorizontalAlign {
+        public get align(): cc.HorizontalTextAlignment {
             return this._label.horizontalAlign;
         }
 
-        public set align(value: cc.Label.HorizontalAlign) {
+        public set align(value: cc.HorizontalTextAlignment) {
             this._label.horizontalAlign = value;
         }
 
-        public get verticalAlign(): cc.Label.VerticalAlign {
+        public get verticalAlign(): cc.VerticalTextAlignment {
             return this._label.verticalAlign;
         }
 
-        public set verticalAlign(value: cc.Label.VerticalAlign) {
+        public set verticalAlign(value: cc.VerticalTextAlignment) {
             this._label.verticalAlign = value;
         }
 
@@ -142,14 +143,14 @@ namespace fgui {
         }
 
         public get letterSpacing(): number {
-            return this._label["spacingX"];
+            return this._label.spacingX;
         }
 
         public set letterSpacing(value: number) {
-            if (this._label["spacingX"] != value) {
+            if (this._label.spacingX != value) {
 
                 this.markSizeChanged();
-                this._label["spacingX"] = value;
+                this._label.spacingX = value;
             }
         }
 
@@ -193,7 +194,7 @@ namespace fgui {
             }
             else {
                 if (!this._outline) {
-                    this._outline = this._node.addComponent(cc.LabelOutline);
+                    this._outline = this._node.addComponent(cc.LabelOutlineComponent);
                     this.updateStrokeColor();
                 }
                 else
@@ -322,10 +323,7 @@ namespace fgui {
 
         public ensureSizeCorrect(): void {
             if (this._sizeDirty) {
-                if (this._label["_forceUpdateRenderData"]) //2.1 above
-                    this._label["_forceUpdateRenderData"]();
-                else
-                    this._label["_updateRenderData"](true);
+                this._label.updateRenderData();
                 this._sizeDirty = false;
             }
         }
@@ -354,15 +352,21 @@ namespace fgui {
                     label.font = font;
             }
         }
-
-        protected assignFontColor(label: any, value: cc.Color): void {
+        public setAlpha(val) {
+            var c = this._label.color;
+            if (c.a != val) {
+                this.color = c;
+            }
+        }
+        protected assignFontColor(label: cc.LabelComponent | cc.RichTextComponent, value: cc.Color): void {
             let font: any = label.font;
-            if ((font instanceof cc.BitmapFont) && !((<any>font)._fntConfig.canTint))
+            if ((font instanceof cc.BitmapFont) && !(font.fntConfig.canTint))
                 value = cc.Color.WHITE;
 
             if (this._grayed)
                 value = ToolSet.toGrayed(value);
-            label.node.color = value;
+            if (label instanceof cc.LabelComponent)
+                label.color = value;
         }
 
         protected updateFont() {
@@ -385,7 +389,7 @@ namespace fgui {
         protected updateFontSize() {
             let font: any = this._label.font;
             if (font instanceof cc.BitmapFont) {
-                let fntConfig = (<any>font)._fntConfig;
+                let fntConfig = font.fntConfig;
                 if (fntConfig.resizable)
                     this._label.fontSize = this._fontSize;
                 else
@@ -400,17 +404,17 @@ namespace fgui {
 
         protected updateOverflow() {
             if (this._autoSize == AutoSizeType.Both)
-                this._label.overflow = cc.Label.Overflow.NONE;
+                this._label.overflow = cc.LabelComponent.Overflow.NONE;
             else if (this._autoSize == AutoSizeType.Height) {
-                this._label.overflow = cc.Label.Overflow.RESIZE_HEIGHT;
+                this._label.overflow = cc.LabelComponent.Overflow.RESIZE_HEIGHT;
                 this._node.width = this._width;
             }
             else if (this._autoSize == AutoSizeType.Shrink) {
-                this._label.overflow = cc.Label.Overflow.SHRINK;
+                this._label.overflow = cc.LabelComponent.Overflow.SHRINK;
                 this._node.setContentSize(this._width, this._height);
             }
             else {
-                this._label.overflow = cc.Label.Overflow.CLAMP;
+                this._label.overflow = cc.LabelComponent.Overflow.CLAMP;
                 this._node.setContentSize(this._width, this._height);
             }
         }

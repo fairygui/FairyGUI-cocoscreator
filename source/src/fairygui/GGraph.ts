@@ -1,8 +1,14 @@
 
 namespace fgui {
-
+    export class GGraphicsComponent extends cc.GraphicsComponent {
+        handleOnLoad: () => void;
+        onLoad() {
+            super.onLoad();
+            if (this.handleOnLoad) this.handleOnLoad();
+        }
+    }
     export class GGraph extends GObject {
-        public _content: cc.Graphics;
+        public _content: GGraphicsComponent;
 
         private _type: GraphType = 0;
         private _lineSize: number = 0;
@@ -14,6 +20,7 @@ namespace fgui {
         private _polygonPoints: any[];
         private _distances: number[];
         private _hasContent: boolean;
+        _needUpdate: boolean;
 
         public constructor() {
             super();
@@ -25,8 +32,6 @@ namespace fgui {
             this._cornerRadius = null;
             this._sides = 3;
             this._startAngle = 0;
-
-            this._content = this._node.addComponent(cc.Graphics);
         }
 
         public drawRect(lineSize: number, lineColor: cc.Color, fillColor: cc.Color, corner?: Array<number>): void {
@@ -98,18 +103,35 @@ namespace fgui {
             if (this._type != 0)
                 this.updateGraph();
         }
+        private onGraphicsLoaded() {
+            if (this._needUpdate) {
+                if (this._type != 0)
+                    this.updateGraph();
+            }
+        }
+        public updateGraph(): void {
+            var w: number = this._width;
+            var h: number = this._height;
+            if (w == 0 || h == 0) {
+                if (this._hasContent) {
+                    this._hasContent = false;
+                    if (this._content)
+                        this._content.clear();
+                }
+                return;
+            }
+            this._needUpdate = true;
+            if (!this._content) {
+                this._content = this._node.addComponent(GGraphicsComponent);
+                this._content.handleOnLoad = this.onGraphicsLoaded.bind(this);
+            }
+            if (!this._content.model) return;
 
-        private updateGraph(): void {
             let ctx = this._content;
             if (this._hasContent) {
                 this._hasContent = false;
                 ctx.clear();
             }
-
-            var w: number = this._width;
-            var h: number = this._height;
-            if (w == 0 || h == 0)
-                return;
 
             var px: number = -this.pivotX * this._width;
             var py: number = this.pivotY * this._height;
@@ -136,7 +158,7 @@ namespace fgui {
                     this._polygonPoints = [];
                 var radius: number = Math.min(this._width, this._height) / 2;
                 this._polygonPoints.length = 0;
-                var angle: number = cc.misc.degreesToRadians(this._startAngle);
+                var angle: number = this._startAngle * cc.macro.RAD;
                 var deltaAngle: number = 2 * Math.PI / this._sides;
                 var dist: number;
                 for (var i: number = 0; i < this._sides; i++) {
@@ -163,9 +185,10 @@ namespace fgui {
             ctx.fill();
 
             this._hasContent = true;
+            this._needUpdate = false;
         }
 
-        private drawPath(ctx: cc.Graphics, points: number[], px: number, py: number): void {
+        private drawPath(ctx: cc.GraphicsComponent, points: number[], px: number, py: number): void {
 
             var cnt: number = points.length;
             ctx.moveTo(points[0] + px, -points[1] + py);
@@ -201,7 +224,7 @@ namespace fgui {
             else
                 super.setProp(index, value);
         }
-        
+
         public setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void {
             super.setup_beforeAdd(buffer, beginPos);
 
