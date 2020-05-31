@@ -14923,19 +14923,22 @@ window.__extends = (this && this.__extends) || (function () {
                 return;
             if (this._uiSources.length > 0) {
                 this._loading = false;
-                this._loaded = 0;
-                this._loadTotal = 0;
                 var cnt = this._uiSources.length;
+                this._loadTotal = cnt;
+                this._loaded = 0;
                 for (var i = 0; i < cnt; i++) {
                     var lib = this._uiSources[i];
+                    if (lib.loaded) {
+                        this._loadTotal--;
+                    }
                     if (!lib.loaded) {
-                        this._loadTotal++;
                         lib.load(this.__uiLoadComplete, this);
-                        this._loading = true;
                     }
                 }
-                if (!this._loading)
-                    this._init();
+                this._loading = this._loadTotal > this._loaded;
+                if (!this._loading && !this._inited) {
+                    this.__uiLoadComplete();
+                }
             }
             else
                 this._init();
