@@ -14963,6 +14963,7 @@ window.__extends = (this && this.__extends) || (function () {
             if (this.modalWaiting) {
                 this.closeModalWait(this._requestingCmd);
             }
+            this._loaded = this._loadTotal = 0;
             this._loading = false;
             this._init();
         };
