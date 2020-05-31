@@ -80,35 +80,48 @@ namespace fgui {
             return pkg;
         }
 
-        public static loadPackage(url: string, completeCallback: ((error: any) => void) | null): void {
-            cc.loader.loadRes(url, function (err, asset) {
-                if (err) {
-                    completeCallback(err);
-                    return;
-                }
+        public static loadPackage(url: string, 
+            completeCallback: ((error: any) => void) | null, 
+            progressCallback?: ((loaded:number, total:number) => void) | null): void {
 
-                if (!asset.rawBuffer)
-                    throw "Missing asset data. Call UIConfig.registerLoader first!";
-
-                let pkg: UIPackage = new UIPackage();
-                pkg.loadPackage(new ByteBuffer(asset.rawBuffer), url);
-                let cnt: number = pkg._items.length;
-                let urls = [];
-                for (var i: number = 0; i < cnt; i++) {
-                    var pi: PackageItem = pkg._items[i];
-                    if (pi.type == PackageItemType.Atlas || pi.type == PackageItemType.Sound)
-                        urls.push(pi.file);
-                }
-
-                cc.loader.loadResArray(urls, function (err, assets) {
-                    if (!err) {
-                        UIPackage._instById[pkg.id] = pkg;
-                        UIPackage._instByName[pkg.name] = pkg;
+            cc.loader.loadRes(url, (loaded, total)=>{
+                    if(progressCallback != null){
+                        progressCallback(loaded, total);
+                    }
+                },
+                (err, asset)=> {
+                    if (err) {
+                        completeCallback(err);
+                        return;
                     }
 
-                    completeCallback(err);
+                    if (!asset.rawBuffer)
+                        throw "Missing asset data. Call UIConfig.registerLoader first!";
+
+                    let pkg: UIPackage = new UIPackage();
+                    pkg.loadPackage(new ByteBuffer(asset.rawBuffer), url);
+                    let cnt: number = pkg._items.length;
+                    let urls = [];
+                    for (var i: number = 0; i < cnt; i++) {
+                        var pi: PackageItem = pkg._items[i];
+                        if (pi.type == PackageItemType.Atlas || pi.type == PackageItemType.Sound)
+                            urls.push(pi.file);
+                    }
+
+                    cc.loader.loadResArray(urls, (loaded, total)=>{
+                            if(progressCallback != null){
+                                progressCallback(loaded, total);
+                            }
+                        },
+                        (err, assets)=>{
+                            if (!err) {
+                                UIPackage._instById[pkg.id] = pkg;
+                                UIPackage._instByName[pkg.name] = pkg;
+                            }
+
+                            completeCallback(err);
+                        });
                 });
-            });
         }
 
         public static removePackage(packageIdOrName: string): void {
