@@ -24,6 +24,9 @@ namespace fgui {
         }
 
         public static create(): GRoot {
+            if(GRoot._inst != null) {
+                return GRoot._inst;
+            }
             GRoot._inst = new GRoot();
             GRoot._inst.node.parent = cc.director.getScene();
 
