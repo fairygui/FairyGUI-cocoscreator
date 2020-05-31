@@ -1542,7 +1542,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GObject.prototype.onDisable = function () {
         };
-        GObject.prototype.onUpdate = function () {
+        GObject.prototype.onUpdate = function (dt) {
         };
         GObject.prototype.onDestroy = function () {
         };
@@ -7414,6 +7414,11 @@ window.__extends = (this && this.__extends) || (function () {
                 this.setErrorState();
         };
         GLoader.prototype.loadExternal = function () {
+            var asset = cc.loader.getRes(this._url);
+            if (asset != null) {
+                this.onLoaded(null, asset);
+                return;
+            }
             if (fgui.ToolSet.startsWith(this._url, "http://")
                 || fgui.ToolSet.startsWith(this._url, "https://")
                 || fgui.ToolSet.startsWith(this._url, '/'))
@@ -8695,6 +8700,9 @@ window.__extends = (this && this.__extends) || (function () {
             configurable: true
         });
         GRoot.create = function () {
+            if (GRoot._inst != null) {
+                return GRoot._inst;
+            }
             GRoot._inst = new GRoot();
             GRoot._inst.node.parent = cc.director.getScene();
             return GRoot._inst;
@@ -14186,8 +14194,12 @@ window.__extends = (this && this.__extends) || (function () {
             UIPackage._instById[pkg._url] = pkg;
             return pkg;
         };
-        UIPackage.loadPackage = function (url, completeCallback) {
-            cc.loader.loadRes(url, function (err, asset) {
+        UIPackage.loadPackage = function (url, completeCallback, progressCallback) {
+            cc.loader.loadRes(url, function (loaded, total) {
+                if (progressCallback != null) {
+                    progressCallback(loaded, total);
+                }
+            }, function (err, asset) {
                 if (err) {
                     completeCallback(err);
                     return;
@@ -14203,7 +14215,11 @@ window.__extends = (this && this.__extends) || (function () {
                     if (pi.type == fgui.PackageItemType.Atlas || pi.type == fgui.PackageItemType.Sound)
                         urls.push(pi.file);
                 }
-                cc.loader.loadResArray(urls, function (err, assets) {
+                cc.loader.loadResArray(urls, function (loaded, total) {
+                    if (progressCallback != null) {
+                        progressCallback(loaded, total);
+                    }
+                }, function (err, assets) {
                     if (!err) {
                         UIPackage._instById[pkg.id] = pkg;
                         UIPackage._instByName[pkg.name] = pkg;
