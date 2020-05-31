@@ -14889,8 +14889,10 @@ window.__extends = (this && this.__extends) || (function () {
                     return false;
             }
             this._requestingCmd = 0;
-            if (this._modalWaitPane && this._modalWaitPane.parent != null)
+            if (this.modalWaiting) {
                 this.removeChild(this._modalWaitPane);
+                this._modalWaitPane = null;
+            }
             return true;
         };
         Object.defineProperty(Window.prototype, "modalWaiting", {
@@ -14905,10 +14907,13 @@ window.__extends = (this && this.__extends) || (function () {
                 return;
             if (this._uiSources.length > 0) {
                 this._loading = false;
+                this._loaded = 0;
+                this._loadTotal = 0;
                 var cnt = this._uiSources.length;
                 for (var i = 0; i < cnt; i++) {
                     var lib = this._uiSources[i];
                     if (!lib.loaded) {
+                        this._loadTotal++;
                         lib.load(this.__uiLoadComplete, this);
                         this._loading = true;
                     }
@@ -14932,18 +14937,22 @@ window.__extends = (this && this.__extends) || (function () {
             this.hideImmediately();
         };
         Window.prototype.__uiLoadComplete = function () {
-            var cnt = this._uiSources.length;
-            for (var i = 0; i < cnt; i++) {
-                var lib = this._uiSources[i];
-                if (!lib.loaded)
-                    return;
+            this._loaded++;
+            if (this._loaded < this._loadTotal) {
+                if (!this.modalWaiting) {
+                    this.showModalWait(this._requestingCmd);
+                }
+                return;
+            }
+            if (this.modalWaiting) {
+                this.closeModalWait(this._requestingCmd);
             }
             this._loading = false;
             this._init();
         };
         Window.prototype._init = function () {
-            this._inited = true;
             this.onInit();
+            this._inited = true;
             if (this.isShowing)
                 this.doShowAnimation();
         };
@@ -15298,14 +15307,24 @@ window.__extends = (this && this.__extends) || (function () {
                     if (!material) {
                         material = cc.Material.getBuiltinMaterial('2d-gray-sprite');
                     }
-                    material = this._graySpriteMaterial = cc.Material.getInstantiatedMaterial(material, this);
+                    if (cc.Material.getInstantiatedMaterial) {
+                        material = this._graySpriteMaterial = cc.Material.getInstantiatedMaterial(material, this);
+                    }
+                    else {
+                        material = this._graySpriteMaterial = cc.Material.create(material, this);
+                    }
                 }
                 else {
                     material = this._spriteMaterial;
                     if (!material) {
                         material = cc.Material.getBuiltinMaterial('2d-sprite', this);
                     }
-                    material = this._spriteMaterial = cc.Material.getInstantiatedMaterial(material, this);
+                    if (cc.Material.getInstantiatedMaterial) {
+                        material = this._spriteMaterial = cc.Material.getInstantiatedMaterial(material, this);
+                    }
+                    else {
+                        material = this._spriteMaterial = cc.Material.create(material, this);
+                    }
                 }
                 this.setMaterial(0, material);
             },
