@@ -10,11 +10,13 @@ namespace fgui {
         private _frame: GComponent;
         private _modal: boolean;
 
-        private _uiSources: Array<IUISource>;
-        private _inited: boolean;
-        private _loading: boolean;
-
+        protected _uiSources: Array<IUISource>;
+        protected _inited: boolean;
+        protected _loading: boolean;
         protected _requestingCmd: number = 0;
+
+        protected _loadTotal: number;
+        protected _loaded: number;
 
         public bringToFontOnClick: boolean;
 
@@ -183,8 +185,10 @@ namespace fgui {
             }
             this._requestingCmd = 0;
 
-            if (this._modalWaitPane && this._modalWaitPane.parent != null)
+            if (this.modalWaiting){
                 this.removeChild(this._modalWaitPane);
+                this._modalWaitPane = null;
+            }
 
             return true;
         }
@@ -201,16 +205,23 @@ namespace fgui {
             if (this._uiSources.length > 0) {
                 this._loading = false;
                 var cnt: number = this._uiSources.length;
+                this._loadTotal = cnt;
+                this._loaded = 0;
                 for (var i: number = 0; i < cnt; i++) {
                     var lib: IUISource = this._uiSources[i];
+                    if (lib.loaded) {
+                        this._loadTotal--;
+                    }
                     if (!lib.loaded) {
                         lib.load(this.__uiLoadComplete, this);
-                        this._loading = true;
                     }
                 }
+                
+                this._loading = this._loadTotal > this._loaded;
 
-                if (!this._loading)
-                    this._init();
+                if (!this._loading && !this._inited){
+                    this.__uiLoadComplete()
+                }
             }
             else
                 this._init();
@@ -234,21 +245,25 @@ namespace fgui {
         }
 
         private __uiLoadComplete(): void {
-            var cnt: number = this._uiSources.length;
-            for (var i: number = 0; i < cnt; i++) {
-                var lib: IUISource = this._uiSources[i];
-                if (!lib.loaded)
-                    return;
+            this._loaded++;
+            if (this._loaded < this._loadTotal) {
+                if (!this.modalWaiting) {
+                    this.showModalWait(this._requestingCmd);
+                }
+                return;
             }
-
+            if (this.modalWaiting) {
+                this.closeModalWait(this._requestingCmd);
+            }
+            this._loaded = this._loadTotal = 0;
             this._loading = false;
             this._init();
         }
 
         private _init(): void {
-            this._inited = true;
             this.onInit();
-
+            this._inited = true;
+            
             if (this.isShowing)
                 this.doShowAnimation();
         }

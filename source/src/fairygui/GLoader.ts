@@ -307,6 +307,13 @@ namespace fgui {
         }
 
         protected loadExternal(): void {
+
+            let asset = cc.loader.getRes(this._url);
+            if(asset != null){
+                this.onLoaded(null, asset);
+                return;
+            }
+
             if (ToolSet.startsWith(this._url, "http://")
                 || ToolSet.startsWith(this._url, "https://")
                 || ToolSet.startsWith(this._url, '/'))
