@@ -2360,6 +2360,9 @@ window.__extends = (this && this.__extends) || (function () {
             for (var i = 0; i < length; i++) {
                 child = this._children[i];
                 child.handleControllerChanged(c);
+			    if (child.ensureBoundsCorrect) {
+			       	child.ensureBoundsCorrect();
+			    }
             }
             this._applyingController = null;
             c.runActions();
@@ -5924,10 +5927,14 @@ window.__extends = (this && this.__extends) || (function () {
                         this.removeChildrenToPool(value, cnt);
                     }
                     if (this.itemRenderer != null) {
-                        for (i = 0; i < value; i++)
-                            this.itemRenderer(i, this.getChildAt(i));
+						for (i = 0; i < value; i++) {
+							var item = this.getChildAt(i);
+							this.itemRenderer(i, item);
+							if (item.ensureBoundsCorrect) item.ensureBoundsCorrect();
+						}
                     }
                 }
+				this.ensureBoundsCorrect();
             },
             enumerable: false,
             configurable: true
@@ -7649,7 +7656,7 @@ window.__extends = (this && this.__extends) || (function () {
             this._shrinkOnly = buffer.readBool();
             this._autoSize = buffer.readBool();
             this._showErrorSign = buffer.readBool();
-            this._playing = buffer.readBool();
+            this.playing = buffer.readBool();
             this._frame = buffer.readInt();
             if (buffer.readBool())
                 this.color = buffer.readColor();

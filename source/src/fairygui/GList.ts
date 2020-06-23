@@ -1049,10 +1049,14 @@ namespace fgui {
                     this.removeChildrenToPool(value, cnt);
                 }
                 if (this.itemRenderer != null) {
-                    for (i = 0; i < value; i++)
-                        this.itemRenderer(i, this.getChildAt(i));
+                    for (i = 0; i < value; i++){
+						var item = this.getChildAt(i);
+                        this.itemRenderer(i, item);
+						if (item.ensureBoundsCorrect) {item.ensureBoundsCorrect();}
+                    }
                 }
             }
+			this.ensureBoundsCorrect();
         }
 
         public refreshVirtualList(): void {
