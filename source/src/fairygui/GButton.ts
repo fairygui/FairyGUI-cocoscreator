@@ -241,10 +241,10 @@ namespace fgui {
                 var cnt: number = this.numChildren;
                 if (val == GButton.DOWN || val == GButton.SELECTED_OVER || val == GButton.SELECTED_DISABLED) {
 
-                    if (!this._downColor) {
-                        var r: number = this._downEffectValue * 255;
-                        this._downColor = new cc.Color(r, r, r, 255);
-                    }
+                    if (!this._downColor)
+                        this._downColor = new cc.Color();
+                    var r: number = this._downEffectValue * 255;
+                    this._downColor.setR(r).setG(r).setB(r);
                     for (var i: number = 0; i < cnt; i++) {
                         var obj: GObject = this.getChildAt(i);
                         if (obj["color"] != undefined && !(obj instanceof GTextField))

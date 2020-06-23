@@ -1,9 +1,12 @@
 window.fgui = {};
 window.fairygui = window.fgui;
 window.__extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -236,7 +239,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.changing = false;
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Controller.prototype.onChanged = function (callback, target) {
@@ -260,7 +263,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._previousIndex;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(Controller.prototype, "selectedPage", {
@@ -276,7 +279,7 @@ window.__extends = (this && this.__extends) || (function () {
                     i = 0;
                 this.selectedIndex = i;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Controller.prototype.setSelectedPage = function (value) {
@@ -292,14 +295,14 @@ window.__extends = (this && this.__extends) || (function () {
                 else
                     return this._pageNames[this._previousIndex];
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(Controller.prototype, "pageCount", {
             get: function () {
                 return this._pageIds.length;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Controller.prototype.getPageName = function (index) {
@@ -381,7 +384,7 @@ window.__extends = (this && this.__extends) || (function () {
                 var i = this._pageIds.indexOf(val);
                 this.selectedIndex = i;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(Controller.prototype, "oppositePageId", {
@@ -392,7 +395,7 @@ window.__extends = (this && this.__extends) || (function () {
                 else if (this._pageIds.length > 1)
                     this.selectedIndex = 1;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(Controller.prototype, "previousPageId", {
@@ -402,7 +405,7 @@ window.__extends = (this && this.__extends) || (function () {
                 else
                     return this._pageIds[this._previousIndex];
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Controller.prototype.runActions = function () {
@@ -488,21 +491,21 @@ window.__extends = (this && this.__extends) || (function () {
                     DragDropManager._inst = new DragDropManager();
                 return DragDropManager._inst;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DragDropManager.prototype, "dragAgent", {
             get: function () {
                 return this._agent;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DragDropManager.prototype, "dragging", {
             get: function () {
                 return this._agent.parent != null;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         DragDropManager.prototype.startDrag = function (source, icon, sourceData, touchId) {
@@ -610,7 +613,8 @@ window.__extends = (this && this.__extends) || (function () {
         PackageItemType[PackageItemType["Font"] = 5] = "Font";
         PackageItemType[PackageItemType["Swf"] = 6] = "Swf";
         PackageItemType[PackageItemType["Misc"] = 7] = "Misc";
-        PackageItemType[PackageItemType["Unknown"] = 8] = "Unknown";
+        PackageItemType[PackageItemType["Spine"] = 8] = "Spine";
+        PackageItemType[PackageItemType["DragonBones"] = 9] = "DragonBones";
     })(PackageItemType = fgui.PackageItemType || (fgui.PackageItemType = {}));
     var ObjectType;
     (function (ObjectType) {
@@ -632,6 +636,7 @@ window.__extends = (this && this.__extends) || (function () {
         ObjectType[ObjectType["Slider"] = 15] = "Slider";
         ObjectType[ObjectType["ScrollBar"] = 16] = "ScrollBar";
         ObjectType[ObjectType["Tree"] = 17] = "Tree";
+        ObjectType[ObjectType["Loader3D"] = 18] = "Loader3D";
     })(ObjectType = fgui.ObjectType || (fgui.ObjectType = {}));
     var ProgressTitleType;
     (function (ProgressTitleType) {
@@ -802,7 +807,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._id;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "name", {
@@ -812,7 +817,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._name = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "x", {
@@ -822,7 +827,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.setPosition(value, this._y);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "y", {
@@ -832,7 +837,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.setPosition(this._x, value);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GObject.prototype.setPosition = function (xv, yv) {
@@ -865,7 +870,7 @@ window.__extends = (this && this.__extends) || (function () {
                 else
                     this.setPosition(value, this._y);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "yMin", {
@@ -878,7 +883,7 @@ window.__extends = (this && this.__extends) || (function () {
                 else
                     this.setPosition(this._x, value);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "pixelSnapping", {
@@ -891,7 +896,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.handlePositionChanged();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GObject.prototype.center = function (restraint) {
@@ -916,7 +921,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.setSize(value, this._rawHeight);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "height", {
@@ -929,7 +934,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.setSize(this._rawWidth, value);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GObject.prototype.setSize = function (wv, hv, ignorePivot) {
@@ -974,14 +979,14 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this.width * Math.abs(this._node.scaleX);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "actualHeight", {
             get: function () {
                 return this.height * Math.abs(this._node.scaleY);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "scaleX", {
@@ -991,7 +996,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.setScale(value, this._node.scaleY);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "scaleY", {
@@ -1001,7 +1006,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.setScale(this._node.scaleX, value);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GObject.prototype.setScale = function (sx, sy) {
@@ -1017,7 +1022,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.setSkew(value, this._skewY);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "skewY", {
@@ -1027,7 +1032,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.setSkew(this._skewX, value);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GObject.prototype.setSkew = function (xv, yv) {
@@ -1045,7 +1050,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.node.anchorX = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "pivotY", {
@@ -1055,7 +1060,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.node.anchorY = 1 - value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GObject.prototype.setPivot = function (xv, yv, asAnchor) {
@@ -1072,7 +1077,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._pivotAsAnchor;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "touchable", {
@@ -1085,7 +1090,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateGear(3);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "grayed", {
@@ -1099,7 +1104,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateGear(3);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "enabled", {
@@ -1110,7 +1115,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this.grayed = !value;
                 this.touchable = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "rotation", {
@@ -1124,7 +1129,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateGear(3);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "alpha", {
@@ -1140,7 +1145,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateGear(3);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "visible", {
@@ -1155,21 +1160,21 @@ window.__extends = (this && this.__extends) || (function () {
                         this._group.setBoundsChangedFlag();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "_finalVisible", {
             get: function () {
                 return this._visible && this._internalVisible && (!this._group || this._group._finalVisible);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "internalVisible3", {
             get: function () {
                 return this._visible && this._internalVisible;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "sortingOrder", {
@@ -1186,7 +1191,7 @@ window.__extends = (this && this.__extends) || (function () {
                         this._parent.childSortingOrderChanged(this, old, this._sortingOrder);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GObject.prototype.requestFocus = function () {
@@ -1206,7 +1211,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._node.on(fgui.Event.ROLL_OUT, this.onRollOut, this);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "blendMode", {
@@ -1219,14 +1224,14 @@ window.__extends = (this && this.__extends) || (function () {
                     fgui.BlendModeUtils.apply(this._node, value);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "onStage", {
             get: function () {
                 return this._node && this._node.activeInHierarchy;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "resourceURL", {
@@ -1236,7 +1241,7 @@ window.__extends = (this && this.__extends) || (function () {
                 else
                     return null;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "group", {
@@ -1252,7 +1257,7 @@ window.__extends = (this && this.__extends) || (function () {
                         this._group.setBoundsChangedFlag();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GObject.prototype.getGear = function (index) {
@@ -1309,28 +1314,28 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this.getGear(1);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "gearSize", {
             get: function () {
                 return this.getGear(2);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "gearLook", {
             get: function () {
                 return this.getGear(3);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "relations", {
             get: function () {
                 return this._relations;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GObject.prototype.addRelation = function (target, relationType, usePercent) {
@@ -1343,14 +1348,14 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._node;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "parent", {
             get: function () {
                 return this._parent;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GObject.prototype.removeFromParent = function () {
@@ -1381,119 +1386,119 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 return fgui.GRoot.inst;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "asCom", {
             get: function () {
                 return this;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "asButton", {
             get: function () {
                 return this;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "asLabel", {
             get: function () {
                 return this;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "asProgress", {
             get: function () {
                 return this;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "asTextField", {
             get: function () {
                 return this;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "asRichTextField", {
             get: function () {
                 return this;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "asTextInput", {
             get: function () {
                 return this;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "asLoader", {
             get: function () {
                 return this;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "asList", {
             get: function () {
                 return this;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "asTree", {
             get: function () {
                 return this;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "asGraph", {
             get: function () {
                 return this;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "asGroup", {
             get: function () {
                 return this;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "asSlider", {
             get: function () {
                 return this;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "asComboBox", {
             get: function () {
                 return this;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "asImage", {
             get: function () {
                 return this;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "asMovieClip", {
             get: function () {
                 return this;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GObject.cast = function (obj) {
@@ -1505,7 +1510,7 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "icon", {
@@ -1514,14 +1519,14 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "treeNode", {
             get: function () {
                 return this._treeNode;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GObject.prototype.dispose = function () {
@@ -1576,7 +1581,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.initDrag();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GObject.prototype, "dragBounds", {
@@ -1586,7 +1591,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._dragBounds = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GObject.prototype.startDrag = function (touchId) {
@@ -1601,7 +1606,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return GObject.draggingObject == this;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GObject.prototype.localToGlobal = function (ax, ay, resultPoint) {
@@ -2024,7 +2029,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._container;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GComponent.prototype.addChild = function (child) {
@@ -2241,7 +2246,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._children.length;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GComponent.prototype.isAncestorOf = function (child) {
@@ -2288,7 +2293,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._controllers;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GComponent.prototype.onChildAdd = function (child, index) {
@@ -2423,7 +2428,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._scrollPane;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GComponent.prototype, "opaque", {
@@ -2433,7 +2438,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._opaque = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GComponent.prototype, "margin", {
@@ -2444,7 +2449,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this._margin.copy(value);
                 this.handleSizeChanged();
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GComponent.prototype, "childrenRenderOrder", {
@@ -2457,7 +2462,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.buildNativeDisplayList();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GComponent.prototype, "apexIndex", {
@@ -2471,7 +2476,7 @@ window.__extends = (this && this.__extends) || (function () {
                         this.buildNativeDisplayList();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GComponent.prototype, "mask", {
@@ -2481,7 +2486,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.setMask(value, false);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GComponent.prototype.setMask = function (value, inverted) {
@@ -2563,14 +2568,14 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return -this.pivotX * this._width + this._margin.left;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GComponent.prototype, "_pivotCorrectY", {
             get: function () {
                 return this.pivotY * this._height - this._margin.top;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GComponent.prototype, "baseUserData", {
@@ -2579,7 +2584,7 @@ window.__extends = (this && this.__extends) || (function () {
                 buffer.seek(0, 4);
                 return buffer.readS();
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GComponent.prototype.setupScroll = function (buffer) {
@@ -2771,7 +2776,7 @@ window.__extends = (this && this.__extends) || (function () {
                 else
                     this.width = value + this._margin.left + this._margin.right;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GComponent.prototype, "viewHeight", {
@@ -2787,7 +2792,7 @@ window.__extends = (this && this.__extends) || (function () {
                 else
                     this.height = value + this._margin.top + this._margin.bottom;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GComponent.prototype.getSnappingPosition = function (xValue, yValue, resultPoint) {
@@ -3098,7 +3103,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._iconObject.icon = value;
                 this.updateGear(7);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GButton.prototype, "selectedIcon", {
@@ -3111,7 +3116,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._iconObject != null)
                     this._iconObject.icon = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GButton.prototype, "title", {
@@ -3124,7 +3129,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._titleObject.text = (this._selected && this._selectedTitle) ? this._selectedTitle : this._title;
                 this.updateGear(6);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GButton.prototype, "text", {
@@ -3134,7 +3139,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.title = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GButton.prototype, "selectedTitle", {
@@ -3146,7 +3151,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._titleObject)
                     this._titleObject.text = (this._selected && this._selectedTitle) ? this._selectedTitle : this._title;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GButton.prototype, "titleColor", {
@@ -3162,7 +3167,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (tf != null)
                     tf.color = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GButton.prototype, "titleFontSize", {
@@ -3178,7 +3183,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (tf != null)
                     tf.fontSize = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GButton.prototype, "sound", {
@@ -3188,7 +3193,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (val) {
                 this._sound = val;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GButton.prototype, "soundVolumeScale", {
@@ -3198,7 +3203,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._soundVolumeScale = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GButton.prototype, "selected", {
@@ -3231,7 +3236,7 @@ window.__extends = (this && this.__extends) || (function () {
                     }
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GButton.prototype, "mode", {
@@ -3245,7 +3250,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._mode = value;
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GButton.prototype, "relatedController", {
@@ -3255,7 +3260,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (val) {
                 this._relatedController = val;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GButton.prototype, "relatedPageId", {
@@ -3265,7 +3270,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (val) {
                 this._relatedPageId = val;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GButton.prototype, "changeStateOnClick", {
@@ -3275,7 +3280,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._changeStateOnClick = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GButton.prototype, "linkedPopup", {
@@ -3285,7 +3290,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._linkedPopup = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GButton.prototype.getTextField = function () {
@@ -3307,10 +3312,10 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._downEffect == 1) {
                 var cnt = this.numChildren;
                 if (val == GButton.DOWN || val == GButton.SELECTED_OVER || val == GButton.SELECTED_DISABLED) {
-                    if (!this._downColor) {
-                        var r = this._downEffectValue * 255;
-                        this._downColor = new cc.Color(r, r, r, 255);
-                    }
+                    if (!this._downColor)
+                        this._downColor = new cc.Color();
+                    var r = this._downEffectValue * 255;
+                    this._downColor.setR(r).setG(r).setB(r);
                     for (var i = 0; i < cnt; i++) {
                         var obj = this.getChildAt(i);
                         if (obj["color"] != undefined && !(obj instanceof fgui.GTextField))
@@ -3608,7 +3613,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._titleObject.text = value;
                 this.updateGear(6);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GComboBox.prototype, "icon", {
@@ -3623,7 +3628,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._iconObject.icon = value;
                 this.updateGear(7);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GComboBox.prototype, "titleColor", {
@@ -3639,7 +3644,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (tf != null)
                     tf.color = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GComboBox.prototype, "titleFontSize", {
@@ -3655,7 +3660,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (tf != null)
                     tf.fontSize = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GComboBox.prototype, "visibleItemCount", {
@@ -3665,7 +3670,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._visibleItemCount = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GComboBox.prototype, "popupDirection", {
@@ -3675,7 +3680,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._popupDirection = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GComboBox.prototype, "items", {
@@ -3704,7 +3709,7 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 this._itemsUpdated = true;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GComboBox.prototype, "icons", {
@@ -3716,7 +3721,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._icons != null && this._selectedIndex != -1 && this._selectedIndex < this._icons.length)
                     this.icon = this._icons[this._selectedIndex];
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GComboBox.prototype, "values", {
@@ -3729,7 +3734,7 @@ window.__extends = (this && this.__extends) || (function () {
                 else
                     this._values = value.concat();
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GComboBox.prototype, "selectedIndex", {
@@ -3752,7 +3757,7 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 this.updateSelectionController();
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GComboBox.prototype, "value", {
@@ -3765,7 +3770,7 @@ window.__extends = (this && this.__extends) || (function () {
                     index = this._values.indexOf("");
                 this.selectedIndex = index;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GComboBox.prototype, "selectionController", {
@@ -3775,7 +3780,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._selectionController = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GComboBox.prototype.getTextField = function () {
@@ -4033,8 +4038,8 @@ window.__extends = (this && this.__extends) || (function () {
             _this._lineSize = 0;
             _this._node.name = "GGraph";
             _this._lineSize = 1;
-            _this._lineColor = cc.Color.BLACK;
-            _this._fillColor = cc.Color.WHITE;
+            _this._lineColor = new cc.Color();
+            _this._fillColor = new cc.Color(255, 255, 255, 255);
             _this._cornerRadius = null;
             _this._sides = 3;
             _this._startAngle = 0;
@@ -4044,16 +4049,16 @@ window.__extends = (this && this.__extends) || (function () {
         GGraph.prototype.drawRect = function (lineSize, lineColor, fillColor, corner) {
             this._type = fgui.GraphType.Rect;
             this._lineSize = lineSize;
-            this._lineColor = lineColor;
-            this._fillColor = fillColor;
+            this._lineColor.set(lineColor);
+            this._fillColor.set(fillColor);
             this._cornerRadius = corner;
             this.updateGraph();
         };
         GGraph.prototype.drawEllipse = function (lineSize, lineColor, fillColor) {
             this._type = fgui.GraphType.Ellipse;
             this._lineSize = lineSize;
-            this._lineColor = lineColor;
-            this._fillColor = fillColor;
+            this._lineColor.set(lineColor);
+            this._fillColor.set(fillColor);
             this._cornerRadius = null;
             this.updateGraph();
         };
@@ -4062,8 +4067,8 @@ window.__extends = (this && this.__extends) || (function () {
             if (distances === void 0) { distances = null; }
             this._type = 4;
             this._lineSize = lineSize;
-            this._lineColor = lineColor;
-            this._fillColor = fillColor;
+            this._lineColor.set(lineColor);
+            this._fillColor.set(fillColor);
             this._sides = sides;
             this._startAngle = startAngle;
             this._distances = distances;
@@ -4072,8 +4077,8 @@ window.__extends = (this && this.__extends) || (function () {
         GGraph.prototype.drawPolygon = function (lineSize, lineColor, fillColor, points) {
             this._type = 3;
             this._lineSize = lineSize;
-            this._lineColor = lineColor;
-            this._fillColor = fillColor;
+            this._lineColor.set(lineColor);
+            this._fillColor.set(fillColor);
             this._polygonPoints = points;
             this.updateGraph();
         };
@@ -4086,7 +4091,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._type == 3)
                     this.updateGraph();
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GGraph.prototype.clearGraphics = function () {
@@ -4100,7 +4105,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._type;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GGraph.prototype, "color", {
@@ -4108,11 +4113,11 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._fillColor;
             },
             set: function (value) {
-                this._fillColor = value;
+                this._fillColor.set(value);
                 if (this._type != 0)
                     this.updateGraph();
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GGraph.prototype.updateGraph = function () {
@@ -4132,7 +4137,7 @@ window.__extends = (this && this.__extends) || (function () {
             ctx.fillColor = this._fillColor;
             if (this._type == 1) {
                 if (this._cornerRadius) {
-                    ctx.roundRect(0 + px, -h + py, w, h, this._cornerRadius[0] * 2);
+                    ctx.roundRect(0 + px, -h + py, w, h, this._cornerRadius[0]);
                 }
                 else
                     ctx.rect(0 + px, -h + py, w, h);
@@ -4184,7 +4189,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this.updateGraph();
         };
         GGraph.prototype.handleAnchorChanged = function () {
-            _super.prototype.handleSizeChanged.call(this);
+            _super.prototype.handleAnchorChanged.call(this);
             if (this._type != 0)
                 this.updateGraph();
         };
@@ -4208,8 +4213,8 @@ window.__extends = (this && this.__extends) || (function () {
                 var i;
                 var cnt;
                 this._lineSize = buffer.readInt();
-                this._lineColor = buffer.readColor(true);
-                this._fillColor = buffer.readColor(true);
+                this._lineColor.set(buffer.readColor(true));
+                this._fillColor.set(buffer.readColor(true));
                 if (buffer.readBool()) {
                     this._cornerRadius = new Array(4);
                     for (i = 0; i < 4; i++)
@@ -4272,7 +4277,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.setBoundsChangedFlag();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GGroup.prototype, "lineGap", {
@@ -4285,7 +4290,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.setBoundsChangedFlag(true);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GGroup.prototype, "columnGap", {
@@ -4298,7 +4303,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.setBoundsChangedFlag(true);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GGroup.prototype, "excludeInvisibles", {
@@ -4311,7 +4316,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.setBoundsChangedFlag();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GGroup.prototype, "autoSizeDisabled", {
@@ -4321,7 +4326,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._autoSizeDisabled = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GGroup.prototype, "mainGridMinSize", {
@@ -4334,7 +4339,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.setBoundsChangedFlag();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GGroup.prototype, "mainGridIndex", {
@@ -4347,7 +4352,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.setBoundsChangedFlag();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GGroup.prototype.setBoundsChangedFlag = function (positionChangedOnly) {
@@ -4657,6 +4662,8 @@ window.__extends = (this && this.__extends) || (function () {
             _this._node.name = "GImage";
             _this._touchDisabled = true;
             _this._content = _this._node.addComponent(fgui.Image);
+            _this._content.sizeMode = cc.Sprite.SizeMode.CUSTOM;
+            _this._content.trim = false;
             return _this;
         }
         Object.defineProperty(GImage.prototype, "color", {
@@ -4664,12 +4671,12 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._node.color;
             },
             set: function (value) {
-                if (this._node.color != value) {
+                if (!this._node.color.equals(value)) {
                     this._node.color = value;
                     this.updateGear(4);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GImage.prototype, "flip", {
@@ -4679,7 +4686,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._content.flip = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GImage.prototype, "fillMethod", {
@@ -4689,7 +4696,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._content.fillMethod = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GImage.prototype, "fillOrigin", {
@@ -4699,7 +4706,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._content.fillOrigin = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GImage.prototype, "fillClockwise", {
@@ -4709,7 +4716,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._content.fillClockwise = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GImage.prototype, "fillAmount", {
@@ -4719,7 +4726,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._content.fillAmount = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GImage.prototype.constructFromResource = function () {
@@ -4788,7 +4795,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._iconObject.icon = value;
                 this.updateGear(7);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLabel.prototype, "title", {
@@ -4803,7 +4810,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._titleObject.text = value;
                 this.updateGear(6);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLabel.prototype, "text", {
@@ -4813,7 +4820,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.title = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLabel.prototype, "titleColor", {
@@ -4830,7 +4837,7 @@ window.__extends = (this && this.__extends) || (function () {
                     tf.color = value;
                 this.updateGear(4);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLabel.prototype, "titleFontSize", {
@@ -4846,7 +4853,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (tf != null)
                     tf.fontSize = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLabel.prototype, "editable", {
@@ -4860,7 +4867,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._titleObject)
                     this._titleObject.asTextInput.editable = val;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GLabel.prototype.getTextField = function () {
@@ -5007,7 +5014,7 @@ window.__extends = (this && this.__extends) || (function () {
                         this.setVirtualListChangedFlag(true);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GList.prototype, "lineCount", {
@@ -5022,7 +5029,7 @@ window.__extends = (this && this.__extends) || (function () {
                         this.setVirtualListChangedFlag(true);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GList.prototype, "columnCount", {
@@ -5037,7 +5044,7 @@ window.__extends = (this && this.__extends) || (function () {
                         this.setVirtualListChangedFlag(true);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GList.prototype, "lineGap", {
@@ -5052,7 +5059,7 @@ window.__extends = (this && this.__extends) || (function () {
                         this.setVirtualListChangedFlag(true);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GList.prototype, "columnGap", {
@@ -5067,7 +5074,7 @@ window.__extends = (this && this.__extends) || (function () {
                         this.setVirtualListChangedFlag(true);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GList.prototype, "align", {
@@ -5082,7 +5089,7 @@ window.__extends = (this && this.__extends) || (function () {
                         this.setVirtualListChangedFlag(true);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GList.prototype, "verticalAlign", {
@@ -5097,7 +5104,7 @@ window.__extends = (this && this.__extends) || (function () {
                         this.setVirtualListChangedFlag(true);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GList.prototype, "virtualItemSize", {
@@ -5113,7 +5120,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.setVirtualListChangedFlag(true);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GList.prototype, "defaultItem", {
@@ -5123,7 +5130,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (val) {
                 this._defaultItem = val;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GList.prototype, "autoResizeItem", {
@@ -5138,7 +5145,7 @@ window.__extends = (this && this.__extends) || (function () {
                         this.setVirtualListChangedFlag(true);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GList.prototype, "selectionMode", {
@@ -5148,7 +5155,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._selectionMode = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GList.prototype, "selectionController", {
@@ -5158,14 +5165,14 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._selectionController = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GList.prototype, "itemPool", {
             get: function () {
                 return this._pool;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GList.prototype.getFromPool = function (url) {
@@ -5258,7 +5265,7 @@ window.__extends = (this && this.__extends) || (function () {
                 else
                     this.clearSelection();
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GList.prototype.getSelection = function (result) {
@@ -5922,7 +5929,7 @@ window.__extends = (this && this.__extends) || (function () {
                     }
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GList.prototype.refreshVirtualList = function () {
@@ -7075,7 +7082,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._count;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GObjectPool.prototype.getObject = function (url) {
@@ -7124,11 +7131,14 @@ window.__extends = (this && this.__extends) || (function () {
             _this._align = fgui.AlignType.Left;
             _this._verticalAlign = fgui.VertAlignType.Top;
             _this._showErrorSign = true;
-            _this._color = cc.Color.WHITE;
+            _this._color = new cc.Color(255, 255, 255, 255);
             _this._container = new cc.Node("Image");
             _this._container.setAnchorPoint(0, 1);
             _this._node.addChild(_this._container);
             _this._content = _this._container.addComponent(fgui.MovieClip);
+            _this._content.sizeMode = cc.Sprite.SizeMode.CUSTOM;
+            _this._content.trim = false;
+            _this._content.setPlaySettings();
             return _this;
         }
         GLoader.prototype.dispose = function () {
@@ -7151,7 +7161,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this.loadContent();
                 this.updateGear(7);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLoader.prototype, "icon", {
@@ -7161,7 +7171,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.url = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLoader.prototype, "align", {
@@ -7174,7 +7184,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateLayout();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLoader.prototype, "verticalAlign", {
@@ -7187,7 +7197,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateLayout();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLoader.prototype, "fill", {
@@ -7200,7 +7210,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateLayout();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLoader.prototype, "shrinkOnly", {
@@ -7213,7 +7223,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateLayout();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLoader.prototype, "autoSize", {
@@ -7226,7 +7236,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateLayout();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLoader.prototype, "playing", {
@@ -7241,7 +7251,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateGear(5);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLoader.prototype, "frame", {
@@ -7256,7 +7266,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateGear(5);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLoader.prototype, "color", {
@@ -7264,13 +7274,13 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._color;
             },
             set: function (value) {
-                if (this._color != value) {
-                    this._color = value;
+                if (!this._color.equals(value)) {
+                    this._color.set(value);
                     this.updateGear(4);
                     this._container.color = value;
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLoader.prototype, "fillMethod", {
@@ -7280,7 +7290,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._content.fillMethod = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLoader.prototype, "fillOrigin", {
@@ -7290,7 +7300,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._content.fillOrigin = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLoader.prototype, "fillClockwise", {
@@ -7300,7 +7310,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._content.fillClockwise = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLoader.prototype, "fillAmount", {
@@ -7310,7 +7320,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._content.fillAmount = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLoader.prototype, "showErrorSign", {
@@ -7320,14 +7330,14 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._showErrorSign = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLoader.prototype, "component", {
             get: function () {
                 return this._content2;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GLoader.prototype, "texture", {
@@ -7347,7 +7357,7 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 this.updateLayout();
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GLoader.prototype.loadContent = function () {
@@ -7659,6 +7669,338 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
+    var GLoader3D = (function (_super) {
+        __extends(GLoader3D, _super);
+        function GLoader3D() {
+            var _this = _super.call(this) || this;
+            _this._frame = 0;
+            _this._node.name = "GLoader3D";
+            _this._playing = true;
+            _this._url = "";
+            _this._fill = fgui.LoaderFillType.None;
+            _this._align = fgui.AlignType.Left;
+            _this._verticalAlign = fgui.VertAlignType.Top;
+            _this._color = new cc.Color(255, 255, 255, 255);
+            _this._container = new cc.Node("Wrapper");
+            _this._container.setAnchorPoint(0, 1);
+            _this._node.addChild(_this._container);
+            return _this;
+        }
+        GLoader3D.prototype.dispose = function () {
+            _super.prototype.dispose.call(this);
+        };
+        Object.defineProperty(GLoader3D.prototype, "url", {
+            get: function () {
+                return this._url;
+            },
+            set: function (value) {
+                if (this._url == value)
+                    return;
+                this._url = value;
+                this.loadContent();
+                this.updateGear(7);
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "icon", {
+            get: function () {
+                return this._url;
+            },
+            set: function (value) {
+                this.url = value;
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "align", {
+            get: function () {
+                return this._align;
+            },
+            set: function (value) {
+                if (this._align != value) {
+                    this._align = value;
+                    this.updateLayout();
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "verticalAlign", {
+            get: function () {
+                return this._verticalAlign;
+            },
+            set: function (value) {
+                if (this._verticalAlign != value) {
+                    this._verticalAlign = value;
+                    this.updateLayout();
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "fill", {
+            get: function () {
+                return this._fill;
+            },
+            set: function (value) {
+                if (this._fill != value) {
+                    this._fill = value;
+                    this.updateLayout();
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "shrinkOnly", {
+            get: function () {
+                return this._shrinkOnly;
+            },
+            set: function (value) {
+                if (this._shrinkOnly != value) {
+                    this._shrinkOnly = value;
+                    this.updateLayout();
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "autoSize", {
+            get: function () {
+                return this._autoSize;
+            },
+            set: function (value) {
+                if (this._autoSize != value) {
+                    this._autoSize = value;
+                    this.updateLayout();
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "playing", {
+            get: function () {
+                return this._playing;
+            },
+            set: function (value) {
+                if (this._playing != value) {
+                    this._playing = value;
+                    this.updateGear(5);
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "frame", {
+            get: function () {
+                return this._frame;
+            },
+            set: function (value) {
+                if (this._frame != value) {
+                    this._frame = value;
+                    this.updateGear(5);
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "color", {
+            get: function () {
+                return this._color;
+            },
+            set: function (value) {
+                if (!this._color.equals(value)) {
+                    this._color.set(value);
+                    this.updateGear(4);
+                    this._container.color = value;
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        GLoader3D.prototype.loadContent = function () {
+            this.clearContent();
+            if (!this._url)
+                return;
+            if (fgui.ToolSet.startsWith(this._url, "ui://"))
+                this.loadFromPackage(this._url);
+            else
+                this.loadExternal();
+        };
+        GLoader3D.prototype.loadFromPackage = function (itemURL) {
+            this._contentItem = fgui.UIPackage.getItemByURL(itemURL);
+            if (this._contentItem) {
+                this._contentItem = this._contentItem.getBranch();
+                this.sourceWidth = this._contentItem.width;
+                this.sourceHeight = this._contentItem.height;
+                this._contentItem = this._contentItem.getHighResolution();
+                this._contentItem.load();
+                if (this._autoSize)
+                    this.setSize(this.sourceWidth, this.sourceHeight);
+                if (this._contentItem.type == fgui.PackageItemType.Spine) {
+                    if (this._contentItem.asset) {
+                        this.updateLayout();
+                    }
+                }
+                else if (this._contentItem.type == fgui.PackageItemType.DragonBones) {
+                }
+            }
+        };
+        GLoader3D.prototype.loadExternal = function () {
+        };
+        GLoader3D.prototype.onLoaded = function (err, asset) {
+            if (!this._url || !cc.isValid(this._node))
+                return;
+            if (err)
+                console.warn(err);
+        };
+        GLoader3D.prototype.updateLayout = function () {
+            if (this._content == null) {
+                if (this._autoSize) {
+                    this._updatingLayout = true;
+                    this.setSize(50, 30);
+                    this._updatingLayout = false;
+                }
+                return;
+            }
+            var contentWidth = this.sourceWidth;
+            var contentHeight = this.sourceHeight;
+            var pivotCorrectX = -this.pivotX * this._width;
+            var pivotCorrectY = this.pivotY * this._height;
+            if (this._autoSize) {
+                this._updatingLayout = true;
+                if (contentWidth == 0)
+                    contentWidth = 50;
+                if (contentHeight == 0)
+                    contentHeight = 30;
+                this.setSize(contentWidth, contentHeight);
+                this._updatingLayout = false;
+                this._container.setContentSize(this._width, this._height);
+                this._container.setPosition(pivotCorrectX, pivotCorrectY);
+                if (contentWidth == this._width && contentHeight == this._height)
+                    return;
+            }
+            var sx = 1, sy = 1;
+            if (this._fill != fgui.LoaderFillType.None) {
+                sx = this.width / this.sourceWidth;
+                sy = this.height / this.sourceHeight;
+                if (sx != 1 || sy != 1) {
+                    if (this._fill == fgui.LoaderFillType.ScaleMatchHeight)
+                        sx = sy;
+                    else if (this._fill == fgui.LoaderFillType.ScaleMatchWidth)
+                        sy = sx;
+                    else if (this._fill == fgui.LoaderFillType.Scale) {
+                        if (sx > sy)
+                            sx = sy;
+                        else
+                            sy = sx;
+                    }
+                    else if (this._fill == fgui.LoaderFillType.ScaleNoBorder) {
+                        if (sx > sy)
+                            sy = sx;
+                        else
+                            sx = sy;
+                    }
+                    if (this._shrinkOnly) {
+                        if (sx > 1)
+                            sx = 1;
+                        if (sy > 1)
+                            sy = 1;
+                    }
+                    contentWidth = this.sourceWidth * sx;
+                    contentHeight = this.sourceHeight * sy;
+                }
+            }
+            this._container.setContentSize(contentWidth, contentHeight);
+            var nx, ny;
+            if (this._align == fgui.AlignType.Left)
+                nx = 0;
+            else if (this._align == fgui.AlignType.Center)
+                nx = Math.floor((this._width - contentWidth) / 2);
+            else
+                nx = this._width - contentWidth;
+            if (this._verticalAlign == fgui.VertAlignType.Top)
+                ny = 0;
+            else if (this._verticalAlign == fgui.VertAlignType.Middle)
+                ny = Math.floor((this._height - contentHeight) / 2);
+            else
+                ny = this._height - contentHeight;
+            ny = -ny;
+            this._container.setPosition(pivotCorrectX + nx, pivotCorrectY + ny);
+        };
+        GLoader3D.prototype.clearContent = function () {
+            this._contentItem = null;
+        };
+        GLoader3D.prototype.handleSizeChanged = function () {
+            _super.prototype.handleSizeChanged.call(this);
+            if (!this._updatingLayout)
+                this.updateLayout();
+        };
+        GLoader3D.prototype.handleAnchorChanged = function () {
+            _super.prototype.handleAnchorChanged.call(this);
+            if (!this._updatingLayout)
+                this.updateLayout();
+        };
+        GLoader3D.prototype.handleGrayedChanged = function () {
+        };
+        GLoader3D.prototype.getProp = function (index) {
+            switch (index) {
+                case fgui.ObjectPropID.Color:
+                    return this.color;
+                case fgui.ObjectPropID.Playing:
+                    return this.playing;
+                case fgui.ObjectPropID.Frame:
+                    return this.frame;
+                case fgui.ObjectPropID.TimeScale:
+                    return 1;
+                default:
+                    return _super.prototype.getProp.call(this, index);
+            }
+        };
+        GLoader3D.prototype.setProp = function (index, value) {
+            switch (index) {
+                case fgui.ObjectPropID.Color:
+                    this.color = value;
+                    break;
+                case fgui.ObjectPropID.Playing:
+                    this.playing = value;
+                    break;
+                case fgui.ObjectPropID.Frame:
+                    this.frame = value;
+                    break;
+                case fgui.ObjectPropID.TimeScale:
+                    break;
+                case fgui.ObjectPropID.DeltaTime:
+                    break;
+                default:
+                    _super.prototype.setProp.call(this, index, value);
+                    break;
+            }
+        };
+        GLoader3D.prototype.setup_beforeAdd = function (buffer, beginPos) {
+            _super.prototype.setup_beforeAdd.call(this, buffer, beginPos);
+            buffer.seek(beginPos, 5);
+            this._url = buffer.readS();
+            this._align = buffer.readByte();
+            this._verticalAlign = buffer.readByte();
+            this._fill = buffer.readByte();
+            this._shrinkOnly = buffer.readBool();
+            this._autoSize = buffer.readBool();
+            this._animationName = buffer.readS();
+            this._playing = buffer.readBool();
+            this._frame = buffer.readInt();
+            this._loop = buffer.readBool();
+            if (buffer.readBool())
+                this.color = buffer.readColor();
+            if (this._url)
+                this.loadContent();
+        };
+        return GLoader3D;
+    }(fgui.GObject));
+    fgui.GLoader3D = GLoader3D;
+})(fgui || (fgui = {}));
+
+(function (fgui) {
     var GMovieClip = (function (_super) {
         __extends(GMovieClip, _super);
         function GMovieClip() {
@@ -7680,7 +8022,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateGear(4);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GMovieClip.prototype, "playing", {
@@ -7693,7 +8035,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateGear(5);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GMovieClip.prototype, "frame", {
@@ -7706,7 +8048,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateGear(5);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GMovieClip.prototype, "timeScale", {
@@ -7716,7 +8058,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._content.timeScale = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GMovieClip.prototype.rewind = function () {
@@ -7829,7 +8171,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.update(this._value);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GProgressBar.prototype, "min", {
@@ -7842,7 +8184,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.update(this._value);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GProgressBar.prototype, "max", {
@@ -7855,7 +8197,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.update(this._value);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GProgressBar.prototype, "value", {
@@ -7869,7 +8211,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.update(value);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GProgressBar.prototype.tweenValue = function (value, duration) {
@@ -7998,8 +8340,8 @@ window.__extends = (this && this.__extends) || (function () {
             _this._node.name = "GTextField";
             _this._touchDisabled = true;
             _this._text = "";
-            _this._color = cc.Color.WHITE;
-            _this._strokeColor = cc.Color.BLACK;
+            _this._color = new cc.Color(255, 255, 255, 255);
+            _this._strokeColor = new cc.Color();
             _this._templateVars = null;
             _this.createRenderer();
             _this.fontSize = 12;
@@ -8025,7 +8367,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this.markSizeChanged();
                 this.updateText();
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextField.prototype, "font", {
@@ -8048,7 +8390,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateFont();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextField.prototype, "fontSize", {
@@ -8064,7 +8406,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateFontSize();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextField.prototype, "color", {
@@ -8072,13 +8414,13 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._color;
             },
             set: function (value) {
-                if (this._color != value) {
-                    this._color = value;
+                if (!this._color.equals(value)) {
+                    this._color.set(value);
                     this.updateGear(4);
                     this.updateFontColor();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextField.prototype, "align", {
@@ -8088,7 +8430,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._label.horizontalAlign = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextField.prototype, "verticalAlign", {
@@ -8098,7 +8440,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._label.verticalAlign = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextField.prototype, "leading", {
@@ -8112,7 +8454,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateFontSize();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextField.prototype, "letterSpacing", {
@@ -8125,7 +8467,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._label["spacingX"] = value;
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextField.prototype, "underline", {
@@ -8134,7 +8476,7 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextField.prototype, "bold", {
@@ -8143,7 +8485,7 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextField.prototype, "italic", {
@@ -8152,7 +8494,7 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextField.prototype, "singleLine", {
@@ -8162,7 +8504,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._label.enableWrapText = !value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextField.prototype, "stroke", {
@@ -8184,7 +8526,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._outline.width = value;
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextField.prototype, "strokeColor", {
@@ -8192,13 +8534,13 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._strokeColor;
             },
             set: function (value) {
-                if (this._strokeColor != value) {
-                    this._strokeColor = value;
+                if (!this._strokeColor.equals(value)) {
+                    this._strokeColor.set(value);
                     this.updateGear(4);
                     this.updateStrokeColor();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextField.prototype, "ubbEnabled", {
@@ -8212,7 +8554,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateText();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextField.prototype, "autoSize", {
@@ -8226,7 +8568,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateOverflow();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GTextField.prototype.parseTemplate = function (template) {
@@ -8281,7 +8623,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this._templateVars = value;
                 this.flushVars();
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GTextField.prototype.setVar = function (name, value) {
@@ -8299,7 +8641,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this.ensureSizeCorrect();
                 return this._node.width;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GTextField.prototype.ensureSizeCorrect = function () {
@@ -8525,7 +8867,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._richText.horizontalAlign = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GRichTextField.prototype, "verticalAlign", {
@@ -8534,7 +8876,7 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GRichTextField.prototype, "letterSpacing", {
@@ -8543,7 +8885,7 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GRichTextField.prototype, "underline", {
@@ -8556,7 +8898,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateText();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GRichTextField.prototype, "bold", {
@@ -8569,7 +8911,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateText();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GRichTextField.prototype, "italic", {
@@ -8582,7 +8924,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.updateText();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GRichTextField.prototype, "singleLine", {
@@ -8591,7 +8933,7 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GRichTextField.prototype.markSizeChanged = function () {
@@ -8691,7 +9033,7 @@ window.__extends = (this && this.__extends) || (function () {
                     throw 'Call GRoot.create first!';
                 return GRoot._inst;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GRoot.create = function () {
@@ -8716,14 +9058,14 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._inputProcessor.getTouchTarget();
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GRoot.prototype, "inputProcessor", {
             get: function () {
                 return this._inputProcessor;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GRoot.prototype.showWindow = function (win) {
@@ -8810,21 +9152,21 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._modalLayer;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GRoot.prototype, "hasModalWindow", {
             get: function () {
                 return this._modalLayer.parent != null;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GRoot.prototype, "modalWaiting", {
             get: function () {
                 return this._modalWaitPane && this._modalWaitPane.node.activeInHierarchy;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GRoot.prototype.getPopupPosition = function (popup, target, downward, result) {
@@ -8903,7 +9245,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._popupStack.length != 0;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GRoot.prototype.closePopup = function (target) {
@@ -8960,7 +9302,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._volumeScale = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GRoot.prototype.playOneShotSound = function (clip, volumeScale) {
@@ -9083,14 +9425,14 @@ window.__extends = (this && this.__extends) || (function () {
                 else
                     return (this._arrowButton1 != null ? this._arrowButton1.width : 0) + (this._arrowButton2 != null ? this._arrowButton2.width : 0);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GScrollBar.prototype, "gripDragging", {
             get: function () {
                 return this._gripDragging;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GScrollBar.prototype.constructExtension = function (buffer) {
@@ -9211,7 +9553,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._titleType = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GSlider.prototype, "wholeNumbers", {
@@ -9224,7 +9566,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.update();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GSlider.prototype, "min", {
@@ -9237,7 +9579,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.update();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GSlider.prototype, "max", {
@@ -9250,7 +9592,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.update();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GSlider.prototype, "value", {
@@ -9263,7 +9605,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.update();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GSlider.prototype.update = function () {
@@ -9441,7 +9783,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (val) {
                 this._editBox.enabled = val;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextInput.prototype, "maxLength", {
@@ -9453,7 +9795,7 @@ window.__extends = (this && this.__extends) || (function () {
                     val = -1;
                 this._editBox.maxLength = val;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextInput.prototype, "promptText", {
@@ -9481,7 +9823,7 @@ window.__extends = (this && this.__extends) || (function () {
                 else
                     this._editBox.placeholderLabel.fontSize = this._fontSize;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextInput.prototype, "restrict", {
@@ -9490,7 +9832,7 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextInput.prototype, "password", {
@@ -9501,7 +9843,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (val) {
                 this._editBox.inputFlag = val ? cc.EditBox.InputFlag.PASSWORD : cc.EditBox.InputFlag.DEFAULT;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextInput.prototype, "align", {
@@ -9514,7 +9856,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._editBox.placeholderLabel.horizontalAlign = value;
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextInput.prototype, "verticalAlign", {
@@ -9527,7 +9869,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._editBox.placeholderLabel.verticalAlign = value;
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextInput.prototype, "letterSpacing", {
@@ -9536,7 +9878,7 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextInput.prototype, "singleLine", {
@@ -9546,7 +9888,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._editBox.inputMode = value ? cc.EditBox.InputMode.SINGLE_LINE : cc.EditBox.InputMode.ANY;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GTextInput.prototype.requestFocus = function () {
@@ -9652,7 +9994,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._rootNode;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTree.prototype, "indent", {
@@ -9662,7 +10004,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._indent = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTree.prototype, "clickToExpand", {
@@ -9672,7 +10014,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._clickToExpand = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GTree.prototype.getSelectedNode = function () {
@@ -9992,21 +10334,21 @@ window.__extends = (this && this.__extends) || (function () {
                     }
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTreeNode.prototype, "isFolder", {
             get: function () {
                 return this._children != null;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTreeNode.prototype, "parent", {
             get: function () {
                 return this._parent;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTreeNode.prototype, "text", {
@@ -10020,7 +10362,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._cell != null)
                     this._cell.text = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTreeNode.prototype, "icon", {
@@ -10034,21 +10376,21 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._cell != null)
                     this._cell.icon = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTreeNode.prototype, "cell", {
             get: function () {
                 return this._cell;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTreeNode.prototype, "level", {
             get: function () {
                 return this._level;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GTreeNode.prototype._setLevel = function (value) {
@@ -10174,7 +10516,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._children.length;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GTreeNode.prototype.expandToRoot = function () {
@@ -10188,7 +10530,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._tree;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GTreeNode.prototype._setTree = function (value) {
@@ -10376,21 +10718,21 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._list.numChildren;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(PopupMenu.prototype, "contentPane", {
             get: function () {
                 return this._contentPane;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(PopupMenu.prototype, "list", {
             get: function () {
                 return this._list;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         PopupMenu.prototype.show = function (target, downward) {
@@ -10443,7 +10785,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._owner;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(RelationItem.prototype, "target", {
@@ -10459,7 +10801,7 @@ window.__extends = (this && this.__extends) || (function () {
                         this.addRefTarget(this._target);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         RelationItem.prototype.add = function (relationType, usePercent) {
@@ -10526,7 +10868,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._defs.length == 0;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         RelationItem.prototype.applyOnSelfResized = function (dWidth, dHeight, applyPivot) {
@@ -11114,7 +11456,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._items.length == 0;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Relations.prototype.setup = function (buffer, parentToChild) {
@@ -11315,35 +11657,35 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._owner;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "hzScrollBar", {
             get: function () {
                 return this._hzScrollBar;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "vtScrollBar", {
             get: function () {
                 return this._vtScrollBar;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "header", {
             get: function () {
                 return this._header;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "footer", {
             get: function () {
                 return this._footer;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "bouncebackEffect", {
@@ -11353,7 +11695,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (sc) {
                 this._bouncebackEffect = sc;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "touchEffect", {
@@ -11363,7 +11705,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (sc) {
                 this._touchEffect = sc;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "scrollStep", {
@@ -11376,7 +11718,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._scrollStep = fgui.UIConfig.defaultScrollStep;
                 this._mouseWheelStep = this._scrollStep * 2;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "decelerationRate", {
@@ -11386,7 +11728,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (val) {
                 this._decelerationRate = val;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "snapToItem", {
@@ -11396,7 +11738,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._snapToItem = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "mouseWheelEnabled", {
@@ -11406,14 +11748,14 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._mouseWheelEnabled = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "isDragged", {
             get: function () {
                 return this._dragged;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "percX", {
@@ -11423,7 +11765,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.setPercX(value, false);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         ScrollPane.prototype.setPercX = function (value, ani) {
@@ -11437,7 +11779,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.setPercY(value, false);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         ScrollPane.prototype.setPercY = function (value, ani) {
@@ -11451,7 +11793,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.setPosX(value, false);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         ScrollPane.prototype.setPosX = function (value, ani) {
@@ -11471,7 +11813,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.setPosY(value, false);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         ScrollPane.prototype.setPosY = function (value, ani) {
@@ -11488,14 +11830,14 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._contentSize.x;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "contentHeight", {
             get: function () {
                 return this._contentSize.y;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "viewWidth", {
@@ -11508,7 +11850,7 @@ window.__extends = (this && this.__extends) || (function () {
                     value += this._vtScrollBar.width;
                 this._owner.width = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "viewHeight", {
@@ -11521,7 +11863,7 @@ window.__extends = (this && this.__extends) || (function () {
                     value += this._hzScrollBar.height;
                 this._owner.height = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "currentPageX", {
@@ -11536,7 +11878,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.setCurrentPageX(value, false);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "currentPageY", {
@@ -11551,7 +11893,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this.setCurrentPageY(value, false);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         ScrollPane.prototype.setCurrentPageX = function (value, ani) {
@@ -11572,14 +11914,14 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._yPos == this._overlapSize.y || this._overlapSize.y == 0;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "isRightMost", {
             get: function () {
                 return this._xPos == this._overlapSize.x || this._overlapSize.x == 0;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "pageController", {
@@ -11589,21 +11931,21 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._pageController = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "scrollingPosX", {
             get: function () {
                 return fgui.ToolSet.clamp(-this._container.x, 0, this._overlapSize.x);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ScrollPane.prototype, "scrollingPosY", {
             get: function () {
                 return fgui.ToolSet.clamp(-(-this._container.y), 0, this._overlapSize.y);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         ScrollPane.prototype.scrollTop = function (ani) {
@@ -12910,7 +13252,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._playing;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Transition.prototype.setValue = function (label) {
@@ -13066,7 +13408,7 @@ window.__extends = (this && this.__extends) || (function () {
                     }
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Transition.prototype.updateFromRelations = function (targetId, dx, dy) {
@@ -14120,6 +14462,8 @@ window.__extends = (this && this.__extends) || (function () {
                     return new fgui.GComboBox();
                 case fgui.ObjectType.Tree:
                     return new fgui.GTree();
+                case fgui.ObjectType.Loader3D:
+                    return new fgui.GLoader3D();
                 default:
                     return null;
             }
@@ -14155,7 +14499,7 @@ window.__extends = (this && this.__extends) || (function () {
                     }
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         UIPackage.getVar = function (key) {
@@ -14469,21 +14813,21 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._id;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(UIPackage.prototype, "name", {
             get: function () {
                 return this._name;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(UIPackage.prototype, "url", {
             get: function () {
                 return this._url;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         UIPackage.prototype.createObject = function (resName, userClass) {
@@ -14752,14 +15096,14 @@ window.__extends = (this && this.__extends) || (function () {
                     }
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(Window.prototype, "frame", {
             get: function () {
                 return this._frame;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(Window.prototype, "closeButton", {
@@ -14773,7 +15117,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._closeButton != null)
                     this._closeButton.onClick(this.closeEventHandler, this);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(Window.prototype, "dragArea", {
@@ -14793,7 +15137,7 @@ window.__extends = (this && this.__extends) || (function () {
                     }
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(Window.prototype, "contentArea", {
@@ -14803,7 +15147,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._contentArea = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Window.prototype.show = function () {
@@ -14839,14 +15183,14 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this.parent != null;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(Window.prototype, "isTop", {
             get: function () {
                 return this.parent != null && this.parent.getChildIndex(this) == this.parent.numChildren - 1;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(Window.prototype, "modal", {
@@ -14856,7 +15200,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (val) {
                 this._modal = val;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Window.prototype.bringToFront = function () {
@@ -14897,7 +15241,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._modalWaitPane && this._modalWaitPane.parent != null;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Window.prototype.init = function () {
@@ -15167,10 +15511,6 @@ window.__extends = (this && this.__extends) || (function () {
             _this._grayed = false;
             return _this;
         }
-        Image.prototype.onLoad = function () {
-            this.sizeMode = cc.Sprite.SizeMode.CUSTOM;
-            this.trim = false;
-        };
         Object.defineProperty(Image.prototype, "flip", {
             get: function () {
                 return this._flip;
@@ -15188,7 +15528,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.node.setScale(sx, sy);
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(Image.prototype, "fillMethod", {
@@ -15212,7 +15552,7 @@ window.__extends = (this && this.__extends) || (function () {
                     }
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(Image.prototype, "fillOrigin", {
@@ -15226,7 +15566,7 @@ window.__extends = (this && this.__extends) || (function () {
                         this.setupFill();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(Image.prototype, "fillClockwise", {
@@ -15240,7 +15580,7 @@ window.__extends = (this && this.__extends) || (function () {
                         this.setupFill();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(Image.prototype, "fillAmount", {
@@ -15258,7 +15598,7 @@ window.__extends = (this && this.__extends) || (function () {
                     }
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Image.prototype.setupFill = function () {
@@ -15267,8 +15607,8 @@ window.__extends = (this && this.__extends) || (function () {
                 this.fillStart = this._fillClockwise ? 1 : 0;
             }
             else {
-                var origin = this._fillOrigin;
-                switch (origin) {
+                var origin_1 = this._fillOrigin;
+                switch (origin_1) {
                     case fgui.FillOrigin.Right:
                         this.fillOrigin = 0;
                         break;
@@ -15298,18 +15638,28 @@ window.__extends = (this && this.__extends) || (function () {
                     if (!material) {
                         material = cc.Material.getBuiltinMaterial('2d-gray-sprite');
                     }
-                    material = this._graySpriteMaterial = cc.Material.getInstantiatedMaterial(material, this);
+                    if (cc.Material.getInstantiatedMaterial) {
+                        material = this._graySpriteMaterial = cc.Material.getInstantiatedMaterial(material, this);
+                    }
+                    else {
+                        material = this._graySpriteMaterial = cc.Material.create(material, this);
+                    }
                 }
                 else {
                     material = this._spriteMaterial;
                     if (!material) {
                         material = cc.Material.getBuiltinMaterial('2d-sprite', this);
                     }
-                    material = this._spriteMaterial = cc.Material.getInstantiatedMaterial(material, this);
+                    if (cc.Material.getInstantiatedMaterial) {
+                        material = this._spriteMaterial = cc.Material.getInstantiatedMaterial(material, this);
+                    }
+                    else {
+                        material = this._spriteMaterial = cc.Material.create(material, this);
+                    }
                 }
                 this.setMaterial(0, material);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         ;
@@ -15346,7 +15696,6 @@ window.__extends = (this && this.__extends) || (function () {
             _this._frameElapsed = 0;
             _this._reversed = false;
             _this._repeatedCount = 0;
-            _this.setPlaySettings();
             return _this;
         }
         Object.defineProperty(MovieClip.prototype, "frames", {
@@ -15373,14 +15722,14 @@ window.__extends = (this && this.__extends) || (function () {
                     this._frameCount = 0;
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(MovieClip.prototype, "frameCount", {
             get: function () {
                 return this._frameCount;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(MovieClip.prototype, "frame", {
@@ -15396,7 +15745,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this.drawFrame();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(MovieClip.prototype, "playing", {
@@ -15408,7 +15757,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._playing = value;
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(MovieClip.prototype, "smoothing", {
@@ -15418,7 +15767,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._smoothing = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         MovieClip.prototype.rewind = function () {
@@ -15601,14 +15950,14 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return false;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(Event.prototype, "isCtrlDown", {
             get: function () {
                 return false;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Event.prototype.captureTouch = function () {
@@ -16151,7 +16500,7 @@ window.__extends = (this && this.__extends) || (function () {
                         this.init();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GearBase.prototype, "tweenConfig", {
@@ -16160,7 +16509,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._tweenConfig = new GearTweenConfig();
                 return this._tweenConfig;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GearBase.prototype.setup = function (buffer) {
@@ -16374,7 +16723,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._controller == null || this._visible > 0;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         return GearDisplay;
@@ -17069,7 +17418,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._fullLength;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GPath.prototype.create2 = function (pt1, pt2, pt3, pt4) {
@@ -17205,7 +17554,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._segments.length;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GPath.prototype.getAnchorsInSegment = function (segmentIndex, points) {
@@ -17447,7 +17796,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._delay;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GTweener.prototype.setDuration = function (value) {
@@ -17458,7 +17807,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._duration;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GTweener.prototype.setBreakpoint = function (value) {
@@ -17486,7 +17835,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._repeat;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GTweener.prototype.setTimeScale = function (value) {
@@ -17510,7 +17859,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._target;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GTweener.prototype.setPath = function (value) {
@@ -17525,7 +17874,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._userData;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GTweener.prototype.onUpdate = function (callback, caller) {
@@ -17547,49 +17896,49 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._startValue;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTweener.prototype, "endValue", {
             get: function () {
                 return this._endValue;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTweener.prototype, "value", {
             get: function () {
                 return this._value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTweener.prototype, "deltaValue", {
             get: function () {
                 return this._deltaValue;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTweener.prototype, "normalizedTime", {
             get: function () {
                 return this._normalizedTime;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTweener.prototype, "completed", {
             get: function () {
                 return this._ended != 0;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTweener.prototype, "allCompleted", {
             get: function () {
                 return this._ended == 1;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         GTweener.prototype.setPaused = function (paused) {
@@ -18003,7 +18352,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this.z = (value & 0x0000FF);
                 this.w = (value & 0xFF000000) >> 24;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         TweenValue.prototype.getField = function (index) {
@@ -18065,7 +18414,7 @@ window.__extends = (this && this.__extends) || (function () {
             get: function () {
                 return this._bytes;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ByteBuffer.prototype, "position", {
@@ -18077,7 +18426,7 @@ window.__extends = (this && this.__extends) || (function () {
                     throw "Out of bounds";
                 this._pos = value;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         ByteBuffer.prototype.skip = function (count) {

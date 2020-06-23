@@ -10,6 +10,8 @@ namespace fgui {
             this._node.name = "GImage";
             this._touchDisabled = true;
             this._content = this._node.addComponent(Image);
+            this._content.sizeMode = cc.Sprite.SizeMode.CUSTOM;
+            this._content.trim = false;
         }
 
         public get color(): cc.Color {
@@ -17,7 +19,7 @@ namespace fgui {
         }
 
         public set color(value: cc.Color) {
-            if (this._node.color != value) {
+            if (!this._node.color.equals(value)) {
                 this._node.color = value;
 
                 this.updateGear(4);

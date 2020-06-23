@@ -20,8 +20,8 @@ namespace fgui {
 
             this._node.name = "GGraph";
             this._lineSize = 1;
-            this._lineColor = cc.Color.BLACK;
-            this._fillColor = cc.Color.WHITE;
+            this._lineColor = new cc.Color();
+            this._fillColor = new cc.Color(255, 255, 255, 255);
             this._cornerRadius = null;
             this._sides = 3;
             this._startAngle = 0;
@@ -32,8 +32,8 @@ namespace fgui {
         public drawRect(lineSize: number, lineColor: cc.Color, fillColor: cc.Color, corner?: Array<number>): void {
             this._type = GraphType.Rect;
             this._lineSize = lineSize;
-            this._lineColor = lineColor;
-            this._fillColor = fillColor;
+            this._lineColor.set(lineColor);
+            this._fillColor.set(fillColor);
             this._cornerRadius = corner;
             this.updateGraph();
         }
@@ -41,8 +41,8 @@ namespace fgui {
         public drawEllipse(lineSize: number, lineColor: cc.Color, fillColor: cc.Color): void {
             this._type = GraphType.Ellipse;
             this._lineSize = lineSize;
-            this._lineColor = lineColor;
-            this._fillColor = fillColor;
+            this._lineColor.set(lineColor);
+            this._fillColor.set(fillColor);
             this._cornerRadius = null;
             this.updateGraph();
         }
@@ -50,8 +50,8 @@ namespace fgui {
         public drawRegularPolygon(lineSize: number, lineColor: cc.Color, fillColor: cc.Color, sides: number, startAngle: number = 0, distances: number[] = null): void {
             this._type = 4;
             this._lineSize = lineSize;
-            this._lineColor = lineColor;
-            this._fillColor = fillColor;
+            this._lineColor.set(lineColor);
+            this._fillColor.set(fillColor);
             this._sides = sides;
             this._startAngle = startAngle;
             this._distances = distances;
@@ -61,8 +61,8 @@ namespace fgui {
         public drawPolygon(lineSize: number, lineColor: cc.Color, fillColor: cc.Color, points: any[]): void {
             this._type = 3;
             this._lineSize = lineSize;
-            this._lineColor = lineColor;
-            this._fillColor = fillColor;
+            this._lineColor.set(lineColor);
+            this._fillColor.set(fillColor);
             this._polygonPoints = points;
             this.updateGraph();
         }
@@ -94,7 +94,7 @@ namespace fgui {
         }
 
         public set color(value: cc.Color) {
-            this._fillColor = value;
+            this._fillColor.set(value);
             if (this._type != 0)
                 this.updateGraph();
         }
@@ -120,7 +120,7 @@ namespace fgui {
 
             if (this._type == 1) {
                 if (this._cornerRadius) {
-                    ctx.roundRect(0 + px, -h + py, w, h, this._cornerRadius[0] * 2);
+                    ctx.roundRect(0 + px, -h + py, w, h, this._cornerRadius[0]);
                 }
                 else
                     ctx.rect(0 + px, -h + py, w, h);
@@ -182,7 +182,7 @@ namespace fgui {
         }
 
         protected handleAnchorChanged(): void {
-            super.handleSizeChanged();
+            super.handleAnchorChanged();
 
             if (this._type != 0)
                 this.updateGraph();
@@ -201,7 +201,7 @@ namespace fgui {
             else
                 super.setProp(index, value);
         }
-        
+
         public setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void {
             super.setup_beforeAdd(buffer, beginPos);
 
@@ -213,8 +213,8 @@ namespace fgui {
                 var cnt: number;
 
                 this._lineSize = buffer.readInt();
-                this._lineColor = buffer.readColor(true);
-                this._fillColor = buffer.readColor(true);
+                this._lineColor.set(buffer.readColor(true));
+                this._fillColor.set(buffer.readColor(true));
                 if (buffer.readBool()) {
                     this._cornerRadius = new Array<number>(4);
                     for (i = 0; i < 4; i++)

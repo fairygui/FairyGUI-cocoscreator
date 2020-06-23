@@ -1024,7 +1024,7 @@ namespace fgui {
         }
 
         public constructFromResource2(objectPool: Array<GObject>, poolIndex: number): void {
-            var contentItem:PackageItem = this.packageItem.getBranch();
+            var contentItem: PackageItem = this.packageItem.getBranch();
 
             if (!contentItem.decoded) {
                 contentItem.decoded = true;

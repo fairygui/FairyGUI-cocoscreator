@@ -1099,7 +1099,7 @@ namespace fgui {
                     break;
 
                 case TransitionActionType.Color:
-                    value.f1 = buffer.readColor();
+                    value.f1 = buffer.readColor().toRGBValue();
                     break;
 
                 case TransitionActionType.Animation:

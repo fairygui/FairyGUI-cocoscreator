@@ -40,13 +40,16 @@ namespace fgui {
             this._align = AlignType.Left;
             this._verticalAlign = VertAlignType.Top;
             this._showErrorSign = true;
-            this._color = cc.Color.WHITE;
+            this._color = new cc.Color(255, 255, 255, 255);
 
             this._container = new cc.Node("Image");
             this._container.setAnchorPoint(0, 1);
             this._node.addChild(this._container);
 
             this._content = this._container.addComponent(MovieClip);
+            this._content.sizeMode = cc.Sprite.SizeMode.CUSTOM;
+            this._content.trim = false;
+            this._content.setPlaySettings();
         }
 
         public dispose(): void {
@@ -166,8 +169,8 @@ namespace fgui {
         }
 
         public set color(value: cc.Color) {
-            if (this._color != value) {
-                this._color = value;
+            if (!this._color.equals(value)) {
+                this._color.set(value);
                 this.updateGear(4);
                 this._container.color = value;
             }
