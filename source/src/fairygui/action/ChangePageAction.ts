@@ -20,7 +20,7 @@ namespace fgui {
             if (this.objectId) {
                 var obj: GObject = controller.parent.getChildById(this.objectId);
                 if (obj instanceof GComponent)
-                    gcom = <GComponent><any>obj;
+                    gcom = obj;
                 else
                     return;
             }

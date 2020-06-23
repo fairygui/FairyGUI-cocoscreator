@@ -1,6 +1,6 @@
 namespace fgui {
     export class GearFontSize extends GearBase {
-        private _storage: Object;
+        private _storage: { [index: string]: number };
         private _default: number = 0;
 
         constructor(owner: GObject) {
@@ -32,7 +32,7 @@ namespace fgui {
         }
 
         public updateState(): void {
-            this._storage[this._controller.selectedPageId] = this._owner.text;
+            this._storage[this._controller.selectedPageId] = this._owner.getProp(ObjectPropID.FontSize);
         }
     }
 }

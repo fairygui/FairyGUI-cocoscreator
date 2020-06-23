@@ -2,7 +2,7 @@
 namespace fgui {
 
     export class GearIcon extends GearBase {
-        private _storage: any;
+        private _storage: { [index: string]: string };
         private _default: string;
 
         public constructor(owner: GObject) {

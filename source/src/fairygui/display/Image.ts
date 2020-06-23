@@ -2,22 +2,16 @@ namespace fgui {
 
     export class Image extends cc.Sprite {
         private _flip: FlipType = FlipType.None;
-
         private _fillMethod: FillMethod = FillMethod.None;
         private _fillOrigin: FillOrigin = FillOrigin.Left;
         private _fillAmount: number = 0;
-        private _fillClockwise: boolean = false;
-        private _grayed: boolean = false;
-        private _graySpriteMaterial: cc.Material;
-        private _spriteMaterial: cc.Material;
+        private _fillClockwise: boolean;
+        private _grayed?: boolean;
+        private _graySpriteMaterial?: cc.Material;
+        private _spriteMaterial?: cc.Material;
 
         public constructor() {
             super();
-        }
-
-        protected onLoad() {
-            this.sizeMode = cc.Sprite.SizeMode.CUSTOM;
-            this.trim = false;
         }
 
         public get flip(): FlipType {
@@ -108,8 +102,7 @@ namespace fgui {
                 this.fillStart = this._fillClockwise ? 1 : 0;
             }
             else {
-                let origin: number = <number>this._fillOrigin;
-                switch (origin) {
+                switch (this._fillOrigin) {
                     case FillOrigin.Right:
                         this.fillOrigin = 0;
                         break;
@@ -135,28 +128,18 @@ namespace fgui {
                 return;
 
             this._grayed = value;
-            let material;
+            let material: cc.Material;
             if (value) {
                 material = this._graySpriteMaterial;
-                if (!material) {
+                if (!material)
                     material = (<any>cc.Material).getBuiltinMaterial('2d-gray-sprite');
-                }
-                if ((<any>cc.Material).getInstantiatedMaterial) {
-                    material = this._graySpriteMaterial = (<any>cc.Material).getInstantiatedMaterial(material, this);
-                } else {
-                    material = this._graySpriteMaterial = (<any>cc.Material).create(material, this);
-                }
+                material = this._graySpriteMaterial = cc.MaterialVariant.create(material, this);
             }
             else {
                 material = this._spriteMaterial;
-                if (!material) {
+                if (!material)
                     material = (<any>cc.Material).getBuiltinMaterial('2d-sprite', this);
-                }
-                if ((<any>cc.Material).getInstantiatedMaterial) {
-                    material = this._spriteMaterial = (<any>cc.Material).getInstantiatedMaterial(material, this);
-                } else {
-                    material = this._spriteMaterial = (<any>cc.Material).create(material, this);
-                }
+                material = this._spriteMaterial = cc.MaterialVariant.create(material, this);
             }
 
             this.setMaterial(0, material);

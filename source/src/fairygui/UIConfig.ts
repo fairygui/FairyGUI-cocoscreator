@@ -22,7 +22,7 @@ namespace fgui {
 
         public static horizontalScrollBar: string;
         public static verticalScrollBar: string;
-        
+
         //Scrolling step in pixels
         public static defaultScrollStep: number = 25;
         //Deceleration ratio of scrollpane when its in touch dragging.
@@ -69,32 +69,36 @@ namespace fgui {
         public static defaultUIGroup: string = "UI";
     }
 
-    let _flag: boolean = false;
-    export var addLoadHandler: Function = function (ext?: string): void {
-        if (_flag)
-            return;
+    //let _flag: boolean = false;
+    /**
+     * - 从ccc2.4开始不需要调用
+     * @deprecated
+     */
+    export function addLoadHandler(ext?: string): void {
+        // if (_flag)
+        //     return;
 
-        _flag = true;
-        if (!ext)
-            ext = "bin";
-        cc.loader.addDownloadHandlers({ [ext]: cc.loader.downloader["extMap"].binary });
-        cc.loader.addLoadHandlers({
-            [ext]: function (item, callback) {
-                item._owner.rawBuffer = item.content;
-                return item.content;
-            }
-        });
+        // _flag = true;
+        // if (!ext)
+        //     ext = "bin";
+        // cc.loader.addDownloadHandlers({ [ext]: cc.loader.downloader["extMap"].binary });
+        // cc.loader.addLoadHandlers({
+        //     [ext]: function (item, callback) {
+        //         item._owner.rawBuffer = item.content;
+        //         return item.content;
+        //     }
+        // });
     };
 
-    let _fontRegistry: any = {};
-    export var registerFont: Function = function (name: string, font: cc.Font | string): void {
+    let _fontRegistry: { [index: string]: cc.Font } = {};
+    export function registerFont(name: string, font: cc.Font | string): void {
         if (font instanceof cc.Font)
             _fontRegistry[name] = font;
         else
             _fontRegistry[name] = cc.loader.getRes(name, cc.Font);
     };
 
-    export var getFontByName: Function = function (name: string): cc.Font {
+    export function getFontByName(name: string): cc.Font {
         return _fontRegistry[name];
     }
 }

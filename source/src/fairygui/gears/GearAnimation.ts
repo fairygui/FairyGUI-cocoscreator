@@ -1,28 +1,33 @@
 ///<reference path="GearBase.ts"/>
 
 namespace fgui {
+    interface Value {
+        playing?: boolean;
+        frame?: number;
+    }
+
     export class GearAnimation extends GearBase {
-        private _storage: Object;
-        private _default: GearAnimationValue;
+        private _storage: { [index: string]: Value };
+        private _default: Value;
 
         constructor(owner: GObject) {
             super(owner);
         }
 
         protected init(): void {
-            this._default = new GearAnimationValue(this._owner.getProp(ObjectPropID.Playing),
-                this._owner.getProp(ObjectPropID.Frame));
+            this._default = {
+                playing: this._owner.getProp(ObjectPropID.Playing),
+                frame: this._owner.getProp(ObjectPropID.Frame)
+            };
             this._storage = {};
         }
 
         protected addStatus(pageId: string, buffer: ByteBuffer): void {
-            var gv: GearAnimationValue;
+            var gv: Value;
             if (pageId == null)
                 gv = this._default;
-            else {
-                gv = new GearAnimationValue();
-                this._storage[pageId] = gv;
-            }
+            else
+                this._storage[pageId] = gv = {};
             gv.playing = buffer.readBool();
             gv.frame = buffer.readInt();
         }
@@ -30,7 +35,7 @@ namespace fgui {
         public apply(): void {
             this._owner._gearLocked = true;
 
-            var gv: GearAnimationValue = this._storage[this._controller.selectedPageId];
+            var gv: Value = this._storage[this._controller.selectedPageId];
             if (!gv)
                 gv = this._default;
 
@@ -41,25 +46,12 @@ namespace fgui {
         }
 
         public updateState(): void {
-            var gv: GearAnimationValue = this._storage[this._controller.selectedPageId];
-            if (!gv) {
-                gv = new GearAnimationValue();
-                this._storage[this._controller.selectedPageId] = gv;
-            }
+            var gv: Value = this._storage[this._controller.selectedPageId];
+            if (!gv)
+                this._storage[this._controller.selectedPageId] = gv = {};
 
             gv.playing = this._owner.getProp(ObjectPropID.Playing);
             gv.frame = this._owner.getProp(ObjectPropID.Frame);
         }
     }
-
-    class GearAnimationValue {
-        public playing: boolean;
-        public frame: number;
-
-        constructor(playing: boolean = true, frame: number = 0) {
-            this.playing = playing;
-            this.frame = frame;
-        }
-    }
-
 }

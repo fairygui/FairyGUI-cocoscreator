@@ -12,11 +12,11 @@ namespace fgui {
         protected _leading: number = 0;
         protected _text: string;
         protected _ubbEnabled: boolean;
-        protected _templateVars: any;
+        protected _templateVars?: { [index: string]: string };
         protected _autoSize: AutoSizeType;
         protected _updatingSize: boolean;
         protected _sizeDirty: boolean;
-        protected _outline: cc.LabelOutline;
+        protected _outline?: cc.LabelOutline;
 
         public constructor() {
             super();
@@ -25,9 +25,8 @@ namespace fgui {
             this._touchDisabled = true;
 
             this._text = "";
-            this._color = cc.Color.WHITE;
-            this._strokeColor = cc.Color.BLACK;
-            this._templateVars = null;
+            this._color = new cc.Color(255, 255, 255, 255);
+            this._strokeColor = new cc.Color();
 
             this.createRenderer();
 
@@ -104,8 +103,8 @@ namespace fgui {
         }
 
         public set color(value: cc.Color) {
-            if (this._color != value) {
-                this._color = value;
+            if (!this._color.equals(value)) {
+                this._color.set(value);
                 this.updateGear(4);
 
                 this.updateFontColor();
@@ -207,8 +206,8 @@ namespace fgui {
         }
 
         public set strokeColor(value: cc.Color) {
-            if (this._strokeColor != value) {
-                this._strokeColor = value;
+            if (!this._strokeColor.equals(value)) {
+                this._strokeColor.set(value);
                 this.updateGear(4);
                 this.updateStrokeColor();
             }
@@ -289,11 +288,11 @@ namespace fgui {
             return result;
         }
 
-        public get templateVars(): any {
+        public get templateVars(): { [index: string]: string } {
             return this._templateVars;
         }
 
-        public set templateVars(value: any) {
+        public set templateVars(value: { [index: string]: string }) {
             if (this._templateVars == null && value == null)
                 return;
 
@@ -332,7 +331,7 @@ namespace fgui {
 
         protected updateText(): void {
             var text2: string = this._text;
-            if (this._templateVars != null)
+            if (this._templateVars)
                 text2 = this.parseTemplate(text2);
 
             if (this._ubbEnabled) //不支持同一个文本不同样式

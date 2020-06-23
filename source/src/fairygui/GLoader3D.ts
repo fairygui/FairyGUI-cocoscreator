@@ -1,57 +1,38 @@
-/// <reference path="GObjectPool.ts" />
-
 namespace fgui {
-
-    export class GLoader extends GObject {
-        public _content: MovieClip;
-
+    export class GLoader3D extends GObject {
         private _url: string;
         private _align: AlignType;
         private _verticalAlign: VertAlignType;
         private _autoSize: boolean;
         private _fill: LoaderFillType;
         private _shrinkOnly: boolean;
-        private _showErrorSign: boolean;
         private _playing: boolean;
         private _frame: number = 0;
+        private _loop: boolean;
+        private _animationName: string;
         private _color: cc.Color;
         private _contentItem: PackageItem;
         private _container: cc.Node;
-        private _errorSign?: GObject;
-        private _content2?: GComponent;
+        private _content: cc.Component;
         private _updatingLayout: boolean;
-
-        private static _errorSignPool: GObjectPool = new GObjectPool();
 
         public constructor() {
             super();
 
-            this._node.name = "GLoader";
+            this._node.name = "GLoader3D";
             this._playing = true;
             this._url = "";
             this._fill = LoaderFillType.None;
             this._align = AlignType.Left;
             this._verticalAlign = VertAlignType.Top;
-            this._showErrorSign = true;
             this._color = new cc.Color(255, 255, 255, 255);
 
-            this._container = new cc.Node("Image");
+            this._container = new cc.Node("Wrapper");
             this._container.setAnchorPoint(0, 1);
             this._node.addChild(this._container);
-
-            this._content = this._container.addComponent(MovieClip);
-            this._content.sizeMode = cc.Sprite.SizeMode.CUSTOM;
-            this._content.trim = false;
-            this._content.setPlaySettings();
         }
 
         public dispose(): void {
-            if (this._contentItem == null) {
-                if (this._content.spriteFrame)
-                    this.freeExternal(this._content.spriteFrame);
-            }
-            if (this._content2)
-                this._content2.dispose();
             super.dispose();
         }
 
@@ -138,8 +119,6 @@ namespace fgui {
         public set playing(value: boolean) {
             if (this._playing != value) {
                 this._playing = value;
-                if (this._content instanceof MovieClip)
-                    this._content.playing = value;
                 this.updateGear(5);
             }
         }
@@ -151,8 +130,6 @@ namespace fgui {
         public set frame(value: number) {
             if (this._frame != value) {
                 this._frame = value;
-                if (this._content instanceof MovieClip)
-                    this._content.frame = value;
                 this.updateGear(5);
             }
         }
@@ -167,70 +144,6 @@ namespace fgui {
                 this.updateGear(4);
                 this._container.color = value;
             }
-        }
-
-        public get fillMethod(): FillMethod {
-            return this._content.fillMethod;
-        }
-
-        public set fillMethod(value: FillMethod) {
-            this._content.fillMethod = value;
-        }
-
-        public get fillOrigin(): FillOrigin {
-            return this._content.fillOrigin;
-        }
-
-        public set fillOrigin(value: FillOrigin) {
-            this._content.fillOrigin = value;
-        }
-
-        public get fillClockwise(): boolean {
-            return this._content.fillClockwise;
-        }
-
-        public set fillClockwise(value: boolean) {
-            this._content.fillClockwise = value;
-        }
-
-        public get fillAmount(): number {
-            return this._content.fillAmount;
-        }
-
-        public set fillAmount(value: number) {
-            this._content.fillAmount = value;
-        }
-
-        public get showErrorSign(): boolean {
-            return this._showErrorSign;
-        }
-
-        public set showErrorSign(value: boolean) {
-            this._showErrorSign = value;
-        }
-
-        public get component(): GComponent {
-            return this._content2;
-        }
-
-        public get texture(): cc.SpriteFrame {
-            return this._content.spriteFrame;
-        }
-
-        public set texture(value: cc.SpriteFrame) {
-            this.url = null;
-
-            this._content.spriteFrame = value;
-            this._content.type = cc.Sprite.Type.SIMPLE;
-            if (value != null) {
-                this.sourceWidth = value.getRect().width;
-                this.sourceHeight = value.getRect().height;
-            }
-            else {
-                this.sourceWidth = this.sourceHeight = 0;
-            }
-
-            this.updateLayout();
         }
 
         protected loadContent(): void {
@@ -257,49 +170,14 @@ namespace fgui {
                 if (this._autoSize)
                     this.setSize(this.sourceWidth, this.sourceHeight);
 
-                if (this._contentItem.type == PackageItemType.Image) {
-                    if (!this._contentItem.asset) {
-                        this.setErrorState();
-                    }
-                    else {
-                        this._content.spriteFrame = <cc.SpriteFrame>this._contentItem.asset;
-                        if (this._content.fillMethod == 0) {
-                            if (this._contentItem.scale9Grid)
-                                this._content.type = cc.Sprite.Type.SLICED;
-                            else if (this._contentItem.scaleByTile)
-                                this._content.type = cc.Sprite.Type.TILED;
-                            else
-                                this._content.type = cc.Sprite.Type.SIMPLE;
-                        }
+                if (this._contentItem.type == PackageItemType.Spine) {
+                    if (this._contentItem.asset) {
                         this.updateLayout();
                     }
                 }
-                else if (this._contentItem.type == PackageItemType.MovieClip) {
-                    this._content.interval = this._contentItem.interval;
-                    this._content.swing = this._contentItem.swing;
-                    this._content.repeatDelay = this._contentItem.repeatDelay;
-                    this._content.frames = this._contentItem.frames;
-                    this.updateLayout();
+                else if (this._contentItem.type == PackageItemType.DragonBones) {
                 }
-                else if (this._contentItem.type == PackageItemType.Component) {
-                    var obj: GObject = UIPackage.createObjectFromURL(itemURL);
-                    if (!obj)
-                        this.setErrorState();
-                    else if (!(obj instanceof GComponent)) {
-                        obj.dispose();
-                        this.setErrorState();
-                    }
-                    else {
-                        this._content2 = obj;
-                        this._container.addChild(this._content2.node);
-                        this.updateLayout();
-                    }
-                }
-                else
-                    this.setErrorState();
             }
-            else
-                this.setErrorState();
         }
 
         protected loadExternal(): void {
@@ -319,56 +197,10 @@ namespace fgui {
 
             if (err)
                 console.warn(err);
-
-            if (asset instanceof cc.SpriteFrame)
-                this.onExternalLoadSuccess(asset);
-            else if (asset instanceof cc.Texture2D)
-                this.onExternalLoadSuccess(new cc.SpriteFrame(asset));
-        }
-
-        protected freeExternal(texture: cc.SpriteFrame): void {
-        }
-
-        protected onExternalLoadSuccess(texture: cc.SpriteFrame): void {
-            this._content.spriteFrame = texture;
-            this._content.type = cc.Sprite.Type.SIMPLE;
-            this.sourceWidth = texture.getRect().width;
-            this.sourceHeight = texture.getRect().height;
-            if (this._autoSize)
-                this.setSize(this.sourceWidth, this.sourceHeight);
-            this.updateLayout();
-        }
-
-        protected onExternalLoadFailed(): void {
-            this.setErrorState();
-        }
-
-        private setErrorState(): void {
-            if (!this._showErrorSign)
-                return;
-
-            if (this._errorSign == null) {
-                if (UIConfig.loaderErrorSign != null) {
-                    this._errorSign = GLoader._errorSignPool.getObject(UIConfig.loaderErrorSign);
-                }
-            }
-
-            if (this._errorSign) {
-                this._errorSign.setSize(this.width, this.height);
-                this._container.addChild(this._errorSign.node);
-            }
-        }
-
-        private clearErrorState(): void {
-            if (this._errorSign) {
-                this._container.removeChild(this._errorSign.node);
-                GLoader._errorSignPool.returnObject(this._errorSign);
-                this._errorSign = null;
-            }
         }
 
         private updateLayout(): void {
-            if (this._content2 == null && this._content == null) {
+            if (this._content == null) {
                 if (this._autoSize) {
                     this._updatingLayout = true;
                     this.setSize(50, 30);
@@ -395,10 +227,7 @@ namespace fgui {
 
                 this._container.setContentSize(this._width, this._height);
                 this._container.setPosition(pivotCorrectX, pivotCorrectY);
-                if (this._content2) {
-                    this._content2.setPosition(pivotCorrectX + this._width * this.pivotX, pivotCorrectY - this._height * this.pivotY);
-                    this._content2.setScale(1, 1);
-                }
+
                 if (contentWidth == this._width && contentHeight == this._height)
                     return;
             }
@@ -437,10 +266,6 @@ namespace fgui {
             }
 
             this._container.setContentSize(contentWidth, contentHeight);
-            if (this._content2) {
-                this._content2.setPosition(pivotCorrectX + this._width * this.pivotX, pivotCorrectY - this._height * this.pivotY);
-                this._content2.setScale(sx, sy);
-            }
 
             var nx: number, ny: number;
             if (this._align == AlignType.Left)
@@ -460,20 +285,6 @@ namespace fgui {
         }
 
         private clearContent(): void {
-            this.clearErrorState();
-
-            if (!this._contentItem) {
-                var texture: cc.SpriteFrame = this._content.spriteFrame;
-                if (texture)
-                    this.freeExternal(texture);
-            }
-            if (this._content2) {
-                this._container.removeChild(this._content2.node);
-                this._content2.dispose();
-                this._content2 = null;
-            }
-            this._content.frames = null;
-            this._content.spriteFrame = null;
             this._contentItem = null;
         }
 
@@ -492,20 +303,6 @@ namespace fgui {
         }
 
         protected handleGrayedChanged(): void {
-            this._content.grayed = this._grayed;
-        }
-
-        protected _hitTest(pt: cc.Vec2, globalPt: cc.Vec2): GObject {
-            if (this._content2) {
-                let obj: GObject = this._content2.hitTest(globalPt);
-                if (obj)
-                    return obj;
-            }
-
-            if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
-                return this;
-            else
-                return null;
         }
 
         public getProp(index: number): any {
@@ -517,7 +314,7 @@ namespace fgui {
                 case ObjectPropID.Frame:
                     return this.frame;
                 case ObjectPropID.TimeScale:
-                    return this._content.timeScale;
+                    return 1;
                 default:
                     return super.getProp(index);
             }
@@ -535,10 +332,8 @@ namespace fgui {
                     this.frame = value;
                     break;
                 case ObjectPropID.TimeScale:
-                    this._content.timeScale = value;
                     break;
                 case ObjectPropID.DeltaTime:
-                    this._content.advance(value);
                     break;
                 default:
                     super.setProp(index, value);
@@ -557,19 +352,13 @@ namespace fgui {
             this._fill = buffer.readByte();
             this._shrinkOnly = buffer.readBool();
             this._autoSize = buffer.readBool();
-            this._showErrorSign = buffer.readBool();
+            this._animationName = buffer.readS();
             this._playing = buffer.readBool();
             this._frame = buffer.readInt();
+            this._loop = buffer.readBool();
 
             if (buffer.readBool())
                 this.color = buffer.readColor();
-            this._content.fillMethod = buffer.readByte();
-            if (this._content.fillMethod != 0) {
-
-                this._content.fillOrigin = buffer.readByte();
-                this._content.fillClockwise = buffer.readBool();
-                this._content.fillAmount = buffer.readFloat();
-            }
 
             if (this._url)
                 this.loadContent();

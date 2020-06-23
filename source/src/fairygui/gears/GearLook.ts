@@ -1,27 +1,37 @@
 
 namespace fgui {
 
+    interface Value {
+        alpha?: number;
+        rotation?: number;
+        grayed?: boolean;
+        touchable?: boolean;
+    }
+
     export class GearLook extends GearBase {
-        private _storage: any;
-        private _default: GearLookValue;
+        private _storage: { [index: string]: Value };
+        private _default: Value;
 
         public constructor(owner: GObject) {
             super(owner);
         }
 
         protected init(): void {
-            this._default = new GearLookValue(this._owner.alpha, this._owner.rotation, this._owner.grayed, this._owner.touchable);
+            this._default = {
+                alpha: this._owner.alpha,
+                rotation: this._owner.rotation,
+                grayed: this._owner.grayed,
+                touchable: this._owner.touchable
+            };
             this._storage = {};
         }
 
         protected addStatus(pageId: string, buffer: ByteBuffer): void {
-            var gv: GearLookValue;
+            var gv: Value;
             if (pageId == null)
                 gv = this._default;
-            else {
-                gv = new GearLookValue();
-                this._storage[pageId] = gv;
-            }
+            else
+                this._storage[pageId] = gv = {};
             gv.alpha = buffer.readFloat();
             gv.rotation = buffer.readFloat();
             gv.grayed = buffer.readBool();
@@ -29,7 +39,7 @@ namespace fgui {
         }
 
         public apply(): void {
-            var gv: GearLookValue = this._storage[this._controller.selectedPageId];
+            var gv: Value = this._storage[this._controller.selectedPageId];
             if (!gv)
                 gv = this._default;
 
@@ -38,7 +48,7 @@ namespace fgui {
                 this._owner.grayed = gv.grayed;
                 this._owner.touchable = gv.touchable;
                 this._owner._gearLocked = false;
-                if (this._tweenConfig._tweener != null) {
+                if (this._tweenConfig._tweener) {
                     if (this._tweenConfig._tweener.endValue.x != gv.alpha || this._tweenConfig._tweener.endValue.y != gv.rotation) {
                         this._tweenConfig._tweener.kill(true);
                         this._tweenConfig._tweener = null;
@@ -47,8 +57,8 @@ namespace fgui {
                         return;
                 }
 
-                var a: Boolean = gv.alpha != this._owner.alpha;
-                var b: Boolean = gv.rotation != this._owner.rotation;
+                var a: boolean = gv.alpha != this._owner.alpha;
+                var b: boolean = gv.rotation != this._owner.rotation;
                 if (a || b) {
                     if (this._owner.checkGearController(0, this._controller))
                         this._tweenConfig._displayLockToken = this._owner.addDisplayLock();
@@ -91,30 +101,14 @@ namespace fgui {
         }
 
         public updateState(): void {
-            var gv: GearLookValue = this._storage[this._controller.selectedPageId];
-            if (!gv) {
-                gv = new GearLookValue();
-                this._storage[this._controller.selectedPageId] = gv;
-            }
+            var gv: Value = this._storage[this._controller.selectedPageId];
+            if (!gv)
+                this._storage[this._controller.selectedPageId] = gv = {};
 
             gv.alpha = this._owner.alpha;
             gv.rotation = this._owner.rotation;
             gv.grayed = this._owner.grayed;
             gv.touchable = this._owner.touchable;
-        }
-    }
-
-    class GearLookValue {
-        public alpha: number;
-        public rotation: number;
-        public grayed: boolean;
-        public touchable: boolean;
-
-        public constructor(alpha: number = 0, rotation: number = 0, grayed: boolean = false, touchable: boolean = true) {
-            this.alpha = alpha;
-            this.rotation = rotation;
-            this.grayed = grayed;
-            this.touchable = touchable;
         }
     }
 }

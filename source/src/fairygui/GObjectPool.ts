@@ -2,7 +2,7 @@
 namespace fgui {
 
     export class GObjectPool {
-        private _pool: any;
+        private _pool: { [index: string]: Array<GObject> };
         private _count: number = 0;
 
         public constructor() {
@@ -30,7 +30,7 @@ namespace fgui {
                 return null;
 
             var arr: Array<GObject> = this._pool[url];
-            if (arr != null && arr.length) {
+            if (arr && arr.length) {
                 this._count--;
                 return arr.shift();
             }

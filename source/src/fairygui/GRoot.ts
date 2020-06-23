@@ -114,7 +114,7 @@ namespace fgui {
         public bringToFront(win: Window): void {
             var cnt: number = this.numChildren;
             var i: number;
-            if (this._modalLayer.parent != null && !win.modal)
+            if (this._modalLayer.parent && !win.modal)
                 i = this.getChildIndex(this._modalLayer) - 1;
             else
                 i = cnt - 1;
@@ -144,7 +144,7 @@ namespace fgui {
         }
 
         public closeModalWait(): void {
-            if (this._modalWaitPane != null && this._modalWaitPane.parent != null)
+            if (this._modalWaitPane && this._modalWaitPane.parent)
                 this.removeChild(this._modalWaitPane);
         }
 
@@ -153,8 +153,8 @@ namespace fgui {
             var cnt: number = arr.length;
             for (var i: number = 0; i < cnt; i++) {
                 var g: GObject = arr[i];
-                if ((g instanceof Window) && !(<Window><any>g).modal)
-                    (<Window><any>g).hide();
+                if ((g instanceof Window) && !g.modal)
+                    g.hide();
             }
         }
 
@@ -164,7 +164,7 @@ namespace fgui {
             for (var i: number = 0; i < cnt; i++) {
                 var g: GObject = arr[i];
                 if (g instanceof Window)
-                    (<Window><any>g).hide();
+                    g.hide();
             }
         }
 
@@ -173,7 +173,7 @@ namespace fgui {
             for (var i: number = cnt - 1; i >= 0; i--) {
                 var g: GObject = this.getChildAt(i);
                 if (g instanceof Window) {
-                    return <Window><any>g;
+                    return g;
                 }
             }
 
@@ -192,8 +192,8 @@ namespace fgui {
             return this._modalWaitPane && this._modalWaitPane.node.activeInHierarchy;
         }
 
-        public getPopupPosition(popup: GObject, target?: GObject, downward?: any, result?: cc.Vec2): cc.Vec2 {
-            let pos = result ? result : new cc.Vec2();
+        public getPopupPosition(popup: GObject, target?: GObject, dir?: PopupDirection | boolean, result?: cc.Vec2): cc.Vec2 {
+            let pos = result || new cc.Vec2();
             var sizeW: number = 0, sizeH: number = 0;
             if (target) {
                 pos = target.localToGlobal();
@@ -209,8 +209,8 @@ namespace fgui {
             if (pos.x + popup.width > this.width)
                 pos.x = pos.x + sizeW - popup.width;
             pos.y += sizeH;
-            if ((downward == undefined && pos.y + popup.height > this.height)
-                || downward == false) {
+            if (((dir === undefined || dir === PopupDirection.Auto) && pos.y + popup.height > this.height)
+                || dir === false || dir === PopupDirection.Up) {
                 pos.y = pos.y - sizeH - popup.height - 1;
                 if (pos.y < 0) {
                     pos.y = 0;
@@ -221,7 +221,7 @@ namespace fgui {
             return pos;
         }
 
-        public showPopup(popup: GObject, target?: GObject, downward?: any): void {
+        public showPopup(popup: GObject, target?: GObject, dir?: PopupDirection | boolean): void {
             if (this._popupStack.length > 0) {
                 var k: number = this._popupStack.indexOf(popup);
                 if (k != -1) {
@@ -231,9 +231,9 @@ namespace fgui {
             }
             this._popupStack.push(popup);
 
-            if (target != null) {
+            if (target) {
                 var p: GObject = target;
-                while (p != null) {
+                while (p) {
                     if (p.parent == this) {
                         if (popup.sortingOrder < p.sortingOrder) {
                             popup.sortingOrder = p.sortingOrder;
@@ -247,19 +247,19 @@ namespace fgui {
             this.addChild(popup);
             this.adjustModalLayer();
 
-            let pt = this.getPopupPosition(popup, target, downward);
+            let pt = this.getPopupPosition(popup, target, dir);
             popup.setPosition(pt.x, pt.y);
         }
 
-        public togglePopup(popup: GObject, target?: GObject, downward?: any): void {
+        public togglePopup(popup: GObject, target?: GObject, dir?: PopupDirection | boolean): void {
             if (this._justClosedPopups.indexOf(popup) != -1)
                 return;
 
-            this.showPopup(popup, target, downward);
+            this.showPopup(popup, target, dir);
         }
 
         public hidePopup(popup?: GObject): void {
-            if (popup != null) {
+            if (popup) {
                 var k: number = this._popupStack.indexOf(popup);
                 if (k != -1) {
                     for (var i: number = this._popupStack.length - 1; i >= k; i--)
@@ -279,9 +279,9 @@ namespace fgui {
         }
 
         private closePopup(target: GObject): void {
-            if (target.parent != null) {
+            if (target.parent) {
                 if (target instanceof Window)
-                    (<Window><any>target).hide();
+                    target.hide();
                 else
                     this.removeChild(target);
             }
@@ -329,7 +329,7 @@ namespace fgui {
         }
 
         public hideTooltips(): void {
-            if (this._tooltipWin != null) {
+            if (this._tooltipWin) {
                 if (this._tooltipWin.parent)
                     this.removeChild(this._tooltipWin);
                 this._tooltipWin = null;
@@ -352,12 +352,12 @@ namespace fgui {
         private adjustModalLayer(): void {
             var cnt: number = this.numChildren;
 
-            if (this._modalWaitPane != null && this._modalWaitPane.parent != null)
+            if (this._modalWaitPane && this._modalWaitPane.parent)
                 this.setChildIndex(this._modalWaitPane, cnt - 1);
 
             for (var i: number = cnt - 1; i >= 0; i--) {
                 var g: GObject = this.getChildAt(i);
-                if ((g instanceof Window) && (<Window>g).modal) {
+                if ((g instanceof Window) && g.modal) {
                     if (this._modalLayer.parent == null)
                         this.addChildAt(this._modalLayer, i);
                     else
@@ -366,18 +366,18 @@ namespace fgui {
                 }
             }
 
-            if (this._modalLayer.parent != null)
+            if (this._modalLayer.parent)
                 this.removeChild(this._modalLayer);
         }
 
         private onTouchBegin_1(evt: Event): void {
-            if (this._tooltipWin != null)
+            if (this._tooltipWin)
                 this.hideTooltips();
 
             this._justClosedPopups.length = 0;
             if (this._popupStack.length > 0) {
                 let mc: GObject = evt.initiator;
-                while (mc != this && mc != null) {
+                while (mc && mc != this) {
                     let pindex: number = this._popupStack.indexOf(mc);
                     if (pindex != -1) {
                         for (let i: number = this._popupStack.length - 1; i > pindex; i--) {

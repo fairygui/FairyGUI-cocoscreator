@@ -2,14 +2,10 @@
 
 namespace fgui {
 
-    export class Frame {
-        public rect: cc.Rect;
-        public addDelay: number = 0;
-        public texture: cc.SpriteFrame;
-
-        public constructor() {
-            this.rect = new cc.Rect();
-        }
+    export interface Frame {
+        rect: cc.Rect;
+        addDelay: number;
+        texture?: cc.SpriteFrame;
     }
 
     export class MovieClip extends Image {
@@ -37,8 +33,6 @@ namespace fgui {
 
         public constructor() {
             super();
-
-            this.setPlaySettings();
         }
 
         public get frames(): Array<Frame> {
@@ -47,7 +41,7 @@ namespace fgui {
 
         public set frames(value: Array<Frame>) {
             this._frames = value;
-            if (this._frames != null) {
+            if (this._frames) {
                 this._frameCount = this._frames.length;
 
                 if (this._end == -1 || this._end > this._frameCount - 1)
@@ -80,7 +74,7 @@ namespace fgui {
 
         public set frame(value: number) {
             if (this._frame != value) {
-                if (this._frames != null && value >= this._frameCount)
+                if (this._frames && value >= this._frameCount)
                     value = this._frameCount - 1;
 
                 this._frame = value;

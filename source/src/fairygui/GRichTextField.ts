@@ -120,7 +120,7 @@ namespace fgui {
         protected updateText(): void {
             var text2: string = this._text;
 
-            if (this._templateVars != null)
+            if (this._templateVars)
                 text2 = this.parseTemplate(text2);
 
             if (this._ubbEnabled) {

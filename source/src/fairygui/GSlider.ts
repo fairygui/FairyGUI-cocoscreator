@@ -156,7 +156,7 @@ namespace fgui {
                 this.changeOnClick = buffer.readBool();
             }
 
-            this._titleObject = <GTextField><any>(this.getChild("title"));
+            this._titleObject = <GTextField>(this.getChild("title"));
             this._barObjectH = this.getChild("bar");
             this._barObjectV = this.getChild("bar_v");
             this._gripObject = this.getChild("grip");
@@ -220,13 +220,12 @@ namespace fgui {
             this._clickPercent = ToolSet.clamp01((this._value - this._min) / (this._max - this._min));
         }
 
-        private static sSilderHelperPoint: cc.Vec2 = new cc.Vec2();
         private onGripTouchMove(evt: Event): void {
             if (!this.canDrag) {
                 return;
             }
 
-            var pt: cc.Vec2 = this.globalToLocal(evt.pos.x, evt.pos.y, GSlider.sSilderHelperPoint);
+            var pt: cc.Vec2 = this.globalToLocal(evt.pos.x, evt.pos.y, s_vec2);
             var deltaX: number = pt.x - this._clickPos.x;
             var deltaY: number = pt.y - this._clickPos.y;
             if (this._reverse) {
@@ -246,7 +245,7 @@ namespace fgui {
             if (!this.changeOnClick)
                 return;
 
-            var pt: cc.Vec2 = this._gripObject.globalToLocal(evt.pos.x, evt.pos.y, GSlider.sSilderHelperPoint);
+            var pt: cc.Vec2 = this._gripObject.globalToLocal(evt.pos.x, evt.pos.y, s_vec2);
             var percent: number = ToolSet.clamp01((this._value - this._min) / (this._max - this._min));
             var delta: number;
             if (this._barObjectH)
@@ -260,4 +259,6 @@ namespace fgui {
             this.updateWithPercent(percent, true);
         }
     }
+
+    var s_vec2: cc.Vec2 = new cc.Vec2();
 }

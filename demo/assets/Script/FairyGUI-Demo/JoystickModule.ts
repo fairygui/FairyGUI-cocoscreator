@@ -48,7 +48,7 @@ export default class JoystickModule extends cc.EventTarget {
         if (this._touchId == -1) {//First touch
             this._touchId = evt.touchId;
 
-            if (this._tweener != null) {
+            if (this._tweener) {
                 this._tweener.kill();
                 this._tweener = null;
             }
