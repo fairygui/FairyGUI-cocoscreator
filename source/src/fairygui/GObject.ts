@@ -811,11 +811,8 @@ namespace fgui {
             result.x = ax;
             result.y = ay;
             result.y = -result.y;
-            if (!this._pivotAsAnchor) {
-                result.x -= this.node.anchorX * this._width;
-                result.y += (1 - this.node.anchorY) * this._height;
-            }
-
+            result.x -= this.node.anchorX * this._width;
+            result.y += (1 - this.node.anchorY) * this._height;
             this._node.convertToWorldSpaceAR(result, result);
             result.y = GRoot.inst.height - result.y;
             return result;
@@ -827,12 +824,9 @@ namespace fgui {
             result = result || new cc.Vec2();
             result.x = ax;
             result.y = GRoot.inst.height - ay;
-
             this._node.convertToNodeSpaceAR(result, result);
-            if (!this._pivotAsAnchor) {
-                result.x += this._node.anchorX * this._width;
-                result.y -= (1 - this._node.anchorY) * this._height;
-            }
+            result.x += this._node.anchorX * this._width;
+            result.y -= (1 - this._node.anchorY) * this._height;
             result.y = -result.y;
             return result;
         }

@@ -1596,10 +1596,8 @@ window.__extends = (this && this.__extends) || (function () {
             result.x = ax;
             result.y = ay;
             result.y = -result.y;
-            if (!this._pivotAsAnchor) {
-                result.x -= this.node.anchorX * this._width;
-                result.y += (1 - this.node.anchorY) * this._height;
-            }
+            result.x -= this.node.anchorX * this._width;
+            result.y += (1 - this.node.anchorY) * this._height;
             this._node.convertToWorldSpaceAR(result, result);
             result.y = fgui.GRoot.inst.height - result.y;
             return result;
@@ -1611,10 +1609,8 @@ window.__extends = (this && this.__extends) || (function () {
             result.x = ax;
             result.y = fgui.GRoot.inst.height - ay;
             this._node.convertToNodeSpaceAR(result, result);
-            if (!this._pivotAsAnchor) {
-                result.x += this._node.anchorX * this._width;
-                result.y -= (1 - this._node.anchorY) * this._height;
-            }
+            result.x += this._node.anchorX * this._width;
+            result.y -= (1 - this._node.anchorY) * this._height;
             result.y = -result.y;
             return result;
         };
@@ -9814,11 +9810,11 @@ window.__extends = (this && this.__extends) || (function () {
                 return;
             var pt = this._gripObject.globalToLocal(evt.pos.x, evt.pos.y, s_vec2);
             var percent = fgui.ToolSet.clamp01((this._value - this._min) / (this._max - this._min));
-            var delta;
-            if (this._barObjectH)
-                delta = pt.x / this._barMaxWidth;
-            if (this._barObjectV)
-                delta = pt.y / this._barMaxHeight;
+            var delta = 0;
+            if (this._barObjectH != null)
+                delta = (pt.x - this._gripObject.width / 2) / this._barMaxWidth;
+            if (this._barObjectV != null)
+                delta = (pt.y - this._gripObject.height / 2) / this._barMaxHeight;
             if (this._reverse)
                 percent -= delta;
             else
