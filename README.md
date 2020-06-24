@@ -6,8 +6,8 @@ Official website: [www.fairygui.com](https://www.fairygui.com)
 
 # 关于版本
 目前有两个主要的分支:
-* master 适用于CocosCreator 2.1或更新的版本
-* ccc2.4 适用于CocosCreator 2.4版本
+* master 适用于CocosCreator 2.4或更新的版本
+* ccc2.1-2.3 适用于CocosCreator 2.1-2.3版本
 * ccc2.0 适用于CocosCreator 2.0版本
 * 不支持CocosCreator 1.x版本
 
