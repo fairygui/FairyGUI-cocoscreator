@@ -35,7 +35,7 @@ export default class BasicDemo extends cc.Component {
         var cnt: number = this._view.numChildren;
         for (var i: number = 0; i < cnt; i++) {
             var obj: fgui.GObject = this._view.getChildAt(i);
-            if (obj.group != null && obj.group.name == "btns")
+            if (obj.group && obj.group.name == "btns")
                 obj.onClick(this.runDemo, this);
         }
 
@@ -71,9 +71,6 @@ export default class BasicDemo extends cc.Component {
             case "Text":
                 this.playText();
                 break;
-                case "List":
-                    this.playList();
-                    break;
 
             case "Window":
                 this.playWindow();
@@ -112,13 +109,7 @@ export default class BasicDemo extends cc.Component {
         obj.getChild("n34").onClick(this.__clickButton, this);
     }
 
-    private playList(): void {
-        var obj: fgui.GComponent = this._demoObjects["List"];
-        obj.getChild("n0").asList.getChildAt(1).draggable = true;
-        obj.getChild("n0").asList.getChildAt(1).on(fgui.Event.DRAG_START, this.onDragStart, this);
-    }
-
-    private onDragStart(evt:fgui.Event):void {
+    private onDragStart(evt: fgui.Event): void {
         var btn: fgui.GObject = fgui.GObject.cast(evt.currentTarget);
         //btn.stopDrag();//取消对原目标的拖动，换成一个替代品
     }
@@ -193,7 +184,7 @@ export default class BasicDemo extends cc.Component {
 
     private __clickPopup1(evt: fgui.Event): void {
         var btn: fgui.GObject = fgui.GObject.cast(evt.currentTarget);
-        this._pm.show(btn, true);
+        this._pm.show(btn);
     }
 
     private __clickPopup2(): void {
@@ -325,8 +316,8 @@ export default class BasicDemo extends cc.Component {
         var obj: fgui.GComponent = this._demoObjects["ProgressBar"];
         var cnt: number = obj.numChildren;
         for (var i: number = 0; i < cnt; i++) {
-            var child: fgui.GProgressBar = obj.getChildAt(i) as fgui.GProgressBar;
-            if (child != null) {
+            var child: fgui.GObject = obj.getChildAt(i);
+            if (child instanceof fgui.GProgressBar) {
                 child.value += 1;
                 if (child.value > child.max)
                     child.value = 0;

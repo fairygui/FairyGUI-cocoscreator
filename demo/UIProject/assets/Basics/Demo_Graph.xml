@@ -11,7 +11,7 @@
     <graph id="n15_sw6l" name="n15" xy="624,62" size="100,100" type="eclipse" lineSize="2" fillColor="#6866cc33"/>
     <graph id="n16_sw6l" name="n16" xy="895,62" size="206,113" type="eclipse" lineSize="2" fillColor="#ff336699"/>
     <graph id="n17_sw6l" name="n17" xy="758,62" size="100,100" type="eclipse" lineSize="16" lineColor="#ff003300" fillColor="#0066cc33"/>
-    <graph id="n18_sw6l" name="pie" xy="490,62" size="100,100" type="eclipse" lineSize="2" lineColor="#ff000099" fillColor="#6800cccc"/>
+    <graph id="n18_sw6l" name="pie" xy="540,112" pivot="0.5,0.5" anchor="true" size="100,100" type="eclipse" lineSize="2" lineColor="#ff000099" fillColor="#6800cccc"/>
     <image id="n19_sw6l" name="n19" src="sw6l8a" fileName="images/radial.png" xy="978,333" pivot="0.5,0.5" anchor="true"/>
     <graph id="n20_sw6l" name="radial" xy="979,333" pivot="0.5,0.5" anchor="true" size="244,244" type="regular_polygon" lineSize="2" lineColor="#ffff9900" fillColor="#6999ff33" sides="6" distances="0.57,0.82,0.7,0.78,0.61,0.47"/>
     <graph id="n21_sw6l" name="trapezoid" xy="317,245" size="144,145" type="rect" lineSize="0" lineColor="#ffffffff"/>

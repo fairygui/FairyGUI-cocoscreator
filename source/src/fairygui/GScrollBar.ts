@@ -53,11 +53,11 @@ namespace fgui {
 
         public get minSize(): number {
             if (this._vertical)
-                return (this._arrowButton1 != null ? this._arrowButton1.height : 0) + (this._arrowButton2 != null ? this._arrowButton2.height : 0);
+                return (this._arrowButton1 ? this._arrowButton1.height : 0) + (this._arrowButton2 ? this._arrowButton2.height : 0);
             else
-                return (this._arrowButton1 != null ? this._arrowButton1.width : 0) + (this._arrowButton2 != null ? this._arrowButton2.width : 0);
+                return (this._arrowButton1 ? this._arrowButton1.width : 0) + (this._arrowButton2 ? this._arrowButton2.width : 0);
         }
-        
+
         public get gripDragging(): boolean {
             return this._gripDragging;
         }
@@ -106,12 +106,11 @@ namespace fgui {
             this._dragOffset.y -= this._grip.y;
         }
 
-        private static sScrollbarHelperPoint: cc.Vec2 = new cc.Vec2();
         private onGripTouchMove(evt: Event): void {
             if (!this.onStage)
                 return;
 
-            var pt: cc.Vec2 = this.globalToLocal(evt.pos.x, evt.pos.y, GScrollBar.sScrollbarHelperPoint);
+            var pt: cc.Vec2 = this.globalToLocal(evt.pos.x, evt.pos.y, s_vec2);
             if (this._vertical) {
                 var curY: number = pt.y - this._dragOffset.y;
                 this._target.setPercY((curY - this._bar.y) / (this._bar.height - this._grip.height), false);
@@ -149,7 +148,7 @@ namespace fgui {
         }
 
         private onBarTouchBegin(evt: Event): void {
-            var pt: cc.Vec2 = this._grip.globalToLocal(evt.pos.x, evt.pos.y, GScrollBar.sScrollbarHelperPoint);
+            var pt: cc.Vec2 = this._grip.globalToLocal(evt.pos.x, evt.pos.y, s_vec2);
             if (this._vertical) {
                 if (pt.y < 0)
                     this._target.scrollUp(4);
@@ -164,4 +163,5 @@ namespace fgui {
             }
         }
     }
+    var s_vec2: cc.Vec2 = new cc.Vec2();
 }

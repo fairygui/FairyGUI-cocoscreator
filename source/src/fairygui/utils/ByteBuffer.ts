@@ -1,9 +1,9 @@
 namespace fgui {
 
     export class ByteBuffer {
-        public stringTable: Array<string> = null;
+        public stringTable: Array<string>;
         public version: number = 0;
-        public littleEndian: boolean = false;
+        public littleEndian: boolean;
 
         protected _view: DataView;
         protected _bytes: Uint8Array;

@@ -4,15 +4,15 @@ namespace fgui {
     export class GGraph extends GObject {
         public _content: cc.Graphics;
 
-        private _type: GraphType = 0;
+        private _type: number = 0;
         private _lineSize: number = 0;
         private _lineColor: cc.Color;
         private _fillColor: cc.Color;
-        private _cornerRadius: Array<number>;
-        private _sides: number;
-        private _startAngle: number;
-        private _polygonPoints: any[];
-        private _distances: number[];
+        private _cornerRadius?: Array<number>;
+        private _sides?: number;
+        private _startAngle?: number;
+        private _polygonPoints?: Array<number>;
+        private _distances?: Array<number>;
         private _hasContent: boolean;
 
         public constructor() {
@@ -22,15 +22,12 @@ namespace fgui {
             this._lineSize = 1;
             this._lineColor = new cc.Color();
             this._fillColor = new cc.Color(255, 255, 255, 255);
-            this._cornerRadius = null;
-            this._sides = 3;
-            this._startAngle = 0;
 
             this._content = this._node.addComponent(cc.Graphics);
         }
 
         public drawRect(lineSize: number, lineColor: cc.Color, fillColor: cc.Color, corner?: Array<number>): void {
-            this._type = GraphType.Rect;
+            this._type = 1;
             this._lineSize = lineSize;
             this._lineColor.set(lineColor);
             this._fillColor.set(fillColor);
@@ -39,26 +36,25 @@ namespace fgui {
         }
 
         public drawEllipse(lineSize: number, lineColor: cc.Color, fillColor: cc.Color): void {
-            this._type = GraphType.Ellipse;
+            this._type = 2;
             this._lineSize = lineSize;
             this._lineColor.set(lineColor);
             this._fillColor.set(fillColor);
-            this._cornerRadius = null;
             this.updateGraph();
         }
 
-        public drawRegularPolygon(lineSize: number, lineColor: cc.Color, fillColor: cc.Color, sides: number, startAngle: number = 0, distances: number[] = null): void {
+        public drawRegularPolygon(lineSize: number, lineColor: cc.Color, fillColor: cc.Color, sides: number, startAngle?: number, distances?: number[]): void {
             this._type = 4;
             this._lineSize = lineSize;
             this._lineColor.set(lineColor);
             this._fillColor.set(fillColor);
             this._sides = sides;
-            this._startAngle = startAngle;
+            this._startAngle = startAngle || 0;
             this._distances = distances;
             this.updateGraph();
         }
 
-        public drawPolygon(lineSize: number, lineColor: cc.Color, fillColor: cc.Color, points: any[]): void {
+        public drawPolygon(lineSize: number, lineColor: cc.Color, fillColor: cc.Color, points: Array<number>): void {
             this._type = 3;
             this._lineSize = lineSize;
             this._lineColor.set(lineColor);
@@ -78,14 +74,14 @@ namespace fgui {
         }
 
         public clearGraphics(): void {
-            this._type = GraphType.PlaceHolder;
+            this._type = 0;
             if (this._hasContent) {
                 this._content.clear();
                 this._hasContent = false;
             }
         }
 
-        public get type(): GraphType {
+        public get type(): number {
             return this._type;
         }
 
@@ -114,19 +110,20 @@ namespace fgui {
             var px: number = -this.pivotX * this._width;
             var py: number = this.pivotY * this._height;
 
+            let ls = this._lineSize / 2;
             ctx.lineWidth = this._lineSize;
             ctx.strokeColor = this._lineColor;
             ctx.fillColor = this._fillColor;
 
             if (this._type == 1) {
                 if (this._cornerRadius) {
-                    ctx.roundRect(0 + px, -h + py, w, h, this._cornerRadius[0]);
+                    ctx.roundRect(px + ls, -h + py + ls, w - this._lineSize, h - this._lineSize, this._cornerRadius[0]);
                 }
                 else
-                    ctx.rect(0 + px, -h + py, w, h);
+                    ctx.rect(px + ls, -h + py + ls, w - this._lineSize, h - this._lineSize);
             }
             else if (this._type == 2) {
-                ctx.ellipse(w / 2 + px, -h / 2 + py, w / 2, h / 2);
+                ctx.ellipse(w / 2 + px, -h / 2 + py, w / 2 - ls, h / 2 - ls);
             }
             else if (this._type == 3) {
                 this.drawPath(ctx, this._polygonPoints, px, py);
@@ -134,7 +131,7 @@ namespace fgui {
             else if (this._type == 4) {
                 if (!this._polygonPoints)
                     this._polygonPoints = [];
-                var radius: number = Math.min(this._width, this._height) / 2;
+                var radius: number = Math.min(w, h) / 2 - ls;
                 this._polygonPoints.length = 0;
                 var angle: number = cc.misc.degreesToRadians(this._startAngle);
                 var deltaAngle: number = 2 * Math.PI / this._sides;
@@ -158,15 +155,15 @@ namespace fgui {
                 this.drawPath(ctx, this._polygonPoints, px, py);
             }
 
-            if (this._lineSize != 0)
+            if (ls != 0)
                 ctx.stroke();
-            ctx.fill();
+            if (this._fillColor.a != 0)
+                ctx.fill();
 
             this._hasContent = true;
         }
 
         private drawPath(ctx: cc.Graphics, points: number[], px: number, py: number): void {
-
             var cnt: number = points.length;
             ctx.moveTo(points[0] + px, -points[1] + py);
             for (var i: number = 2; i < cnt; i += 2)
@@ -200,6 +197,39 @@ namespace fgui {
                 this.color = value;
             else
                 super.setProp(index, value);
+        }
+
+        protected _hitTest(pt: cc.Vec2): GObject {
+            if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height) {
+                if (this._type == 3) {
+                    let points = this._polygonPoints;
+                    let len: number = points.length / 2;
+                    let i: number;
+                    let j: number = len - 1;
+                    let oddNodes: boolean = false;
+                    let w: number = this._width;
+                    let h: number = this._height;
+
+                    for (i = 0; i < len; ++i) {
+                        let ix: number = points[i * 2];
+                        let iy: number = points[i * 2 + 1];
+                        let jx: number = points[j * 2];
+                        let jy: number = points[j * 2 + 1];
+                        if ((iy < pt.y && jy >= pt.y || jy < pt.y && iy >= pt.y) && (ix <= pt.x || jx <= pt.x)) {
+                            if (ix + (pt.y - iy) / (jy - iy) * (jx - ix) < pt.x)
+                                oddNodes = !oddNodes;
+                        }
+
+                        j = i;
+                    }
+
+                    return oddNodes ? this : null;
+                }
+                else
+                    return this;
+            }
+            else
+                return null;
         }
 
         public setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void {

@@ -29,16 +29,10 @@ namespace fgui {
             super.dispose();
         }
 
-        /**
-         * @see GroupLayout
-         */
         public get layout(): number {
             return this._layout;
         }
 
-        /**
-         * @see GroupLayout
-         */
         public set layout(value: number) {
             if (this._layout != value) {
                 this._layout = value;
@@ -110,7 +104,7 @@ namespace fgui {
         }
 
         public setBoundsChangedFlag(positionChangedOnly: boolean = false): void {
-            if (this._updating == 0 && this._parent != null) {
+            if (this._updating == 0 && this._parent) {
                 if (!positionChangedOnly)
                     this._percentReady = false;
 

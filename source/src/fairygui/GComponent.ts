@@ -2,13 +2,13 @@
 
 namespace fgui {
     export class GComponent extends GObject {
-        public hitArea: IHitTest;
+        public hitArea?: IHitTest;
 
         private _sortingChildCount: number = 0;
         private _opaque: boolean;
-        private _applyingController: Controller;
-        private _rectMask: cc.Mask;
-        private _maskContent: GObject;
+        private _applyingController?: Controller;
+        private _rectMask?: cc.Mask;
+        private _maskContent?: GObject;
 
         protected _margin: Margin;
         protected _trackBounds: boolean;
@@ -21,9 +21,9 @@ namespace fgui {
         public _controllers: Array<Controller>;
         public _transitions: Array<Transition>;
         public _container: cc.Node;
-        public _scrollPane: ScrollPane;
+        public _scrollPane?: ScrollPane;
         public _alignOffset: cc.Vec2;
-        public _customMask: cc.Mask;
+        public _customMask?: cc.Mask;
 
         public constructor() {
             super();
@@ -484,14 +484,13 @@ namespace fgui {
                 if (child == obj) {
                     myIndex = i;
                 }
-                else if ((child instanceof GButton)
-                    && (<GButton><any>child).relatedController == c) {
+                else if ((child instanceof GButton) && child.relatedController == c) {
                     if (i > maxIndex)
                         maxIndex = i;
                 }
             }
             if (myIndex < maxIndex) {
-                if (this._applyingController != null)
+                if (this._applyingController)
                     this._children[maxIndex].handleControllerChanged(this._applyingController);
                 this.swapChildrenAt(myIndex, maxIndex);
             }
@@ -513,11 +512,11 @@ namespace fgui {
         }
 
         public isChildInView(child: GObject): boolean {
-            if (this._rectMask != null) {
+            if (this._rectMask) {
                 return child.x + child.width >= 0 && child.x <= this.width
                     && child.y + child.height >= 0 && child.y <= this.height;
             }
-            else if (this._scrollPane != null) {
+            else if (this._scrollPane) {
                 return this._scrollPane.isChildInView(child);
             }
             else
@@ -650,10 +649,10 @@ namespace fgui {
             if (this._maskContent instanceof GImage) {
                 this._customMask.type = cc.Mask.Type.IMAGE_STENCIL;
                 this._customMask.alphaThreshold = 0.0001;
-                this._customMask.spriteFrame = (<GImage>this._maskContent)._content.spriteFrame;
+                this._customMask.spriteFrame = this._maskContent._content.spriteFrame;
             }
-            else {
-                if ((<GGraph>this._maskContent).type == GraphType.Ellipse)
+            else if (this._maskContent instanceof GGraph) {
+                if (this._maskContent.type == 2)
                     this._customMask.type = cc.Mask.Type.ELLIPSE;
                 else
                     this._customMask.type = cc.Mask.Type.RECT;
@@ -729,7 +728,7 @@ namespace fgui {
 
         protected handleGrayedChanged(): void {
             var c: Controller = this.getController("grayed");
-            if (c != null) {
+            if (c) {
                 c.selectedIndex = this.grayed ? 1 : 0;
                 return;
             }
@@ -744,50 +743,35 @@ namespace fgui {
         public handleControllerChanged(c: Controller): void {
             super.handleControllerChanged(c);
 
-            if (this._scrollPane != null)
+            if (this._scrollPane)
                 this._scrollPane.handleControllerChanged(c);
         }
 
-        public hitTest(globalPt: cc.Vec2): GObject {
-            if (this._touchDisabled || !this._touchable || !this._node.activeInHierarchy)
-                return null;
-
-            let target: GObject;
-
+        protected _hitTest(pt: cc.Vec2, globalPt: cc.Vec2): GObject {
             if (this._customMask) {
-                let b = this._customMask["_hitTest"](globalPt) || false;
+                s_vec2.set(globalPt);
+                s_vec2.y = GRoot.inst.height - globalPt.y;
+                let b = this._customMask["_hitTest"](s_vec2) || false;
                 if (!b)
                     return null;
             }
 
-            let flag = 0;
-
-            if (this.hitArea || this._rectMask) {
-                let pt: cc.Vec3 = this._node.convertToNodeSpaceAR(globalPt);
-                pt.x += this._node.anchorX * this._width;
-                pt.y += this._node.anchorY * this._height;
-
-                if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
-                    flag = 1;
-                else
-                    flag = 2;
-
-                if (this.hitArea && !this.hitArea.hitTest(this, pt.x, pt.y))
+            if (this.hitArea) {
+                if (!this.hitArea.hitTest(pt, globalPt))
                     return null;
+            }
+            else if (this._rectMask) {
+                s_vec2.set(pt);
+                s_vec2.x += this._container.x;
+                s_vec2.y += this._container.y;
 
-                if (this._rectMask) {
-                    pt.x += this._container.x;
-                    pt.y += this._container.y;
-
-                    let clippingSize: cc.Size = this._container.getContentSize();
-
-                    if (pt.x < 0 || pt.y < 0 || pt.x >= clippingSize.width || pt.y >= clippingSize.height)
-                        return null;
-                }
+                let clippingSize: cc.Size = this._container.getContentSize();
+                if (s_vec2.x < 0 || s_vec2.y < 0 || s_vec2.x >= clippingSize.width || s_vec2.y >= clippingSize.height)
+                    return null;
             }
 
             if (this._scrollPane) {
-                target = this._scrollPane.hitTest(globalPt);
+                let target = this._scrollPane.hitTest(pt, globalPt);
                 if (!target)
                     return null;
 
@@ -795,31 +779,23 @@ namespace fgui {
                     return target;
             }
 
+            let target: GObject = null;
+
             let cnt = this._children.length;
             for (let i = cnt - 1; i >= 0; i--) {
-                target = this._children[i].hitTest(globalPt);
+                let child = this._children[i];
+                if (this._maskContent == child || child._touchDisabled)
+                    continue;
+
+                target = child.hitTest(globalPt);
                 if (target)
-                    return target;
+                    break;
             }
 
-            if (this._opaque) {
-                if (flag == 0) {
-                    let pt: cc.Vec3 = this._node.convertToNodeSpaceAR(globalPt);
-                    pt.x += this._node.anchorX * this._width;
-                    pt.y += this._node.anchorY * this._height;
-                    if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
-                        flag = 1;
-                    else
-                        flag = 2;
-                }
+            if (!target && this._opaque && (this.hitArea || pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height))
+                target = this;
 
-                if (flag == 1)
-                    return this;
-                else
-                    return null;
-            }
-            else
-                return null;
+            return target;
         }
 
         public setBoundsChangedFlag(): void {
@@ -905,28 +881,28 @@ namespace fgui {
         }
 
         public get viewWidth(): number {
-            if (this._scrollPane != null)
+            if (this._scrollPane)
                 return this._scrollPane.viewWidth;
             else
                 return this.width - this._margin.left - this._margin.right;
         }
 
         public set viewWidth(value: number) {
-            if (this._scrollPane != null)
+            if (this._scrollPane)
                 this._scrollPane.viewWidth = value;
             else
                 this.width = value + this._margin.left + this._margin.right;
         }
 
         public get viewHeight(): number {
-            if (this._scrollPane != null)
+            if (this._scrollPane)
                 return this._scrollPane.viewHeight;
             else
                 return this.height - this._margin.top - this._margin.bottom;
         }
 
         public set viewHeight(value: number) {
-            if (this._scrollPane != null)
+            if (this._scrollPane)
                 this._scrollPane.viewHeight = value;
             else
                 this.height = value + this._margin.top + this._margin.bottom;
@@ -1110,7 +1086,7 @@ namespace fgui {
                 dataLen = buffer.readShort();
                 curPos = buffer.position;
 
-                if (objectPool != null)
+                if (objectPool)
                     child = objectPool[poolIndex + i];
                 else {
                     buffer.seek(curPos, 0);
@@ -1127,15 +1103,15 @@ namespace fgui {
                         else
                             pkg = contentItem.owner;
 
-                        pi = pkg != null ? pkg.getItemById(src) : null;
+                        pi = pkg ? pkg.getItemById(src) : null;
                     }
 
-                    if (pi != null) {
+                    if (pi) {
                         child = UIObjectFactory.newObject(pi);
                         child.constructFromResource();
                     }
                     else
-                        child = UIObjectFactory.newObject2(type);
+                        child = UIObjectFactory.newObject(type);
                 }
 
                 child._underConstruct = true;
@@ -1239,14 +1215,14 @@ namespace fgui {
             buffer.seek(beginPos, 4);
 
             var pageController: number = buffer.readShort();
-            if (pageController != null && this._scrollPane != null)
+            if (pageController != -1 && this._scrollPane)
                 this._scrollPane.pageController = this._parent.getControllerAt(pageController);
 
             var cnt: number = buffer.readShort();
             for (var i: number = 0; i < cnt; i++) {
                 var cc: Controller = this.getController(buffer.readS());
                 var pageId: string = buffer.readS();
-                if (cc != null)
+                if (cc)
                     cc.selectedPageId = pageId;
             }
 
@@ -1275,4 +1251,6 @@ namespace fgui {
                 this._transitions[i].onDisable();
         }
     }
+
+    var s_vec2: cc.Vec2 = new cc.Vec2();
 }

@@ -4,6 +4,6 @@ namespace fgui {
         fileName: string;
         loaded: boolean;
 
-        load(callback: Function, thisObj: any): void;
+        load(callback: Function, target: any): void;
     }
 }

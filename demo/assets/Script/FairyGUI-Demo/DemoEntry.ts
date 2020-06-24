@@ -9,7 +9,6 @@ export default class DemoEntry extends cc.Component {
     private _currentDemo: cc.Component;
 
     onLoad() {
-        fgui.addLoadHandler();
         fgui.GRoot.create();
 
         this.node.on("start_demo", this.onDemoStart, this);

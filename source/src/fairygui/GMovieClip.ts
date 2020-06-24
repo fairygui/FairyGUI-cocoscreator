@@ -9,17 +9,19 @@ namespace fgui {
 
             this._node.name = "GMovieClip";
             this._touchDisabled = true;
+
             this._content = this._node.addComponent(MovieClip);
             this._content.sizeMode = cc.Sprite.SizeMode.CUSTOM;
             this._content.trim = false;
+            this._content.setPlaySettings();
         }
 
         public get color(): cc.Color {
-            return cc.Color.WHITE;
+            return this._node.color;
         }
 
         public set color(value: cc.Color) {
-            if (this._node.color != value) {
+            if (!this._node.color.equals(value)) {
                 this._node.color = value;
                 this.updateGear(4);
             }
@@ -74,6 +76,13 @@ namespace fgui {
 
         protected handleGrayedChanged(): void {
             this._content.grayed = this._grayed;
+        }
+
+        protected handleSizeChanged(): void {
+            super.handleSizeChanged();
+
+            //不知道原因，尺寸改变必须调用一次这个，否则大小不对
+            this._content.sizeMode = cc.Sprite.SizeMode.CUSTOM;
         }
 
         public getProp(index: number): any {

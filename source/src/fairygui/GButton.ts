@@ -54,7 +54,7 @@ namespace fgui {
         public set icon(value: string) {
             this._icon = value;
             value = (this._selected && this._selectedIcon) ? this._selectedIcon : this._icon;
-            if (this._iconObject != null)
+            if (this._iconObject)
                 this._iconObject.icon = value;
             this.updateGear(7);
         }
@@ -66,7 +66,7 @@ namespace fgui {
         public set selectedIcon(value: string) {
             this._selectedIcon = value;
             value = (this._selected && this._selectedIcon) ? this._selectedIcon : this._icon;
-            if (this._iconObject != null)
+            if (this._iconObject)
                 this._iconObject.icon = value;
         }
 
@@ -101,7 +101,7 @@ namespace fgui {
 
         public get titleColor(): cc.Color {
             var tf: GTextField = this.getTextField();
-            if (tf != null)
+            if (tf)
                 return tf.color;
             else
                 return cc.Color.BLACK;
@@ -109,13 +109,13 @@ namespace fgui {
 
         public set titleColor(value: cc.Color) {
             var tf: GTextField = this.getTextField();
-            if (tf != null)
+            if (tf)
                 tf.color = value;
         }
 
         public get titleFontSize(): number {
             var tf: GTextField = this.getTextField();
-            if (tf != null)
+            if (tf)
                 return tf.fontSize;
             else
                 return 0;
@@ -123,7 +123,7 @@ namespace fgui {
 
         public set titleFontSize(value: number) {
             var tf: GTextField = this.getTextField();
-            if (tf != null)
+            if (tf)
                 tf.fontSize = value;
         }
         public get sound(): string {
@@ -153,7 +153,7 @@ namespace fgui {
                     this._titleObject.text = this._selected ? this._selectedTitle : this._title;
                 if (this._selectedIcon) {
                     var str: string = this._selected ? this._selectedIcon : this._icon;
-                    if (this._iconObject != null)
+                    if (this._iconObject)
                         this._iconObject.icon = str;
                 }
                 if (this._relatedController
@@ -220,11 +220,9 @@ namespace fgui {
 
         public getTextField(): GTextField {
             if (this._titleObject instanceof GTextField)
-                return (<GTextField>this._titleObject);
-            else if (this._titleObject instanceof GLabel)
-                return (<GLabel>this._titleObject).getTextField();
-            else if (this._titleObject instanceof GButton)
-                return (<GButton>this._titleObject).getTextField();
+                return this._titleObject;
+            else if ((this._titleObject instanceof GLabel) || (this._titleObject instanceof GButton))
+                return this._titleObject.getTextField();
             else
                 return null;
         }
@@ -244,7 +242,7 @@ namespace fgui {
                     if (!this._downColor)
                         this._downColor = new cc.Color();
                     var r: number = this._downEffectValue * 255;
-                    this._downColor.setR(r).setG(r).setB(r);
+                    this._downColor.r = this._downColor.g = this._downColor.b = r;
                     for (var i: number = 0; i < cnt; i++) {
                         var obj: GObject = this.getChildAt(i);
                         if (obj["color"] != undefined && !(obj instanceof GTextField))
@@ -375,9 +373,9 @@ namespace fgui {
             this._buttonController = this.getController("button");
             this._titleObject = this.getChild("title");
             this._iconObject = this.getChild("icon");
-            if (this._titleObject != null)
+            if (this._titleObject)
                 this._title = this._titleObject.text;
-            if (this._iconObject != null)
+            if (this._iconObject)
                 this._icon = this._iconObject.icon;
 
             if (this._mode == ButtonMode.Common)
@@ -475,9 +473,9 @@ namespace fgui {
                     this.setState(GButton.DOWN);
             }
 
-            if (this._linkedPopup != null) {
+            if (this._linkedPopup) {
                 if (this._linkedPopup instanceof Window)
-                    (<Window><any>(this._linkedPopup)).toggleStatus();
+                    this._linkedPopup.toggleStatus();
                 else
                     this.root.togglePopup(this._linkedPopup, this);
             }

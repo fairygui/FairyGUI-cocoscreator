@@ -5,7 +5,7 @@ namespace fgui {
         private _text: string;
         private _readPos: number = 0;
 
-        protected _handlers: any;
+        protected _handlers: { [index: string]: (tagName: string, end: boolean, attr: string) => string };
 
         public lastColor: string;
         public lastSize: string;

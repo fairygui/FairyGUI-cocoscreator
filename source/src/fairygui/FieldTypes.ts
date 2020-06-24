@@ -55,6 +55,7 @@ namespace fgui {
         Font,
         Swf,
         Misc,
+        Unknown,
         Spine,
         DragonBones
     }
@@ -147,12 +148,6 @@ namespace fgui {
         BottomExt_Bottom = 23,
 
         Size = 24
-    }
-
-    export enum GraphType {
-        PlaceHolder,
-        Rect,
-        Ellipse
     }
 
     export enum FillMethod {

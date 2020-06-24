@@ -15,17 +15,10 @@ namespace fgui {
         private _playing: boolean;
         private _frame: number = 0;
         private _color: cc.Color;
-
         private _contentItem: PackageItem;
-        private _contentSourceWidth: number = 0;
-        private _contentSourceHeight: number = 0;
-        private _contentWidth: number = 0;
-        private _contentHeight: number = 0;
-
         private _container: cc.Node;
-        private _errorSign: GObject;
-        private _content2: GComponent;
-
+        private _errorSign?: GObject;
+        private _content2?: GComponent;
         private _updatingLayout: boolean;
 
         private static _errorSignPool: GObjectPool = new GObjectPool();
@@ -54,10 +47,10 @@ namespace fgui {
 
         public dispose(): void {
             if (this._contentItem == null) {
-                if (this._content.spriteFrame != null)
+                if (this._content.spriteFrame)
                     this.freeExternal(this._content.spriteFrame);
             }
-            if (this._content2 != null)
+            if (this._content2)
                 this._content2.dispose();
             super.dispose();
         }
@@ -146,7 +139,7 @@ namespace fgui {
             if (this._playing != value) {
                 this._playing = value;
                 if (this._content instanceof MovieClip)
-                    (<MovieClip>this._content).playing = value;
+                    this._content.playing = value;
                 this.updateGear(5);
             }
         }
@@ -159,7 +152,7 @@ namespace fgui {
             if (this._frame != value) {
                 this._frame = value;
                 if (this._content instanceof MovieClip)
-                    (<MovieClip>this._content).frame = value;
+                    this._content.frame = value;
                 this.updateGear(5);
             }
         }
@@ -230,11 +223,11 @@ namespace fgui {
             this._content.spriteFrame = value;
             this._content.type = cc.Sprite.Type.SIMPLE;
             if (value != null) {
-                this._contentSourceWidth = value.getRect().width;
-                this._contentSourceHeight = value.getRect().height;
+                this.sourceWidth = value.getRect().width;
+                this.sourceHeight = value.getRect().height;
             }
             else {
-                this._contentSourceWidth = this._contentHeight = 0;
+                this.sourceWidth = this.sourceHeight = 0;
             }
 
             this.updateLayout();
@@ -254,15 +247,15 @@ namespace fgui {
 
         protected loadFromPackage(itemURL: string) {
             this._contentItem = UIPackage.getItemByURL(itemURL);
-            if (this._contentItem != null) {
+            if (this._contentItem) {
                 this._contentItem = this._contentItem.getBranch();
-                this._contentSourceWidth = this._contentItem.width;
-                this._contentSourceHeight = this._contentItem.height;
+                this.sourceWidth = this._contentItem.width;
+                this.sourceHeight = this._contentItem.height;
                 this._contentItem = this._contentItem.getHighResolution();
                 this._contentItem.load();
 
                 if (this._autoSize)
-                    this.setSize(this._contentSourceWidth, this._contentSourceHeight);
+                    this.setSize(this.sourceWidth, this.sourceHeight);
 
                 if (this._contentItem.type == PackageItemType.Image) {
                     if (!this._contentItem.asset) {
@@ -297,7 +290,7 @@ namespace fgui {
                         this.setErrorState();
                     }
                     else {
-                        this._content2 = obj.asCom;
+                        this._content2 = obj;
                         this._container.addChild(this._content2.node);
                         this.updateLayout();
                     }
@@ -313,9 +306,9 @@ namespace fgui {
             if (ToolSet.startsWith(this._url, "http://")
                 || ToolSet.startsWith(this._url, "https://")
                 || ToolSet.startsWith(this._url, '/'))
-                cc.loader.load(this._url, this.onLoaded.bind(this));
+                cc.assetManager.loadRemote(this._url, this.onLoaded.bind(this));
             else
-                cc.loader.loadRes(this._url, cc.Asset, this.onLoaded.bind(this));
+                cc.resources.load(this._url, cc.Asset, this.onLoaded.bind(this));
         }
 
         private onLoaded(err, asset): void {
@@ -324,12 +317,11 @@ namespace fgui {
             if (!this._url || !cc.isValid(this._node))
                 return;
 
-            asset = cc.loader.getRes(this._url);
-            if (!asset)
-                return;
+            if (err)
+                console.warn(err);
 
             if (asset instanceof cc.SpriteFrame)
-                this.onExternalLoadSuccess(<cc.SpriteFrame>asset);
+                this.onExternalLoadSuccess(asset);
             else if (asset instanceof cc.Texture2D)
                 this.onExternalLoadSuccess(new cc.SpriteFrame(asset));
         }
@@ -340,10 +332,10 @@ namespace fgui {
         protected onExternalLoadSuccess(texture: cc.SpriteFrame): void {
             this._content.spriteFrame = texture;
             this._content.type = cc.Sprite.Type.SIMPLE;
-            this._contentSourceWidth = texture.getRect().width;
-            this._contentSourceHeight = texture.getRect().height;
+            this.sourceWidth = texture.getRect().width;
+            this.sourceHeight = texture.getRect().height;
             if (this._autoSize)
-                this.setSize(this._contentSourceWidth, this._contentSourceHeight);
+                this.setSize(this.sourceWidth, this.sourceHeight);
             this.updateLayout();
         }
 
@@ -361,14 +353,14 @@ namespace fgui {
                 }
             }
 
-            if (this._errorSign != null) {
+            if (this._errorSign) {
                 this._errorSign.setSize(this.width, this.height);
                 this._container.addChild(this._errorSign.node);
             }
         }
 
         private clearErrorState(): void {
-            if (this._errorSign != null) {
+            if (this._errorSign) {
                 this._container.removeChild(this._errorSign.node);
                 GLoader._errorSignPool.returnObject(this._errorSign);
                 this._errorSign = null;
@@ -385,36 +377,36 @@ namespace fgui {
                 return;
             }
 
-            this._contentWidth = this._contentSourceWidth;
-            this._contentHeight = this._contentSourceHeight;
+            let contentWidth = this.sourceWidth;
+            let contentHeight = this.sourceHeight;
 
             let pivotCorrectX = -this.pivotX * this._width;
             let pivotCorrectY = this.pivotY * this._height;
 
             if (this._autoSize) {
                 this._updatingLayout = true;
-                if (this._contentWidth == 0)
-                    this._contentWidth = 50;
-                if (this._contentHeight == 0)
-                    this._contentHeight = 30;
+                if (contentWidth == 0)
+                    contentWidth = 50;
+                if (contentHeight == 0)
+                    contentHeight = 30;
 
-                this.setSize(this._contentWidth, this._contentHeight);
+                this.setSize(contentWidth, contentHeight);
                 this._updatingLayout = false;
 
                 this._container.setContentSize(this._width, this._height);
                 this._container.setPosition(pivotCorrectX, pivotCorrectY);
-                if (this._content2 != null) {
+                if (this._content2) {
                     this._content2.setPosition(pivotCorrectX + this._width * this.pivotX, pivotCorrectY - this._height * this.pivotY);
                     this._content2.setScale(1, 1);
                 }
-                if (this._contentWidth == this._width && this._contentHeight == this._height)
+                if (contentWidth == this._width && contentHeight == this._height)
                     return;
             }
 
             var sx: number = 1, sy: number = 1;
             if (this._fill != LoaderFillType.None) {
-                sx = this.width / this._contentSourceWidth;
-                sy = this.height / this._contentSourceHeight;
+                sx = this.width / this.sourceWidth;
+                sy = this.height / this.sourceHeight;
 
                 if (sx != 1 || sy != 1) {
                     if (this._fill == LoaderFillType.ScaleMatchHeight)
@@ -439,13 +431,13 @@ namespace fgui {
                         if (sy > 1)
                             sy = 1;
                     }
-                    this._contentWidth = this._contentSourceWidth * sx;
-                    this._contentHeight = this._contentSourceHeight * sy;
+                    contentWidth = this.sourceWidth * sx;
+                    contentHeight = this.sourceHeight * sy;
                 }
             }
 
-            this._container.setContentSize(this._contentWidth, this._contentHeight);
-            if (this._content2 != null) {
+            this._container.setContentSize(contentWidth, contentHeight);
+            if (this._content2) {
                 this._content2.setPosition(pivotCorrectX + this._width * this.pivotX, pivotCorrectY - this._height * this.pivotY);
                 this._content2.setScale(sx, sy);
             }
@@ -454,15 +446,15 @@ namespace fgui {
             if (this._align == AlignType.Left)
                 nx = 0;
             else if (this._align == AlignType.Center)
-                nx = Math.floor((this._width - this._contentWidth) / 2);
+                nx = Math.floor((this._width - contentWidth) / 2);
             else
-                nx = this._width - this._contentWidth;
+                nx = this._width - contentWidth;
             if (this._verticalAlign == VertAlignType.Top)
                 ny = 0;
             else if (this._verticalAlign == VertAlignType.Middle)
-                ny = Math.floor((this._height - this._contentHeight) / 2);
+                ny = Math.floor((this._height - contentHeight) / 2);
             else
-                ny = this._height - this._contentHeight;
+                ny = this._height - contentHeight;
             ny = -ny;
             this._container.setPosition(pivotCorrectX + nx, pivotCorrectY + ny);
         }
@@ -470,12 +462,12 @@ namespace fgui {
         private clearContent(): void {
             this.clearErrorState();
 
-            if (this._contentItem == null) {
+            if (!this._contentItem) {
                 var texture: cc.SpriteFrame = this._content.spriteFrame;
-                if (texture != null)
+                if (texture)
                     this.freeExternal(texture);
             }
-            if (this._content2 != null) {
+            if (this._content2) {
                 this._container.removeChild(this._content2.node);
                 this._content2.dispose();
                 this._content2 = null;
@@ -503,19 +495,13 @@ namespace fgui {
             this._content.grayed = this._grayed;
         }
 
-        public hitTest(globalPt: cc.Vec2): GObject {
-            if (this._touchDisabled || !this._touchable || !this._node.activeInHierarchy)
-                return null;
-
+        protected _hitTest(pt: cc.Vec2, globalPt: cc.Vec2): GObject {
             if (this._content2) {
                 let obj: GObject = this._content2.hitTest(globalPt);
                 if (obj)
                     return obj;
             }
 
-            let pt: cc.Vec3 = this._node.convertToNodeSpaceAR(globalPt);
-            pt.x += this._node.anchorX * this._width;
-            pt.y += this._node.anchorY * this._height;
             if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
                 return this;
             else

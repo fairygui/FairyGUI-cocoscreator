@@ -1,15 +1,15 @@
 namespace fgui {
     export class GTreeNode {
-        public data: any;
+        public data?: any;
 
         private _parent: GTreeNode;
         private _children: Array<GTreeNode>;
-        private _expanded: boolean = false;
+        private _expanded: boolean;
         private _level: number = 0;
         private _tree: GTree;
 
         public _cell: GComponent;
-        public _resURL: string;
+        public _resURL?: string;
 
         constructor(hasChild: boolean, resURL?: string) {
             this._resURL = resURL;
@@ -23,7 +23,7 @@ namespace fgui {
 
             if (this._expanded != value) {
                 this._expanded = value;
-                if (this._tree != null) {
+                if (this._tree) {
                     if (this._expanded)
                         this._tree._afterExpanded(this);
                     else
@@ -45,26 +45,26 @@ namespace fgui {
         }
 
         public get text(): string {
-            if (this._cell != null)
+            if (this._cell)
                 return this._cell.text;
             else
                 return null;
         }
 
         public set text(value: string) {
-            if (this._cell != null)
+            if (this._cell)
                 this._cell.text = value;
         }
 
         public get icon(): string {
-            if (this._cell != null)
+            if (this._cell)
                 return this._cell.icon;
             else
                 return null;
         }
 
         public set icon(value: string) {
-            if (this._cell != null)
+            if (this._cell)
                 this._cell.icon = value;
         }
 
@@ -108,7 +108,7 @@ namespace fgui {
                     child._parent = this;
                     child._level = this._level + 1;
                     child._setTree(this._tree);
-                    if (this._tree != null && this == this._tree.rootNode || this._cell != null && this._cell.parent != null && this._expanded)
+                    if (this._tree && this == this._tree.rootNode || this._cell && this._cell.parent && this._expanded)
                         this._tree._afterInserted(child);
                 }
 
@@ -133,7 +133,7 @@ namespace fgui {
                 this._children.splice(index, 1);
 
                 child._parent = null;
-                if (this._tree != null) {
+                if (this._tree) {
                     child._setTree(null);
                     this._tree._afterRemoved(child);
                 }
@@ -202,7 +202,7 @@ namespace fgui {
 
             this._children.splice(oldIndex, 1);
             this._children.splice(index, 0, child);
-            if (this._tree != null && this == this._tree.rootNode || this._cell != null && this._cell.parent != null && this._expanded)
+            if (this._tree && this == this._tree.rootNode || this._cell && this._cell.parent && this._expanded)
                 this._tree._afterMoved(child);
         }
 
@@ -240,10 +240,10 @@ namespace fgui {
 
         public _setTree(value: GTree): void {
             this._tree = value;
-            if (this._tree != null && this._tree.treeNodeWillExpand && this._expanded)
+            if (this._tree && this._tree.treeNodeWillExpand && this._expanded)
                 this._tree.treeNodeWillExpand(this, true);
 
-            if (this._children != null) {
+            if (this._children) {
                 var cnt: number = this._children.length;
                 for (var i: number = 0; i < cnt; i++) {
                     var node: GTreeNode = this._children[i];

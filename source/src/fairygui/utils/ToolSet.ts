@@ -3,9 +3,6 @@
 namespace fgui {
 
     export class ToolSet {
-        public constructor() {
-        }
-
         public static startsWith(source: string, str: string, ignoreCase?: boolean): boolean {
             if (!source)
                 return false;
@@ -24,7 +21,8 @@ namespace fgui {
             if (!str)
                 return "";
             else
-                return str.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;");
+                return str.replace(/&/g, "&amp;").replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;").replace(/'/g, "&apos;").replace(/"/g, "&quot;");
         }
 
         public static clamp(value: number, min: number, max: number): number {

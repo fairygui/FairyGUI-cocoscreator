@@ -71,7 +71,7 @@ window.__extends = (this && this.__extends) || (function () {
         AsyncOperationRunner.prototype.init = function (item) {
             this._itemList.length = 0;
             this._objectPool.length = 0;
-            var di = new DisplayListItem(item, 0);
+            var di = { pi: item, type: item.objectType };
             di.childCount = this.collectComponentChildren(item);
             this._itemList.push(di);
             this._index = 0;
@@ -109,12 +109,12 @@ window.__extends = (this && this.__extends) || (function () {
                     else
                         pkg = item.owner;
                     pi = pkg != null ? pkg.getItemById(src) : null;
-                    di = new DisplayListItem(pi, type);
-                    if (pi != null && pi.type == fgui.PackageItemType.Component)
+                    di = { pi: pi, type: type };
+                    if (pi && pi.type == fgui.PackageItemType.Component)
                         di.childCount = this.collectComponentChildren(pi);
                 }
                 else {
-                    di = new DisplayListItem(null, type);
+                    di = { type: type };
                     if (type == fgui.ObjectType.List)
                         di.listItemCount = this.collectListChildren(buffer);
                 }
@@ -141,8 +141,8 @@ window.__extends = (this && this.__extends) || (function () {
                     url = defaultItem;
                 if (url) {
                     pi = fgui.UIPackage.getItemByURL(url);
-                    if (pi != null) {
-                        di = new DisplayListItem(pi, pi.objectType);
+                    if (pi) {
+                        di = { pi: pi, type: pi.objectType };
                         if (pi.type == fgui.PackageItemType.Component)
                             di.childCount = this.collectComponentChildren(pi);
                         this._itemList.push(di);
@@ -163,11 +163,11 @@ window.__extends = (this && this.__extends) || (function () {
             var totalItems = this._itemList.length;
             while (this._index < totalItems) {
                 di = this._itemList[this._index];
-                if (di.packageItem != null) {
-                    obj = fgui.UIObjectFactory.newObject(di.packageItem);
+                if (di.pi) {
+                    obj = fgui.UIObjectFactory.newObject(di.pi);
                     this._objectPool.push(obj);
                     fgui.UIPackage._constructing++;
-                    if (di.packageItem.type == fgui.PackageItemType.Component) {
+                    if (di.pi.type == fgui.PackageItemType.Component) {
                         poolStart = this._objectPool.length - di.childCount - 1;
                         obj.constructFromResource2(this._objectPool, poolStart);
                         this._objectPool.splice(poolStart, di.childCount);
@@ -178,7 +178,7 @@ window.__extends = (this && this.__extends) || (function () {
                     fgui.UIPackage._constructing--;
                 }
                 else {
-                    obj = fgui.UIObjectFactory.newObject2(di.type);
+                    obj = fgui.UIObjectFactory.newObject(di.type);
                     this._objectPool.push(obj);
                     if (di.type == fgui.ObjectType.List && di.listItemCount > 0) {
                         poolStart = this._objectPool.length - di.listItemCount - 1;
@@ -198,23 +198,16 @@ window.__extends = (this && this.__extends) || (function () {
         };
         return AsyncOperationRunner;
     }(cc.Component));
-    var DisplayListItem = (function () {
-        function DisplayListItem(packageItem, type) {
-            this.packageItem = packageItem;
-            this.type = type;
-        }
-        return DisplayListItem;
-    }());
 })(fgui || (fgui = {}));
 
 (function (fgui) {
+    var _nextPageId = 0;
     var Controller = (function (_super) {
         __extends(Controller, _super);
         function Controller() {
             var _this = _super.call(this) || this;
             _this._selectedIndex = 0;
             _this._previousIndex = 0;
-            _this.changing = false;
             _this._pageIds = [];
             _this._pageNames = [];
             _this._selectedIndex = -1;
@@ -313,7 +306,7 @@ window.__extends = (this && this.__extends) || (function () {
             this.addPageAt(name, this._pageIds.length);
         };
         Controller.prototype.addPageAt = function (name, index) {
-            var nid = "" + (Controller._nextPageId++);
+            var nid = "" + (_nextPageId++);
             if (index == this._pageIds.length) {
                 this._pageIds.push(nid);
                 this._pageNames.push(name);
@@ -450,7 +443,7 @@ window.__extends = (this && this.__extends) || (function () {
             buffer.seek(beginPos, 2);
             cnt = buffer.readShort();
             if (cnt > 0) {
-                if (this._actions == null)
+                if (!this._actions)
                     this._actions = new Array();
                 for (i = 0; i < cnt; i++) {
                     nextPos = buffer.readShort();
@@ -461,12 +454,11 @@ window.__extends = (this && this.__extends) || (function () {
                     buffer.position = nextPos;
                 }
             }
-            if (this.parent != null && this._pageIds.length > 0)
+            if (this.parent && this._pageIds.length > 0)
                 this._selectedIndex = homePageIndex;
             else
                 this._selectedIndex = -1;
         };
-        Controller._nextPageId = 0;
         return Controller;
     }(cc.EventTarget));
     fgui.Controller = Controller;
@@ -487,7 +479,7 @@ window.__extends = (this && this.__extends) || (function () {
         }
         Object.defineProperty(DragDropManager, "inst", {
             get: function () {
-                if (DragDropManager._inst == null)
+                if (!DragDropManager._inst)
                     DragDropManager._inst = new DragDropManager();
                 return DragDropManager._inst;
             },
@@ -509,7 +501,7 @@ window.__extends = (this && this.__extends) || (function () {
             configurable: true
         });
         DragDropManager.prototype.startDrag = function (source, icon, sourceData, touchId) {
-            if (this._agent.parent != null)
+            if (this._agent.parent)
                 return;
             this._sourceData = sourceData;
             this._agent.url = icon;
@@ -520,20 +512,20 @@ window.__extends = (this && this.__extends) || (function () {
             this._agent.startDrag(touchId);
         };
         DragDropManager.prototype.cancel = function () {
-            if (this._agent.parent != null) {
+            if (this._agent.parent) {
                 this._agent.stopDrag();
                 fgui.GRoot.inst.removeChild(this._agent);
                 this._sourceData = null;
             }
         };
         DragDropManager.prototype.onDragEnd = function () {
-            if (this._agent.parent == null)
+            if (!this._agent.parent)
                 return;
             fgui.GRoot.inst.removeChild(this._agent);
             var sourceData = this._sourceData;
             this._sourceData = null;
             var obj = fgui.GRoot.inst.touchTarget;
-            while (obj != null) {
+            while (obj) {
                 if (obj.node.hasEventListener(fgui.Event.DROP)) {
                     obj.requestFocus();
                     obj.node.emit(fgui.Event.DROP, obj, sourceData);
@@ -613,8 +605,9 @@ window.__extends = (this && this.__extends) || (function () {
         PackageItemType[PackageItemType["Font"] = 5] = "Font";
         PackageItemType[PackageItemType["Swf"] = 6] = "Swf";
         PackageItemType[PackageItemType["Misc"] = 7] = "Misc";
-        PackageItemType[PackageItemType["Spine"] = 8] = "Spine";
-        PackageItemType[PackageItemType["DragonBones"] = 9] = "DragonBones";
+        PackageItemType[PackageItemType["Unknown"] = 8] = "Unknown";
+        PackageItemType[PackageItemType["Spine"] = 9] = "Spine";
+        PackageItemType[PackageItemType["DragonBones"] = 10] = "DragonBones";
     })(PackageItemType = fgui.PackageItemType || (fgui.PackageItemType = {}));
     var ObjectType;
     (function (ObjectType) {
@@ -711,12 +704,6 @@ window.__extends = (this && this.__extends) || (function () {
         RelationType[RelationType["BottomExt_Bottom"] = 23] = "BottomExt_Bottom";
         RelationType[RelationType["Size"] = 24] = "Size";
     })(RelationType = fgui.RelationType || (fgui.RelationType = {}));
-    var GraphType;
-    (function (GraphType) {
-        GraphType[GraphType["PlaceHolder"] = 0] = "PlaceHolder";
-        GraphType[GraphType["Rect"] = 1] = "Rect";
-        GraphType[GraphType["Ellipse"] = 2] = "Ellipse";
-    })(GraphType = fgui.GraphType || (fgui.GraphType = {}));
     var FillMethod;
     (function (FillMethod) {
         FillMethod[FillMethod["None"] = 0] = "None";
@@ -756,16 +743,10 @@ window.__extends = (this && this.__extends) || (function () {
             this._alpha = 1;
             this._visible = true;
             this._touchable = true;
-            this._grayed = false;
-            this._draggable = false;
             this._skewX = 0;
             this._skewY = 0;
-            this._pivotAsAnchor = false;
             this._sortingOrder = 0;
             this._internalVisible = true;
-            this._handlingController = false;
-            this._pixelSnapping = false;
-            this._dragTesting = false;
             this.sourceWidth = 0;
             this.sourceHeight = 0;
             this.initWidth = 0;
@@ -779,7 +760,6 @@ window.__extends = (this && this.__extends) || (function () {
             this._rawWidth = 0;
             this._rawHeight = 0;
             this._sizePercentInGroup = 0;
-            this._touchDisabled = false;
             this._node = new cc.Node();
             if (GObject._defaultGroupIndex == -1) {
                 GObject._defaultGroupIndex = 0;
@@ -852,12 +832,12 @@ window.__extends = (this && this.__extends) || (function () {
                 this.updateGear(1);
                 if (this._parent && !(this._parent instanceof fgui.GList)) {
                     this._parent.setBoundsChangedFlag();
-                    if (this._group != null)
+                    if (this._group)
                         this._group.setBoundsChangedFlag(true);
                     this._node.emit(fgui.Event.XY_CHANGED, this);
                 }
-                if (GObject.draggingObject == this && !GObject.sUpdateInDragging)
-                    this.localToGlobalRect(0, 0, this._width, this._height, GObject.sGlobalRect);
+                if (GObject.draggingObject == this && !sUpdateInDragging)
+                    this.localToGlobalRect(0, 0, this._width, this._height, sGlobalRect);
             }
         };
         Object.defineProperty(GObject.prototype, "xMin", {
@@ -901,7 +881,7 @@ window.__extends = (this && this.__extends) || (function () {
         });
         GObject.prototype.center = function (restraint) {
             var r;
-            if (this._parent != null)
+            if (this._parent)
                 r = this.parent;
             else
                 r = this.root;
@@ -964,7 +944,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._parent) {
                     this._relations.onOwnerSizeChanged(dWidth, dHeight, this._pivotAsAnchor || !ignorePivot);
                     this._parent.setBoundsChangedFlag();
-                    if (this._group != null)
+                    if (this._group)
                         this._group.setBoundsChangedFlag();
                 }
                 this._node.emit(fgui.Event.SIZE_CHANGED, this);
@@ -1187,7 +1167,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._sortingOrder != value) {
                     var old = this._sortingOrder;
                     this._sortingOrder = value;
-                    if (this._parent != null)
+                    if (this._parent)
                         this._parent.childSortingOrderChanged(this, old, this._sortingOrder);
                 }
             },
@@ -1236,7 +1216,7 @@ window.__extends = (this && this.__extends) || (function () {
         });
         Object.defineProperty(GObject.prototype, "resourceURL", {
             get: function () {
-                if (this.packageItem != null)
+                if (this.packageItem)
                     return "ui://" + this.packageItem.owner.id + this.packageItem.id;
                 else
                     return null;
@@ -1250,10 +1230,10 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
                 if (this._group != value) {
-                    if (this._group != null)
+                    if (this._group)
                         this._group.setBoundsChangedFlag();
                     this._group = value;
-                    if (this._group != null)
+                    if (this._group)
                         this._group.setBoundsChangedFlag();
                 }
             },
@@ -1262,7 +1242,7 @@ window.__extends = (this && this.__extends) || (function () {
         });
         GObject.prototype.getGear = function (index) {
             var gear = this._gears[index];
-            if (gear == null)
+            if (!gear)
                 this._gears[index] = gear = fgui.GearBase.create(this, index);
             return gear;
         };
@@ -1270,14 +1250,14 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._underConstruct || this._gearLocked)
                 return;
             var gear = this._gears[index];
-            if (gear != null && gear.controller != null)
+            if (gear && gear.controller)
                 gear.updateState();
         };
         GObject.prototype.checkGearController = function (index, c) {
-            return this._gears[index] != null && this._gears[index].controller == c;
+            return this._gears[index] && this._gears[index].controller == c;
         };
         GObject.prototype.updateGearFromRelations = function (index, dx, dy) {
-            if (this._gears[index] != null)
+            if (this._gears[index])
                 this._gears[index].updateFromRelations(dx, dy);
         };
         GObject.prototype.addDisplayLock = function () {
@@ -1539,7 +1519,7 @@ window.__extends = (this && this.__extends) || (function () {
             n.destroy();
             for (var i = 0; i < 10; i++) {
                 var gear = this._gears[i];
-                if (gear != null)
+                if (gear)
                     gear.dispose();
             }
         };
@@ -1609,83 +1589,64 @@ window.__extends = (this && this.__extends) || (function () {
             enumerable: false,
             configurable: true
         });
-        GObject.prototype.localToGlobal = function (ax, ay, resultPoint) {
-            if (ax == undefined)
-                ax = 0;
-            if (ay == undefined)
-                ay = 0;
-            var pt = resultPoint || new cc.Vec2();
-            pt.x = ax;
-            pt.y = ay;
-            pt.y = -pt.y;
-            if (!this._pivotAsAnchor) {
-                pt.x -= this.node.anchorX * this._width;
-                pt.y += (1 - this.node.anchorY) * this._height;
-            }
-            var v3 = this._node.convertToWorldSpaceAR(pt);
-            pt.x = v3.x;
-            pt.y = fgui.GRoot.inst.height - v3.y;
-            return pt;
+        GObject.prototype.localToGlobal = function (ax, ay, result) {
+            ax = ax || 0;
+            ay = ay || 0;
+            result = result || new cc.Vec2();
+            result.x = ax;
+            result.y = ay;
+            result.y = -result.y;
+            result.x -= this.node.anchorX * this._width;
+            result.y += (1 - this.node.anchorY) * this._height;
+            this._node.convertToWorldSpaceAR(result, result);
+            result.y = fgui.GRoot.inst.height - result.y;
+            return result;
         };
-        GObject.prototype.globalToLocal = function (ax, ay, resultPoint) {
-            if (ax == undefined)
-                ax = 0;
-            if (ay == undefined)
-                ay = 0;
-            var pt = resultPoint || new cc.Vec2();
-            pt.x = ax;
-            pt.y = fgui.GRoot.inst.height - ay;
-            var v3 = this._node.convertToNodeSpaceAR(pt);
-            pt.x = v3.x;
-            pt.y = v3.y;
-            if (!this._pivotAsAnchor) {
-                pt.x -= this._node.anchorX * this._width;
-                pt.y += (1 - this._node.anchorY) * this._height;
-            }
-            pt.y = -pt.y;
-            return pt;
+        GObject.prototype.globalToLocal = function (ax, ay, result) {
+            ax = ax || 0;
+            ay = ay || 0;
+            result = result || new cc.Vec2();
+            result.x = ax;
+            result.y = fgui.GRoot.inst.height - ay;
+            this._node.convertToNodeSpaceAR(result, result);
+            result.x += this._node.anchorX * this._width;
+            result.y -= (1 - this._node.anchorY) * this._height;
+            result.y = -result.y;
+            return result;
         };
-        GObject.prototype.localToGlobalRect = function (ax, ay, aw, ah, resultRect) {
-            if (ax == undefined)
-                ax = 0;
-            if (ay == undefined)
-                ay = 0;
-            if (aw == undefined)
-                aw = 0;
-            if (ah == undefined)
-                ah = 0;
-            var ret = resultRect || new cc.Rect();
+        GObject.prototype.localToGlobalRect = function (ax, ay, aw, ah, result) {
+            ax = ax || 0;
+            ay = ay || 0;
+            aw = aw || 0;
+            ah = ah || 0;
+            result = result || new cc.Rect();
             var pt = this.localToGlobal(ax, ay);
-            ret.x = pt.x;
-            ret.y = pt.y;
+            result.x = pt.x;
+            result.y = pt.y;
             pt = this.localToGlobal(ax + aw, ay + ah, pt);
-            ret.xMax = pt.x;
-            ret.yMax = pt.y;
-            return ret;
+            result.xMax = pt.x;
+            result.yMax = pt.y;
+            return result;
         };
-        GObject.prototype.globalToLocalRect = function (ax, ay, aw, ah, resultRect) {
-            if (ax == undefined)
-                ax = 0;
-            if (ay == undefined)
-                ay = 0;
-            if (aw == undefined)
-                aw = 0;
-            if (ah == undefined)
-                ah = 0;
-            var ret = resultRect || new cc.Rect();
+        GObject.prototype.globalToLocalRect = function (ax, ay, aw, ah, result) {
+            ax = ax || 0;
+            ay = ay || 0;
+            aw = aw || 0;
+            ah = ah || 0;
+            result = result || new cc.Rect();
             var pt = this.globalToLocal(ax, ay);
-            ret.x = pt.x;
-            ret.y = pt.y;
+            result.x = pt.x;
+            result.y = pt.y;
             pt = this.globalToLocal(ax + aw, ay + ah, pt);
-            ret.xMax = pt.x;
-            ret.yMax = pt.y;
-            return ret;
+            result.xMax = pt.x;
+            result.yMax = pt.y;
+            return result;
         };
         GObject.prototype.handleControllerChanged = function (c) {
             this._handlingController = true;
             for (var i = 0; i < 10; i++) {
                 var gear = this._gears[i];
-                if (gear != null && gear.controller == c)
+                if (gear && gear.controller == c)
                     gear.apply();
             }
             this._handlingController = false;
@@ -1719,12 +1680,17 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._parent)
                 this._parent.setBoundsChangedFlag();
         };
-        GObject.prototype.hitTest = function (globalPt) {
-            if (this._touchDisabled || !this._touchable || !this._node.activeInHierarchy)
+        GObject.prototype.hitTest = function (globalPt, forTouch) {
+            if (forTouch == null)
+                forTouch = true;
+            if (forTouch && (this._touchDisabled || !this._touchable || !this._node.activeInHierarchy))
                 return null;
-            var pt = this._node.convertToNodeSpaceAR(globalPt);
-            pt.x += this._node.anchorX * this._width;
-            pt.y += this._node.anchorY * this._height;
+            if (!this._hitTestPt)
+                this._hitTestPt = new cc.Vec2();
+            this.globalToLocal(globalPt.x, globalPt.y, this._hitTestPt);
+            return this._hitTest(this._hitTestPt, globalPt);
+        };
+        GObject.prototype._hitTest = function (pt, globalPt) {
             if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
                 return this;
             else
@@ -1863,7 +1829,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         GObject.prototype.dragBegin = function (touchId) {
-            if (GObject.draggingObject != null) {
+            if (GObject.draggingObject) {
                 var tmp = GObject.draggingObject;
                 tmp.stopDrag();
                 GObject.draggingObject = null;
@@ -1871,8 +1837,8 @@ window.__extends = (this && this.__extends) || (function () {
             }
             if (touchId == undefined)
                 touchId = fgui.GRoot.inst.inputProcessor.getAllTouches()[0];
-            GObject.sGlobalDragStart.set(fgui.GRoot.inst.getTouchPosition(touchId));
-            this.localToGlobalRect(0, 0, this._width, this._height, GObject.sGlobalRect);
+            sGlobalDragStart.set(fgui.GRoot.inst.getTouchPosition(touchId));
+            this.localToGlobalRect(0, 0, this._width, this._height, sGlobalRect);
             GObject.draggingObject = this;
             this._dragTesting = true;
             fgui.GRoot.inst.inputProcessor.addTouchMonitor(touchId, this);
@@ -1884,7 +1850,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this._dragTesting = false;
                 GObject.draggingObject = null;
             }
-            GObject.sDragQuery = false;
+            sDragQuery = false;
         };
         GObject.prototype.onTouchBegin_0 = function (evt) {
             if (this._dragStartPoint == null)
@@ -1900,35 +1866,35 @@ window.__extends = (this && this.__extends) || (function () {
                     && Math.abs(this._dragStartPoint.y - evt.pos.y) < sensitivity)
                     return;
                 this._dragTesting = false;
-                GObject.sDragQuery = true;
+                sDragQuery = true;
                 this._node.emit(fgui.Event.DRAG_START, evt);
-                if (GObject.sDragQuery)
+                if (sDragQuery)
                     this.dragBegin(evt.touchId);
             }
             if (GObject.draggingObject == this) {
-                var xx = evt.pos.x - GObject.sGlobalDragStart.x + GObject.sGlobalRect.x;
-                var yy = evt.pos.y - GObject.sGlobalDragStart.y + GObject.sGlobalRect.y;
-                if (this._dragBounds != null) {
-                    var rect = fgui.GRoot.inst.localToGlobalRect(this._dragBounds.x, this._dragBounds.y, this._dragBounds.width, this._dragBounds.height, GObject.sDragHelperRect);
+                var xx = evt.pos.x - sGlobalDragStart.x + sGlobalRect.x;
+                var yy = evt.pos.y - sGlobalDragStart.y + sGlobalRect.y;
+                if (this._dragBounds) {
+                    var rect = fgui.GRoot.inst.localToGlobalRect(this._dragBounds.x, this._dragBounds.y, this._dragBounds.width, this._dragBounds.height, sDragHelperRect);
                     if (xx < rect.x)
                         xx = rect.x;
-                    else if (xx + GObject.sGlobalRect.width > rect.xMax) {
-                        xx = rect.xMax - GObject.sGlobalRect.width;
+                    else if (xx + sGlobalRect.width > rect.xMax) {
+                        xx = rect.xMax - sGlobalRect.width;
                         if (xx < rect.x)
                             xx = rect.x;
                     }
                     if (yy < rect.y)
                         yy = rect.y;
-                    else if (yy + GObject.sGlobalRect.height > rect.yMax) {
-                        yy = rect.yMax - GObject.sGlobalRect.height;
+                    else if (yy + sGlobalRect.height > rect.yMax) {
+                        yy = rect.yMax - sGlobalRect.height;
                         if (yy < rect.y)
                             yy = rect.y;
                     }
                 }
-                GObject.sUpdateInDragging = true;
-                var pt = this.parent.globalToLocal(xx, yy, GObject.sHelperPoint);
+                sUpdateInDragging = true;
+                var pt = this.parent.globalToLocal(xx, yy, sHelperPoint);
                 this.setPosition(Math.round(pt.x), Math.round(pt.y));
-                GObject.sUpdateInDragging = false;
+                sUpdateInDragging = false;
                 this._node.emit(fgui.Event.DRAG_MOVE, evt);
             }
         };
@@ -1939,14 +1905,15 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         GObject._defaultGroupIndex = -1;
-        GObject.sGlobalDragStart = new cc.Vec2();
-        GObject.sGlobalRect = new cc.Rect();
-        GObject.sHelperPoint = new cc.Vec2();
-        GObject.sDragHelperRect = new cc.Rect();
-        GObject.sDragQuery = false;
         return GObject;
     }());
     fgui.GObject = GObject;
+    var sGlobalDragStart = new cc.Vec2();
+    var sGlobalRect = new cc.Rect();
+    var sHelperPoint = new cc.Vec2();
+    var sDragHelperRect = new cc.Rect();
+    var sUpdateInDragging;
+    var sDragQuery = false;
     var GObjectPartner = (function (_super) {
         __extends(GObjectPartner, _super);
         function GObjectPartner() {
@@ -2380,14 +2347,13 @@ window.__extends = (this && this.__extends) || (function () {
                 if (child == obj) {
                     myIndex = i;
                 }
-                else if ((child instanceof fgui.GButton)
-                    && child.relatedController == c) {
+                else if ((child instanceof fgui.GButton) && child.relatedController == c) {
                     if (i > maxIndex)
                         maxIndex = i;
                 }
             }
             if (myIndex < maxIndex) {
-                if (this._applyingController != null)
+                if (this._applyingController)
                     this._children[maxIndex].handleControllerChanged(this._applyingController);
                 this.swapChildrenAt(myIndex, maxIndex);
             }
@@ -2405,11 +2371,11 @@ window.__extends = (this && this.__extends) || (function () {
             return null;
         };
         GComponent.prototype.isChildInView = function (child) {
-            if (this._rectMask != null) {
+            if (this._rectMask) {
                 return child.x + child.width >= 0 && child.x <= this.width
                     && child.y + child.height >= 0 && child.y <= this.height;
             }
-            else if (this._scrollPane != null) {
+            else if (this._scrollPane) {
                 return this._scrollPane.isChildInView(child);
             }
             else
@@ -2546,8 +2512,8 @@ window.__extends = (this && this.__extends) || (function () {
                 this._customMask.alphaThreshold = 0.0001;
                 this._customMask.spriteFrame = this._maskContent._content.spriteFrame;
             }
-            else {
-                if (this._maskContent.type == fgui.GraphType.Ellipse)
+            else if (this._maskContent instanceof fgui.GGraph) {
+                if (this._maskContent.type == 2)
                     this._customMask.type = cc.Mask.Type.ELLIPSE;
                 else
                     this._customMask.type = cc.Mask.Type.RECT;
@@ -2619,7 +2585,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GComponent.prototype.handleGrayedChanged = function () {
             var c = this.getController("grayed");
-            if (c != null) {
+            if (c) {
                 c.selectedIndex = this.grayed ? 1 : 0;
                 return;
             }
@@ -2631,67 +2597,49 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GComponent.prototype.handleControllerChanged = function (c) {
             _super.prototype.handleControllerChanged.call(this, c);
-            if (this._scrollPane != null)
+            if (this._scrollPane)
                 this._scrollPane.handleControllerChanged(c);
         };
-        GComponent.prototype.hitTest = function (globalPt) {
-            if (this._touchDisabled || !this._touchable || !this._node.activeInHierarchy)
-                return null;
-            var target;
+        GComponent.prototype._hitTest = function (pt, globalPt) {
             if (this._customMask) {
-                var b = this._customMask["_hitTest"](globalPt) || false;
+                s_vec2.set(globalPt);
+                s_vec2.y = fgui.GRoot.inst.height - globalPt.y;
+                var b = this._customMask["_hitTest"](s_vec2) || false;
                 if (!b)
                     return null;
             }
-            var flag = 0;
-            if (this.hitArea || this._rectMask) {
-                var pt = this._node.convertToNodeSpaceAR(globalPt);
-                pt.x += this._node.anchorX * this._width;
-                pt.y += this._node.anchorY * this._height;
-                if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
-                    flag = 1;
-                else
-                    flag = 2;
-                if (this.hitArea && !this.hitArea.hitTest(this, pt.x, pt.y))
+            if (this.hitArea) {
+                if (!this.hitArea.hitTest(pt, globalPt))
                     return null;
-                if (this._rectMask) {
-                    pt.x += this._container.x;
-                    pt.y += this._container.y;
-                    var clippingSize = this._container.getContentSize();
-                    if (pt.x < 0 || pt.y < 0 || pt.x >= clippingSize.width || pt.y >= clippingSize.height)
-                        return null;
-                }
+            }
+            else if (this._rectMask) {
+                s_vec2.set(pt);
+                s_vec2.x += this._container.x;
+                s_vec2.y += this._container.y;
+                var clippingSize = this._container.getContentSize();
+                if (s_vec2.x < 0 || s_vec2.y < 0 || s_vec2.x >= clippingSize.width || s_vec2.y >= clippingSize.height)
+                    return null;
             }
             if (this._scrollPane) {
-                target = this._scrollPane.hitTest(globalPt);
-                if (!target)
+                var target_1 = this._scrollPane.hitTest(pt, globalPt);
+                if (!target_1)
                     return null;
-                if (target != this)
-                    return target;
+                if (target_1 != this)
+                    return target_1;
             }
+            var target = null;
             var cnt = this._children.length;
             for (var i = cnt - 1; i >= 0; i--) {
-                target = this._children[i].hitTest(globalPt);
+                var child = this._children[i];
+                if (this._maskContent == child || child._touchDisabled)
+                    continue;
+                target = child.hitTest(globalPt);
                 if (target)
-                    return target;
+                    break;
             }
-            if (this._opaque) {
-                if (flag == 0) {
-                    var pt = this._node.convertToNodeSpaceAR(globalPt);
-                    pt.x += this._node.anchorX * this._width;
-                    pt.y += this._node.anchorY * this._height;
-                    if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
-                        flag = 1;
-                    else
-                        flag = 2;
-                }
-                if (flag == 1)
-                    return this;
-                else
-                    return null;
-            }
-            else
-                return null;
+            if (!target && this._opaque && (this.hitArea || pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height))
+                target = this;
+            return target;
         };
         GComponent.prototype.setBoundsChangedFlag = function () {
             if (!this._scrollPane && !this._trackBounds)
@@ -2765,13 +2713,13 @@ window.__extends = (this && this.__extends) || (function () {
         };
         Object.defineProperty(GComponent.prototype, "viewWidth", {
             get: function () {
-                if (this._scrollPane != null)
+                if (this._scrollPane)
                     return this._scrollPane.viewWidth;
                 else
                     return this.width - this._margin.left - this._margin.right;
             },
             set: function (value) {
-                if (this._scrollPane != null)
+                if (this._scrollPane)
                     this._scrollPane.viewWidth = value;
                 else
                     this.width = value + this._margin.left + this._margin.right;
@@ -2781,13 +2729,13 @@ window.__extends = (this && this.__extends) || (function () {
         });
         Object.defineProperty(GComponent.prototype, "viewHeight", {
             get: function () {
-                if (this._scrollPane != null)
+                if (this._scrollPane)
                     return this._scrollPane.viewHeight;
                 else
                     return this.height - this._margin.top - this._margin.bottom;
             },
             set: function (value) {
-                if (this._scrollPane != null)
+                if (this._scrollPane)
                     this._scrollPane.viewHeight = value;
                 else
                     this.height = value + this._margin.top + this._margin.bottom;
@@ -2944,7 +2892,7 @@ window.__extends = (this && this.__extends) || (function () {
             for (i = 0; i < childCount; i++) {
                 dataLen = buffer.readShort();
                 curPos = buffer.position;
-                if (objectPool != null)
+                if (objectPool)
                     child = objectPool[poolIndex + i];
                 else {
                     buffer.seek(curPos, 0);
@@ -2958,14 +2906,14 @@ window.__extends = (this && this.__extends) || (function () {
                             pkg = fgui.UIPackage.getById(pkgId);
                         else
                             pkg = contentItem.owner;
-                        pi = pkg != null ? pkg.getItemById(src) : null;
+                        pi = pkg ? pkg.getItemById(src) : null;
                     }
-                    if (pi != null) {
+                    if (pi) {
                         child = fgui.UIObjectFactory.newObject(pi);
                         child.constructFromResource();
                     }
                     else
-                        child = fgui.UIObjectFactory.newObject2(type);
+                        child = fgui.UIObjectFactory.newObject(type);
                 }
                 child._underConstruct = true;
                 child.setup_beforeAdd(buffer, curPos);
@@ -3040,13 +2988,13 @@ window.__extends = (this && this.__extends) || (function () {
             _super.prototype.setup_afterAdd.call(this, buffer, beginPos);
             buffer.seek(beginPos, 4);
             var pageController = buffer.readShort();
-            if (pageController != null && this._scrollPane != null)
+            if (pageController != -1 && this._scrollPane)
                 this._scrollPane.pageController = this._parent.getControllerAt(pageController);
             var cnt = buffer.readShort();
             for (var i = 0; i < cnt; i++) {
                 var cc = this.getController(buffer.readS());
                 var pageId = buffer.readS();
-                if (cc != null)
+                if (cc)
                     cc.selectedPageId = pageId;
             }
             if (buffer.version >= 2) {
@@ -3074,6 +3022,7 @@ window.__extends = (this && this.__extends) || (function () {
         return GComponent;
     }(fgui.GObject));
     fgui.GComponent = GComponent;
+    var s_vec2 = new cc.Vec2();
 })(fgui || (fgui = {}));
 
 (function (fgui) {
@@ -3099,7 +3048,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._icon = value;
                 value = (this._selected && this._selectedIcon) ? this._selectedIcon : this._icon;
-                if (this._iconObject != null)
+                if (this._iconObject)
                     this._iconObject.icon = value;
                 this.updateGear(7);
             },
@@ -3113,7 +3062,7 @@ window.__extends = (this && this.__extends) || (function () {
             set: function (value) {
                 this._selectedIcon = value;
                 value = (this._selected && this._selectedIcon) ? this._selectedIcon : this._icon;
-                if (this._iconObject != null)
+                if (this._iconObject)
                     this._iconObject.icon = value;
             },
             enumerable: false,
@@ -3157,14 +3106,14 @@ window.__extends = (this && this.__extends) || (function () {
         Object.defineProperty(GButton.prototype, "titleColor", {
             get: function () {
                 var tf = this.getTextField();
-                if (tf != null)
+                if (tf)
                     return tf.color;
                 else
                     return cc.Color.BLACK;
             },
             set: function (value) {
                 var tf = this.getTextField();
-                if (tf != null)
+                if (tf)
                     tf.color = value;
             },
             enumerable: false,
@@ -3173,14 +3122,14 @@ window.__extends = (this && this.__extends) || (function () {
         Object.defineProperty(GButton.prototype, "titleFontSize", {
             get: function () {
                 var tf = this.getTextField();
-                if (tf != null)
+                if (tf)
                     return tf.fontSize;
                 else
                     return 0;
             },
             set: function (value) {
                 var tf = this.getTextField();
-                if (tf != null)
+                if (tf)
                     tf.fontSize = value;
             },
             enumerable: false,
@@ -3220,7 +3169,7 @@ window.__extends = (this && this.__extends) || (function () {
                         this._titleObject.text = this._selected ? this._selectedTitle : this._title;
                     if (this._selectedIcon) {
                         var str = this._selected ? this._selectedIcon : this._icon;
-                        if (this._iconObject != null)
+                        if (this._iconObject)
                             this._iconObject.icon = str;
                     }
                     if (this._relatedController
@@ -3296,9 +3245,7 @@ window.__extends = (this && this.__extends) || (function () {
         GButton.prototype.getTextField = function () {
             if (this._titleObject instanceof fgui.GTextField)
                 return this._titleObject;
-            else if (this._titleObject instanceof fgui.GLabel)
-                return this._titleObject.getTextField();
-            else if (this._titleObject instanceof GButton)
+            else if ((this._titleObject instanceof fgui.GLabel) || (this._titleObject instanceof GButton))
                 return this._titleObject.getTextField();
             else
                 return null;
@@ -3315,7 +3262,7 @@ window.__extends = (this && this.__extends) || (function () {
                     if (!this._downColor)
                         this._downColor = new cc.Color();
                     var r = this._downEffectValue * 255;
-                    this._downColor.setR(r).setG(r).setB(r);
+                    this._downColor.r = this._downColor.g = this._downColor.b = r;
                     for (var i = 0; i < cnt; i++) {
                         var obj = this.getChildAt(i);
                         if (obj["color"] != undefined && !(obj instanceof fgui.GTextField))
@@ -3437,9 +3384,9 @@ window.__extends = (this && this.__extends) || (function () {
             this._buttonController = this.getController("button");
             this._titleObject = this.getChild("title");
             this._iconObject = this.getChild("icon");
-            if (this._titleObject != null)
+            if (this._titleObject)
                 this._title = this._titleObject.text;
-            if (this._iconObject != null)
+            if (this._iconObject)
                 this._icon = this._iconObject.icon;
             if (this._mode == fgui.ButtonMode.Common)
                 this.setState(GButton.UP);
@@ -3516,9 +3463,9 @@ window.__extends = (this && this.__extends) || (function () {
                 else
                     this.setState(GButton.DOWN);
             }
-            if (this._linkedPopup != null) {
+            if (this._linkedPopup) {
                 if (this._linkedPopup instanceof fgui.Window)
-                    (this._linkedPopup).toggleStatus();
+                    this._linkedPopup.toggleStatus();
                 else
                     this.root.togglePopup(this._linkedPopup, this);
             }
@@ -3634,14 +3581,14 @@ window.__extends = (this && this.__extends) || (function () {
         Object.defineProperty(GComboBox.prototype, "titleColor", {
             get: function () {
                 var tf = this.getTextField();
-                if (tf != null)
+                if (tf)
                     return tf.color;
                 else
                     return cc.Color.BLACK;
             },
             set: function (value) {
                 var tf = this.getTextField();
-                if (tf != null)
+                if (tf)
                     tf.color = value;
             },
             enumerable: false,
@@ -3650,14 +3597,14 @@ window.__extends = (this && this.__extends) || (function () {
         Object.defineProperty(GComboBox.prototype, "titleFontSize", {
             get: function () {
                 var tf = this.getTextField();
-                if (tf != null)
+                if (tf)
                     return tf.fontSize;
                 else
                     return 0;
             },
             set: function (value) {
                 var tf = this.getTextField();
-                if (tf != null)
+                if (tf)
                     tf.fontSize = value;
             },
             enumerable: false,
@@ -3698,12 +3645,12 @@ window.__extends = (this && this.__extends) || (function () {
                     else if (this._selectedIndex == -1)
                         this._selectedIndex = 0;
                     this.text = this._items[this._selectedIndex];
-                    if (this._icons != null && this._selectedIndex < this._icons.length)
+                    if (this._icons && this._selectedIndex < this._icons.length)
                         this.icon = this._icons[this._selectedIndex];
                 }
                 else {
                     this.text = "";
-                    if (this._icons != null)
+                    if (this._icons)
                         this.icon = null;
                     this._selectedIndex = -1;
                 }
@@ -3718,7 +3665,7 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
                 this._icons = value;
-                if (this._icons != null && this._selectedIndex != -1 && this._selectedIndex < this._icons.length)
+                if (this._icons && this._selectedIndex != -1 && this._selectedIndex < this._icons.length)
                     this.icon = this._icons[this._selectedIndex];
             },
             enumerable: false,
@@ -3747,12 +3694,12 @@ window.__extends = (this && this.__extends) || (function () {
                 this._selectedIndex = val;
                 if (this._selectedIndex >= 0 && this._selectedIndex < this._items.length) {
                     this.text = this._items[this._selectedIndex];
-                    if (this._icons != null && this._selectedIndex < this._icons.length)
+                    if (this._icons && this._selectedIndex < this._icons.length)
                         this.icon = this._icons[this._selectedIndex];
                 }
                 else {
                     this.text = "";
-                    if (this._icons != null)
+                    if (this._icons)
                         this.icon = null;
                 }
                 this.updateSelectionController();
@@ -3786,9 +3733,7 @@ window.__extends = (this && this.__extends) || (function () {
         GComboBox.prototype.getTextField = function () {
             if (this._titleObject instanceof fgui.GTextField)
                 return this._titleObject;
-            else if (this._titleObject instanceof fgui.GLabel)
-                return this._titleObject.getTextField();
-            else if (this._titleObject instanceof fgui.GButton)
+            else if ((this._titleObject instanceof fgui.GLabel) || (this._titleObject instanceof fgui.GButton))
                 return this._titleObject.getTextField();
             else
                 return null;
@@ -3852,13 +3797,14 @@ window.__extends = (this && this.__extends) || (function () {
             this._iconObject = this.getChild("icon");
             str = buffer.readS();
             if (str) {
-                this.dropdown = (fgui.UIPackage.createObjectFromURL(str));
-                if (!this.dropdown) {
+                var obj = fgui.UIPackage.createObjectFromURL(str);
+                if (!(obj instanceof fgui.GComponent)) {
                     console.error("下拉框必须为元件");
                     return;
                 }
+                this.dropdown = obj;
                 this.dropdown.name = "this.dropdown";
-                this._list = this.dropdown.getChild("list").asList;
+                this._list = this.dropdown.getChild("list");
                 if (this._list == null) {
                     console.error(this.resourceURL + ": 下拉框的弹出元件里必须包含名为list的列表");
                     return;
@@ -3881,7 +3827,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this.selectedIndex = c.selectedIndex;
         };
         GComboBox.prototype.updateSelectionController = function () {
-            if (this._selectionController != null && !this._selectionController.changing
+            if (this._selectionController && !this._selectionController.changing
                 && this._selectedIndex < this._selectionController.pageCount) {
                 var c = this._selectionController;
                 this._selectionController = null;
@@ -3953,19 +3899,14 @@ window.__extends = (this && this.__extends) || (function () {
                     var item = this._list.addItemFromPool();
                     item.name = i < this._values.length ? this._values[i] : "";
                     item.text = this._items[i];
-                    item.icon = (this._icons != null && i < this._icons.length) ? this._icons[i] : null;
+                    item.icon = (this._icons && i < this._icons.length) ? this._icons[i] : null;
                 }
                 this._list.resizeToFit(this._visibleItemCount);
             }
             this._list.selectedIndex = -1;
             this.dropdown.width = this.width;
             this._list.ensureBoundsCorrect();
-            var downward = null;
-            if (this._popupDirection == fgui.PopupDirection.Down)
-                downward = true;
-            else if (this._popupDirection == fgui.PopupDirection.Up)
-                downward = false;
-            this.root.togglePopup(this.dropdown, this, downward);
+            this.root.togglePopup(this.dropdown, this, this._popupDirection);
             if (this.dropdown.parent)
                 this.setState(fgui.GButton.DOWN);
         };
@@ -4040,14 +3981,11 @@ window.__extends = (this && this.__extends) || (function () {
             _this._lineSize = 1;
             _this._lineColor = new cc.Color();
             _this._fillColor = new cc.Color(255, 255, 255, 255);
-            _this._cornerRadius = null;
-            _this._sides = 3;
-            _this._startAngle = 0;
             _this._content = _this._node.addComponent(cc.Graphics);
             return _this;
         }
         GGraph.prototype.drawRect = function (lineSize, lineColor, fillColor, corner) {
-            this._type = fgui.GraphType.Rect;
+            this._type = 1;
             this._lineSize = lineSize;
             this._lineColor.set(lineColor);
             this._fillColor.set(fillColor);
@@ -4055,22 +3993,19 @@ window.__extends = (this && this.__extends) || (function () {
             this.updateGraph();
         };
         GGraph.prototype.drawEllipse = function (lineSize, lineColor, fillColor) {
-            this._type = fgui.GraphType.Ellipse;
+            this._type = 2;
             this._lineSize = lineSize;
             this._lineColor.set(lineColor);
             this._fillColor.set(fillColor);
-            this._cornerRadius = null;
             this.updateGraph();
         };
         GGraph.prototype.drawRegularPolygon = function (lineSize, lineColor, fillColor, sides, startAngle, distances) {
-            if (startAngle === void 0) { startAngle = 0; }
-            if (distances === void 0) { distances = null; }
             this._type = 4;
             this._lineSize = lineSize;
             this._lineColor.set(lineColor);
             this._fillColor.set(fillColor);
             this._sides = sides;
-            this._startAngle = startAngle;
+            this._startAngle = startAngle || 0;
             this._distances = distances;
             this.updateGraph();
         };
@@ -4095,7 +4030,7 @@ window.__extends = (this && this.__extends) || (function () {
             configurable: true
         });
         GGraph.prototype.clearGraphics = function () {
-            this._type = fgui.GraphType.PlaceHolder;
+            this._type = 0;
             if (this._hasContent) {
                 this._content.clear();
                 this._hasContent = false;
@@ -4132,18 +4067,19 @@ window.__extends = (this && this.__extends) || (function () {
                 return;
             var px = -this.pivotX * this._width;
             var py = this.pivotY * this._height;
+            var ls = this._lineSize / 2;
             ctx.lineWidth = this._lineSize;
             ctx.strokeColor = this._lineColor;
             ctx.fillColor = this._fillColor;
             if (this._type == 1) {
                 if (this._cornerRadius) {
-                    ctx.roundRect(0 + px, -h + py, w, h, this._cornerRadius[0]);
+                    ctx.roundRect(px + ls, -h + py + ls, w - this._lineSize, h - this._lineSize, this._cornerRadius[0]);
                 }
                 else
-                    ctx.rect(0 + px, -h + py, w, h);
+                    ctx.rect(px + ls, -h + py + ls, w - this._lineSize, h - this._lineSize);
             }
             else if (this._type == 2) {
-                ctx.ellipse(w / 2 + px, -h / 2 + py, w / 2, h / 2);
+                ctx.ellipse(w / 2 + px, -h / 2 + py, w / 2 - ls, h / 2 - ls);
             }
             else if (this._type == 3) {
                 this.drawPath(ctx, this._polygonPoints, px, py);
@@ -4151,7 +4087,7 @@ window.__extends = (this && this.__extends) || (function () {
             else if (this._type == 4) {
                 if (!this._polygonPoints)
                     this._polygonPoints = [];
-                var radius = Math.min(this._width, this._height) / 2;
+                var radius = Math.min(w, h) / 2 - ls;
                 this._polygonPoints.length = 0;
                 var angle = cc.misc.degreesToRadians(this._startAngle);
                 var deltaAngle = 2 * Math.PI / this._sides;
@@ -4171,9 +4107,10 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 this.drawPath(ctx, this._polygonPoints, px, py);
             }
-            if (this._lineSize != 0)
+            if (ls != 0)
                 ctx.stroke();
-            ctx.fill();
+            if (this._fillColor.a != 0)
+                ctx.fill();
             this._hasContent = true;
         };
         GGraph.prototype.drawPath = function (ctx, points, px, py) {
@@ -4204,6 +4141,35 @@ window.__extends = (this && this.__extends) || (function () {
                 this.color = value;
             else
                 _super.prototype.setProp.call(this, index, value);
+        };
+        GGraph.prototype._hitTest = function (pt) {
+            if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height) {
+                if (this._type == 3) {
+                    var points = this._polygonPoints;
+                    var len = points.length / 2;
+                    var i = void 0;
+                    var j = len - 1;
+                    var oddNodes = false;
+                    var w = this._width;
+                    var h = this._height;
+                    for (i = 0; i < len; ++i) {
+                        var ix = points[i * 2];
+                        var iy = points[i * 2 + 1];
+                        var jx = points[j * 2];
+                        var jy = points[j * 2 + 1];
+                        if ((iy < pt.y && jy >= pt.y || jy < pt.y && iy >= pt.y) && (ix <= pt.x || jx <= pt.x)) {
+                            if (ix + (pt.y - iy) / (jy - iy) * (jx - ix) < pt.x)
+                                oddNodes = !oddNodes;
+                        }
+                        j = i;
+                    }
+                    return oddNodes ? this : null;
+                }
+                else
+                    return this;
+            }
+            else
+                return null;
         };
         GGraph.prototype.setup_beforeAdd = function (buffer, beginPos) {
             _super.prototype.setup_beforeAdd.call(this, buffer, beginPos);
@@ -4357,7 +4323,7 @@ window.__extends = (this && this.__extends) || (function () {
         });
         GGroup.prototype.setBoundsChangedFlag = function (positionChangedOnly) {
             if (positionChangedOnly === void 0) { positionChangedOnly = false; }
-            if (this._updating == 0 && this._parent != null) {
+            if (this._updating == 0 && this._parent) {
                 if (!positionChangedOnly)
                     this._percentReady = false;
                 if (!this._boundsChanged) {
@@ -4787,11 +4753,11 @@ window.__extends = (this && this.__extends) || (function () {
         }
         Object.defineProperty(GLabel.prototype, "icon", {
             get: function () {
-                if (this._iconObject != null)
+                if (this._iconObject)
                     return this._iconObject.icon;
             },
             set: function (value) {
-                if (this._iconObject != null)
+                if (this._iconObject)
                     this._iconObject.icon = value;
                 this.updateGear(7);
             },
@@ -4826,14 +4792,14 @@ window.__extends = (this && this.__extends) || (function () {
         Object.defineProperty(GLabel.prototype, "titleColor", {
             get: function () {
                 var tf = this.getTextField();
-                if (tf != null)
+                if (tf)
                     return tf.color;
                 else
                     return cc.Color.WHITE;
             },
             set: function (value) {
                 var tf = this.getTextField();
-                if (tf != null)
+                if (tf)
                     tf.color = value;
                 this.updateGear(4);
             },
@@ -4843,14 +4809,14 @@ window.__extends = (this && this.__extends) || (function () {
         Object.defineProperty(GLabel.prototype, "titleFontSize", {
             get: function () {
                 var tf = this.getTextField();
-                if (tf != null)
+                if (tf)
                     return tf.fontSize;
                 else
                     return 0;
             },
             set: function (value) {
                 var tf = this.getTextField();
-                if (tf != null)
+                if (tf)
                     tf.fontSize = value;
             },
             enumerable: false,
@@ -4859,13 +4825,13 @@ window.__extends = (this && this.__extends) || (function () {
         Object.defineProperty(GLabel.prototype, "editable", {
             get: function () {
                 if (this._titleObject && (this._titleObject instanceof fgui.GTextInput))
-                    return this._titleObject.asTextInput.editable;
+                    return this._titleObject.editable;
                 else
                     return false;
             },
             set: function (val) {
-                if (this._titleObject)
-                    this._titleObject.asTextInput.editable = val;
+                if (this._titleObject && (this._titleObject instanceof fgui.GTextInput))
+                    this._titleObject.editable = val;
             },
             enumerable: false,
             configurable: true
@@ -4873,9 +4839,7 @@ window.__extends = (this && this.__extends) || (function () {
         GLabel.prototype.getTextField = function () {
             if (this._titleObject instanceof fgui.GTextField)
                 return this._titleObject;
-            else if (this._titleObject instanceof GLabel)
-                return this._titleObject.getTextField();
-            else if (this._titleObject instanceof fgui.GButton)
+            else if ((this._titleObject instanceof GLabel) || (this._titleObject instanceof fgui.GButton))
                 return this._titleObject.getTextField();
             else
                 return null;
@@ -4942,7 +4906,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this.titleFontSize = iv;
             if (buffer.readBool()) {
                 var input = this.getTextField();
-                if (input != null) {
+                if (input instanceof fgui.GTextInput) {
                     str = buffer.readS();
                     if (str != null)
                         input.promptText = str;
@@ -5176,11 +5140,10 @@ window.__extends = (this && this.__extends) || (function () {
             configurable: true
         });
         GList.prototype.getFromPool = function (url) {
-            if (url === void 0) { url = null; }
             if (!url)
                 url = this._defaultItem;
             var obj = this._pool.getObject(url);
-            if (obj != null)
+            if (obj)
                 obj.visible = true;
             return obj;
         };
@@ -5188,24 +5151,20 @@ window.__extends = (this && this.__extends) || (function () {
             this._pool.returnObject(obj);
         };
         GList.prototype.addChildAt = function (child, index) {
-            if (index === void 0) { index = 0; }
             _super.prototype.addChildAt.call(this, child, index);
             if (child instanceof fgui.GButton) {
-                var button = child;
-                button.selected = false;
-                button.changeStateOnClick = false;
+                child.selected = false;
+                child.changeStateOnClick = false;
             }
             child.on(fgui.Event.CLICK, this.onClickItem, this);
             return child;
         };
         GList.prototype.addItem = function (url) {
-            if (url === void 0) { url = null; }
             if (!url)
                 url = this._defaultItem;
             return this.addChild(fgui.UIPackage.createObjectFromURL(url));
         };
         GList.prototype.addItemFromPool = function (url) {
-            if (url === void 0) { url = null; }
             return this.addChild(this.getFromPool(url));
         };
         GList.prototype.removeChildAt = function (index, dispose) {
@@ -5237,8 +5196,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._virtual) {
                     for (i = 0; i < this._realNumItems; i++) {
                         var ii = this._virtualItems[i];
-                        if ((ii.obj instanceof fgui.GButton) && ii.obj.selected
-                            || ii.obj == null && ii.selected) {
+                        if ((ii.obj instanceof fgui.GButton) && ii.obj.selected || !ii.obj && ii.selected) {
                             if (this._loop)
                                 return i % this._numItems;
                             else
@@ -5249,8 +5207,8 @@ window.__extends = (this && this.__extends) || (function () {
                 else {
                     var cnt = this._children.length;
                     for (i = 0; i < cnt; i++) {
-                        var obj = this._children[i].asButton;
-                        if (obj != null && obj.selected)
+                        var obj = this._children[i];
+                        if ((obj instanceof fgui.GButton) && obj.selected)
                             return i;
                     }
                 }
@@ -5275,8 +5233,7 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._virtual) {
                 for (i = 0; i < this._realNumItems; i++) {
                     var ii = this._virtualItems[i];
-                    if ((ii.obj instanceof fgui.GButton) && ii.obj.selected
-                        || ii.obj == null && ii.selected) {
+                    if ((ii.obj instanceof fgui.GButton) && ii.obj.selected || !ii.obj && ii.selected) {
                         var j = i;
                         if (this._loop) {
                             j = i % this._numItems;
@@ -5290,8 +5247,8 @@ window.__extends = (this && this.__extends) || (function () {
             else {
                 var cnt = this._children.length;
                 for (i = 0; i < cnt; i++) {
-                    var obj = this._children[i].asButton;
-                    if (obj != null && obj.selected)
+                    var obj = this._children[i];
+                    if ((obj instanceof fgui.GButton) && obj.selected)
                         result.push(i);
                 }
             }
@@ -5306,16 +5263,16 @@ window.__extends = (this && this.__extends) || (function () {
             if (scrollItToView)
                 this.scrollToView(index);
             this._lastSelectedIndex = index;
-            var obj = null;
+            var obj;
             if (this._virtual) {
                 var ii = this._virtualItems[index];
-                if (ii.obj != null)
-                    obj = ii.obj.asButton;
+                if (ii.obj)
+                    obj = ii.obj;
                 ii.selected = true;
             }
             else
-                obj = this.getChildAt(index).asButton;
-            if (obj != null && !obj.selected) {
+                obj = this.getChildAt(index);
+            if ((obj instanceof fgui.GButton) && !obj.selected) {
                 obj.selected = true;
                 this.updateSelectionController(index);
             }
@@ -5323,16 +5280,16 @@ window.__extends = (this && this.__extends) || (function () {
         GList.prototype.removeSelection = function (index) {
             if (this._selectionMode == fgui.ListSelectionMode.None)
                 return;
-            var obj = null;
+            var obj;
             if (this._virtual) {
                 var ii = this._virtualItems[index];
-                if (ii.obj != null)
-                    obj = ii.obj.asButton;
+                if (ii.obj)
+                    obj = ii.obj;
                 ii.selected = false;
             }
             else
-                obj = this.getChildAt(index).asButton;
-            if (obj != null)
+                obj = this.getChildAt(index);
+            if (obj instanceof fgui.GButton)
                 obj.selected = false;
         };
         GList.prototype.clearSelection = function () {
@@ -5348,8 +5305,8 @@ window.__extends = (this && this.__extends) || (function () {
             else {
                 var cnt = this._children.length;
                 for (i = 0; i < cnt; i++) {
-                    var obj = this._children[i].asButton;
-                    if (obj != null)
+                    var obj = this._children[i];
+                    if (obj instanceof fgui.GButton)
                         obj.selected = false;
                 }
             }
@@ -5360,7 +5317,7 @@ window.__extends = (this && this.__extends) || (function () {
                 for (i = 0; i < this._realNumItems; i++) {
                     var ii = this._virtualItems[i];
                     if (ii.obj != g) {
-                        if ((ii.obj instanceof fgui.GButton))
+                        if (ii.obj instanceof fgui.GButton)
                             ii.obj.selected = false;
                         ii.selected = false;
                     }
@@ -5369,8 +5326,8 @@ window.__extends = (this && this.__extends) || (function () {
             else {
                 var cnt = this._children.length;
                 for (i = 0; i < cnt; i++) {
-                    var obj = this._children[i].asButton;
-                    if (obj != null && obj != g)
+                    var obj = this._children[i];
+                    if ((obj instanceof fgui.GButton) && obj != g)
                         obj.selected = false;
                 }
             }
@@ -5392,8 +5349,8 @@ window.__extends = (this && this.__extends) || (function () {
             else {
                 var cnt = this._children.length;
                 for (i = 0; i < cnt; i++) {
-                    var obj = this._children[i].asButton;
-                    if (obj != null && !obj.selected) {
+                    var obj = this._children[i];
+                    if ((obj instanceof fgui.GButton) && !obj.selected) {
                         obj.selected = true;
                         last = i;
                     }
@@ -5423,8 +5380,8 @@ window.__extends = (this && this.__extends) || (function () {
             else {
                 var cnt = this._children.length;
                 for (i = 0; i < cnt; i++) {
-                    var obj = this._children[i].asButton;
-                    if (obj != null) {
+                    var obj = this._children[i];
+                    if (obj instanceof fgui.GButton) {
                         obj.selected = !obj.selected;
                         if (obj.selected)
                             last = i;
@@ -5560,7 +5517,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         GList.prototype.onClickItem = function (evt) {
-            if (this._scrollPane != null && this._scrollPane.isDragged)
+            if (this._scrollPane && this._scrollPane.isDragged)
                 return;
             var item = fgui.GObject.cast(evt.currentTarget);
             this.setSelectionOnEvent(item, evt);
@@ -5575,17 +5532,16 @@ window.__extends = (this && this.__extends) || (function () {
             if (!(item instanceof fgui.GButton) || this._selectionMode == fgui.ListSelectionMode.None)
                 return;
             var dontChangeLastIndex = false;
-            var button = item;
             var index = this.childIndexToItemIndex(this.getChildIndex(item));
             if (this._selectionMode == fgui.ListSelectionMode.Single) {
-                if (!button.selected) {
-                    this.clearSelectionExcept(button);
-                    button.selected = true;
+                if (!item.selected) {
+                    this.clearSelectionExcept(item);
+                    item.selected = true;
                 }
             }
             else {
                 if (evt.isShiftDown) {
-                    if (!button.selected) {
+                    if (!item.selected) {
                         if (this._lastSelectedIndex != -1) {
                             var min = Math.min(this._lastSelectedIndex, index);
                             var max = Math.max(this._lastSelectedIndex, index);
@@ -5601,33 +5557,33 @@ window.__extends = (this && this.__extends) || (function () {
                             }
                             else {
                                 for (i = min; i <= max; i++) {
-                                    var obj = this.getChildAt(i).asButton;
-                                    if (obj != null)
+                                    var obj = this.getChildAt(i);
+                                    if (obj instanceof fgui.GButton)
                                         obj.selected = true;
                                 }
                             }
                             dontChangeLastIndex = true;
                         }
                         else {
-                            button.selected = true;
+                            item.selected = true;
                         }
                     }
                 }
                 else if (evt.isCtrlDown || this._selectionMode == fgui.ListSelectionMode.Multiple_SingleClick) {
-                    button.selected = !button.selected;
+                    item.selected = !item.selected;
                 }
                 else {
-                    if (!button.selected) {
-                        this.clearSelectionExcept(button);
-                        button.selected = true;
+                    if (!item.selected) {
+                        this.clearSelectionExcept(item);
+                        item.selected = true;
                     }
                     else
-                        this.clearSelectionExcept(button);
+                        this.clearSelectionExcept(item);
                 }
             }
             if (!dontChangeLastIndex)
                 this._lastSelectedIndex = index;
-            if (button.selected)
+            if (item.selected)
                 this.updateSelectionController(index);
         };
         GList.prototype.resizeToFit = function (itemCount, minSize) {
@@ -5704,7 +5660,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this.selectedIndex = c.selectedIndex;
         };
         GList.prototype.updateSelectionController = function (index) {
-            if (this._selectionController != null && !this._selectionController.changing
+            if (this._selectionController && !this._selectionController.changing
                 && index < this._selectionController.pageCount) {
                 var c = this._selectionController;
                 this._selectionController = null;
@@ -5777,15 +5733,15 @@ window.__extends = (this && this.__extends) || (function () {
                     rect = new cc.Rect(page * this.viewWidth + (index % this._curLineItemCount) * (ii.width + this._columnGap), (index / this._curLineItemCount) % this._curLineItemCount2 * (ii.height + this._lineGap), ii.width, ii.height);
                 }
                 setFirst = true;
-                if (this._scrollPane != null)
+                if (this._scrollPane)
                     this._scrollPane.scrollToView(rect, ani, setFirst);
             }
             else {
                 var obj = this.getChildAt(index);
-                if (obj != null) {
-                    if (this._scrollPane != null)
+                if (obj) {
+                    if (this._scrollPane)
                         this._scrollPane.scrollToView(obj, ani, setFirst);
-                    else if (this.parent != null && this.parent.scrollPane != null)
+                    else if (this.parent && this.parent.scrollPane)
                         this.parent.scrollPane.scrollToView(obj, ani, setFirst);
                 }
             }
@@ -5798,7 +5754,7 @@ window.__extends = (this && this.__extends) || (function () {
                 return index;
             if (this._layout == fgui.ListLayoutType.Pagination) {
                 for (var i = this._firstIndex; i < this._realNumItems; i++) {
-                    if (this._virtualItems[i].obj != null) {
+                    if (this._virtualItems[i].obj) {
                         index--;
                         if (index < 0)
                             return i;
@@ -5840,7 +5796,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GList.prototype._setVirtual = function (loop) {
             if (!this._virtual) {
-                if (this._scrollPane == null)
+                if (!this._scrollPane)
                     throw "Virtual list must be scrollable!";
                 if (loop) {
                     if (this._layout == fgui.ListLayoutType.FlowHorizontal || this._layout == fgui.ListLayoutType.FlowVertical)
@@ -5854,7 +5810,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._itemSize == null) {
                     this._itemSize = new cc.Size(0, 0);
                     var obj = this.getFromPool(null);
-                    if (obj == null) {
+                    if (!obj) {
                         throw "Virtual List must have a default list item resource.";
                     }
                     else {
@@ -5896,9 +5852,11 @@ window.__extends = (this && this.__extends) || (function () {
                     var oldCount = this._virtualItems.length;
                     if (this._realNumItems > oldCount) {
                         for (i = oldCount; i < this._realNumItems; i++) {
-                            var ii = new ItemInfo();
-                            ii.width = this._itemSize.width;
-                            ii.height = this._itemSize.height;
+                            var ii = {
+                                width: this._itemSize.width,
+                                height: this._itemSize.height,
+                                updateFlag: 0
+                            };
                             this._virtualItems.push(ii);
                         }
                     }
@@ -6220,25 +6178,25 @@ window.__extends = (this && this.__extends) || (function () {
             this.itemInfoVer++;
             while (curIndex < this._realNumItems && (end || curY < max)) {
                 ii = this._virtualItems[curIndex];
-                if (ii.obj == null || forceUpdate) {
+                if (!ii.obj || forceUpdate) {
                     if (this.itemProvider != null) {
                         url = this.itemProvider(curIndex % this._numItems);
                         if (url == null)
                             url = this._defaultItem;
                         url = fgui.UIPackage.normalizeURL(url);
                     }
-                    if (ii.obj != null && ii.obj.resourceURL != url) {
+                    if (ii.obj && ii.obj.resourceURL != url) {
                         if (ii.obj instanceof fgui.GButton)
                             ii.selected = ii.obj.selected;
                         this.removeChildToPool(ii.obj);
                         ii.obj = null;
                     }
                 }
-                if (ii.obj == null) {
+                if (!ii.obj) {
                     if (forward) {
                         for (j = reuseIndex; j >= oldFirstIndex; j--) {
                             ii2 = this._virtualItems[j];
-                            if (ii2.obj != null && ii2.updateFlag != this.itemInfoVer && ii2.obj.resourceURL == url) {
+                            if (ii2.obj && ii2.updateFlag != this.itemInfoVer && ii2.obj.resourceURL == url) {
                                 if (ii2.obj instanceof fgui.GButton)
                                     ii2.selected = ii2.obj.selected;
                                 ii.obj = ii2.obj;
@@ -6252,7 +6210,7 @@ window.__extends = (this && this.__extends) || (function () {
                     else {
                         for (j = reuseIndex; j <= lastIndex; j++) {
                             ii2 = this._virtualItems[j];
-                            if (ii2.obj != null && ii2.updateFlag != this.itemInfoVer && ii2.obj.resourceURL == url) {
+                            if (ii2.obj && ii2.updateFlag != this.itemInfoVer && ii2.obj.resourceURL == url) {
                                 if (ii2.obj instanceof fgui.GButton)
                                     ii2.selected = ii2.obj.selected;
                                 ii.obj = ii2.obj;
@@ -6263,7 +6221,7 @@ window.__extends = (this && this.__extends) || (function () {
                             }
                         }
                     }
-                    if (ii.obj != null) {
+                    if (ii.obj) {
                         this.setChildIndex(ii.obj, forward ? curIndex - newFirstIndex : this.numChildren);
                     }
                     else {
@@ -6305,7 +6263,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
             for (i = 0; i < childCount; i++) {
                 ii = this._virtualItems[oldFirstIndex + i];
-                if (ii.updateFlag != this.itemInfoVer && ii.obj != null) {
+                if (ii.updateFlag != this.itemInfoVer && ii.obj) {
                     if (ii.obj instanceof fgui.GButton)
                         ii.selected = ii.obj.selected;
                     this.removeChildToPool(ii.obj);
@@ -6353,25 +6311,25 @@ window.__extends = (this && this.__extends) || (function () {
             this.itemInfoVer++;
             while (curIndex < this._realNumItems && (end || curX < max)) {
                 ii = this._virtualItems[curIndex];
-                if (ii.obj == null || forceUpdate) {
+                if (!ii.obj || forceUpdate) {
                     if (this.itemProvider != null) {
                         url = this.itemProvider(curIndex % this._numItems);
                         if (url == null)
                             url = this._defaultItem;
                         url = fgui.UIPackage.normalizeURL(url);
                     }
-                    if (ii.obj != null && ii.obj.resourceURL != url) {
+                    if (ii.obj && ii.obj.resourceURL != url) {
                         if (ii.obj instanceof fgui.GButton)
                             ii.selected = ii.obj.selected;
                         this.removeChildToPool(ii.obj);
                         ii.obj = null;
                     }
                 }
-                if (ii.obj == null) {
+                if (!ii.obj) {
                     if (forward) {
                         for (j = reuseIndex; j >= oldFirstIndex; j--) {
                             ii2 = this._virtualItems[j];
-                            if (ii2.obj != null && ii2.updateFlag != this.itemInfoVer && ii2.obj.resourceURL == url) {
+                            if (ii2.obj && ii2.updateFlag != this.itemInfoVer && ii2.obj.resourceURL == url) {
                                 if (ii2.obj instanceof fgui.GButton)
                                     ii2.selected = ii2.obj.selected;
                                 ii.obj = ii2.obj;
@@ -6385,7 +6343,7 @@ window.__extends = (this && this.__extends) || (function () {
                     else {
                         for (j = reuseIndex; j <= lastIndex; j++) {
                             ii2 = this._virtualItems[j];
-                            if (ii2.obj != null && ii2.updateFlag != this.itemInfoVer && ii2.obj.resourceURL == url) {
+                            if (ii2.obj && ii2.updateFlag != this.itemInfoVer && ii2.obj.resourceURL == url) {
                                 if (ii2.obj instanceof fgui.GButton)
                                     ii2.selected = ii2.obj.selected;
                                 ii.obj = ii2.obj;
@@ -6396,7 +6354,7 @@ window.__extends = (this && this.__extends) || (function () {
                             }
                         }
                     }
-                    if (ii.obj != null) {
+                    if (ii.obj) {
                         this.setChildIndex(ii.obj, forward ? curIndex - newFirstIndex : this.numChildren);
                     }
                     else {
@@ -6438,7 +6396,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
             for (i = 0; i < childCount; i++) {
                 ii = this._virtualItems[oldFirstIndex + i];
-                if (ii.updateFlag != this.itemInfoVer && ii.obj != null) {
+                if (ii.updateFlag != this.itemInfoVer && ii.obj) {
                     if (ii.obj instanceof fgui.GButton)
                         ii.selected = ii.obj.selected;
                     this.removeChildToPool(ii.obj);
@@ -6506,10 +6464,10 @@ window.__extends = (this && this.__extends) || (function () {
                 ii = this._virtualItems[i];
                 if (ii.updateFlag != this.itemInfoVer)
                     continue;
-                if (ii.obj == null) {
+                if (!ii.obj) {
                     while (reuseIndex < virtualItemCount) {
                         ii2 = this._virtualItems[reuseIndex];
-                        if (ii2.obj != null && ii2.updateFlag != this.itemInfoVer) {
+                        if (ii2.obj && ii2.updateFlag != this.itemInfoVer) {
                             if (ii2.obj instanceof fgui.GButton)
                                 ii2.selected = ii2.obj.selected;
                             ii.obj = ii2.obj;
@@ -6520,7 +6478,7 @@ window.__extends = (this && this.__extends) || (function () {
                     }
                     if (insertIndex == -1)
                         insertIndex = this.getChildIndex(lastObj) + 1;
-                    if (ii.obj == null) {
+                    if (!ii.obj) {
                         if (this.itemProvider != null) {
                             url = this.itemProvider(i % this._numItems);
                             if (url == null)
@@ -6584,7 +6542,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
             for (i = reuseIndex; i < virtualItemCount; i++) {
                 ii = this._virtualItems[i];
-                if (ii.updateFlag != this.itemInfoVer && ii.obj != null) {
+                if (ii.updateFlag != this.itemInfoVer && ii.obj) {
                     if (ii.obj instanceof fgui.GButton)
                         ii.selected = ii.obj.selected;
                     this.removeChildToPool(ii.obj);
@@ -6650,7 +6608,7 @@ window.__extends = (this && this.__extends) || (function () {
             if (newOffsetX != this._alignOffset.x || newOffsetY != this._alignOffset.y) {
                 this._alignOffset.x = newOffsetX;
                 this._alignOffset.y = newOffsetY;
-                if (this._scrollPane != null)
+                if (this._scrollPane)
                     this._scrollPane.adjustMaskContainer();
                 else
                     this._container.setPosition(this._pivotCorrectX + this._alignOffset.x, this._pivotCorrectY - this._alignOffset.y);
@@ -6994,7 +6952,7 @@ window.__extends = (this && this.__extends) || (function () {
                     }
                 }
                 var obj = this.getFromPool(str);
-                if (obj != null) {
+                if (obj) {
                     this.addChild(obj);
                     this.setupItem(buffer, obj);
                 }
@@ -7025,7 +6983,7 @@ window.__extends = (this && this.__extends) || (function () {
                 for (i = 0; i < cnt; i++) {
                     var cc = obj.getController(buffer.readS());
                     str = buffer.readS();
-                    if (cc != null)
+                    if (cc)
                         cc.selectedPageId = str;
                 }
                 if (buffer.version >= 2) {
@@ -7051,15 +7009,6 @@ window.__extends = (this && this.__extends) || (function () {
         return GList;
     }(fgui.GComponent));
     fgui.GList = GList;
-    var ItemInfo = (function () {
-        function ItemInfo() {
-            this.width = 0;
-            this.height = 0;
-            this.updateFlag = 0;
-            this.selected = false;
-        }
-        return ItemInfo;
-    }());
 })(fgui || (fgui = {}));
 
 (function (fgui) {
@@ -7090,7 +7039,7 @@ window.__extends = (this && this.__extends) || (function () {
             if (url == null)
                 return null;
             var arr = this._pool[url];
-            if (arr != null && arr.length) {
+            if (arr && arr.length) {
                 this._count--;
                 return arr.shift();
             }
@@ -7120,10 +7069,6 @@ window.__extends = (this && this.__extends) || (function () {
         function GLoader() {
             var _this = _super.call(this) || this;
             _this._frame = 0;
-            _this._contentSourceWidth = 0;
-            _this._contentSourceHeight = 0;
-            _this._contentWidth = 0;
-            _this._contentHeight = 0;
             _this._node.name = "GLoader";
             _this._playing = true;
             _this._url = "";
@@ -7143,10 +7088,10 @@ window.__extends = (this && this.__extends) || (function () {
         }
         GLoader.prototype.dispose = function () {
             if (this._contentItem == null) {
-                if (this._content.spriteFrame != null)
+                if (this._content.spriteFrame)
                     this.freeExternal(this._content.spriteFrame);
             }
-            if (this._content2 != null)
+            if (this._content2)
                 this._content2.dispose();
             _super.prototype.dispose.call(this);
         };
@@ -7349,11 +7294,11 @@ window.__extends = (this && this.__extends) || (function () {
                 this._content.spriteFrame = value;
                 this._content.type = cc.Sprite.Type.SIMPLE;
                 if (value != null) {
-                    this._contentSourceWidth = value.getRect().width;
-                    this._contentSourceHeight = value.getRect().height;
+                    this.sourceWidth = value.getRect().width;
+                    this.sourceHeight = value.getRect().height;
                 }
                 else {
-                    this._contentSourceWidth = this._contentHeight = 0;
+                    this.sourceWidth = this.sourceHeight = 0;
                 }
                 this.updateLayout();
             },
@@ -7371,14 +7316,14 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GLoader.prototype.loadFromPackage = function (itemURL) {
             this._contentItem = fgui.UIPackage.getItemByURL(itemURL);
-            if (this._contentItem != null) {
+            if (this._contentItem) {
                 this._contentItem = this._contentItem.getBranch();
-                this._contentSourceWidth = this._contentItem.width;
-                this._contentSourceHeight = this._contentItem.height;
+                this.sourceWidth = this._contentItem.width;
+                this.sourceHeight = this._contentItem.height;
                 this._contentItem = this._contentItem.getHighResolution();
                 this._contentItem.load();
                 if (this._autoSize)
-                    this.setSize(this._contentSourceWidth, this._contentSourceHeight);
+                    this.setSize(this.sourceWidth, this.sourceHeight);
                 if (this._contentItem.type == fgui.PackageItemType.Image) {
                     if (!this._contentItem.asset) {
                         this.setErrorState();
@@ -7412,7 +7357,7 @@ window.__extends = (this && this.__extends) || (function () {
                         this.setErrorState();
                     }
                     else {
-                        this._content2 = obj.asCom;
+                        this._content2 = obj;
                         this._container.addChild(this._content2.node);
                         this.updateLayout();
                     }
@@ -7427,16 +7372,15 @@ window.__extends = (this && this.__extends) || (function () {
             if (fgui.ToolSet.startsWith(this._url, "http://")
                 || fgui.ToolSet.startsWith(this._url, "https://")
                 || fgui.ToolSet.startsWith(this._url, '/'))
-                cc.loader.load(this._url, this.onLoaded.bind(this));
+                cc.assetManager.loadRemote(this._url, this.onLoaded.bind(this));
             else
-                cc.loader.loadRes(this._url, cc.Asset, this.onLoaded.bind(this));
+                cc.resources.load(this._url, cc.Asset, this.onLoaded.bind(this));
         };
         GLoader.prototype.onLoaded = function (err, asset) {
             if (!this._url || !cc.isValid(this._node))
                 return;
-            asset = cc.loader.getRes(this._url);
-            if (!asset)
-                return;
+            if (err)
+                console.warn(err);
             if (asset instanceof cc.SpriteFrame)
                 this.onExternalLoadSuccess(asset);
             else if (asset instanceof cc.Texture2D)
@@ -7447,10 +7391,10 @@ window.__extends = (this && this.__extends) || (function () {
         GLoader.prototype.onExternalLoadSuccess = function (texture) {
             this._content.spriteFrame = texture;
             this._content.type = cc.Sprite.Type.SIMPLE;
-            this._contentSourceWidth = texture.getRect().width;
-            this._contentSourceHeight = texture.getRect().height;
+            this.sourceWidth = texture.getRect().width;
+            this.sourceHeight = texture.getRect().height;
             if (this._autoSize)
-                this.setSize(this._contentSourceWidth, this._contentSourceHeight);
+                this.setSize(this.sourceWidth, this.sourceHeight);
             this.updateLayout();
         };
         GLoader.prototype.onExternalLoadFailed = function () {
@@ -7464,13 +7408,13 @@ window.__extends = (this && this.__extends) || (function () {
                     this._errorSign = GLoader._errorSignPool.getObject(fgui.UIConfig.loaderErrorSign);
                 }
             }
-            if (this._errorSign != null) {
+            if (this._errorSign) {
                 this._errorSign.setSize(this.width, this.height);
                 this._container.addChild(this._errorSign.node);
             }
         };
         GLoader.prototype.clearErrorState = function () {
-            if (this._errorSign != null) {
+            if (this._errorSign) {
                 this._container.removeChild(this._errorSign.node);
                 GLoader._errorSignPool.returnObject(this._errorSign);
                 this._errorSign = null;
@@ -7485,31 +7429,31 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 return;
             }
-            this._contentWidth = this._contentSourceWidth;
-            this._contentHeight = this._contentSourceHeight;
+            var contentWidth = this.sourceWidth;
+            var contentHeight = this.sourceHeight;
             var pivotCorrectX = -this.pivotX * this._width;
             var pivotCorrectY = this.pivotY * this._height;
             if (this._autoSize) {
                 this._updatingLayout = true;
-                if (this._contentWidth == 0)
-                    this._contentWidth = 50;
-                if (this._contentHeight == 0)
-                    this._contentHeight = 30;
-                this.setSize(this._contentWidth, this._contentHeight);
+                if (contentWidth == 0)
+                    contentWidth = 50;
+                if (contentHeight == 0)
+                    contentHeight = 30;
+                this.setSize(contentWidth, contentHeight);
                 this._updatingLayout = false;
                 this._container.setContentSize(this._width, this._height);
                 this._container.setPosition(pivotCorrectX, pivotCorrectY);
-                if (this._content2 != null) {
+                if (this._content2) {
                     this._content2.setPosition(pivotCorrectX + this._width * this.pivotX, pivotCorrectY - this._height * this.pivotY);
                     this._content2.setScale(1, 1);
                 }
-                if (this._contentWidth == this._width && this._contentHeight == this._height)
+                if (contentWidth == this._width && contentHeight == this._height)
                     return;
             }
             var sx = 1, sy = 1;
             if (this._fill != fgui.LoaderFillType.None) {
-                sx = this.width / this._contentSourceWidth;
-                sy = this.height / this._contentSourceHeight;
+                sx = this.width / this.sourceWidth;
+                sy = this.height / this.sourceHeight;
                 if (sx != 1 || sy != 1) {
                     if (this._fill == fgui.LoaderFillType.ScaleMatchHeight)
                         sx = sy;
@@ -7533,12 +7477,12 @@ window.__extends = (this && this.__extends) || (function () {
                         if (sy > 1)
                             sy = 1;
                     }
-                    this._contentWidth = this._contentSourceWidth * sx;
-                    this._contentHeight = this._contentSourceHeight * sy;
+                    contentWidth = this.sourceWidth * sx;
+                    contentHeight = this.sourceHeight * sy;
                 }
             }
-            this._container.setContentSize(this._contentWidth, this._contentHeight);
-            if (this._content2 != null) {
+            this._container.setContentSize(contentWidth, contentHeight);
+            if (this._content2) {
                 this._content2.setPosition(pivotCorrectX + this._width * this.pivotX, pivotCorrectY - this._height * this.pivotY);
                 this._content2.setScale(sx, sy);
             }
@@ -7546,26 +7490,26 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._align == fgui.AlignType.Left)
                 nx = 0;
             else if (this._align == fgui.AlignType.Center)
-                nx = Math.floor((this._width - this._contentWidth) / 2);
+                nx = Math.floor((this._width - contentWidth) / 2);
             else
-                nx = this._width - this._contentWidth;
+                nx = this._width - contentWidth;
             if (this._verticalAlign == fgui.VertAlignType.Top)
                 ny = 0;
             else if (this._verticalAlign == fgui.VertAlignType.Middle)
-                ny = Math.floor((this._height - this._contentHeight) / 2);
+                ny = Math.floor((this._height - contentHeight) / 2);
             else
-                ny = this._height - this._contentHeight;
+                ny = this._height - contentHeight;
             ny = -ny;
             this._container.setPosition(pivotCorrectX + nx, pivotCorrectY + ny);
         };
         GLoader.prototype.clearContent = function () {
             this.clearErrorState();
-            if (this._contentItem == null) {
+            if (!this._contentItem) {
                 var texture = this._content.spriteFrame;
-                if (texture != null)
+                if (texture)
                     this.freeExternal(texture);
             }
-            if (this._content2 != null) {
+            if (this._content2) {
                 this._container.removeChild(this._content2.node);
                 this._content2.dispose();
                 this._content2 = null;
@@ -7587,17 +7531,12 @@ window.__extends = (this && this.__extends) || (function () {
         GLoader.prototype.handleGrayedChanged = function () {
             this._content.grayed = this._grayed;
         };
-        GLoader.prototype.hitTest = function (globalPt) {
-            if (this._touchDisabled || !this._touchable || !this._node.activeInHierarchy)
-                return null;
+        GLoader.prototype._hitTest = function (pt, globalPt) {
             if (this._content2) {
                 var obj = this._content2.hitTest(globalPt);
                 if (obj)
                     return obj;
             }
-            var pt = this._node.convertToNodeSpaceAR(globalPt);
-            pt.x += this._node.anchorX * this._width;
-            pt.y += this._node.anchorY * this._height;
             if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
                 return this;
             else
@@ -7786,6 +7725,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._playing != value) {
                     this._playing = value;
                     this.updateGear(5);
+                    this.onChange();
                 }
             },
             enumerable: false,
@@ -7799,6 +7739,46 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._frame != value) {
                     this._frame = value;
                     this.updateGear(5);
+                    this.onChange();
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "animationName", {
+            get: function () {
+                return this._animationName;
+            },
+            set: function (value) {
+                if (this._animationName != value) {
+                    this._animationName = value;
+                    this.onChange();
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "skinName", {
+            get: function () {
+                return this._skinName;
+            },
+            set: function (value) {
+                if (this._skinName != value) {
+                    this._skinName = value;
+                    this.onChange();
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "loop", {
+            get: function () {
+                return this._loop;
+            },
+            set: function (value) {
+                if (this._loop != value) {
+                    this._loop = value;
+                    this.onChange();
                 }
             },
             enumerable: false,
@@ -7812,8 +7792,16 @@ window.__extends = (this && this.__extends) || (function () {
                 if (!this._color.equals(value)) {
                     this._color.set(value);
                     this.updateGear(4);
-                    this._container.color = value;
+                    if (this._content)
+                        this._content.node.color = value;
                 }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "content", {
+            get: function () {
+                return;
             },
             enumerable: false,
             configurable: true
@@ -7834,35 +7822,105 @@ window.__extends = (this && this.__extends) || (function () {
                 this.sourceWidth = this._contentItem.width;
                 this.sourceHeight = this._contentItem.height;
                 this._contentItem = this._contentItem.getHighResolution();
-                this._contentItem.load();
                 if (this._autoSize)
                     this.setSize(this.sourceWidth, this.sourceHeight);
-                if (this._contentItem.type == fgui.PackageItemType.Spine) {
-                    if (this._contentItem.asset) {
-                        this.updateLayout();
-                    }
-                }
-                else if (this._contentItem.type == fgui.PackageItemType.DragonBones) {
-                }
+                if (this._contentItem.type == fgui.PackageItemType.Spine || this._contentItem.type == fgui.PackageItemType.DragonBones)
+                    this._contentItem.owner.getItemAsset(this._contentItem, this.onLoaded.bind(this));
             }
         };
-        GLoader3D.prototype.loadExternal = function () {
+        GLoader3D.prototype.onLoaded = function (err, item) {
+            if (this._contentItem != item)
+                return;
+            if (err)
+                console.warn(err);
+            if (!this._contentItem.asset)
+                return;
+            if (this._contentItem.type == fgui.PackageItemType.Spine)
+                this.setSpine(this._contentItem.asset, this._contentItem.skeletonAnchor);
+            else if (this._contentItem.type == fgui.PackageItemType.DragonBones)
+                this.setDragonBones(this._contentItem.asset, this._contentItem.atlasAsset, this._contentItem.skeletonAnchor);
         };
-        GLoader3D.prototype.onLoaded = function (err, asset) {
+        GLoader3D.prototype.setSpine = function (asset, anchor, pma) {
+            this.url = null;
+            var node = new cc.Node();
+            node.color = this._color;
+            this._container.addChild(node);
+            node.setPosition(anchor.x, -anchor.y);
+            this._content = node.addComponent(sp.Skeleton);
+            this._content.premultipliedAlpha = pma;
+            this._content.skeletonData = asset;
+            this.onChangeSpine();
+            this.updateLayout();
+        };
+        GLoader3D.prototype.setDragonBones = function (asset, atlasAsset, anchor, pma) {
+            this.url = null;
+            var node = new cc.Node();
+            node.color = this._color;
+            this._container.addChild(node);
+            node.setPosition(anchor.x, -anchor.y);
+            this._content = node.addComponent(dragonBones.ArmatureDisplay);
+            this._content.premultipliedAlpha = pma;
+            this._content.dragonAsset = asset;
+            this._content.dragonAtlasAsset = atlasAsset;
+            var armatureKey = asset["init"](dragonBones.CCFactory.getInstance(), atlasAsset["_uuid"]);
+            var dragonBonesData = this._content["_factory"].getDragonBonesData(armatureKey);
+            this._content.armatureName = dragonBonesData.armatureNames[0];
+            this.onChangeDragonBones();
+            this.updateLayout();
+        };
+        GLoader3D.prototype.onChange = function () {
+            this.onChangeSpine();
+            this.onChangeDragonBones();
+        };
+        GLoader3D.prototype.onChangeSpine = function () {
+            if (!(this._content instanceof sp.Skeleton))
+                return;
+            if (this._animationName) {
+                var trackEntry = this._content.getCurrent(0);
+                if (!trackEntry || trackEntry.animation.name != this._animationName || trackEntry.isComplete() && !trackEntry.loop) {
+                    this._content.defaultAnimation = this._animationName;
+                    trackEntry = this._content.setAnimation(0, this._animationName, this._loop);
+                }
+                if (this._playing)
+                    this._content.paused = false;
+                else {
+                    this._content.paused = true;
+                    trackEntry.trackTime = fgui.ToolSet.lerp(0, trackEntry.animationEnd - trackEntry.animationStart, this._frame / 100);
+                }
+            }
+            else
+                this._content.clearTrack(0);
+            var skin = this._skinName || this._content.skeletonData.getRuntimeData().skins[0].name;
+            if (this._content["_skeleton"].skin != skin)
+                this._content.setSkin(skin);
+        };
+        GLoader3D.prototype.onChangeDragonBones = function () {
+            if (!(this._content instanceof dragonBones.ArmatureDisplay))
+                return;
+            if (this._animationName) {
+                if (this._playing)
+                    this._content.playAnimation(this._animationName, this._loop ? 0 : 1);
+                else
+                    this._content.armature().animation.gotoAndStopByFrame(this._animationName, this._frame);
+            }
+            else
+                this._content.armature().animation.reset();
+        };
+        GLoader3D.prototype.loadExternal = function () {
+            if (fgui.ToolSet.startsWith(this._url, "http://")
+                || fgui.ToolSet.startsWith(this._url, "https://")
+                || fgui.ToolSet.startsWith(this._url, '/'))
+                cc.assetManager.loadRemote(this._url, sp.SkeletonData, this.onLoaded2.bind(this));
+            else
+                cc.resources.load(this._url, sp.SkeletonData, this.onLoaded2.bind(this));
+        };
+        GLoader3D.prototype.onLoaded2 = function (err, asset) {
             if (!this._url || !cc.isValid(this._node))
                 return;
             if (err)
                 console.warn(err);
         };
         GLoader3D.prototype.updateLayout = function () {
-            if (this._content == null) {
-                if (this._autoSize) {
-                    this._updatingLayout = true;
-                    this.setSize(50, 30);
-                    this._updatingLayout = false;
-                }
-                return;
-            }
             var contentWidth = this.sourceWidth;
             var contentHeight = this.sourceHeight;
             var pivotCorrectX = -this.pivotX * this._width;
@@ -7875,10 +7933,11 @@ window.__extends = (this && this.__extends) || (function () {
                     contentHeight = 30;
                 this.setSize(contentWidth, contentHeight);
                 this._updatingLayout = false;
-                this._container.setContentSize(this._width, this._height);
-                this._container.setPosition(pivotCorrectX, pivotCorrectY);
-                if (contentWidth == this._width && contentHeight == this._height)
+                if (contentWidth == this._width && contentHeight == this._height) {
+                    this._container.setScale(1, 1);
+                    this._container.setPosition(pivotCorrectX, pivotCorrectY);
                     return;
+                }
             }
             var sx = 1, sy = 1;
             if (this._fill != fgui.LoaderFillType.None) {
@@ -7911,7 +7970,7 @@ window.__extends = (this && this.__extends) || (function () {
                     contentHeight = this.sourceHeight * sy;
                 }
             }
-            this._container.setContentSize(contentWidth, contentHeight);
+            this._container.setScale(sx, sy);
             var nx, ny;
             if (this._align == fgui.AlignType.Left)
                 nx = 0;
@@ -7930,6 +7989,10 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GLoader3D.prototype.clearContent = function () {
             this._contentItem = null;
+            if (this._content) {
+                this._content.node.destroy();
+                this._content = null;
+            }
         };
         GLoader3D.prototype.handleSizeChanged = function () {
             _super.prototype.handleSizeChanged.call(this);
@@ -7987,6 +8050,7 @@ window.__extends = (this && this.__extends) || (function () {
             this._shrinkOnly = buffer.readBool();
             this._autoSize = buffer.readBool();
             this._animationName = buffer.readS();
+            this._skinName = buffer.readS();
             this._playing = buffer.readBool();
             this._frame = buffer.readInt();
             this._loop = buffer.readBool();
@@ -8010,14 +8074,15 @@ window.__extends = (this && this.__extends) || (function () {
             _this._content = _this._node.addComponent(fgui.MovieClip);
             _this._content.sizeMode = cc.Sprite.SizeMode.CUSTOM;
             _this._content.trim = false;
+            _this._content.setPlaySettings();
             return _this;
         }
         Object.defineProperty(GMovieClip.prototype, "color", {
             get: function () {
-                return cc.Color.WHITE;
+                return this._node.color;
             },
             set: function (value) {
-                if (this._node.color != value) {
+                if (!this._node.color.equals(value)) {
                     this._node.color = value;
                     this.updateGear(4);
                 }
@@ -8075,6 +8140,10 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GMovieClip.prototype.handleGrayedChanged = function () {
             this._content.grayed = this._grayed;
+        };
+        GMovieClip.prototype.handleSizeChanged = function () {
+            _super.prototype.handleSizeChanged.call(this);
+            this._content.sizeMode = cc.Sprite.SizeMode.CUSTOM;
         };
         GMovieClip.prototype.getProp = function (index) {
             switch (index) {
@@ -8217,7 +8286,7 @@ window.__extends = (this && this.__extends) || (function () {
         GProgressBar.prototype.tweenValue = function (value, duration) {
             var oldValule;
             var tweener = fgui.GTween.getTween(this, this.update);
-            if (tweener != null) {
+            if (tweener) {
                 oldValule = tweener.value.x;
                 tweener.kill();
             }
@@ -8248,31 +8317,23 @@ window.__extends = (this && this.__extends) || (function () {
             var fullHeight = this.height - this._barMaxHeightDelta;
             if (!this._reverse) {
                 if (this._barObjectH) {
-                    if ((this._barObjectH instanceof fgui.GImage) && this._barObjectH.fillMethod != fgui.FillMethod.None)
-                        this._barObjectH.fillAmount = percent;
-                    else
+                    if (!this.setFillAmount(this._barObjectH, percent))
                         this._barObjectH.width = Math.round(fullWidth * percent);
                 }
                 if (this._barObjectV) {
-                    if ((this._barObjectV instanceof fgui.GImage) && this._barObjectV.fillMethod != fgui.FillMethod.None)
-                        this._barObjectV.fillAmount = percent;
-                    else
+                    if (!this.setFillAmount(this._barObjectV, percent))
                         this._barObjectV.height = Math.round(fullHeight * percent);
                 }
             }
             else {
                 if (this._barObjectH) {
-                    if ((this._barObjectH instanceof fgui.GImage) && this._barObjectH.fillMethod != fgui.FillMethod.None)
-                        this._barObjectH.fillAmount = 1 - percent;
-                    else {
+                    if (!this.setFillAmount(this._barObjectH, 1 - percent)) {
                         this._barObjectH.width = Math.round(fullWidth * percent);
                         this._barObjectH.x = this._barStartX + (fullWidth - this._barObjectH.width);
                     }
                 }
                 if (this._barObjectV) {
-                    if ((this._barObjectV instanceof fgui.GImage) && this._barObjectV.fillMethod != fgui.FillMethod.None)
-                        this._barObjectV.fillAmount = 1 - percent;
-                    else {
+                    if (!this.setFillAmount(this._barObjectV, 1 - percent)) {
                         this._barObjectV.height = Math.round(fullHeight * percent);
                         this._barObjectV.y = this._barStartY + (fullHeight - this._barObjectV.height);
                     }
@@ -8280,6 +8341,14 @@ window.__extends = (this && this.__extends) || (function () {
             }
             if (this._aniObject)
                 this._aniObject.setProp(fgui.ObjectPropID.Frame, Math.floor(percent * 100));
+        };
+        GProgressBar.prototype.setFillAmount = function (bar, percent) {
+            if (((bar instanceof fgui.GImage) || (bar instanceof fgui.GLoader)) && bar.fillMethod != fgui.FillMethod.None) {
+                bar.fillAmount = percent;
+                return true;
+            }
+            else
+                return false;
         };
         GProgressBar.prototype.constructExtension = function (buffer) {
             buffer.seek(0, 6);
@@ -8342,7 +8411,6 @@ window.__extends = (this && this.__extends) || (function () {
             _this._text = "";
             _this._color = new cc.Color(255, 255, 255, 255);
             _this._strokeColor = new cc.Color();
-            _this._templateVars = null;
             _this.createRenderer();
             _this.fontSize = 12;
             _this.leading = 3;
@@ -8655,7 +8723,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GTextField.prototype.updateText = function () {
             var text2 = this._text;
-            if (this._templateVars != null)
+            if (this._templateVars)
                 text2 = this.parseTemplate(text2);
             if (this._ubbEnabled)
                 text2 = fgui.UBBParser.inst.parse(fgui.ToolSet.encodeHTML(text2), true);
@@ -8940,7 +9008,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GRichTextField.prototype.updateText = function () {
             var text2 = this._text;
-            if (this._templateVars != null)
+            if (this._templateVars)
                 text2 = this.parseTemplate(text2);
             if (this._ubbEnabled) {
                 fgui.UBBParser.inst.linkUnderline = this.linkUnderline;
@@ -9092,7 +9160,7 @@ window.__extends = (this && this.__extends) || (function () {
         GRoot.prototype.bringToFront = function (win) {
             var cnt = this.numChildren;
             var i;
-            if (this._modalLayer.parent != null && !win.modal)
+            if (this._modalLayer.parent && !win.modal)
                 i = this.getChildIndex(this._modalLayer) - 1;
             else
                 i = cnt - 1;
@@ -9117,7 +9185,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         GRoot.prototype.closeModalWait = function () {
-            if (this._modalWaitPane != null && this._modalWaitPane.parent != null)
+            if (this._modalWaitPane && this._modalWaitPane.parent)
                 this.removeChild(this._modalWaitPane);
         };
         GRoot.prototype.closeAllExceptModals = function () {
@@ -9169,8 +9237,8 @@ window.__extends = (this && this.__extends) || (function () {
             enumerable: false,
             configurable: true
         });
-        GRoot.prototype.getPopupPosition = function (popup, target, downward, result) {
-            var pos = result ? result : new cc.Vec2();
+        GRoot.prototype.getPopupPosition = function (popup, target, dir, result) {
+            var pos = result || new cc.Vec2();
             var sizeW = 0, sizeH = 0;
             if (target) {
                 pos = target.localToGlobal();
@@ -9185,8 +9253,8 @@ window.__extends = (this && this.__extends) || (function () {
             if (pos.x + popup.width > this.width)
                 pos.x = pos.x + sizeW - popup.width;
             pos.y += sizeH;
-            if ((downward == undefined && pos.y + popup.height > this.height)
-                || downward == false) {
+            if (((dir === undefined || dir === fgui.PopupDirection.Auto) && pos.y + popup.height > this.height)
+                || dir === false || dir === fgui.PopupDirection.Up) {
                 pos.y = pos.y - sizeH - popup.height - 1;
                 if (pos.y < 0) {
                     pos.y = 0;
@@ -9195,7 +9263,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
             return pos;
         };
-        GRoot.prototype.showPopup = function (popup, target, downward) {
+        GRoot.prototype.showPopup = function (popup, target, dir) {
             if (this._popupStack.length > 0) {
                 var k = this._popupStack.indexOf(popup);
                 if (k != -1) {
@@ -9204,9 +9272,9 @@ window.__extends = (this && this.__extends) || (function () {
                 }
             }
             this._popupStack.push(popup);
-            if (target != null) {
+            if (target) {
                 var p = target;
-                while (p != null) {
+                while (p) {
                     if (p.parent == this) {
                         if (popup.sortingOrder < p.sortingOrder) {
                             popup.sortingOrder = p.sortingOrder;
@@ -9218,16 +9286,16 @@ window.__extends = (this && this.__extends) || (function () {
             }
             this.addChild(popup);
             this.adjustModalLayer();
-            var pt = this.getPopupPosition(popup, target, downward);
+            var pt = this.getPopupPosition(popup, target, dir);
             popup.setPosition(pt.x, pt.y);
         };
-        GRoot.prototype.togglePopup = function (popup, target, downward) {
+        GRoot.prototype.togglePopup = function (popup, target, dir) {
             if (this._justClosedPopups.indexOf(popup) != -1)
                 return;
-            this.showPopup(popup, target, downward);
+            this.showPopup(popup, target, dir);
         };
         GRoot.prototype.hidePopup = function (popup) {
-            if (popup != null) {
+            if (popup) {
                 var k = this._popupStack.indexOf(popup);
                 if (k != -1) {
                     for (var i = this._popupStack.length - 1; i >= k; i--)
@@ -9249,7 +9317,7 @@ window.__extends = (this && this.__extends) || (function () {
             configurable: true
         });
         GRoot.prototype.closePopup = function (target) {
-            if (target.parent != null) {
+            if (target.parent) {
                 if (target instanceof fgui.Window)
                     target.hide();
                 else
@@ -9289,7 +9357,7 @@ window.__extends = (this && this.__extends) || (function () {
             this.addChild(this._tooltipWin);
         };
         GRoot.prototype.hideTooltips = function () {
-            if (this._tooltipWin != null) {
+            if (this._tooltipWin) {
                 if (this._tooltipWin.parent)
                     this.removeChild(this._tooltipWin);
                 this._tooltipWin = null;
@@ -9312,7 +9380,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GRoot.prototype.adjustModalLayer = function () {
             var cnt = this.numChildren;
-            if (this._modalWaitPane != null && this._modalWaitPane.parent != null)
+            if (this._modalWaitPane && this._modalWaitPane.parent)
                 this.setChildIndex(this._modalWaitPane, cnt - 1);
             for (var i = cnt - 1; i >= 0; i--) {
                 var g = this.getChildAt(i);
@@ -9324,16 +9392,16 @@ window.__extends = (this && this.__extends) || (function () {
                     return;
                 }
             }
-            if (this._modalLayer.parent != null)
+            if (this._modalLayer.parent)
                 this.removeChild(this._modalLayer);
         };
         GRoot.prototype.onTouchBegin_1 = function (evt) {
-            if (this._tooltipWin != null)
+            if (this._tooltipWin)
                 this.hideTooltips();
             this._justClosedPopups.length = 0;
             if (this._popupStack.length > 0) {
                 var mc = evt.initiator;
-                while (mc != this && mc != null) {
+                while (mc && mc != this) {
                     var pindex = this._popupStack.indexOf(mc);
                     if (pindex != -1) {
                         for (var i = this._popupStack.length - 1; i > pindex; i--) {
@@ -9421,9 +9489,9 @@ window.__extends = (this && this.__extends) || (function () {
         Object.defineProperty(GScrollBar.prototype, "minSize", {
             get: function () {
                 if (this._vertical)
-                    return (this._arrowButton1 != null ? this._arrowButton1.height : 0) + (this._arrowButton2 != null ? this._arrowButton2.height : 0);
+                    return (this._arrowButton1 ? this._arrowButton1.height : 0) + (this._arrowButton2 ? this._arrowButton2.height : 0);
                 else
-                    return (this._arrowButton1 != null ? this._arrowButton1.width : 0) + (this._arrowButton2 != null ? this._arrowButton2.width : 0);
+                    return (this._arrowButton1 ? this._arrowButton1.width : 0) + (this._arrowButton2 ? this._arrowButton2.width : 0);
             },
             enumerable: false,
             configurable: true
@@ -9471,7 +9539,7 @@ window.__extends = (this && this.__extends) || (function () {
         GScrollBar.prototype.onGripTouchMove = function (evt) {
             if (!this.onStage)
                 return;
-            var pt = this.globalToLocal(evt.pos.x, evt.pos.y, GScrollBar.sScrollbarHelperPoint);
+            var pt = this.globalToLocal(evt.pos.x, evt.pos.y, s_vec2);
             if (this._vertical) {
                 var curY = pt.y - this._dragOffset.y;
                 this._target.setPercY((curY - this._bar.y) / (this._bar.height - this._grip.height), false);
@@ -9502,7 +9570,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this._target.scrollRight();
         };
         GScrollBar.prototype.onBarTouchBegin = function (evt) {
-            var pt = this._grip.globalToLocal(evt.pos.x, evt.pos.y, GScrollBar.sScrollbarHelperPoint);
+            var pt = this._grip.globalToLocal(evt.pos.x, evt.pos.y, s_vec2);
             if (this._vertical) {
                 if (pt.y < 0)
                     this._target.scrollUp(4);
@@ -9516,10 +9584,10 @@ window.__extends = (this && this.__extends) || (function () {
                     this._target.scrollRight(4);
             }
         };
-        GScrollBar.sScrollbarHelperPoint = new cc.Vec2();
         return GScrollBar;
     }(fgui.GComponent));
     fgui.GScrollBar = GScrollBar;
+    var s_vec2 = new cc.Vec2();
 })(fgui || (fgui = {}));
 
 (function (fgui) {
@@ -9723,7 +9791,7 @@ window.__extends = (this && this.__extends) || (function () {
             if (!this.canDrag) {
                 return;
             }
-            var pt = this.globalToLocal(evt.pos.x, evt.pos.y, GSlider.sSilderHelperPoint);
+            var pt = this.globalToLocal(evt.pos.x, evt.pos.y, s_vec2);
             var deltaX = pt.x - this._clickPos.x;
             var deltaY = pt.y - this._clickPos.y;
             if (this._reverse) {
@@ -9740,23 +9808,23 @@ window.__extends = (this && this.__extends) || (function () {
         GSlider.prototype.onBarTouchBegin = function (evt) {
             if (!this.changeOnClick)
                 return;
-            var pt = this._gripObject.globalToLocal(evt.pos.x, evt.pos.y, GSlider.sSilderHelperPoint);
+            var pt = this._gripObject.globalToLocal(evt.pos.x, evt.pos.y, s_vec2);
             var percent = fgui.ToolSet.clamp01((this._value - this._min) / (this._max - this._min));
-            var delta;
-            if (this._barObjectH)
-                delta = pt.x / this._barMaxWidth;
-            if (this._barObjectV)
-                delta = pt.y / this._barMaxHeight;
+            var delta = 0;
+            if (this._barObjectH != null)
+                delta = (pt.x - this._gripObject.width / 2) / this._barMaxWidth;
+            if (this._barObjectV != null)
+                delta = (pt.y - this._gripObject.height / 2) / this._barMaxHeight;
             if (this._reverse)
                 percent -= delta;
             else
                 percent += delta;
             this.updateWithPercent(percent, true);
         };
-        GSlider.sSilderHelperPoint = new cc.Vec2();
         return GSlider;
     }(fgui.GComponent));
     fgui.GSlider = GSlider;
+    var s_vec2 = new cc.Vec2();
 })(fgui || (fgui = {}));
 
 (function (fgui) {
@@ -9898,7 +9966,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GTextInput.prototype.updateText = function () {
             var text2 = this._text;
-            if (this._templateVars != null)
+            if (this._templateVars)
                 text2 = this.parseTemplate(text2);
             if (this._ubbEnabled)
                 text2 = fgui.UBBParser.inst.parse(fgui.ToolSet.encodeHTML(text2), true);
@@ -10026,19 +10094,19 @@ window.__extends = (this && this.__extends) || (function () {
         GTree.prototype.getSelectedNodes = function (result) {
             if (!result)
                 result = new Array();
-            GTree.helperIntList.length = 0;
-            _super.prototype.getSelection.call(this, GTree.helperIntList);
-            var cnt = GTree.helperIntList.length;
+            s_list.length = 0;
+            _super.prototype.getSelection.call(this, s_list);
+            var cnt = s_list.length;
             var ret = new Array();
             for (var i = 0; i < cnt; i++) {
-                var node = this.getChildAt(GTree.helperIntList[i])._treeNode;
+                var node = this.getChildAt(s_list[i])._treeNode;
                 ret.push(node);
             }
             return ret;
         };
         GTree.prototype.selectNode = function (node, scrollItToView) {
             var parentNode = node.parent;
-            while (parentNode != null && parentNode != this._rootNode) {
+            while (parentNode && parentNode != this._rootNode) {
                 parentNode.expanded = true;
                 parentNode = parentNode.parent;
             }
@@ -10076,12 +10144,12 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GTree.prototype.createCell = function (node) {
             var child = this.getFromPool(node._resURL);
-            if (!child)
+            if (!(child instanceof fgui.GComponent))
                 throw new Error("cannot create tree node object.");
             child._treeNode = node;
             node._cell = child;
             var indentObj = child.getChild("indent");
-            if (indentObj != null)
+            if (indentObj)
                 indentObj.width = (node.level - 1) * this._indent;
             var cc;
             cc = child.getController("expanded");
@@ -10139,7 +10207,7 @@ window.__extends = (this && this.__extends) || (function () {
             var cc = node._cell.getController("expanded");
             if (cc)
                 cc.selectedIndex = 1;
-            if (node._cell.parent != null)
+            if (node._cell.parent)
                 this.checkChildren(node, this.getChildIndex(node._cell));
         };
         GTree.prototype._afterCollapsed = function (node) {
@@ -10156,7 +10224,7 @@ window.__extends = (this && this.__extends) || (function () {
             var cc = node._cell.getController("expanded");
             if (cc)
                 cc.selectedIndex = 0;
-            if (node._cell.parent != null)
+            if (node._cell.parent)
                 this.hideFolderNode(node);
         };
         GTree.prototype._afterMoved = function (node) {
@@ -10217,8 +10285,8 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         GTree.prototype.removeNode = function (node) {
-            if (node._cell != null) {
-                if (node._cell.parent != null)
+            if (node._cell) {
+                if (node._cell.parent)
                     this.removeChild(node._cell);
                 this.returnToPool(node._cell);
                 node._cell._treeNode = null;
@@ -10302,16 +10370,15 @@ window.__extends = (this && this.__extends) || (function () {
                 buffer.position = nextPos;
             }
         };
-        GTree.helperIntList = new Array();
         return GTree;
     }(fgui.GList));
     fgui.GTree = GTree;
+    var s_list = new Array();
 })(fgui || (fgui = {}));
 
 (function (fgui) {
     var GTreeNode = (function () {
         function GTreeNode(hasChild, resURL) {
-            this._expanded = false;
             this._level = 0;
             this._resURL = resURL;
             if (hasChild)
@@ -10326,7 +10393,7 @@ window.__extends = (this && this.__extends) || (function () {
                     return;
                 if (this._expanded != value) {
                     this._expanded = value;
-                    if (this._tree != null) {
+                    if (this._tree) {
                         if (this._expanded)
                             this._tree._afterExpanded(this);
                         else
@@ -10353,13 +10420,13 @@ window.__extends = (this && this.__extends) || (function () {
         });
         Object.defineProperty(GTreeNode.prototype, "text", {
             get: function () {
-                if (this._cell != null)
+                if (this._cell)
                     return this._cell.text;
                 else
                     return null;
             },
             set: function (value) {
-                if (this._cell != null)
+                if (this._cell)
                     this._cell.text = value;
             },
             enumerable: false,
@@ -10367,13 +10434,13 @@ window.__extends = (this && this.__extends) || (function () {
         });
         Object.defineProperty(GTreeNode.prototype, "icon", {
             get: function () {
-                if (this._cell != null)
+                if (this._cell)
                     return this._cell.icon;
                 else
                     return null;
             },
             set: function (value) {
-                if (this._cell != null)
+                if (this._cell)
                     this._cell.icon = value;
             },
             enumerable: false,
@@ -10419,7 +10486,7 @@ window.__extends = (this && this.__extends) || (function () {
                     child._parent = this;
                     child._level = this._level + 1;
                     child._setTree(this._tree);
-                    if (this._tree != null && this == this._tree.rootNode || this._cell != null && this._cell.parent != null && this._expanded)
+                    if (this._tree && this == this._tree.rootNode || this._cell && this._cell.parent && this._expanded)
                         this._tree._afterInserted(child);
                 }
                 return child;
@@ -10440,7 +10507,7 @@ window.__extends = (this && this.__extends) || (function () {
                 var child = this._children[index];
                 this._children.splice(index, 1);
                 child._parent = null;
-                if (this._tree != null) {
+                if (this._tree) {
                     child._setTree(null);
                     this._tree._afterRemoved(child);
                 }
@@ -10496,7 +10563,7 @@ window.__extends = (this && this.__extends) || (function () {
                 return;
             this._children.splice(oldIndex, 1);
             this._children.splice(index, 0, child);
-            if (this._tree != null && this == this._tree.rootNode || this._cell != null && this._cell.parent != null && this._expanded)
+            if (this._tree && this == this._tree.rootNode || this._cell && this._cell.parent && this._expanded)
                 this._tree._afterMoved(child);
         };
         GTreeNode.prototype.swapChildren = function (child1, child2) {
@@ -10535,9 +10602,9 @@ window.__extends = (this && this.__extends) || (function () {
         });
         GTreeNode.prototype._setTree = function (value) {
             this._tree = value;
-            if (this._tree != null && this._tree.treeNodeWillExpand && this._expanded)
+            if (this._tree && this._tree.treeNodeWillExpand && this._expanded)
                 this._tree.treeNodeWillExpand(this, true);
-            if (this._children != null) {
+            if (this._children) {
                 var cnt = this._children.length;
                 for (var i = 0; i < cnt; i++) {
                     var node = this._children[i];
@@ -10578,9 +10645,6 @@ window.__extends = (this && this.__extends) || (function () {
         function PackageItem() {
             this.width = 0;
             this.height = 0;
-            this.tileGridIndice = 0;
-            this.interval = 0;
-            this.repeatDelay = 0;
         }
         PackageItem.prototype.load = function () {
             return this.owner.getItemAsset(this);
@@ -10612,13 +10676,12 @@ window.__extends = (this && this.__extends) || (function () {
 (function (fgui) {
     var PopupMenu = (function () {
         function PopupMenu(url) {
-            if (url === void 0) { url = null; }
             if (!url) {
                 url = fgui.UIConfig.popupMenu;
                 if (!url)
                     throw "UIConfig.popupMenu not defined";
             }
-            this._contentPane = fgui.UIPackage.createObjectFromURL(url).asCom;
+            this._contentPane = fgui.UIPackage.createObjectFromURL(url);
             this._contentPane.on(fgui.Event.DISPLAY, this.onDisplay, this);
             this._list = (this._contentPane.getChild("list"));
             this._list.removeChildrenToPool();
@@ -10631,23 +10694,23 @@ window.__extends = (this && this.__extends) || (function () {
             this._contentPane.dispose();
         };
         PopupMenu.prototype.addItem = function (caption, callback) {
-            var item = this._list.addItemFromPool().asButton;
+            var item = this._list.addItemFromPool();
             item.title = caption;
             item.data = callback;
             item.grayed = false;
             var c = item.getController("checked");
-            if (c != null)
+            if (c)
                 c.selectedIndex = 0;
             return item;
         };
         PopupMenu.prototype.addItemAt = function (caption, index, callback) {
-            var item = this._list.getFromPool().asButton;
+            var item = this._list.getFromPool();
             this._list.addChildAt(item, index);
             item.title = caption;
             item.data = callback;
             item.grayed = false;
             var c = item.getController("checked");
-            if (c != null)
+            if (c)
                 c.selectedIndex = 0;
             return item;
         };
@@ -10661,24 +10724,24 @@ window.__extends = (this && this.__extends) || (function () {
             return item.name;
         };
         PopupMenu.prototype.setItemText = function (name, caption) {
-            var item = this._list.getChild(name).asButton;
+            var item = this._list.getChild(name);
             item.title = caption;
         };
         PopupMenu.prototype.setItemVisible = function (name, visible) {
-            var item = this._list.getChild(name).asButton;
+            var item = this._list.getChild(name);
             if (item.visible != visible) {
                 item.visible = visible;
                 this._list.setBoundsChangedFlag();
             }
         };
         PopupMenu.prototype.setItemGrayed = function (name, grayed) {
-            var item = this._list.getChild(name).asButton;
+            var item = this._list.getChild(name);
             item.grayed = grayed;
         };
         PopupMenu.prototype.setItemCheckable = function (name, checkable) {
-            var item = this._list.getChild(name).asButton;
+            var item = this._list.getChild(name);
             var c = item.getController("checked");
-            if (c != null) {
+            if (c) {
                 if (checkable) {
                     if (c.selectedIndex == 0)
                         c.selectedIndex = 1;
@@ -10688,22 +10751,22 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         PopupMenu.prototype.setItemChecked = function (name, checked) {
-            var item = this._list.getChild(name).asButton;
+            var item = this._list.getChild(name);
             var c = item.getController("checked");
-            if (c != null)
+            if (c)
                 c.selectedIndex = checked ? 2 : 1;
         };
         PopupMenu.prototype.isItemChecked = function (name) {
-            var item = this._list.getChild(name).asButton;
+            var item = this._list.getChild(name);
             var c = item.getController("checked");
-            if (c != null)
+            if (c)
                 return c.selectedIndex == 2;
             else
                 return false;
         };
         PopupMenu.prototype.removeItem = function (name) {
             var item = this._list.getChild(name);
-            if (item != null) {
+            if (item) {
                 var index = this._list.getChildIndex(item);
                 this._list.removeChildToPoolAt(index);
                 return true;
@@ -10735,27 +10798,26 @@ window.__extends = (this && this.__extends) || (function () {
             enumerable: false,
             configurable: true
         });
-        PopupMenu.prototype.show = function (target, downward) {
+        PopupMenu.prototype.show = function (target, dir) {
             if (target === void 0) { target = null; }
             var r = target != null ? target.root : fgui.GRoot.inst;
-            r.showPopup(this.contentPane, (target instanceof fgui.GRoot) ? null : target, downward);
+            r.showPopup(this.contentPane, (target instanceof fgui.GRoot) ? null : target, dir);
         };
-        PopupMenu.prototype.onClickItem = function (itemObject, evt) {
+        PopupMenu.prototype.onClickItem = function (item, evt) {
             var _this = this;
             this._list._partner.callLater(function (dt) {
-                _this.onClickItem2(itemObject, evt);
+                _this.onClickItem2(item, evt);
             }, 0.1);
         };
-        PopupMenu.prototype.onClickItem2 = function (itemObject, evt) {
-            var item = itemObject.asButton;
-            if (item == null)
+        PopupMenu.prototype.onClickItem2 = function (item, evt) {
+            if (!(item instanceof fgui.GButton))
                 return;
             if (item.grayed) {
                 this._list.selectedIndex = -1;
                 return;
             }
             var c = item.getController("checked");
-            if (c != null && c.selectedIndex != 0) {
+            if (c && c.selectedIndex != 0) {
                 if (c.selectedIndex == 1)
                     c.selectedIndex = 2;
                 else
@@ -10829,9 +10891,6 @@ window.__extends = (this && this.__extends) || (function () {
             info.type = relationType;
             info.axis = (relationType <= fgui.RelationType.Right_Right || relationType == fgui.RelationType.Width || relationType >= fgui.RelationType.LeftExt_Left && relationType <= fgui.RelationType.RightExt_Right) ? 0 : 1;
             this._defs.push(info);
-            if (usePercent || relationType == fgui.RelationType.Left_Center || relationType == fgui.RelationType.Center_Center || relationType == fgui.RelationType.Right_Center
-                || relationType == fgui.RelationType.Top_Middle || relationType == fgui.RelationType.Middle_Middle || relationType == fgui.RelationType.Bottom_Middle)
-                this._owner.pixelSnapping = true;
         };
         RelationItem.prototype.remove = function (relationType) {
             if (relationType == fgui.RelationType.Size) {
@@ -10859,7 +10918,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         RelationItem.prototype.dispose = function () {
-            if (this._target != null) {
+            if (this._target) {
                 this.releaseRefTarget(this._target);
                 this._target = null;
             }
@@ -10900,7 +10959,7 @@ window.__extends = (this && this.__extends) || (function () {
                 ox = this._owner.x - ox;
                 oy = this._owner.y - oy;
                 this._owner.updateGearFromRelations(1, ox, oy);
-                if (this._owner.parent != null) {
+                if (this._owner.parent) {
                     var len = this._owner.parent._transitions.length;
                     if (len > 0) {
                         for (var i = 0; i < len; ++i) {
@@ -11283,7 +11342,7 @@ window.__extends = (this && this.__extends) || (function () {
                 ox = this._owner.x - ox;
                 oy = this._owner.y - oy;
                 this._owner.updateGearFromRelations(1, ox, oy);
-                if (this._owner.parent != null) {
+                if (this._owner.parent) {
                     var len = this._owner.parent._transitions.length;
                     if (len > 0) {
                         for (var i = 0; i < len; ++i) {
@@ -11313,7 +11372,7 @@ window.__extends = (this && this.__extends) || (function () {
                 ox = this._owner.x - ox;
                 oy = this._owner.y - oy;
                 this._owner.updateGearFromRelations(1, ox, oy);
-                if (this._owner.parent != null) {
+                if (this._owner.parent) {
                     var len = this._owner.parent._transitions.length;
                     if (len > 0) {
                         for (var i = 0; i < len; ++i) {
@@ -11614,16 +11673,16 @@ window.__extends = (this && this.__extends) || (function () {
         };
         ScrollPane.prototype.onDestroy = function () {
             this._pageController = null;
-            if (this._hzScrollBar != null)
+            if (this._hzScrollBar)
                 this._hzScrollBar.dispose();
-            if (this._vtScrollBar != null)
+            if (this._vtScrollBar)
                 this._vtScrollBar.dispose();
-            if (this._header != null)
+            if (this._header)
                 this._header.dispose();
-            if (this._footer != null)
+            if (this._footer)
                 this._footer.dispose();
         };
-        ScrollPane.prototype.hitTest = function (globalPt) {
+        ScrollPane.prototype.hitTest = function (pt, globalPt) {
             var target;
             if (this._vtScrollBar) {
                 target = this._vtScrollBar.hitTest(globalPt);
@@ -11645,10 +11704,8 @@ window.__extends = (this && this.__extends) || (function () {
                 if (target)
                     return target;
             }
-            var pt = this._maskContainer.convertToNodeSpaceAR(globalPt);
-            pt.x += this._maskContainer.anchorX * this._viewSize.x;
-            pt.y += this._maskContainer.anchorY * this._viewSize.y;
-            if (pt.x >= 0 && pt.y >= 0 && pt.x < this._viewSize.x && pt.y < this._viewSize.y)
+            if (pt.x >= this._owner.margin.left && pt.y >= this._owner.margin.top
+                && pt.x < this._owner.margin.left + this._viewSize.x && pt.y < this._owner.margin.top + this._viewSize.y)
                 return this._owner;
             else
                 return null;
@@ -11846,7 +11903,7 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
                 value = value + this._owner.margin.left + this._owner.margin.right;
-                if (this._vtScrollBar != null && !this._floating)
+                if (this._vtScrollBar && !this._floating)
                     value += this._vtScrollBar.width;
                 this._owner.width = value;
             },
@@ -11859,7 +11916,7 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
                 value = value + this._owner.margin.top + this._owner.margin.bottom;
-                if (this._hzScrollBar != null && !this._floating)
+                if (this._hzScrollBar && !this._floating)
                     value += this._hzScrollBar.height;
                 this._owner.height = value;
             },
@@ -11994,11 +12051,11 @@ window.__extends = (this && this.__extends) || (function () {
             var rect;
             if (target instanceof fgui.GObject) {
                 if (target.parent != this._owner) {
-                    target.parent.localToGlobalRect(target.x, target.y, target.width, target.height, ScrollPane.sHelperRect);
-                    rect = this._owner.globalToLocalRect(ScrollPane.sHelperRect.x, ScrollPane.sHelperRect.y, ScrollPane.sHelperRect.width, ScrollPane.sHelperRect.height, ScrollPane.sHelperRect);
+                    target.parent.localToGlobalRect(target.x, target.y, target.width, target.height, s_rect);
+                    rect = this._owner.globalToLocalRect(s_rect.x, s_rect.y, s_rect.width, s_rect.height, s_rect);
                 }
                 else {
-                    rect = ScrollPane.sHelperRect;
+                    rect = s_rect;
                     rect.x = target.x;
                     rect.y = target.y;
                     rect.width = target.width;
@@ -12060,7 +12117,7 @@ window.__extends = (this && this.__extends) || (function () {
         ScrollPane.prototype.cancelDragging = function () {
             if (ScrollPane.draggingPane == this)
                 ScrollPane.draggingPane = null;
-            ScrollPane._gestureFlag = 0;
+            _gestureFlag = 0;
             this._dragged = false;
         };
         ScrollPane.prototype.lockHeader = function (size) {
@@ -12075,7 +12132,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this._tweenStart.y = cy;
                 this._tweenChange.set(cc.Vec2.ZERO);
                 this._tweenChange[this._refreshBarAxis] = this._headerLockedSize - this._tweenStart[this._refreshBarAxis];
-                this._tweenDuration.x = this._tweenDuration.y = ScrollPane.TWEEN_TIME_DEFAULT;
+                this._tweenDuration.x = this._tweenDuration.y = TWEEN_TIME_DEFAULT;
                 this.startTween(2);
             }
         };
@@ -12096,7 +12153,7 @@ window.__extends = (this && this.__extends) || (function () {
                 else
                     max += this._footerLockedSize;
                 this._tweenChange[this._refreshBarAxis] = -max - this._tweenStart[this._refreshBarAxis];
-                this._tweenDuration.x = this._tweenDuration.y = ScrollPane.TWEEN_TIME_DEFAULT;
+                this._tweenDuration.x = this._tweenDuration.y = TWEEN_TIME_DEFAULT;
                 this.startTween(2);
             }
         };
@@ -12113,7 +12170,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         ScrollPane.prototype.updatePageController = function () {
-            if (this._pageController != null && !this._pageController.changing) {
+            if (this._pageController && !this._pageController.changing) {
                 var index;
                 if (this._scrollType == fgui.ScrollType.Horizontal)
                     index = this.currentPageX;
@@ -12129,7 +12186,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         ScrollPane.prototype.adjustMaskContainer = function () {
             var mx = 0;
-            if (this._displayOnLeft && this._vtScrollBar != null && !this._floating)
+            if (this._displayOnLeft && this._vtScrollBar && !this._floating)
                 mx = Math.floor(this._owner.margin.left + this._vtScrollBar.width);
             this._maskContainer.setAnchorPoint(this._owner._alignOffset.x / this._viewSize.x, 1 - this._owner._alignOffset.y / this._viewSize.y);
             if (this._owner._customMask)
@@ -12288,13 +12345,13 @@ window.__extends = (this && this.__extends) || (function () {
                 this._container.setPosition(fgui.ToolSet.clamp(this._container.x, -max, this._headerLockedSize), -fgui.ToolSet.clamp((-this._container.y), -this._overlapSize.y, 0));
             else
                 this._container.setPosition(fgui.ToolSet.clamp(this._container.x, -this._overlapSize.x, 0), -fgui.ToolSet.clamp((-this._container.y), -max, this._headerLockedSize));
-            if (this._header != null) {
+            if (this._header) {
                 if (this._refreshBarAxis == "x")
                     this._header.height = this._viewSize.y;
                 else
                     this._header.width = this._viewSize.x;
             }
-            if (this._footer != null) {
+            if (this._footer) {
                 if (this._refreshBarAxis == "y")
                     this._footer.height = this._viewSize.y;
                 else
@@ -12317,11 +12374,11 @@ window.__extends = (this && this.__extends) || (function () {
             this._needRefresh = false;
             this.unschedule(this.refresh);
             if (this._pageMode || this._snapToItem) {
-                ScrollPane.sEndPos.x = -this._xPos;
-                ScrollPane.sEndPos.y = -this._yPos;
-                this.alignPosition(ScrollPane.sEndPos, false);
-                this._xPos = -ScrollPane.sEndPos.x;
-                this._yPos = -ScrollPane.sEndPos.y;
+                sEndPos.x = -this._xPos;
+                sEndPos.y = -this._yPos;
+                this.alignPosition(sEndPos, false);
+                this._xPos = -sEndPos.x;
+                this._yPos = -sEndPos.y;
             }
             this.refresh2();
             this._owner.node.emit(fgui.Event.SCROLL, this._owner);
@@ -12352,7 +12409,7 @@ window.__extends = (this && this.__extends) || (function () {
                     posY = 0;
                 }
                 if (posX != this._container.x || posY != (-this._container.y)) {
-                    this._tweenDuration.x = this._tweenDuration.y = ScrollPane.TWEEN_TIME_GO;
+                    this._tweenDuration.x = this._tweenDuration.y = TWEEN_TIME_GO;
                     this._tweenStart.x = this._container.x;
                     this._tweenStart.y = (-this._container.y);
                     this._tweenChange.x = posX - this._tweenStart.x;
@@ -12382,7 +12439,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
             else
                 this._dragged = false;
-            var pt = this._owner.globalToLocal(evt.pos.x, evt.pos.y, ScrollPane.sHelperPoint);
+            var pt = this._owner.globalToLocal(evt.pos.x, evt.pos.y, s_vec2);
             this._containerPos.x = this._container.x;
             this._containerPos.y = -this._container.y;
             this._beginTouchPos.set(pt);
@@ -12399,21 +12456,21 @@ window.__extends = (this && this.__extends) || (function () {
                 return;
             if (!this._touchEffect)
                 return;
-            if (fgui.GObject.draggingObject != null && fgui.GObject.draggingObject.onStage)
+            if (fgui.GObject.draggingObject && fgui.GObject.draggingObject.onStage)
                 return;
-            if (ScrollPane.draggingPane != null && ScrollPane.draggingPane != this && ScrollPane.draggingPane._owner.onStage)
+            if (ScrollPane.draggingPane && ScrollPane.draggingPane != this && ScrollPane.draggingPane._owner.onStage)
                 return;
-            var pt = this._owner.globalToLocal(evt.pos.x, evt.pos.y, ScrollPane.sHelperPoint);
+            var pt = this._owner.globalToLocal(evt.pos.x, evt.pos.y, s_vec2);
             var sensitivity = fgui.UIConfig.touchScrollSensitivity;
             var diff, diff2;
             var sv, sh, st;
             if (this._scrollType == fgui.ScrollType.Vertical) {
                 if (!this._isHoldAreaDone) {
-                    ScrollPane._gestureFlag |= 1;
+                    _gestureFlag |= 1;
                     diff = Math.abs(this._beginTouchPos.y - pt.y);
                     if (diff < sensitivity)
                         return;
-                    if ((ScrollPane._gestureFlag & 2) != 0) {
+                    if ((_gestureFlag & 2) != 0) {
                         diff2 = Math.abs(this._beginTouchPos.x - pt.x);
                         if (diff < diff2)
                             return;
@@ -12423,11 +12480,11 @@ window.__extends = (this && this.__extends) || (function () {
             }
             else if (this._scrollType == fgui.ScrollType.Horizontal) {
                 if (!this._isHoldAreaDone) {
-                    ScrollPane._gestureFlag |= 2;
+                    _gestureFlag |= 2;
                     diff = Math.abs(this._beginTouchPos.x - pt.x);
                     if (diff < sensitivity)
                         return;
-                    if ((ScrollPane._gestureFlag & 1) != 0) {
+                    if ((_gestureFlag & 1) != 0) {
                         diff2 = Math.abs(this._beginTouchPos.y - pt.y);
                         if (diff < diff2)
                             return;
@@ -12436,7 +12493,7 @@ window.__extends = (this && this.__extends) || (function () {
                 sh = true;
             }
             else {
-                ScrollPane._gestureFlag = 3;
+                _gestureFlag = 3;
                 if (!this._isHoldAreaDone) {
                     diff = Math.abs(this._beginTouchPos.y - pt.y);
                     if (diff < sensitivity) {
@@ -12453,18 +12510,18 @@ window.__extends = (this && this.__extends) || (function () {
                 if (newPosY > 0) {
                     if (!this._bouncebackEffect)
                         this._container.y = 0;
-                    else if (this._header != null && this._header.maxHeight != 0)
+                    else if (this._header && this._header.maxHeight != 0)
                         this._container.y = -Math.floor(Math.min(newPosY * 0.5, this._header.maxHeight));
                     else
-                        this._container.y = -Math.floor(Math.min(newPosY * 0.5, this._viewSize.y * ScrollPane.PULL_RATIO));
+                        this._container.y = -Math.floor(Math.min(newPosY * 0.5, this._viewSize.y * PULL_RATIO));
                 }
                 else if (newPosY < -this._overlapSize.y) {
                     if (!this._bouncebackEffect)
                         this._container.y = this._overlapSize.y;
-                    else if (this._footer != null && this._footer.maxHeight > 0)
+                    else if (this._footer && this._footer.maxHeight > 0)
                         this._container.y = -Math.floor(Math.max((newPosY + this._overlapSize.y) * 0.5, -this._footer.maxHeight) - this._overlapSize.y);
                     else
-                        this._container.y = -Math.floor(Math.max((newPosY + this._overlapSize.y) * 0.5, -this._viewSize.y * ScrollPane.PULL_RATIO) - this._overlapSize.y);
+                        this._container.y = -Math.floor(Math.max((newPosY + this._overlapSize.y) * 0.5, -this._viewSize.y * PULL_RATIO) - this._overlapSize.y);
                 }
                 else
                     this._container.y = -newPosY;
@@ -12473,18 +12530,18 @@ window.__extends = (this && this.__extends) || (function () {
                 if (newPosX > 0) {
                     if (!this._bouncebackEffect)
                         this._container.x = 0;
-                    else if (this._header != null && this._header.maxWidth != 0)
+                    else if (this._header && this._header.maxWidth != 0)
                         this._container.x = Math.floor(Math.min(newPosX * 0.5, this._header.maxWidth));
                     else
-                        this._container.x = Math.floor(Math.min(newPosX * 0.5, this._viewSize.x * ScrollPane.PULL_RATIO));
+                        this._container.x = Math.floor(Math.min(newPosX * 0.5, this._viewSize.x * PULL_RATIO));
                 }
                 else if (newPosX < 0 - this._overlapSize.x) {
                     if (!this._bouncebackEffect)
                         this._container.x = -this._overlapSize.x;
-                    else if (this._footer != null && this._footer.maxWidth > 0)
+                    else if (this._footer && this._footer.maxWidth > 0)
                         this._container.x = Math.floor(Math.max((newPosX + this._overlapSize.x) * 0.5, -this._footer.maxWidth) - this._overlapSize.x);
                     else
-                        this._container.x = Math.floor(Math.max((newPosX + this._overlapSize.x) * 0.5, -this._viewSize.x * ScrollPane.PULL_RATIO) - this._overlapSize.x);
+                        this._container.x = Math.floor(Math.max((newPosX + this._overlapSize.x) * 0.5, -this._viewSize.x * PULL_RATIO) - this._overlapSize.x);
                 }
                 else
                     this._container.x = newPosX;
@@ -12542,7 +12599,7 @@ window.__extends = (this && this.__extends) || (function () {
         ScrollPane.prototype.onTouchEnd = function (evt) {
             if (ScrollPane.draggingPane == this)
                 ScrollPane.draggingPane = null;
-            ScrollPane._gestureFlag = 0;
+            _gestureFlag = 0;
             if (!this._dragged || !this._touchEffect || !this._owner.node.activeInHierarchy) {
                 this._dragged = false;
                 return;
@@ -12550,27 +12607,27 @@ window.__extends = (this && this.__extends) || (function () {
             this._dragged = false;
             this._tweenStart.x = this._container.x;
             this._tweenStart.y = -this._container.y;
-            ScrollPane.sEndPos.set(this._tweenStart);
+            sEndPos.set(this._tweenStart);
             var flag = false;
             if (this._container.x > 0) {
-                ScrollPane.sEndPos.x = 0;
+                sEndPos.x = 0;
                 flag = true;
             }
             else if (this._container.x < -this._overlapSize.x) {
-                ScrollPane.sEndPos.x = -this._overlapSize.x;
+                sEndPos.x = -this._overlapSize.x;
                 flag = true;
             }
             if ((-this._container.y) > 0) {
-                ScrollPane.sEndPos.y = 0;
+                sEndPos.y = 0;
                 flag = true;
             }
             else if ((-this._container.y) < -this._overlapSize.y) {
-                ScrollPane.sEndPos.y = -this._overlapSize.y;
+                sEndPos.y = -this._overlapSize.y;
                 flag = true;
             }
             if (flag) {
-                this._tweenChange.x = ScrollPane.sEndPos.x - this._tweenStart.x;
-                this._tweenChange.y = ScrollPane.sEndPos.y - this._tweenStart.y;
+                this._tweenChange.x = sEndPos.x - this._tweenStart.x;
+                this._tweenChange.y = sEndPos.y - this._tweenStart.y;
                 if (this._tweenChange.x < -fgui.UIConfig.touchDragSensitivity || this._tweenChange.y < -fgui.UIConfig.touchDragSensitivity) {
                     this._refreshEventDispatching = true;
                     this._owner.node.emit(fgui.Event.PULL_DOWN_RELEASE), this._owner;
@@ -12581,22 +12638,22 @@ window.__extends = (this && this.__extends) || (function () {
                     this._owner.node.emit(fgui.Event.PULL_UP_RELEASE, this._owner);
                     this._refreshEventDispatching = false;
                 }
-                if (this._headerLockedSize > 0 && ScrollPane.sEndPos[this._refreshBarAxis] == 0) {
-                    ScrollPane.sEndPos[this._refreshBarAxis] = this._headerLockedSize;
-                    this._tweenChange.x = ScrollPane.sEndPos.x - this._tweenStart.x;
-                    this._tweenChange.y = ScrollPane.sEndPos.y - this._tweenStart.y;
+                if (this._headerLockedSize > 0 && sEndPos[this._refreshBarAxis] == 0) {
+                    sEndPos[this._refreshBarAxis] = this._headerLockedSize;
+                    this._tweenChange.x = sEndPos.x - this._tweenStart.x;
+                    this._tweenChange.y = sEndPos.y - this._tweenStart.y;
                 }
-                else if (this._footerLockedSize > 0 && ScrollPane.sEndPos[this._refreshBarAxis] == -this._overlapSize[this._refreshBarAxis]) {
+                else if (this._footerLockedSize > 0 && sEndPos[this._refreshBarAxis] == -this._overlapSize[this._refreshBarAxis]) {
                     var max = this._overlapSize[this._refreshBarAxis];
                     if (max == 0)
                         max = Math.max(this._contentSize[this._refreshBarAxis] + this._footerLockedSize - this._viewSize[this._refreshBarAxis], 0);
                     else
                         max += this._footerLockedSize;
-                    ScrollPane.sEndPos[this._refreshBarAxis] = -max;
-                    this._tweenChange.x = ScrollPane.sEndPos.x - this._tweenStart.x;
-                    this._tweenChange.y = ScrollPane.sEndPos.y - this._tweenStart.y;
+                    sEndPos[this._refreshBarAxis] = -max;
+                    this._tweenChange.x = sEndPos.x - this._tweenStart.x;
+                    this._tweenChange.y = sEndPos.y - this._tweenStart.y;
                 }
-                this._tweenDuration.x = this._tweenDuration.y = ScrollPane.TWEEN_TIME_DEFAULT;
+                this._tweenDuration.x = this._tweenDuration.y = TWEEN_TIME_DEFAULT;
             }
             else {
                 if (!this._inertiaDisabled) {
@@ -12607,24 +12664,24 @@ window.__extends = (this && this.__extends) || (function () {
                         this._velocity.x = this._velocity.x * factor;
                         this._velocity.y = this._velocity.y * factor;
                     }
-                    this.updateTargetAndDuration(this._tweenStart, ScrollPane.sEndPos);
+                    this.updateTargetAndDuration(this._tweenStart, sEndPos);
                 }
                 else
-                    this._tweenDuration.x = this._tweenDuration.y = ScrollPane.TWEEN_TIME_DEFAULT;
-                ScrollPane.sOldChange.x = ScrollPane.sEndPos.x - this._tweenStart.x;
-                ScrollPane.sOldChange.y = ScrollPane.sEndPos.y - this._tweenStart.y;
-                this.loopCheckingTarget(ScrollPane.sEndPos);
+                    this._tweenDuration.x = this._tweenDuration.y = TWEEN_TIME_DEFAULT;
+                sOldChange.x = sEndPos.x - this._tweenStart.x;
+                sOldChange.y = sEndPos.y - this._tweenStart.y;
+                this.loopCheckingTarget(sEndPos);
                 if (this._pageMode || this._snapToItem)
-                    this.alignPosition(ScrollPane.sEndPos, true);
-                this._tweenChange.x = ScrollPane.sEndPos.x - this._tweenStart.x;
-                this._tweenChange.y = ScrollPane.sEndPos.y - this._tweenStart.y;
+                    this.alignPosition(sEndPos, true);
+                this._tweenChange.x = sEndPos.x - this._tweenStart.x;
+                this._tweenChange.y = sEndPos.y - this._tweenStart.y;
                 if (this._tweenChange.x == 0 && this._tweenChange.y == 0) {
                     this.updateScrollBarVisible();
                     return;
                 }
                 if (this._pageMode || this._snapToItem) {
-                    this.fixDuration("x", ScrollPane.sOldChange.x);
-                    this.fixDuration("y", ScrollPane.sOldChange.y);
+                    this.fixDuration("x", sOldChange.x);
+                    this.fixDuration("y", sOldChange.y);
                 }
             }
             this.startTween(2);
@@ -12655,9 +12712,9 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         ScrollPane.prototype.updateScrollBarPos = function () {
-            if (this._vtScrollBar != null)
+            if (this._vtScrollBar)
                 this._vtScrollBar.setScrollPerc(this._overlapSize.y == 0 ? 0 : fgui.ToolSet.clamp(this._container.y, 0, this._overlapSize.y) / this._overlapSize.y);
-            if (this._hzScrollBar != null)
+            if (this._hzScrollBar)
                 this._hzScrollBar.setScrollPerc(this._overlapSize.x == 0 ? 0 : fgui.ToolSet.clamp(-this._container.x, 0, this._overlapSize.x) / this._overlapSize.x);
             this.checkRefreshBar();
         };
@@ -12786,7 +12843,7 @@ window.__extends = (this && this.__extends) || (function () {
                 pos.y = this.alignByPage(pos.y, "y", inertialScrolling);
             }
             else if (this._snapToItem) {
-                var pt = this._owner.getSnappingPosition(-pos.x, -pos.y, ScrollPane.sHelperPoint);
+                var pt = this._owner.getSnappingPosition(-pos.x, -pos.y, s_vec2);
                 if (pos.x < 0 && pos.x > -this._overlapSize.x)
                     pos.x = -pt.x;
                 if (pos.y < 0 && pos.y > -this._overlapSize.y)
@@ -12872,8 +12929,8 @@ window.__extends = (this && this.__extends) || (function () {
                     pos += change;
                 }
             }
-            if (duration < ScrollPane.TWEEN_TIME_DEFAULT)
-                duration = ScrollPane.TWEEN_TIME_DEFAULT;
+            if (duration < TWEEN_TIME_DEFAULT)
+                duration = TWEEN_TIME_DEFAULT;
             this._tweenDuration[axis] = duration;
             return pos;
         };
@@ -12881,8 +12938,8 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._tweenChange[axis] == 0 || Math.abs(this._tweenChange[axis]) >= Math.abs(oldChange))
                 return;
             var newDuration = Math.abs(this._tweenChange[axis] / oldChange) * this._tweenDuration[axis];
-            if (newDuration < ScrollPane.TWEEN_TIME_DEFAULT)
-                newDuration = ScrollPane.TWEEN_TIME_DEFAULT;
+            if (newDuration < TWEEN_TIME_DEFAULT)
+                newDuration = TWEEN_TIME_DEFAULT;
             this._tweenDuration[axis] = newDuration;
         };
         ScrollPane.prototype.startTween = function (type) {
@@ -12903,10 +12960,10 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._header == null && this._footer == null)
                 return;
             var pos = (this._refreshBarAxis == "x" ? this._container.x : (-this._container.y));
-            if (this._header != null) {
+            if (this._header) {
                 if (pos > 0) {
                     this._header.node.active = true;
-                    var pt = ScrollPane.sHelperPoint;
+                    var pt = s_vec2;
                     pt.x = this._header.width;
                     pt.y = this._header.height;
                     pt[this._refreshBarAxis] = pos;
@@ -12916,11 +12973,11 @@ window.__extends = (this && this.__extends) || (function () {
                     this._header.node.active = false;
                 }
             }
-            if (this._footer != null) {
+            if (this._footer) {
                 var max = this._overlapSize[this._refreshBarAxis];
                 if (pos < -max || max == 0 && this._footerLockedSize > 0) {
                     this._footer.node.active = true;
-                    pt = ScrollPane.sHelperPoint;
+                    pt = s_vec2;
                     pt.x = this._footer.x;
                     pt.y = this._footer.y;
                     if (max > 0)
@@ -12978,7 +13035,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._tweenChange[axis] = 0;
                 }
                 else {
-                    var ratio = ScrollPane.easeFunc(this._tweenTime[axis], this._tweenDuration[axis]);
+                    var ratio = easeFunc(this._tweenTime[axis], this._tweenDuration[axis]);
                     newValue = this._tweenStart[axis] + Math.floor(this._tweenChange[axis] * ratio);
                 }
                 var threshold1 = 0;
@@ -12997,14 +13054,14 @@ window.__extends = (this && this.__extends) || (function () {
                     if (newValue > 20 + threshold1 && this._tweenChange[axis] > 0
                         || newValue > threshold1 && this._tweenChange[axis] == 0) {
                         this._tweenTime[axis] = 0;
-                        this._tweenDuration[axis] = ScrollPane.TWEEN_TIME_DEFAULT;
+                        this._tweenDuration[axis] = TWEEN_TIME_DEFAULT;
                         this._tweenChange[axis] = -newValue + threshold1;
                         this._tweenStart[axis] = newValue;
                     }
                     else if (newValue < threshold2 - 20 && this._tweenChange[axis] < 0
                         || newValue < threshold2 && this._tweenChange[axis] == 0) {
                         this._tweenTime[axis] = 0;
-                        this._tweenDuration[axis] = ScrollPane.TWEEN_TIME_DEFAULT;
+                        this._tweenDuration[axis] = TWEEN_TIME_DEFAULT;
                         this._tweenChange[axis] = threshold2 - newValue;
                         this._tweenStart[axis] = newValue;
                     }
@@ -13024,20 +13081,20 @@ window.__extends = (this && this.__extends) || (function () {
                 newValue = (axis == "x" ? this._container.x : (-this._container.y));
             return newValue;
         };
-        ScrollPane.easeFunc = function (t, d) {
-            return (t = t / d - 1) * t * t + 1;
-        };
-        ScrollPane._gestureFlag = 0;
-        ScrollPane.TWEEN_TIME_GO = 0.5;
-        ScrollPane.TWEEN_TIME_DEFAULT = 0.3;
-        ScrollPane.PULL_RATIO = 0.5;
-        ScrollPane.sHelperPoint = new cc.Vec2();
-        ScrollPane.sHelperRect = new cc.Rect();
-        ScrollPane.sEndPos = new cc.Vec2();
-        ScrollPane.sOldChange = new cc.Vec2();
         return ScrollPane;
     }(cc.Component));
     fgui.ScrollPane = ScrollPane;
+    var _gestureFlag = 0;
+    var TWEEN_TIME_GO = 0.5;
+    var TWEEN_TIME_DEFAULT = 0.3;
+    var PULL_RATIO = 0.5;
+    var s_vec2 = new cc.Vec2();
+    var s_rect = new cc.Rect();
+    var sEndPos = new cc.Vec2();
+    var sOldChange = new cc.Vec2();
+    function easeFunc(t, d) {
+        return (t = t / d - 1) * t * t + 1;
+    }
 })(fgui || (fgui = {}));
 
 (function (fgui) {
@@ -13047,12 +13104,8 @@ window.__extends = (this && this.__extends) || (function () {
             this._ownerBaseY = 0;
             this._totalTimes = 0;
             this._totalTasks = 0;
-            this._playing = false;
-            this._paused = false;
             this._options = 0;
-            this._reversed = false;
             this._totalDuration = 0;
-            this._autoPlay = false;
             this._autoPlayTimes = 1;
             this._autoPlayDelay = 0;
             this._timeScale = 1;
@@ -13117,16 +13170,16 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 else if (item.target != this._owner && item.target.parent != this._owner)
                     item.target = null;
-                if (item.target != null && item.type == TransitionActionType.Transition) {
+                if (item.target && item.type == ActionType.Transition) {
                     var trans = item.target.getTransition(item.value.transName);
                     if (trans == this)
                         trans = null;
-                    if (trans != null) {
+                    if (trans) {
                         if (item.value.playTimes == 0) {
                             var j;
                             for (j = i - 1; j >= 0; j--) {
                                 var item2 = this._items[j];
-                                if (item2.type == TransitionActionType.Transition) {
+                                if (item2.type == ActionType.Transition) {
                                     if (item2.value.trans == trans) {
                                         item2.value.stopTime = item.time - item2.time;
                                         break;
@@ -13186,18 +13239,18 @@ window.__extends = (this && this.__extends) || (function () {
                 item.target.releaseDisplayLock(item.displayLockToken);
                 item.displayLockToken = 0;
             }
-            if (item.tweener != null) {
+            if (item.tweener) {
                 item.tweener.kill(setToComplete);
                 item.tweener = null;
-                if (item.type == TransitionActionType.Shake && !setToComplete) {
+                if (item.type == ActionType.Shake && !setToComplete) {
                     item.target._gearLocked = true;
                     item.target.setPosition(item.target.x - item.value.lastOffsetX, item.target.y - item.value.lastOffsetY);
                     item.target._gearLocked = false;
                 }
             }
-            if (item.type == TransitionActionType.Transition) {
+            if (item.type == ActionType.Transition) {
                 var trans = item.value.trans;
-                if (trans != null)
+                if (trans)
                     trans.stop(setToComplete, false);
             }
         };
@@ -13206,18 +13259,18 @@ window.__extends = (this && this.__extends) || (function () {
                 return;
             this._paused = paused;
             var tweener = fgui.GTween.getTween(this);
-            if (tweener != null)
+            if (tweener)
                 tweener.setPaused(paused);
             var cnt = this._items.length;
             for (var i = 0; i < cnt; i++) {
                 var item = this._items[i];
                 if (item.target == null)
                     continue;
-                if (item.type == TransitionActionType.Transition) {
-                    if (item.value.trans != null)
+                if (item.type == ActionType.Transition) {
+                    if (item.value.trans)
                         item.value.trans.setPaused(paused);
                 }
-                else if (item.type == TransitionActionType.Animation) {
+                else if (item.type == ActionType.Animation) {
                     if (paused) {
                         item.value.flag = item.target.getProp(fgui.ObjectPropID.Playing);
                         item.target.setProp(fgui.ObjectPropID.Playing, false);
@@ -13225,7 +13278,7 @@ window.__extends = (this && this.__extends) || (function () {
                     else
                         item.target.setProp(fgui.ObjectPropID.Playing, item.value.flag);
                 }
-                if (item.tweener != null)
+                if (item.tweener)
                     item.tweener.setPaused(paused);
             }
         };
@@ -13235,13 +13288,13 @@ window.__extends = (this && this.__extends) || (function () {
             var cnt = this._items.length;
             for (var i = 0; i < cnt; i++) {
                 var item = this._items[i];
-                if (item.tweener != null) {
+                if (item.tweener) {
                     item.tweener.kill();
                     item.tweener = null;
                 }
                 item.target = null;
                 item.hook = null;
-                if (item.tweenConfig != null)
+                if (item.tweenConfig)
                     item.tweenConfig.endHook = null;
             }
             this._items.length = 0;
@@ -13265,67 +13318,67 @@ window.__extends = (this && this.__extends) || (function () {
             for (var i = 0; i < cnt; i++) {
                 var item = this._items[i];
                 if (item.label == label) {
-                    if (item.tweenConfig != null)
+                    if (item.tweenConfig)
                         value = item.tweenConfig.startValue;
                     else
                         value = item.value;
                 }
-                else if (item.tweenConfig != null && item.tweenConfig.endLabel == label) {
+                else if (item.tweenConfig && item.tweenConfig.endLabel == label) {
                     value = item.tweenConfig.endValue;
                 }
                 else
                     continue;
                 switch (item.type) {
-                    case TransitionActionType.XY:
-                    case TransitionActionType.Size:
-                    case TransitionActionType.Pivot:
-                    case TransitionActionType.Scale:
-                    case TransitionActionType.Skew:
+                    case ActionType.XY:
+                    case ActionType.Size:
+                    case ActionType.Pivot:
+                    case ActionType.Scale:
+                    case ActionType.Skew:
                         value.b1 = true;
                         value.b2 = true;
                         value.f1 = parseFloat(args[0]);
                         value.f2 = parseFloat(args[1]);
                         break;
-                    case TransitionActionType.Alpha:
+                    case ActionType.Alpha:
                         value.f1 = parseFloat(args[0]);
                         break;
-                    case TransitionActionType.Rotation:
+                    case ActionType.Rotation:
                         value.f1 = parseFloat(args[0]);
                         break;
-                    case TransitionActionType.Color:
+                    case ActionType.Color:
                         value.f1 = parseFloat(args[0]);
                         break;
-                    case TransitionActionType.Animation:
+                    case ActionType.Animation:
                         value.frame = parseInt(args[0]);
                         if (args.length > 1)
                             value.playing = args[1];
                         break;
-                    case TransitionActionType.Visible:
+                    case ActionType.Visible:
                         value.visible = args[0];
                         break;
-                    case TransitionActionType.Sound:
+                    case ActionType.Sound:
                         value.sound = args[0];
                         if (args.length > 1)
                             value.volume = parseFloat(args[1]);
                         break;
-                    case TransitionActionType.Transition:
+                    case ActionType.Transition:
                         value.transName = args[0];
                         if (args.length > 1)
                             value.playTimes = parseInt(args[1]);
                         break;
-                    case TransitionActionType.Shake:
+                    case ActionType.Shake:
                         value.amplitude = parseFloat(args[0]);
                         if (args.length > 1)
                             value.duration = parseFloat(args[1]);
                         break;
-                    case TransitionActionType.ColorFilter:
+                    case ActionType.ColorFilter:
                         value.f1 = parseFloat(args[0]);
                         value.f2 = parseFloat(args[1]);
                         value.f3 = parseFloat(args[2]);
                         value.f4 = parseFloat(args[3]);
                         break;
-                    case TransitionActionType.Text:
-                    case TransitionActionType.Icon:
+                    case ActionType.Text:
+                    case ActionType.Icon:
                         value.text = args[0];
                         break;
                 }
@@ -13339,7 +13392,7 @@ window.__extends = (this && this.__extends) || (function () {
                     item.hook = callback;
                     break;
                 }
-                else if (item.tweenConfig != null && item.tweenConfig.endLabel == label) {
+                else if (item.tweenConfig && item.tweenConfig.endLabel == label) {
                     item.tweenConfig.endHook = callback;
                     break;
                 }
@@ -13350,7 +13403,7 @@ window.__extends = (this && this.__extends) || (function () {
             for (var i = 0; i < cnt; i++) {
                 var item = this._items[i];
                 item.hook = null;
-                if (item.tweenConfig != null)
+                if (item.tweenConfig)
                     item.tweenConfig.endHook = null;
             }
         };
@@ -13368,7 +13421,7 @@ window.__extends = (this && this.__extends) || (function () {
             var cnt = this._items.length;
             for (var i = 0; i < cnt; i++) {
                 var item = this._items[i];
-                if (item.tweenConfig != null && item.label == label)
+                if (item.tweenConfig && item.label == label)
                     item.tweenConfig.duration = value;
             }
         };
@@ -13378,7 +13431,7 @@ window.__extends = (this && this.__extends) || (function () {
                 var item = this._items[i];
                 if (item.label == label)
                     return item.time;
-                else if (item.tweenConfig != null && item.tweenConfig.endLabel == label)
+                else if (item.tweenConfig && item.tweenConfig.endLabel == label)
                     return item.time + item.tweenConfig.duration;
             }
             return Number.NaN;
@@ -13394,14 +13447,14 @@ window.__extends = (this && this.__extends) || (function () {
                         var cnt = this._items.length;
                         for (var i = 0; i < cnt; i++) {
                             var item = this._items[i];
-                            if (item.tweener != null)
+                            if (item.tweener)
                                 item.tweener.setTimeScale(value);
-                            else if (item.type == TransitionActionType.Transition) {
-                                if (item.value.trans != null)
+                            else if (item.type == ActionType.Transition) {
+                                if (item.value.trans)
                                     item.value.trans.timeScale = value;
                             }
-                            else if (item.type == TransitionActionType.Animation) {
-                                if (item.target != null)
+                            else if (item.type == ActionType.Animation) {
+                                if (item.target)
                                     item.target.setProp(fgui.ObjectPropID.TimeScale, value);
                             }
                         }
@@ -13417,8 +13470,8 @@ window.__extends = (this && this.__extends) || (function () {
                 return;
             for (var i = 0; i < cnt; i++) {
                 var item = this._items[i];
-                if (item.type == TransitionActionType.XY && item.targetId == targetId) {
-                    if (item.tweenConfig != null) {
+                if (item.type == ActionType.XY && item.targetId == targetId) {
+                    if (item.tweenConfig) {
                         item.tweenConfig.startValue.f1 += dx;
                         item.tweenConfig.startValue.f2 += dy;
                         item.tweenConfig.endValue.f1 += dx;
@@ -13436,18 +13489,18 @@ window.__extends = (this && this.__extends) || (function () {
                 this.play(null, this._autoPlayTimes, this._autoPlayDelay);
         };
         Transition.prototype.onDisable = function () {
-            if ((this._options & Transition.OPTION_AUTO_STOP_DISABLED) == 0)
-                this.stop((this._options & Transition.OPTION_AUTO_STOP_AT_END) != 0 ? true : false, false);
+            if ((this._options & OPTION_AUTO_STOP_DISABLED) == 0)
+                this.stop((this._options & OPTION_AUTO_STOP_AT_END) != 0 ? true : false, false);
         };
         Transition.prototype.onDelayedPlay = function () {
             this.internalPlay();
             this._playing = this._totalTasks > 0;
             if (this._playing) {
-                if ((this._options & Transition.OPTION_IGNORE_DISPLAY_CONTROLLER) != 0) {
+                if ((this._options & OPTION_IGNORE_DISPLAY_CONTROLLER) != 0) {
                     var cnt = this._items.length;
                     for (var i = 0; i < cnt; i++) {
                         var item = this._items[i];
-                        if (item.target != null && item.target != this._owner)
+                        if (item.target && item.target != this._owner)
                             item.displayLockToken = item.target.addDisplayLock();
                     }
                 }
@@ -13471,7 +13524,7 @@ window.__extends = (this && this.__extends) || (function () {
                     item = this._items[i];
                     if (item.target == null)
                         continue;
-                    if (item.type == TransitionActionType.Animation && this._startTime != 0 && item.time <= this._startTime) {
+                    if (item.type == ActionType.Animation && this._startTime != 0 && item.time <= this._startTime) {
                         needSkipAnimations = true;
                         item.value.flag = false;
                     }
@@ -13492,7 +13545,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         Transition.prototype.playItem = function (item) {
             var time;
-            if (item.tweenConfig != null) {
+            if (item.tweenConfig) {
                 if (this._reversed)
                     time = (this._totalDuration - item.time - item.tweenConfig.duration);
                 else
@@ -13511,20 +13564,20 @@ window.__extends = (this && this.__extends) || (function () {
                     item.value.b1 = startValue.b1 || endValue.b1;
                     item.value.b2 = startValue.b2 || endValue.b2;
                     switch (item.type) {
-                        case TransitionActionType.XY:
-                        case TransitionActionType.Size:
-                        case TransitionActionType.Scale:
-                        case TransitionActionType.Skew:
+                        case ActionType.XY:
+                        case ActionType.Size:
+                        case ActionType.Scale:
+                        case ActionType.Skew:
                             item.tweener = fgui.GTween.to2(startValue.f1, startValue.f2, endValue.f1, endValue.f2, item.tweenConfig.duration);
                             break;
-                        case TransitionActionType.Alpha:
-                        case TransitionActionType.Rotation:
+                        case ActionType.Alpha:
+                        case ActionType.Rotation:
                             item.tweener = fgui.GTween.to(startValue.f1, endValue.f1, item.tweenConfig.duration);
                             break;
-                        case TransitionActionType.Color:
+                        case ActionType.Color:
                             item.tweener = fgui.GTween.toColor(startValue.f1, endValue.f1, item.tweenConfig.duration);
                             break;
-                        case TransitionActionType.ColorFilter:
+                        case ActionType.ColorFilter:
                             item.tweener = fgui.GTween.to4(startValue.f1, startValue.f2, startValue.f3, startValue.f4, endValue.f1, endValue.f2, endValue.f3, endValue.f4, item.tweenConfig.duration);
                             break;
                     }
@@ -13541,7 +13594,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._totalTasks++;
                 }
             }
-            else if (item.type == TransitionActionType.Shake) {
+            else if (item.type == ActionType.Shake) {
                 if (this._reversed)
                     time = (this._totalDuration - item.time - item.value.duration);
                 else
@@ -13575,7 +13628,7 @@ window.__extends = (this && this.__extends) || (function () {
                         .onComplete(this.onDelayedPlayItem, this);
                 }
             }
-            if (item.tweener != null)
+            if (item.tweener)
                 item.tweener.seek(this._startTime);
         };
         Transition.prototype.skipAnimations = function () {
@@ -13588,7 +13641,7 @@ window.__extends = (this && this.__extends) || (function () {
             var cnt = this._items.length;
             for (var i = 0; i < cnt; i++) {
                 item = this._items[i];
-                if (item.type != TransitionActionType.Animation || item.time > this._startTime)
+                if (item.type != ActionType.Animation || item.time > this._startTime)
                     continue;
                 value = item.value;
                 if (value.flag)
@@ -13599,7 +13652,7 @@ window.__extends = (this && this.__extends) || (function () {
                 playTotalTime = 0;
                 for (var j = i; j < cnt; j++) {
                     item = this._items[j];
-                    if (item.type != TransitionActionType.Animation || item.target != target || item.time > this._startTime)
+                    if (item.type != ActionType.Animation || item.target != target || item.time > this._startTime)
                         continue;
                     value = item.value;
                     value.flag = true;
@@ -13642,7 +13695,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         Transition.prototype.onTweenStart = function (tweener) {
             var item = tweener.target;
-            if (item.type == TransitionActionType.XY || item.type == TransitionActionType.Size) {
+            if (item.type == ActionType.XY || item.type == ActionType.Size) {
                 var startValue;
                 var endValue;
                 if (this._reversed) {
@@ -13653,7 +13706,7 @@ window.__extends = (this && this.__extends) || (function () {
                     startValue = item.tweenConfig.startValue;
                     endValue = item.tweenConfig.endValue;
                 }
-                if (item.type == TransitionActionType.XY) {
+                if (item.type == ActionType.XY) {
                     if (item.target != this._owner) {
                         if (!startValue.b1)
                             tweener.startValue.x = item.target.x;
@@ -13703,10 +13756,10 @@ window.__extends = (this && this.__extends) || (function () {
         Transition.prototype.onTweenUpdate = function (tweener) {
             var item = tweener.target;
             switch (item.type) {
-                case TransitionActionType.XY:
-                case TransitionActionType.Size:
-                case TransitionActionType.Scale:
-                case TransitionActionType.Skew:
+                case ActionType.XY:
+                case ActionType.Size:
+                case ActionType.Scale:
+                case ActionType.Skew:
                     item.value.f1 = tweener.value.x;
                     item.value.f2 = tweener.value.y;
                     if (item.tweenConfig.path) {
@@ -13714,20 +13767,20 @@ window.__extends = (this && this.__extends) || (function () {
                         item.value.f2 += tweener.startValue.y;
                     }
                     break;
-                case TransitionActionType.Alpha:
-                case TransitionActionType.Rotation:
+                case ActionType.Alpha:
+                case ActionType.Rotation:
                     item.value.f1 = tweener.value.x;
                     break;
-                case TransitionActionType.Color:
+                case ActionType.Color:
                     item.value.f1 = tweener.value.color;
                     break;
-                case TransitionActionType.ColorFilter:
+                case ActionType.ColorFilter:
                     item.value.f1 = tweener.value.x;
                     item.value.f2 = tweener.value.y;
                     item.value.f3 = tweener.value.z;
                     item.value.f4 = tweener.value.w;
                     break;
-                case TransitionActionType.Shake:
+                case ActionType.Shake:
                     item.value.offsetX = tweener.deltaValue.x;
                     item.value.offsetY = tweener.deltaValue.y;
                     break;
@@ -13748,7 +13801,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         Transition.prototype.callHook = function (item, tweenEnd) {
             if (tweenEnd) {
-                if (item.tweenConfig != null && item.tweenConfig.endHook != null)
+                if (item.tweenConfig && item.tweenConfig.endHook != null)
                     item.tweenConfig.endHook(item.label);
             }
             else {
@@ -13770,7 +13823,7 @@ window.__extends = (this && this.__extends) || (function () {
                         var cnt = this._items.length;
                         for (var i = 0; i < cnt; i++) {
                             var item = this._items[i];
-                            if (item.target != null && item.displayLockToken != 0) {
+                            if (item.target && item.displayLockToken != 0) {
                                 item.target.releaseDisplayLock(item.displayLockToken);
                                 item.displayLockToken = 0;
                             }
@@ -13788,7 +13841,7 @@ window.__extends = (this && this.__extends) || (function () {
             item.target._gearLocked = true;
             var value = item.value;
             switch (item.type) {
-                case TransitionActionType.XY:
+                case ActionType.XY:
                     if (item.target == this._owner) {
                         if (value.b1 && value.b2)
                             item.target.setPosition(value.f1 + this._ownerBaseX, value.f2 + this._ownerBaseY);
@@ -13816,44 +13869,44 @@ window.__extends = (this && this.__extends) || (function () {
                         }
                     }
                     break;
-                case TransitionActionType.Size:
+                case ActionType.Size:
                     if (!value.b1)
                         value.f1 = item.target.width;
                     if (!value.b2)
                         value.f2 = item.target.height;
                     item.target.setSize(value.f1, value.f2);
                     break;
-                case TransitionActionType.Pivot:
+                case ActionType.Pivot:
                     item.target.setPivot(value.f1, value.f2, item.target.pivotAsAnchor);
                     break;
-                case TransitionActionType.Alpha:
+                case ActionType.Alpha:
                     item.target.alpha = value.f1;
                     break;
-                case TransitionActionType.Rotation:
+                case ActionType.Rotation:
                     item.target.rotation = value.f1;
                     break;
-                case TransitionActionType.Scale:
+                case ActionType.Scale:
                     item.target.setScale(value.f1, value.f2);
                     break;
-                case TransitionActionType.Skew:
+                case ActionType.Skew:
                     item.target.setSkew(value.f1, value.f2);
                     break;
-                case TransitionActionType.Color:
+                case ActionType.Color:
                     item.target.setProp(fgui.ObjectPropID.Color, value.f1);
                     break;
-                case TransitionActionType.Animation:
+                case ActionType.Animation:
                     if (value.frame >= 0)
                         item.target.setProp(fgui.ObjectPropID.Frame, value.frame);
                     item.target.setProp(fgui.ObjectPropID.Playing, value.playing);
                     item.target.setProp(fgui.ObjectPropID.TimeScale, this._timeScale);
                     break;
-                case TransitionActionType.Visible:
+                case ActionType.Visible:
                     item.target.visible = value.visible;
                     break;
-                case TransitionActionType.Transition:
+                case ActionType.Transition:
                     if (this._playing) {
                         var trans = value.trans;
-                        if (trans != null) {
+                        if (trans) {
                             this._totalTasks++;
                             var startTime = this._startTime > item.time ? (this._startTime - item.time) : 0;
                             var endTime = this._endTime >= 0 ? (this._endTime - item.time) : -1;
@@ -13864,7 +13917,7 @@ window.__extends = (this && this.__extends) || (function () {
                         }
                     }
                     break;
-                case TransitionActionType.Sound:
+                case ActionType.Sound:
                     if (this._playing && item.time >= this._startTime) {
                         if (value.audioClip == null) {
                             var pi = fgui.UIPackage.getItemByURL(value.sound);
@@ -13875,19 +13928,19 @@ window.__extends = (this && this.__extends) || (function () {
                             fgui.GRoot.inst.playOneShotSound(value.audioClip, value.volume);
                     }
                     break;
-                case TransitionActionType.Shake:
+                case ActionType.Shake:
                     item.target.setPosition(item.target.x - value.lastOffsetX + value.offsetX, item.target.y - value.lastOffsetY + value.offsetY);
                     value.lastOffsetX = value.offsetX;
                     value.lastOffsetY = value.offsetY;
                     break;
-                case TransitionActionType.ColorFilter:
+                case ActionType.ColorFilter:
                     {
                         break;
                     }
-                case TransitionActionType.Text:
+                case ActionType.Text:
                     item.target.text = value.text;
                     break;
-                case TransitionActionType.Icon:
+                case ActionType.Icon:
                     item.target.icon = value.text;
                     break;
             }
@@ -13904,7 +13957,7 @@ window.__extends = (this && this.__extends) || (function () {
                 var dataLen = buffer.readShort();
                 var curPos = buffer.position;
                 buffer.seek(curPos, 0);
-                var item = new TransitionItem(buffer.readByte());
+                var item = new Item(buffer.readByte());
                 this._items[i] = item;
                 item.time = buffer.readFloat();
                 var targetId = buffer.readShort();
@@ -13961,172 +14014,100 @@ window.__extends = (this && this.__extends) || (function () {
         };
         Transition.prototype.decodeValue = function (item, buffer, value) {
             switch (item.type) {
-                case TransitionActionType.XY:
-                case TransitionActionType.Size:
-                case TransitionActionType.Pivot:
-                case TransitionActionType.Skew:
+                case ActionType.XY:
+                case ActionType.Size:
+                case ActionType.Pivot:
+                case ActionType.Skew:
                     value.b1 = buffer.readBool();
                     value.b2 = buffer.readBool();
                     value.f1 = buffer.readFloat();
                     value.f2 = buffer.readFloat();
-                    if (buffer.version >= 2 && item.type == TransitionActionType.XY)
+                    if (buffer.version >= 2 && item.type == ActionType.XY)
                         value.b3 = buffer.readBool();
                     break;
-                case TransitionActionType.Alpha:
-                case TransitionActionType.Rotation:
+                case ActionType.Alpha:
+                case ActionType.Rotation:
                     value.f1 = buffer.readFloat();
                     break;
-                case TransitionActionType.Scale:
+                case ActionType.Scale:
                     value.f1 = buffer.readFloat();
                     value.f2 = buffer.readFloat();
                     break;
-                case TransitionActionType.Color:
-                    value.f1 = buffer.readColor();
+                case ActionType.Color:
+                    value.f1 = buffer.readColor().toRGBValue();
                     break;
-                case TransitionActionType.Animation:
+                case ActionType.Animation:
                     value.playing = buffer.readBool();
                     value.frame = buffer.readInt();
                     break;
-                case TransitionActionType.Visible:
+                case ActionType.Visible:
                     value.visible = buffer.readBool();
                     break;
-                case TransitionActionType.Sound:
+                case ActionType.Sound:
                     value.sound = buffer.readS();
                     value.volume = buffer.readFloat();
                     break;
-                case TransitionActionType.Transition:
+                case ActionType.Transition:
                     value.transName = buffer.readS();
                     value.playTimes = buffer.readInt();
                     break;
-                case TransitionActionType.Shake:
+                case ActionType.Shake:
                     value.amplitude = buffer.readFloat();
                     value.duration = buffer.readFloat();
                     break;
-                case TransitionActionType.ColorFilter:
+                case ActionType.ColorFilter:
                     value.f1 = buffer.readFloat();
                     value.f2 = buffer.readFloat();
                     value.f3 = buffer.readFloat();
                     value.f4 = buffer.readFloat();
                     break;
-                case TransitionActionType.Text:
-                case TransitionActionType.Icon:
+                case ActionType.Text:
+                case ActionType.Icon:
                     value.text = buffer.readS();
                     break;
             }
         };
-        Transition.OPTION_IGNORE_DISPLAY_CONTROLLER = 1;
-        Transition.OPTION_AUTO_STOP_DISABLED = 2;
-        Transition.OPTION_AUTO_STOP_AT_END = 4;
         return Transition;
     }());
     fgui.Transition = Transition;
-    var TransitionActionType = (function () {
-        function TransitionActionType() {
-        }
-        TransitionActionType.XY = 0;
-        TransitionActionType.Size = 1;
-        TransitionActionType.Scale = 2;
-        TransitionActionType.Pivot = 3;
-        TransitionActionType.Alpha = 4;
-        TransitionActionType.Rotation = 5;
-        TransitionActionType.Color = 6;
-        TransitionActionType.Animation = 7;
-        TransitionActionType.Visible = 8;
-        TransitionActionType.Sound = 9;
-        TransitionActionType.Transition = 10;
-        TransitionActionType.Shake = 11;
-        TransitionActionType.ColorFilter = 12;
-        TransitionActionType.Skew = 13;
-        TransitionActionType.Text = 14;
-        TransitionActionType.Icon = 15;
-        TransitionActionType.Unknown = 16;
-        return TransitionActionType;
-    }());
-    var TransitionItem = (function () {
-        function TransitionItem(type) {
+    var OPTION_IGNORE_DISPLAY_CONTROLLER = 1;
+    var OPTION_AUTO_STOP_DISABLED = 2;
+    var OPTION_AUTO_STOP_AT_END = 4;
+    var ActionType;
+    (function (ActionType) {
+        ActionType[ActionType["XY"] = 0] = "XY";
+        ActionType[ActionType["Size"] = 1] = "Size";
+        ActionType[ActionType["Scale"] = 2] = "Scale";
+        ActionType[ActionType["Pivot"] = 3] = "Pivot";
+        ActionType[ActionType["Alpha"] = 4] = "Alpha";
+        ActionType[ActionType["Rotation"] = 5] = "Rotation";
+        ActionType[ActionType["Color"] = 6] = "Color";
+        ActionType[ActionType["Animation"] = 7] = "Animation";
+        ActionType[ActionType["Visible"] = 8] = "Visible";
+        ActionType[ActionType["Sound"] = 9] = "Sound";
+        ActionType[ActionType["Transition"] = 10] = "Transition";
+        ActionType[ActionType["Shake"] = 11] = "Shake";
+        ActionType[ActionType["ColorFilter"] = 12] = "ColorFilter";
+        ActionType[ActionType["Skew"] = 13] = "Skew";
+        ActionType[ActionType["Text"] = 14] = "Text";
+        ActionType[ActionType["Icon"] = 15] = "Icon";
+        ActionType[ActionType["Unknown"] = 16] = "Unknown";
+    })(ActionType || (ActionType = {}));
+    var Item = (function () {
+        function Item(type) {
             this.type = type;
-            switch (type) {
-                case TransitionActionType.XY:
-                case TransitionActionType.Size:
-                case TransitionActionType.Scale:
-                case TransitionActionType.Pivot:
-                case TransitionActionType.Skew:
-                case TransitionActionType.Alpha:
-                case TransitionActionType.Rotation:
-                case TransitionActionType.Color:
-                case TransitionActionType.ColorFilter:
-                    this.value = new TValue();
-                    break;
-                case TransitionActionType.Animation:
-                    this.value = new TValue_Animation();
-                    break;
-                case TransitionActionType.Shake:
-                    this.value = new TValue_Shake();
-                    break;
-                case TransitionActionType.Sound:
-                    this.value = new TValue_Sound();
-                    break;
-                case TransitionActionType.Transition:
-                    this.value = new TValue_Transition();
-                    break;
-                case TransitionActionType.Visible:
-                    this.value = new TValue_Visible();
-                    break;
-                case TransitionActionType.Text:
-                case TransitionActionType.Icon:
-                    this.value = new TValue_Text();
-                    break;
-            }
+            this.value = {};
+            this.displayLockToken = 0;
         }
-        return TransitionItem;
+        return Item;
     }());
     var TweenConfig = (function () {
         function TweenConfig() {
-            this.duration = 0;
-            this.repeat = 0;
-            this.yoyo = false;
             this.easeType = fgui.EaseType.QuadOut;
-            this.startValue = new TValue();
-            this.endValue = new TValue();
+            this.startValue = { b1: true, b2: true };
+            this.endValue = { b1: true, b2: true };
         }
         return TweenConfig;
-    }());
-    var TValue_Visible = (function () {
-        function TValue_Visible() {
-        }
-        return TValue_Visible;
-    }());
-    var TValue_Animation = (function () {
-        function TValue_Animation() {
-        }
-        return TValue_Animation;
-    }());
-    var TValue_Sound = (function () {
-        function TValue_Sound() {
-        }
-        return TValue_Sound;
-    }());
-    var TValue_Transition = (function () {
-        function TValue_Transition() {
-        }
-        return TValue_Transition;
-    }());
-    var TValue_Shake = (function () {
-        function TValue_Shake() {
-        }
-        return TValue_Shake;
-    }());
-    var TValue_Text = (function () {
-        function TValue_Text() {
-        }
-        return TValue_Text;
-    }());
-    var TValue = (function () {
-        function TValue() {
-            this.f1 = this.f2 = this.f3 = this.f4 = 0;
-            this.b1 = this.b2 = true;
-        }
-        return TValue;
     }());
 })(fgui || (fgui = {}));
 
@@ -14135,7 +14116,8 @@ window.__extends = (this && this.__extends) || (function () {
         function TranslationHelper() {
         }
         TranslationHelper.loadFromXML = function (source) {
-            TranslationHelper.strings = {};
+            var strings = {};
+            TranslationHelper.strings = strings;
             var xml = new cc["SAXParser"]().parse(source).documentElement;
             var nodes = xml.childNodes;
             var length1 = nodes.length;
@@ -14149,10 +14131,10 @@ window.__extends = (this && this.__extends) || (function () {
                         continue;
                     var key2 = key.substr(0, i);
                     var key3 = key.substr(i + 1);
-                    var col = TranslationHelper.strings[key2];
+                    var col = strings[key2];
                     if (!col) {
                         col = {};
-                        TranslationHelper.strings[key2] = col;
+                        strings[key2] = col;
                     }
                     col[key3] = text;
                 }
@@ -14326,7 +14308,6 @@ window.__extends = (this && this.__extends) || (function () {
                 buffer.position = curPos + dataLen;
             }
         };
-        TranslationHelper.strings = null;
         return TranslationHelper;
     }());
     fgui.TranslationHelper = TranslationHelper;
@@ -14355,46 +14336,34 @@ window.__extends = (this && this.__extends) || (function () {
         return UIConfig;
     }());
     fgui.UIConfig = UIConfig;
-    var _flag = false;
-    fgui.addLoadHandler = function (ext) {
-        var _a, _b;
-        if (_flag)
-            return;
-        _flag = true;
-        if (!ext)
-            ext = "bin";
-        cc.loader.addDownloadHandlers((_a = {}, _a[ext] = cc.loader.downloader["extMap"].binary, _a));
-        cc.loader.addLoadHandlers((_b = {},
-            _b[ext] = function (item, callback) {
-                item._owner.rawBuffer = item.content;
-                return item.content;
-            },
-            _b));
-    };
+    function addLoadHandler(ext) {
+    }
+    fgui.addLoadHandler = addLoadHandler;
+    ;
     var _fontRegistry = {};
-    fgui.registerFont = function (name, font) {
+    function registerFont(name, font) {
         if (font instanceof cc.Font)
             _fontRegistry[name] = font;
         else
             _fontRegistry[name] = cc.loader.getRes(name, cc.Font);
-    };
-    fgui.getFontByName = function (name) {
+    }
+    fgui.registerFont = registerFont;
+    ;
+    function getFontByName(name) {
         return _fontRegistry[name];
-    };
+    }
+    fgui.getFontByName = getFontByName;
 })(fgui || (fgui = {}));
 
 (function (fgui) {
     var UIObjectFactory = (function () {
         function UIObjectFactory() {
         }
-        UIObjectFactory.setPackageItemExtension = function (url, type) {
-            UIObjectFactory.setExtension(url, type);
-        };
         UIObjectFactory.setExtension = function (url, type) {
             if (url == null)
-                throw "Invaild url: " + url;
+                throw new Error("Invaild url: " + url);
             var pi = fgui.UIPackage.getItemByURL(url);
-            if (pi != null)
+            if (pi)
                 pi.extensionType = type;
             UIObjectFactory.extensions[url] = type;
         };
@@ -14402,71 +14371,75 @@ window.__extends = (this && this.__extends) || (function () {
             UIObjectFactory.loaderType = type;
         };
         UIObjectFactory.resolveExtension = function (pi) {
-            pi.extensionType = UIObjectFactory.extensions["ui://" + pi.owner.id + pi.id];
-            if (!pi.extensionType)
-                pi.extensionType = UIObjectFactory.extensions["ui://" + pi.owner.name + "/" + pi.name];
+            var extensionType = UIObjectFactory.extensions["ui://" + pi.owner.id + pi.id];
+            if (!extensionType)
+                extensionType = UIObjectFactory.extensions["ui://" + pi.owner.name + "/" + pi.name];
+            if (extensionType)
+                pi.extensionType = extensionType;
         };
-        UIObjectFactory.newObject = function (pi, userClass) {
+        UIObjectFactory.newObject = function (type, userClass) {
             var obj;
-            if (pi.type == fgui.PackageItemType.Component) {
-                if (userClass)
-                    obj = new userClass();
-                else if (pi.extensionType)
-                    obj = new pi.extensionType();
-                else
-                    obj = UIObjectFactory.newObject2(pi.objectType);
-            }
-            else
-                obj = UIObjectFactory.newObject2(pi.objectType);
-            if (obj)
-                obj.packageItem = pi;
-            return obj;
-        };
-        UIObjectFactory.newObject2 = function (type) {
             UIObjectFactory.counter++;
-            switch (type) {
-                case fgui.ObjectType.Image:
-                    return new fgui.GImage();
-                case fgui.ObjectType.MovieClip:
-                    return new fgui.GMovieClip();
-                case fgui.ObjectType.Component:
-                    return new fgui.GComponent();
-                case fgui.ObjectType.Text:
-                    return new fgui.GTextField();
-                case fgui.ObjectType.RichText:
-                    return new fgui.GRichTextField();
-                case fgui.ObjectType.InputText:
-                    return new fgui.GTextInput();
-                case fgui.ObjectType.Group:
-                    return new fgui.GGroup();
-                case fgui.ObjectType.List:
-                    return new fgui.GList();
-                case fgui.ObjectType.Graph:
-                    return new fgui.GGraph();
-                case fgui.ObjectType.Loader:
-                    if (UIObjectFactory.loaderType != null)
-                        return new UIObjectFactory.loaderType();
-                    else
-                        return new fgui.GLoader();
-                case fgui.ObjectType.Button:
-                    return new fgui.GButton();
-                case fgui.ObjectType.Label:
-                    return new fgui.GLabel();
-                case fgui.ObjectType.ProgressBar:
-                    return new fgui.GProgressBar();
-                case fgui.ObjectType.Slider:
-                    return new fgui.GSlider();
-                case fgui.ObjectType.ScrollBar:
-                    return new fgui.GScrollBar();
-                case fgui.ObjectType.ComboBox:
-                    return new fgui.GComboBox();
-                case fgui.ObjectType.Tree:
-                    return new fgui.GTree();
-                case fgui.ObjectType.Loader3D:
-                    return new fgui.GLoader3D();
-                default:
-                    return null;
+            if (typeof type === 'number') {
+                switch (type) {
+                    case fgui.ObjectType.Image:
+                        return new fgui.GImage();
+                    case fgui.ObjectType.MovieClip:
+                        return new fgui.GMovieClip();
+                    case fgui.ObjectType.Component:
+                        return new fgui.GComponent();
+                    case fgui.ObjectType.Text:
+                        return new fgui.GTextField();
+                    case fgui.ObjectType.RichText:
+                        return new fgui.GRichTextField();
+                    case fgui.ObjectType.InputText:
+                        return new fgui.GTextInput();
+                    case fgui.ObjectType.Group:
+                        return new fgui.GGroup();
+                    case fgui.ObjectType.List:
+                        return new fgui.GList();
+                    case fgui.ObjectType.Graph:
+                        return new fgui.GGraph();
+                    case fgui.ObjectType.Loader:
+                        if (UIObjectFactory.loaderType)
+                            return new UIObjectFactory.loaderType();
+                        else
+                            return new fgui.GLoader();
+                    case fgui.ObjectType.Button:
+                        return new fgui.GButton();
+                    case fgui.ObjectType.Label:
+                        return new fgui.GLabel();
+                    case fgui.ObjectType.ProgressBar:
+                        return new fgui.GProgressBar();
+                    case fgui.ObjectType.Slider:
+                        return new fgui.GSlider();
+                    case fgui.ObjectType.ScrollBar:
+                        return new fgui.GScrollBar();
+                    case fgui.ObjectType.ComboBox:
+                        return new fgui.GComboBox();
+                    case fgui.ObjectType.Tree:
+                        return new fgui.GTree();
+                    case fgui.ObjectType.Loader3D:
+                        return new fgui.GLoader3D();
+                    default:
+                        return null;
+                }
             }
+            else {
+                if (type.type == fgui.PackageItemType.Component) {
+                    if (userClass)
+                        obj = new userClass();
+                    else if (type.extensionType)
+                        obj = new type.extensionType();
+                    else
+                        obj = UIObjectFactory.newObject(type.objectType);
+                }
+                else
+                    obj = UIObjectFactory.newObject(type.objectType);
+                if (obj)
+                    obj.packageItem = type;
+            }
+            return obj;
         };
         UIObjectFactory.counter = 0;
         UIObjectFactory.extensions = {};
@@ -14476,6 +14449,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
+    var _a;
     var UIPackage = (function () {
         function UIPackage() {
             this._items = new Array();
@@ -14514,46 +14488,94 @@ window.__extends = (this && this.__extends) || (function () {
         UIPackage.getByName = function (name) {
             return UIPackage._instByName[name];
         };
-        UIPackage.addPackage = function (url) {
-            var pkg = UIPackage._instById[url];
+        UIPackage.addPackage = function (path) {
+            var pkg = UIPackage._instById[path];
             if (pkg)
                 return pkg;
-            var asset = cc.loader.getRes(url);
+            var asset = cc.resources.get(path, cc.BufferAsset);
             if (!asset)
-                throw "Resource '" + url + "' not ready";
-            if (!asset.rawBuffer)
-                throw "Missing asset data. Call UIConfig.registerLoader first!";
+                throw "Resource '" + path + "' not ready";
+            if (!asset._buffer)
+                throw "Missing asset data.";
             pkg = new UIPackage();
-            pkg.loadPackage(new fgui.ByteBuffer(asset.rawBuffer), url);
+            pkg._bundle = cc.resources;
+            pkg.loadPackage(new fgui.ByteBuffer(asset._buffer), path);
             UIPackage._instById[pkg.id] = pkg;
             UIPackage._instByName[pkg.name] = pkg;
-            UIPackage._instById[pkg._url] = pkg;
+            UIPackage._instById[pkg._path] = pkg;
             return pkg;
         };
-        UIPackage.loadPackage = function (url, completeCallback) {
-            cc.loader.loadRes(url, function (err, asset) {
+        UIPackage.loadPackage = function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            var path;
+            var onProgress;
+            var onComplete;
+            var bundle;
+            if (args[0] instanceof cc.AssetManager.Bundle) {
+                bundle = args[0];
+                path = args[1];
+                if (args.length > 3) {
+                    onProgress = args[2];
+                    onComplete = args[3];
+                }
+                else
+                    onComplete = args[2];
+            }
+            else {
+                path = args[0];
+                if (args.length > 2) {
+                    onProgress = args[1];
+                    onComplete = args[2];
+                }
+                else
+                    onComplete = args[1];
+            }
+            bundle = bundle || cc.resources;
+            bundle.load(path, cc.BufferAsset, onProgress, function (err, asset) {
                 if (err) {
-                    completeCallback(err);
+                    if (onComplete != null)
+                        onComplete(err, null);
                     return;
                 }
-                if (!asset.rawBuffer)
-                    throw "Missing asset data. Call UIConfig.registerLoader first!";
                 var pkg = new UIPackage();
-                pkg.loadPackage(new fgui.ByteBuffer(asset.rawBuffer), url);
+                pkg._bundle = bundle;
+                pkg.loadPackage(new fgui.ByteBuffer(asset._buffer), path);
                 var cnt = pkg._items.length;
                 var urls = [];
+                var types = [];
                 for (var i = 0; i < cnt; i++) {
                     var pi = pkg._items[i];
-                    if (pi.type == fgui.PackageItemType.Atlas || pi.type == fgui.PackageItemType.Sound)
+                    if (pi.type == fgui.PackageItemType.Atlas || pi.type == fgui.PackageItemType.Sound) {
+                        var assetType = ItemTypeToAssetType[pi.type];
                         urls.push(pi.file);
+                        types.push(assetType);
+                    }
                 }
-                cc.loader.loadResArray(urls, function (err, assets) {
-                    if (!err) {
+                var total = urls.length;
+                var lastErr;
+                var taskComplete = function (err) {
+                    total--;
+                    if (err)
+                        lastErr = err;
+                    if (total <= 0) {
                         UIPackage._instById[pkg.id] = pkg;
                         UIPackage._instByName[pkg.name] = pkg;
+                        if (pkg._path)
+                            UIPackage._instByName[pkg._path] = pkg;
+                        if (onComplete != null)
+                            onComplete(lastErr, pkg);
                     }
-                    completeCallback(err);
-                });
+                };
+                if (total > 0) {
+                    urls.forEach(function (url, index) {
+                        bundle.load(url, types[index], onProgress, taskComplete);
+                    });
+                }
+                else
+                    taskComplete();
             });
         };
         UIPackage.removePackage = function (packageIdOrName) {
@@ -14564,9 +14586,9 @@ window.__extends = (this && this.__extends) || (function () {
                 throw "No package found: " + packageIdOrName;
             pkg.dispose();
             delete UIPackage._instById[pkg.id];
-            if (pkg._url != null)
-                delete UIPackage._instById[pkg._url];
             delete UIPackage._instByName[pkg.name];
+            if (pkg._path)
+                delete UIPackage._instById[pkg._path];
         };
         UIPackage.createObject = function (pkgName, resName, userClass) {
             var pkg = UIPackage.getByName(pkgName);
@@ -14632,10 +14654,10 @@ window.__extends = (this && this.__extends) || (function () {
         UIPackage.setStringsSource = function (source) {
             fgui.TranslationHelper.loadFromXML(source);
         };
-        UIPackage.prototype.loadPackage = function (buffer, url) {
+        UIPackage.prototype.loadPackage = function (buffer, path) {
             if (buffer.readUint() != 0x46475549)
-                throw "FairyGUI: old package format found in '" + url + "'";
-            this._url = url;
+                throw "FairyGUI: old package format found in '" + path + "'";
+            this._path = path;
             buffer.version = buffer.readInt();
             var ver2 = buffer.version >= 2;
             var compressed = buffer.readBool();
@@ -14677,7 +14699,9 @@ window.__extends = (this && this.__extends) || (function () {
             }
             buffer.seek(indexTablePos, 1);
             var pi;
-            url = url + "_";
+            var pos = path.indexOf('/');
+            var shortPath = pos == -1 ? path : path.substr(0, pos + 1);
+            path = path + "_";
             cnt = buffer.readShort();
             for (i = 0; i < cnt; i++) {
                 nextPos = buffer.readInt();
@@ -14737,7 +14761,16 @@ window.__extends = (this && this.__extends) || (function () {
                     case fgui.PackageItemType.Sound:
                     case fgui.PackageItemType.Misc:
                         {
-                            pi.file = url + cc.path.mainFileName(pi.file);
+                            pi.file = path + cc.path.mainFileName(pi.file);
+                            break;
+                        }
+                    case fgui.PackageItemType.Spine:
+                    case fgui.PackageItemType.DragonBones:
+                        {
+                            pi.file = shortPath + cc.path.mainFileName(pi.file);
+                            pi.skeletonAnchor = new cc.Vec2();
+                            pi.skeletonAnchor.x = buffer.readFloat();
+                            pi.skeletonAnchor.y = buffer.readFloat();
                             break;
                         }
                 }
@@ -14769,12 +14802,12 @@ window.__extends = (this && this.__extends) || (function () {
                 nextPos += buffer.position;
                 var itemId = buffer.readS();
                 pi = this._itemsById[buffer.readS()];
-                var sprite = new AtlasSprite();
-                sprite.atlas = pi;
-                sprite.rect.x = buffer.readInt();
-                sprite.rect.y = buffer.readInt();
-                sprite.rect.width = buffer.readInt();
-                sprite.rect.height = buffer.readInt();
+                var rect = new cc.Rect();
+                rect.x = buffer.readInt();
+                rect.y = buffer.readInt();
+                rect.width = buffer.readInt();
+                rect.height = buffer.readInt();
+                var sprite = { atlas: pi, rect: rect, offset: new cc.Vec2(), originalSize: new cc.Size(0, 0) };
                 sprite.rotated = buffer.readBool();
                 if (ver2 && buffer.readBool()) {
                     sprite.offset.x = buffer.readInt();
@@ -14806,7 +14839,7 @@ window.__extends = (this && this.__extends) || (function () {
             for (var i = 0; i < cnt; i++) {
                 var pi = this._items[i];
                 if (pi.asset)
-                    cc.loader.releaseAsset(pi.asset);
+                    cc.assetManager.releaseAsset(pi.asset);
             }
         };
         Object.defineProperty(UIPackage.prototype, "id", {
@@ -14823,9 +14856,16 @@ window.__extends = (this && this.__extends) || (function () {
             enumerable: false,
             configurable: true
         });
-        Object.defineProperty(UIPackage.prototype, "url", {
+        Object.defineProperty(UIPackage.prototype, "path", {
             get: function () {
-                return this._url;
+                return this._path;
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(UIPackage.prototype, "dependencies", {
+            get: function () {
+                return this._dependencies;
             },
             enumerable: false,
             configurable: true
@@ -14859,15 +14899,16 @@ window.__extends = (this && this.__extends) || (function () {
             }
             return this.getItemAsset(pi);
         };
-        UIPackage.prototype.getItemAsset = function (item) {
+        UIPackage.prototype.getItemAsset = function (item, onComplete) {
+            var _this = this;
             switch (item.type) {
                 case fgui.PackageItemType.Image:
                     if (!item.decoded) {
                         item.decoded = true;
                         var sprite = this._sprites[item.id];
-                        if (sprite != null) {
+                        if (sprite) {
                             var atlasTexture = this.getItemAsset(sprite.atlas);
-                            if (atlasTexture != null) {
+                            if (atlasTexture) {
                                 var sf = new cc.SpriteFrame(atlasTexture, sprite.rect, sprite.rotated, new cc.Vec2(sprite.offset.x - (sprite.originalSize.width - sprite.rect.width) / 2, -(sprite.offset.y - (sprite.originalSize.height - sprite.rect.height) / 2)), sprite.originalSize);
                                 if (item.scale9Grid) {
                                     sf.insetLeft = item.scale9Grid.x;
@@ -14879,43 +14920,64 @@ window.__extends = (this && this.__extends) || (function () {
                             }
                         }
                     }
-                    return item.asset;
+                    break;
                 case fgui.PackageItemType.Atlas:
-                    if (!item.decoded) {
-                        item.decoded = true;
-                        item.asset = cc.loader.getRes(item.file);
-                        if (!item.asset)
-                            console.log("Resource '" + item.file + "' not found, please check default.res.json!");
-                    }
-                    return item.asset;
                 case fgui.PackageItemType.Sound:
                     if (!item.decoded) {
                         item.decoded = true;
-                        item.asset = cc.loader.getRes(item.file);
+                        item.asset = this._bundle.get(item.file, ItemTypeToAssetType[item.type]);
                         if (!item.asset)
-                            console.log("Resource '" + item.file + "' not found, please check default.res.json!");
+                            console.log("Resource '" + item.file + "' not found");
                     }
-                    return item.asset;
+                    break;
+                case fgui.PackageItemType.Spine:
+                    if (!item.decoded && !item.loading) {
+                        item.loading = true;
+                        this._bundle.load(item.file, sp.SkeletonData, function (err, asset) {
+                            item.decoded = true;
+                            item.asset = asset;
+                            onComplete(err, item);
+                        });
+                    }
+                    break;
+                case fgui.PackageItemType.DragonBones:
+                    if (!item.decoded && !item.loading) {
+                        item.loading = true;
+                        this._bundle.load(item.file, dragonBones.DragonBonesAsset, function (err, asset) {
+                            if (err) {
+                                item.decoded = true;
+                                onComplete(err, item);
+                                return;
+                            }
+                            item.asset = asset;
+                            var atlasFile = item.file.replace("_ske", "_tex");
+                            var pos = atlasFile.lastIndexOf('.');
+                            if (pos != -1)
+                                atlasFile = atlasFile.substr(0, pos + 1) + "json";
+                            _this._bundle.load(atlasFile, dragonBones.DragonBonesAtlasAsset, function (err, asset) {
+                                item.decoded = true;
+                                item.atlasAsset = asset;
+                                onComplete(err, item);
+                            });
+                        });
+                    }
+                    break;
                 case fgui.PackageItemType.Font:
                     if (!item.decoded) {
                         item.decoded = true;
                         this.loadFont(item);
                     }
-                    return item.asset;
+                    break;
                 case fgui.PackageItemType.MovieClip:
                     if (!item.decoded) {
                         item.decoded = true;
                         this.loadMovieClip(item);
                     }
-                    return null;
-                case fgui.PackageItemType.Misc:
-                    if (item.file)
-                        return cc.loader.getRes(item.file);
-                    else
-                        return null;
+                    break;
                 default:
-                    return null;
+                    break;
             }
+            return item.asset;
         };
         UIPackage.prototype.loadAllAssets = function () {
             var cnt = this._items.length;
@@ -14939,21 +15001,22 @@ window.__extends = (this && this.__extends) || (function () {
             for (var i = 0; i < frameCount; i++) {
                 var nextPos = buffer.readShort();
                 nextPos += buffer.position;
-                frame = new fgui.Frame();
-                frame.rect.x = buffer.readInt();
-                frame.rect.y = buffer.readInt();
-                frame.rect.width = buffer.readInt();
-                frame.rect.height = buffer.readInt();
-                frame.addDelay = buffer.readInt() / 1000;
+                var rect = new cc.Rect();
+                rect.x = buffer.readInt();
+                rect.y = buffer.readInt();
+                rect.width = buffer.readInt();
+                rect.height = buffer.readInt();
+                var addDelay = buffer.readInt() / 1000;
+                var frame_1 = { rect: rect, addDelay: addDelay };
                 spriteId = buffer.readS();
                 if (spriteId != null && (sprite = this._sprites[spriteId]) != null) {
                     var atlasTexture = this.getItemAsset(sprite.atlas);
-                    if (atlasTexture != null) {
-                        var sx = item.width / frame.rect.width;
-                        frame.texture = new cc.SpriteFrame(atlasTexture, sprite.rect, sprite.rotated, new cc.Vec2(frame.rect.x - (item.width - frame.rect.width) / 2, -(frame.rect.y - (item.height - frame.rect.height) / 2)), new cc.Size(item.width, item.height));
+                    if (atlasTexture) {
+                        var sx = item.width / frame_1.rect.width;
+                        frame_1.texture = new cc.SpriteFrame(atlasTexture, sprite.rect, sprite.rotated, new cc.Vec2(frame_1.rect.x - (item.width - frame_1.rect.width) / 2, -(frame_1.rect.y - (item.height - frame_1.rect.height) / 2)), new cc.Size(item.width, item.height));
                     }
                 }
-                item.frames[i] = frame;
+                item.frames[i] = frame_1;
                 buffer.position = nextPos;
             }
         };
@@ -14978,10 +15041,10 @@ window.__extends = (this && this.__extends) || (function () {
             var lineHeight = buffer.readInt();
             var mainTexture;
             var mainSprite = this._sprites[item.id];
-            if (mainSprite != null)
+            if (mainSprite)
                 mainTexture = (this.getItemAsset(mainSprite.atlas));
             buffer.seek(0, 1);
-            var bg = null;
+            var bg;
             var cnt = buffer.readInt();
             for (var i = 0; i < cnt; i++) {
                 var nextPos = buffer.readShort();
@@ -15050,14 +15113,12 @@ window.__extends = (this && this.__extends) || (function () {
         return UIPackage;
     }());
     fgui.UIPackage = UIPackage;
-    var AtlasSprite = (function () {
-        function AtlasSprite() {
-            this.rect = new cc.Rect();
-            this.offset = new cc.Vec2(0, 0);
-            this.originalSize = new cc.Size(0, 0);
-        }
-        return AtlasSprite;
-    }());
+    var ItemTypeToAssetType = (_a = {},
+        _a[fgui.PackageItemType.Atlas] = cc.Texture2D,
+        _a[fgui.PackageItemType.Sound] = cc.AudioClip,
+        _a[fgui.PackageItemType.Spine] = sp.SkeletonData,
+        _a[fgui.PackageItemType.DragonBones] = dragonBones.DragonBonesAsset,
+        _a);
 })(fgui || (fgui = {}));
 
 (function (fgui) {
@@ -15080,15 +15141,15 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (val) {
                 if (this._contentPane != val) {
-                    if (this._contentPane != null)
+                    if (this._contentPane)
                         this.removeChild(this._contentPane);
                     this._contentPane = val;
-                    if (this._contentPane != null) {
+                    if (this._contentPane) {
                         this.addChild(this._contentPane);
                         this.setSize(this._contentPane.width, this._contentPane.height);
                         this._contentPane.addRelation(this, fgui.RelationType.Size);
                         this._frame = (this._contentPane.getChild("frame"));
-                        if (this._frame != null) {
+                        if (this._frame) {
                             this.closeButton = this._frame.getChild("closeButton");
                             this.dragArea = this._frame.getChild("dragArea");
                             this.contentArea = this._frame.getChild("contentArea");
@@ -15111,10 +15172,10 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._closeButton;
             },
             set: function (value) {
-                if (this._closeButton != null)
+                if (this._closeButton)
                     this._closeButton.offClick(this.closeEventHandler, this);
                 this._closeButton = value;
-                if (this._closeButton != null)
+                if (this._closeButton)
                     this._closeButton.onClick(this.closeEventHandler, this);
             },
             enumerable: false,
@@ -15126,12 +15187,12 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
                 if (this._dragArea != value) {
-                    if (this._dragArea != null) {
+                    if (this._dragArea) {
                         this._dragArea.draggable = false;
                         this._dragArea.off(fgui.Event.DRAG_START, this.onDragStart_1, this);
                     }
                     this._dragArea = value;
-                    if (this._dragArea != null) {
+                    if (this._dragArea) {
                         this._dragArea.draggable = true;
                         this._dragArea.on(fgui.Event.DRAG_START, this.onDragStart_1, this);
                     }
@@ -15161,7 +15222,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this.doHideAnimation();
         };
         Window.prototype.hideImmediately = function () {
-            var r = (this.parent instanceof fgui.GRoot) ? (this.parent) : null;
+            var r = (this.parent instanceof fgui.GRoot) ? this.parent : null;
             if (!r)
                 r = fgui.GRoot.inst;
             r.hideWindowImmediately(this);
@@ -15188,7 +15249,7 @@ window.__extends = (this && this.__extends) || (function () {
         });
         Object.defineProperty(Window.prototype, "isTop", {
             get: function () {
-                return this.parent != null && this.parent.getChildIndex(this) == this.parent.numChildren - 1;
+                return this.parent && this.parent.getChildIndex(this) == this.parent.numChildren - 1;
             },
             enumerable: false,
             configurable: true
@@ -15217,7 +15278,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         Window.prototype.layoutModalWaitPane = function () {
-            if (this._contentArea != null) {
+            if (this._contentArea) {
                 var pt = this._frame.localToGlobal();
                 pt = this.globalToLocal(pt.x, pt.y, pt);
                 this._modalWaitPane.setPosition(pt.x + this._contentArea.x, pt.y + this._contentArea.y);
@@ -15233,7 +15294,7 @@ window.__extends = (this && this.__extends) || (function () {
                     return false;
             }
             this._requestingCmd = 0;
-            if (this._modalWaitPane && this._modalWaitPane.parent != null)
+            if (this._modalWaitPane && this._modalWaitPane.parent)
                 this.removeChild(this._modalWaitPane);
             return true;
         };
@@ -15292,7 +15353,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this.doShowAnimation();
         };
         Window.prototype.dispose = function () {
-            if (this.parent != null)
+            if (this.parent)
                 this.hideImmediately();
             _super.prototype.dispose.call(this);
         };
@@ -15468,7 +15529,7 @@ window.__extends = (this && this.__extends) || (function () {
         function BlendModeUtils() {
         }
         BlendModeUtils.apply = function (node, blendMode) {
-            var f = BlendModeUtils.factors[blendMode];
+            var f = factors[blendMode];
             var renderers = node.getComponentsInChildren(cc.RenderComponent);
             renderers.forEach(function (element) {
                 element.srcBlendFactor = f[0];
@@ -15476,26 +15537,26 @@ window.__extends = (this && this.__extends) || (function () {
             });
         };
         BlendModeUtils.override = function (blendMode, srcFactor, dstFactor) {
-            BlendModeUtils.factors[blendMode][0] = srcFactor;
-            BlendModeUtils.factors[blendMode][1] = dstFactor;
+            factors[blendMode][0] = srcFactor;
+            factors[blendMode][1] = dstFactor;
         };
-        BlendModeUtils.factors = [
-            [cc.macro.SRC_ALPHA, cc.macro.ONE_MINUS_SRC_ALPHA],
-            [cc.macro.ONE, cc.macro.ONE],
-            [cc.macro.SRC_ALPHA, cc.macro.ONE],
-            [cc.macro.DST_COLOR, cc.macro.ONE_MINUS_SRC_ALPHA],
-            [cc.macro.ONE, cc.macro.ONE_MINUS_SRC_COLOR],
-            [cc.macro.ZERO, cc.macro.ONE_MINUS_SRC_ALPHA],
-            [cc.macro.ZERO, cc.macro.SRC_ALPHA],
-            [cc.macro.ONE_MINUS_DST_ALPHA, cc.macro.DST_ALPHA],
-            [cc.macro.ONE, cc.macro.ZERO],
-            [cc.macro.SRC_ALPHA, cc.macro.ONE_MINUS_SRC_ALPHA],
-            [cc.macro.SRC_ALPHA, cc.macro.ONE_MINUS_SRC_ALPHA],
-            [cc.macro.SRC_ALPHA, cc.macro.ONE_MINUS_SRC_ALPHA],
-        ];
         return BlendModeUtils;
     }());
     fgui.BlendModeUtils = BlendModeUtils;
+    var factors = [
+        [cc.macro.SRC_ALPHA, cc.macro.ONE_MINUS_SRC_ALPHA],
+        [cc.macro.ONE, cc.macro.ONE],
+        [cc.macro.SRC_ALPHA, cc.macro.ONE],
+        [cc.macro.DST_COLOR, cc.macro.ONE_MINUS_SRC_ALPHA],
+        [cc.macro.ONE, cc.macro.ONE_MINUS_SRC_COLOR],
+        [cc.macro.ZERO, cc.macro.ONE_MINUS_SRC_ALPHA],
+        [cc.macro.ZERO, cc.macro.SRC_ALPHA],
+        [cc.macro.ONE_MINUS_DST_ALPHA, cc.macro.DST_ALPHA],
+        [cc.macro.ONE, cc.macro.ZERO],
+        [cc.macro.SRC_ALPHA, cc.macro.ONE_MINUS_SRC_ALPHA],
+        [cc.macro.SRC_ALPHA, cc.macro.ONE_MINUS_SRC_ALPHA],
+        [cc.macro.SRC_ALPHA, cc.macro.ONE_MINUS_SRC_ALPHA],
+    ];
 })(fgui || (fgui = {}));
 
 (function (fgui) {
@@ -15507,8 +15568,6 @@ window.__extends = (this && this.__extends) || (function () {
             _this._fillMethod = fgui.FillMethod.None;
             _this._fillOrigin = fgui.FillOrigin.Left;
             _this._fillAmount = 0;
-            _this._fillClockwise = false;
-            _this._grayed = false;
             return _this;
         }
         Object.defineProperty(Image.prototype, "flip", {
@@ -15607,8 +15666,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this.fillStart = this._fillClockwise ? 1 : 0;
             }
             else {
-                var origin_1 = this._fillOrigin;
-                switch (origin_1) {
+                switch (this._fillOrigin) {
                     case fgui.FillOrigin.Right:
                         this.fillOrigin = 0;
                         break;
@@ -15635,27 +15693,15 @@ window.__extends = (this && this.__extends) || (function () {
                 var material;
                 if (value) {
                     material = this._graySpriteMaterial;
-                    if (!material) {
+                    if (!material)
                         material = cc.Material.getBuiltinMaterial('2d-gray-sprite');
-                    }
-                    if (cc.Material.getInstantiatedMaterial) {
-                        material = this._graySpriteMaterial = cc.Material.getInstantiatedMaterial(material, this);
-                    }
-                    else {
-                        material = this._graySpriteMaterial = cc.Material.create(material, this);
-                    }
+                    material = this._graySpriteMaterial = cc.MaterialVariant.create(material, this);
                 }
                 else {
                     material = this._spriteMaterial;
-                    if (!material) {
+                    if (!material)
                         material = cc.Material.getBuiltinMaterial('2d-sprite', this);
-                    }
-                    if (cc.Material.getInstantiatedMaterial) {
-                        material = this._spriteMaterial = cc.Material.getInstantiatedMaterial(material, this);
-                    }
-                    else {
-                        material = this._spriteMaterial = cc.Material.create(material, this);
-                    }
+                    material = this._spriteMaterial = cc.MaterialVariant.create(material, this);
                 }
                 this.setMaterial(0, material);
             },
@@ -15669,14 +15715,6 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var Frame = (function () {
-        function Frame() {
-            this.addDelay = 0;
-            this.rect = new cc.Rect();
-        }
-        return Frame;
-    }());
-    fgui.Frame = Frame;
     var MovieClip = (function (_super) {
         __extends(MovieClip, _super);
         function MovieClip() {
@@ -15704,7 +15742,7 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
                 this._frames = value;
-                if (this._frames != null) {
+                if (this._frames) {
                     this._frameCount = this._frames.length;
                     if (this._end == -1 || this._end > this._frameCount - 1)
                         this._end = this._frameCount - 1;
@@ -15738,7 +15776,7 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
                 if (this._frame != value) {
-                    if (this._frames != null && value >= this._frameCount)
+                    if (this._frames && value >= this._frameCount)
                         value = this._frameCount - 1;
                     this._frame = value;
                     this._frameElapsed = 0;
@@ -15967,8 +16005,8 @@ window.__extends = (this && this.__extends) || (function () {
         };
         Event._borrow = function (type, bubbles) {
             var evt;
-            if (Event._eventPool.length) {
-                evt = Event._eventPool.pop();
+            if (eventPool.length) {
+                evt = eventPool.pop();
                 evt.type = type;
                 evt.bubbles = bubbles;
             }
@@ -15981,7 +16019,7 @@ window.__extends = (this && this.__extends) || (function () {
             evt.initiator = null;
             evt.touch = null;
             evt.unuse();
-            Event._eventPool.push(evt);
+            eventPool.push(evt);
         };
         Event.TOUCH_BEGIN = "fui_touch_begin";
         Event.TOUCH_MOVE = "fui_touch_move";
@@ -16009,10 +16047,10 @@ window.__extends = (this && this.__extends) || (function () {
         Event.PULL_DOWN_RELEASE = "fui_pull_down_release";
         Event.PULL_UP_RELEASE = "fui_pull_up_release";
         Event.CLICK_ITEM = "fui_click_item";
-        Event._eventPool = new Array();
         return Event;
     }(cc.Event));
     fgui.Event = Event;
+    var eventPool = new Array();
 })(fgui || (fgui = {}));
 
 (function (fgui) {
@@ -16024,9 +16062,9 @@ window.__extends = (this && this.__extends) || (function () {
             this.scaleX = 1;
             this.scaleY = 1;
         }
-        PixelHitTest.prototype.hitTest = function (obj, x, y) {
-            x = Math.floor((x / this.scaleX - this.offsetX) * this._data.scale);
-            y = Math.floor((y / this.scaleY - this.offsetY) * this._data.scale);
+        PixelHitTest.prototype.hitTest = function (pt) {
+            var x = Math.floor((pt.x / this.scaleX - this.offsetX) * this._data.scale);
+            var y = Math.floor((pt.y / this.scaleY - this.offsetY) * this._data.scale);
             if (x < 0 || y < 0 || x >= this._data.pixelWidth)
                 return false;
             var pos = y * this._data.pixelWidth + x;
@@ -16051,12 +16089,11 @@ window.__extends = (this && this.__extends) || (function () {
     }());
     fgui.PixelHitTestData = PixelHitTestData;
     var ChildHitArea = (function () {
-        function ChildHitArea(child, reversed) {
+        function ChildHitArea(child) {
             this._child = child;
-            this._reversed = reversed;
         }
-        ChildHitArea.prototype.hitTest = function (obj, x, y) {
-            return false;
+        ChildHitArea.prototype.hitTest = function (pt, globalPt) {
+            return this._child.hitTest(globalPt, false) != null;
         };
         return ChildHitArea;
     }());
@@ -16203,7 +16240,7 @@ window.__extends = (this && this.__extends) || (function () {
                     if (mm == this._owner)
                         done = true;
                 }
-                if (!done && this.node != null) {
+                if (!done && this.node) {
                     evt2.unuse();
                     evt2.type = fgui.Event.TOUCH_MOVE;
                     this.node.dispatchEvent(evt2);
@@ -16226,7 +16263,7 @@ window.__extends = (this && this.__extends) || (function () {
                 mm.node.dispatchEvent(evt2);
             }
             ti.touchMonitors.length = 0;
-            if (ti.target && ti.target.node != null) {
+            if (ti.target && ti.target.node) {
                 if (ti.target instanceof fgui.GRichTextField)
                     ti.target.node.getComponent(cc.RichText)["_onTouchEnded"](evt2);
                 evt2.unuse();
@@ -16262,7 +16299,7 @@ window.__extends = (this && this.__extends) || (function () {
                 mm.node.dispatchEvent(evt2);
             }
             ti.touchMonitors.length = 0;
-            if (ti.target && ti.target.node != null) {
+            if (ti.target && ti.target.node) {
                 evt2.bubbles = true;
                 ti.target.node.dispatchEvent(evt2);
             }
@@ -16301,7 +16338,7 @@ window.__extends = (this && this.__extends) || (function () {
                     if (mm == this._owner)
                         done = true;
                 }
-                if (!done && this.node != null) {
+                if (!done && this.node) {
                     evt2.initiator = this._owner;
                     this.node.dispatchEvent(evt2);
                     fgui.Event._return(evt2);
@@ -16322,13 +16359,13 @@ window.__extends = (this && this.__extends) || (function () {
                 camera.getScreenToWorldPoint(pos, this._touchPos);
             else
                 this._touchPos.set(pos);
+            this._touchPos.y = fgui.GRoot.inst.height - this._touchPos.y;
             var target = this._owner.hitTest(this._touchPos);
             if (!target)
                 target = this._owner;
             var ti = this.getInfo(touchId);
             ti.target = target;
-            ti.pos.x = pos.x;
-            ti.pos.y = fgui.GRoot.inst.height - pos.y;
+            ti.pos.set(this._touchPos);
             ti.button = cc.Event.EventMouse.BUTTON_LEFT;
             ti.touch = touch;
             return ti;
@@ -16360,7 +16397,7 @@ window.__extends = (this && this.__extends) || (function () {
             ti.downPos.set(ti.pos);
             ti.downTargets.length = 0;
             var obj = ti.target;
-            while (obj != null) {
+            while (obj) {
                 ti.downTargets.push(obj);
                 obj = obj.findParent();
             }
@@ -16385,12 +16422,12 @@ window.__extends = (this && this.__extends) || (function () {
                 || Math.abs(ti.pos.x - ti.downPos.x) > 50 || Math.abs(ti.pos.y - ti.downPos.y) > 50)
                 return null;
             var obj = ti.downTargets[0];
-            if (obj && obj.node != null && obj.node.activeInHierarchy)
+            if (obj && obj.node && obj.node.activeInHierarchy)
                 return obj;
             obj = ti.target;
-            while (obj != null) {
+            while (obj) {
                 var index = ti.downTargets.indexOf(obj);
-                if (index != -1 && obj.node != null && obj.node.activeInHierarchy)
+                if (index != -1 && obj.node && obj.node.activeInHierarchy)
                     break;
                 obj = obj.findParent();
             }
@@ -16400,12 +16437,12 @@ window.__extends = (this && this.__extends) || (function () {
             if (ti.lastRollOver == target)
                 return;
             var element = ti.lastRollOver;
-            while (element != null && element.node != null) {
+            while (element && element.node) {
                 this._rollOutChain.push(element);
                 element = element.findParent();
             }
             element = target;
-            while (element != null && element.node != null) {
+            while (element && element.node) {
                 var i = this._rollOutChain.indexOf(element);
                 if (i != -1) {
                     this._rollOutChain.length = i;
@@ -16418,7 +16455,7 @@ window.__extends = (this && this.__extends) || (function () {
             var cnt = this._rollOutChain.length;
             for (var i = 0; i < cnt; i++) {
                 element = this._rollOutChain[i];
-                if (element.node != null && element.node.activeInHierarchy) {
+                if (element.node && element.node.activeInHierarchy) {
                     var evt = this.getEvent(ti, element, fgui.Event.ROLL_OUT, false);
                     element.node.dispatchEvent(evt);
                     fgui.Event._return(evt);
@@ -16427,7 +16464,7 @@ window.__extends = (this && this.__extends) || (function () {
             cnt = this._rollOverChain.length;
             for (var i = 0; i < cnt; i++) {
                 element = this._rollOverChain[i];
-                if (element.node != null && element.node.activeInHierarchy) {
+                if (element.node && element.node.activeInHierarchy) {
                     var evt = this.getEvent(ti, element, fgui.Event.ROLL_OVER, false);
                     element.node.dispatchEvent(evt);
                     fgui.Event._return(evt);
@@ -16476,15 +16513,15 @@ window.__extends = (this && this.__extends) || (function () {
             this._owner = owner;
         }
         GearBase.create = function (owner, index) {
-            if (!GearBase.Classes)
-                GearBase.Classes = [
+            if (!Classes)
+                Classes = [
                     fgui.GearDisplay, fgui.GearXY, fgui.GearSize, fgui.GearLook, fgui.GearColor,
                     fgui.GearAnimation, fgui.GearText, fgui.GearIcon, fgui.GearDisplay2, fgui.GearFontSize
                 ];
-            return new (GearBase.Classes[index])(owner);
+            return new (Classes[index])(owner);
         };
         GearBase.prototype.dispose = function () {
-            if (this._tweenConfig != null && this._tweenConfig._tweener != null) {
+            if (this._tweenConfig && this._tweenConfig._tweener) {
                 this._tweenConfig._tweener.kill();
                 this._tweenConfig._tweener = null;
             }
@@ -16505,7 +16542,7 @@ window.__extends = (this && this.__extends) || (function () {
         });
         Object.defineProperty(GearBase.prototype, "tweenConfig", {
             get: function () {
-                if (this._tweenConfig == null)
+                if (!this._tweenConfig)
                     this._tweenConfig = new GearTweenConfig();
                 return this._tweenConfig;
             },
@@ -16568,10 +16605,10 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GearBase.prototype.updateState = function () {
         };
-        GearBase.disableAllTweenEffect = false;
         return GearBase;
     }());
     fgui.GearBase = GearBase;
+    var Classes;
     var GearTweenConfig = (function () {
         function GearTweenConfig() {
             this.tween = true;
@@ -16591,17 +16628,18 @@ window.__extends = (this && this.__extends) || (function () {
             return _super.call(this, owner) || this;
         }
         GearAnimation.prototype.init = function () {
-            this._default = new GearAnimationValue(this._owner.getProp(fgui.ObjectPropID.Playing), this._owner.getProp(fgui.ObjectPropID.Frame));
+            this._default = {
+                playing: this._owner.getProp(fgui.ObjectPropID.Playing),
+                frame: this._owner.getProp(fgui.ObjectPropID.Frame)
+            };
             this._storage = {};
         };
         GearAnimation.prototype.addStatus = function (pageId, buffer) {
             var gv;
             if (pageId == null)
                 gv = this._default;
-            else {
-                gv = new GearAnimationValue();
-                this._storage[pageId] = gv;
-            }
+            else
+                this._storage[pageId] = gv = {};
             gv.playing = buffer.readBool();
             gv.frame = buffer.readInt();
         };
@@ -16616,25 +16654,14 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GearAnimation.prototype.updateState = function () {
             var gv = this._storage[this._controller.selectedPageId];
-            if (!gv) {
-                gv = new GearAnimationValue();
-                this._storage[this._controller.selectedPageId] = gv;
-            }
+            if (!gv)
+                this._storage[this._controller.selectedPageId] = gv = {};
             gv.playing = this._owner.getProp(fgui.ObjectPropID.Playing);
             gv.frame = this._owner.getProp(fgui.ObjectPropID.Frame);
         };
         return GearAnimation;
     }(fgui.GearBase));
     fgui.GearAnimation = GearAnimation;
-    var GearAnimationValue = (function () {
-        function GearAnimationValue(playing, frame) {
-            if (playing === void 0) { playing = true; }
-            if (frame === void 0) { frame = 0; }
-            this.playing = playing;
-            this.frame = frame;
-        }
-        return GearAnimationValue;
-    }());
 })(fgui || (fgui = {}));
 
 (function (fgui) {
@@ -16644,17 +16671,18 @@ window.__extends = (this && this.__extends) || (function () {
             return _super.call(this, owner) || this;
         }
         GearColor.prototype.init = function () {
-            this._default = new GearColorValue(this._owner.getProp(fgui.ObjectPropID.Color), this._owner.getProp(fgui.ObjectPropID.OutlineColor));
+            this._default = {
+                color: this._owner.getProp(fgui.ObjectPropID.Color),
+                strokeColor: this._owner.getProp(fgui.ObjectPropID.OutlineColor)
+            };
             this._storage = {};
         };
         GearColor.prototype.addStatus = function (pageId, buffer) {
             var gv;
             if (pageId == null)
                 gv = this._default;
-            else {
-                gv = new GearColorValue();
-                this._storage[pageId] = gv;
-            }
+            else
+                this._storage[pageId] = gv = {};
             gv.color = buffer.readColor();
             gv.strokeColor = buffer.readColor();
         };
@@ -16664,29 +16692,19 @@ window.__extends = (this && this.__extends) || (function () {
             if (!gv)
                 gv = this._default;
             this._owner.setProp(fgui.ObjectPropID.Color, gv.color);
-            if (gv.strokeColor != null)
-                this._owner.setProp(fgui.ObjectPropID.OutlineColor, gv.strokeColor);
+            this._owner.setProp(fgui.ObjectPropID.OutlineColor, gv.strokeColor);
             this._owner._gearLocked = false;
         };
         GearColor.prototype.updateState = function () {
             var gv = this._storage[this._controller.selectedPageId];
             if (!gv)
-                this._storage[this._controller.selectedPageId] = gv = new GearColorValue();
+                this._storage[this._controller.selectedPageId] = gv = {};
             gv.color = this._owner.getProp(fgui.ObjectPropID.Color);
             gv.strokeColor = this._owner.getProp(fgui.ObjectPropID.OutlineColor);
         };
         return GearColor;
     }(fgui.GearBase));
     fgui.GearColor = GearColor;
-    var GearColorValue = (function () {
-        function GearColorValue(color, strokeColor) {
-            if (color === void 0) { color = null; }
-            if (strokeColor === void 0) { strokeColor = null; }
-            this.color = color;
-            this.strokeColor = strokeColor;
-        }
-        return GearColorValue;
-    }());
 })(fgui || (fgui = {}));
 
 (function (fgui) {
@@ -16790,7 +16808,7 @@ window.__extends = (this && this.__extends) || (function () {
             this._owner._gearLocked = false;
         };
         GearFontSize.prototype.updateState = function () {
-            this._storage[this._controller.selectedPageId] = this._owner.text;
+            this._storage[this._controller.selectedPageId] = this._owner.getProp(fgui.ObjectPropID.FontSize);
         };
         return GearFontSize;
     }(fgui.GearBase));
@@ -16837,17 +16855,20 @@ window.__extends = (this && this.__extends) || (function () {
             return _super.call(this, owner) || this;
         }
         GearLook.prototype.init = function () {
-            this._default = new GearLookValue(this._owner.alpha, this._owner.rotation, this._owner.grayed, this._owner.touchable);
+            this._default = {
+                alpha: this._owner.alpha,
+                rotation: this._owner.rotation,
+                grayed: this._owner.grayed,
+                touchable: this._owner.touchable
+            };
             this._storage = {};
         };
         GearLook.prototype.addStatus = function (pageId, buffer) {
             var gv;
             if (pageId == null)
                 gv = this._default;
-            else {
-                gv = new GearLookValue();
-                this._storage[pageId] = gv;
-            }
+            else
+                this._storage[pageId] = gv = {};
             gv.alpha = buffer.readFloat();
             gv.rotation = buffer.readFloat();
             gv.grayed = buffer.readBool();
@@ -16862,7 +16883,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this._owner.grayed = gv.grayed;
                 this._owner.touchable = gv.touchable;
                 this._owner._gearLocked = false;
-                if (this._tweenConfig._tweener != null) {
+                if (this._tweenConfig._tweener) {
                     if (this._tweenConfig._tweener.endValue.x != gv.alpha || this._tweenConfig._tweener.endValue.y != gv.rotation) {
                         this._tweenConfig._tweener.kill(true);
                         this._tweenConfig._tweener = null;
@@ -16911,10 +16932,8 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GearLook.prototype.updateState = function () {
             var gv = this._storage[this._controller.selectedPageId];
-            if (!gv) {
-                gv = new GearLookValue();
-                this._storage[this._controller.selectedPageId] = gv;
-            }
+            if (!gv)
+                this._storage[this._controller.selectedPageId] = gv = {};
             gv.alpha = this._owner.alpha;
             gv.rotation = this._owner.rotation;
             gv.grayed = this._owner.grayed;
@@ -16923,19 +16942,6 @@ window.__extends = (this && this.__extends) || (function () {
         return GearLook;
     }(fgui.GearBase));
     fgui.GearLook = GearLook;
-    var GearLookValue = (function () {
-        function GearLookValue(alpha, rotation, grayed, touchable) {
-            if (alpha === void 0) { alpha = 0; }
-            if (rotation === void 0) { rotation = 0; }
-            if (grayed === void 0) { grayed = false; }
-            if (touchable === void 0) { touchable = true; }
-            this.alpha = alpha;
-            this.rotation = rotation;
-            this.grayed = grayed;
-            this.touchable = touchable;
-        }
-        return GearLookValue;
-    }());
 })(fgui || (fgui = {}));
 
 (function (fgui) {
@@ -16945,17 +16951,20 @@ window.__extends = (this && this.__extends) || (function () {
             return _super.call(this, owner) || this;
         }
         GearSize.prototype.init = function () {
-            this._default = new GearSizeValue(this._owner.width, this._owner.height, this._owner.scaleX, this._owner.scaleY);
+            this._default = {
+                width: this._owner.width,
+                height: this._owner.height,
+                scaleX: this._owner.scaleX,
+                scaleY: this._owner.scaleY
+            };
             this._storage = {};
         };
         GearSize.prototype.addStatus = function (pageId, buffer) {
             var gv;
             if (pageId == null)
                 gv = this._default;
-            else {
-                gv = new GearSizeValue();
-                this._storage[pageId] = gv;
-            }
+            else
+                this._storage[pageId] = gv = {};
             gv.width = buffer.readInt();
             gv.height = buffer.readInt();
             gv.scaleX = buffer.readFloat();
@@ -16966,7 +16975,7 @@ window.__extends = (this && this.__extends) || (function () {
             if (!gv)
                 gv = this._default;
             if (this._tweenConfig && this._tweenConfig.tween && !fgui.UIPackage._constructing && !fgui.GearBase.disableAllTweenEffect) {
-                if (this._tweenConfig._tweener != null) {
+                if (this._tweenConfig._tweener) {
                     if (this._tweenConfig._tweener.endValue.x != gv.width || this._tweenConfig._tweener.endValue.y != gv.height
                         || this._tweenConfig._tweener.endValue.z != gv.scaleX || this._tweenConfig._tweener.endValue.w != gv.scaleY) {
                         this._tweenConfig._tweener.kill(true);
@@ -17014,10 +17023,8 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GearSize.prototype.updateState = function () {
             var gv = this._storage[this._controller.selectedPageId];
-            if (!gv) {
-                gv = new GearSizeValue();
-                this._storage[this._controller.selectedPageId] = gv;
-            }
+            if (!gv)
+                this._storage[this._controller.selectedPageId] = {};
             gv.width = this._owner.width;
             gv.height = this._owner.height;
             gv.scaleX = this._owner.scaleX;
@@ -17038,19 +17045,6 @@ window.__extends = (this && this.__extends) || (function () {
         return GearSize;
     }(fgui.GearBase));
     fgui.GearSize = GearSize;
-    var GearSizeValue = (function () {
-        function GearSizeValue(width, height, scaleX, scaleY) {
-            if (width === void 0) { width = 0; }
-            if (height === void 0) { height = 0; }
-            if (scaleX === void 0) { scaleX = 0; }
-            if (scaleY === void 0) { scaleY = 0; }
-            this.width = width;
-            this.height = height;
-            this.scaleX = scaleX;
-            this.scaleY = scaleY;
-        }
-        return GearSizeValue;
-    }());
 })(fgui || (fgui = {}));
 
 (function (fgui) {
@@ -17094,8 +17088,10 @@ window.__extends = (this && this.__extends) || (function () {
         }
         GearXY.prototype.init = function () {
             this._default = {
-                x: this._owner.x, y: this._owner.y,
-                px: this._owner.x / this._owner.parent.width, py: this._owner.y / this._owner.parent.height
+                x: this._owner.x,
+                y: this._owner.y,
+                px: this._owner.x / this._owner.parent.width,
+                py: this._owner.y / this._owner.parent.height
             };
             this._storage = {};
         };
@@ -17103,10 +17099,8 @@ window.__extends = (this && this.__extends) || (function () {
             var gv;
             if (pageId == null)
                 gv = this._default;
-            else {
-                gv = {};
-                this._storage[pageId] = gv;
-            }
+            else
+                this._storage[pageId] = gv = {};
             gv.x = buffer.readInt();
             gv.y = buffer.readInt();
         };
@@ -17120,21 +17114,21 @@ window.__extends = (this && this.__extends) || (function () {
             gv.py = buffer.readFloat();
         };
         GearXY.prototype.apply = function () {
-            var pt = this._storage[this._controller.selectedPageId];
-            if (!pt)
-                pt = this._default;
+            var gv = this._storage[this._controller.selectedPageId];
+            if (!gv)
+                gv = this._default;
             var ex;
             var ey;
             if (this.positionsInPercent && this._owner.parent) {
-                ex = pt.px * this._owner.parent.width;
-                ey = pt.py * this._owner.parent.height;
+                ex = gv.px * this._owner.parent.width;
+                ey = gv.py * this._owner.parent.height;
             }
             else {
-                ex = pt.x;
-                ey = pt.y;
+                ex = gv.x;
+                ey = gv.y;
             }
-            if (this._tweenConfig != null && this._tweenConfig.tween && !fgui.UIPackage._constructing && !fgui.GearBase.disableAllTweenEffect) {
-                if (this._tweenConfig._tweener != null) {
+            if (this._tweenConfig && this._tweenConfig.tween && !fgui.UIPackage._constructing && !fgui.GearBase.disableAllTweenEffect) {
+                if (this._tweenConfig._tweener) {
                     if (this._tweenConfig._tweener.endValue.x != ex || this._tweenConfig._tweener.endValue.y != ey) {
                         this._tweenConfig._tweener.kill(true);
                         this._tweenConfig._tweener = null;
@@ -17174,15 +17168,13 @@ window.__extends = (this && this.__extends) || (function () {
             this._tweenConfig._tweener = null;
         };
         GearXY.prototype.updateState = function () {
-            var pt = this._storage[this._controller.selectedPageId];
-            if (!pt) {
-                pt = {};
-                this._storage[this._controller.selectedPageId] = pt;
-            }
-            pt.x = this._owner.x;
-            pt.y = this._owner.y;
-            pt.px = this._owner.x / this._owner.parent.width;
-            pt.py = this._owner.y / this._owner.parent.height;
+            var gv = this._storage[this._controller.selectedPageId];
+            if (!gv)
+                this._storage[this._controller.selectedPageId] = gv = {};
+            gv.x = this._owner.x;
+            gv.y = this._owner.y;
+            gv.px = this._owner.x / this._owner.parent.width;
+            gv.py = this._owner.y / this._owner.parent.height;
         };
         GearXY.prototype.updateFromRelations = function (dx, dy) {
             if (this._controller == null || this._storage == null || this.positionsInPercent)
@@ -17202,169 +17194,159 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
-    var EaseManager = (function () {
-        function EaseManager() {
+    var _PiOver2 = Math.PI * 0.5;
+    var _TwoPi = Math.PI * 2;
+    function evaluateEase(easeType, time, duration, overshootOrAmplitude, period) {
+        switch (easeType) {
+            case fgui.EaseType.Linear:
+                return time / duration;
+            case fgui.EaseType.SineIn:
+                return -Math.cos(time / duration * _PiOver2) + 1;
+            case fgui.EaseType.SineOut:
+                return Math.sin(time / duration * _PiOver2);
+            case fgui.EaseType.SineInOut:
+                return -0.5 * (Math.cos(Math.PI * time / duration) - 1);
+            case fgui.EaseType.QuadIn:
+                return (time /= duration) * time;
+            case fgui.EaseType.QuadOut:
+                return -(time /= duration) * (time - 2);
+            case fgui.EaseType.QuadInOut:
+                if ((time /= duration * 0.5) < 1)
+                    return 0.5 * time * time;
+                return -0.5 * ((--time) * (time - 2) - 1);
+            case fgui.EaseType.CubicIn:
+                return (time /= duration) * time * time;
+            case fgui.EaseType.CubicOut:
+                return ((time = time / duration - 1) * time * time + 1);
+            case fgui.EaseType.CubicInOut:
+                if ((time /= duration * 0.5) < 1)
+                    return 0.5 * time * time * time;
+                return 0.5 * ((time -= 2) * time * time + 2);
+            case fgui.EaseType.QuartIn:
+                return (time /= duration) * time * time * time;
+            case fgui.EaseType.QuartOut:
+                return -((time = time / duration - 1) * time * time * time - 1);
+            case fgui.EaseType.QuartInOut:
+                if ((time /= duration * 0.5) < 1)
+                    return 0.5 * time * time * time * time;
+                return -0.5 * ((time -= 2) * time * time * time - 2);
+            case fgui.EaseType.QuintIn:
+                return (time /= duration) * time * time * time * time;
+            case fgui.EaseType.QuintOut:
+                return ((time = time / duration - 1) * time * time * time * time + 1);
+            case fgui.EaseType.QuintInOut:
+                if ((time /= duration * 0.5) < 1)
+                    return 0.5 * time * time * time * time * time;
+                return 0.5 * ((time -= 2) * time * time * time * time + 2);
+            case fgui.EaseType.ExpoIn:
+                return (time == 0) ? 0 : Math.pow(2, 10 * (time / duration - 1));
+            case fgui.EaseType.ExpoOut:
+                if (time == duration)
+                    return 1;
+                return (-Math.pow(2, -10 * time / duration) + 1);
+            case fgui.EaseType.ExpoInOut:
+                if (time == 0)
+                    return 0;
+                if (time == duration)
+                    return 1;
+                if ((time /= duration * 0.5) < 1)
+                    return 0.5 * Math.pow(2, 10 * (time - 1));
+                return 0.5 * (-Math.pow(2, -10 * --time) + 2);
+            case fgui.EaseType.CircIn:
+                return -(Math.sqrt(1 - (time /= duration) * time) - 1);
+            case fgui.EaseType.CircOut:
+                return Math.sqrt(1 - (time = time / duration - 1) * time);
+            case fgui.EaseType.CircInOut:
+                if ((time /= duration * 0.5) < 1)
+                    return -0.5 * (Math.sqrt(1 - time * time) - 1);
+                return 0.5 * (Math.sqrt(1 - (time -= 2) * time) + 1);
+            case fgui.EaseType.ElasticIn:
+                var s0;
+                if (time == 0)
+                    return 0;
+                if ((time /= duration) == 1)
+                    return 1;
+                if (period == 0)
+                    period = duration * 0.3;
+                if (overshootOrAmplitude < 1) {
+                    overshootOrAmplitude = 1;
+                    s0 = period / 4;
+                }
+                else
+                    s0 = period / _TwoPi * Math.asin(1 / overshootOrAmplitude);
+                return -(overshootOrAmplitude * Math.pow(2, 10 * (time -= 1)) * Math.sin((time * duration - s0) * _TwoPi / period));
+            case fgui.EaseType.ElasticOut:
+                var s1;
+                if (time == 0)
+                    return 0;
+                if ((time /= duration) == 1)
+                    return 1;
+                if (period == 0)
+                    period = duration * 0.3;
+                if (overshootOrAmplitude < 1) {
+                    overshootOrAmplitude = 1;
+                    s1 = period / 4;
+                }
+                else
+                    s1 = period / _TwoPi * Math.asin(1 / overshootOrAmplitude);
+                return (overshootOrAmplitude * Math.pow(2, -10 * time) * Math.sin((time * duration - s1) * _TwoPi / period) + 1);
+            case fgui.EaseType.ElasticInOut:
+                var s;
+                if (time == 0)
+                    return 0;
+                if ((time /= duration * 0.5) == 2)
+                    return 1;
+                if (period == 0)
+                    period = duration * (0.3 * 1.5);
+                if (overshootOrAmplitude < 1) {
+                    overshootOrAmplitude = 1;
+                    s = period / 4;
+                }
+                else
+                    s = period / _TwoPi * Math.asin(1 / overshootOrAmplitude);
+                if (time < 1)
+                    return -0.5 * (overshootOrAmplitude * Math.pow(2, 10 * (time -= 1)) * Math.sin((time * duration - s) * _TwoPi / period));
+                return overshootOrAmplitude * Math.pow(2, -10 * (time -= 1)) * Math.sin((time * duration - s) * _TwoPi / period) * 0.5 + 1;
+            case fgui.EaseType.BackIn:
+                return (time /= duration) * time * ((overshootOrAmplitude + 1) * time - overshootOrAmplitude);
+            case fgui.EaseType.BackOut:
+                return ((time = time / duration - 1) * time * ((overshootOrAmplitude + 1) * time + overshootOrAmplitude) + 1);
+            case fgui.EaseType.BackInOut:
+                if ((time /= duration * 0.5) < 1)
+                    return 0.5 * (time * time * (((overshootOrAmplitude *= (1.525)) + 1) * time - overshootOrAmplitude));
+                return 0.5 * ((time -= 2) * time * (((overshootOrAmplitude *= (1.525)) + 1) * time + overshootOrAmplitude) + 2);
+            case fgui.EaseType.BounceIn:
+                return bounce_easeIn(time, duration);
+            case fgui.EaseType.BounceOut:
+                return bounce_easeOut(time, duration);
+            case fgui.EaseType.BounceInOut:
+                return bounce_easeInOut(time, duration);
+            default:
+                return -(time /= duration) * (time - 2);
         }
-        EaseManager.evaluate = function (easeType, time, duration, overshootOrAmplitude, period) {
-            switch (easeType) {
-                case fgui.EaseType.Linear:
-                    return time / duration;
-                case fgui.EaseType.SineIn:
-                    return -Math.cos(time / duration * EaseManager._PiOver2) + 1;
-                case fgui.EaseType.SineOut:
-                    return Math.sin(time / duration * EaseManager._PiOver2);
-                case fgui.EaseType.SineInOut:
-                    return -0.5 * (Math.cos(Math.PI * time / duration) - 1);
-                case fgui.EaseType.QuadIn:
-                    return (time /= duration) * time;
-                case fgui.EaseType.QuadOut:
-                    return -(time /= duration) * (time - 2);
-                case fgui.EaseType.QuadInOut:
-                    if ((time /= duration * 0.5) < 1)
-                        return 0.5 * time * time;
-                    return -0.5 * ((--time) * (time - 2) - 1);
-                case fgui.EaseType.CubicIn:
-                    return (time /= duration) * time * time;
-                case fgui.EaseType.CubicOut:
-                    return ((time = time / duration - 1) * time * time + 1);
-                case fgui.EaseType.CubicInOut:
-                    if ((time /= duration * 0.5) < 1)
-                        return 0.5 * time * time * time;
-                    return 0.5 * ((time -= 2) * time * time + 2);
-                case fgui.EaseType.QuartIn:
-                    return (time /= duration) * time * time * time;
-                case fgui.EaseType.QuartOut:
-                    return -((time = time / duration - 1) * time * time * time - 1);
-                case fgui.EaseType.QuartInOut:
-                    if ((time /= duration * 0.5) < 1)
-                        return 0.5 * time * time * time * time;
-                    return -0.5 * ((time -= 2) * time * time * time - 2);
-                case fgui.EaseType.QuintIn:
-                    return (time /= duration) * time * time * time * time;
-                case fgui.EaseType.QuintOut:
-                    return ((time = time / duration - 1) * time * time * time * time + 1);
-                case fgui.EaseType.QuintInOut:
-                    if ((time /= duration * 0.5) < 1)
-                        return 0.5 * time * time * time * time * time;
-                    return 0.5 * ((time -= 2) * time * time * time * time + 2);
-                case fgui.EaseType.ExpoIn:
-                    return (time == 0) ? 0 : Math.pow(2, 10 * (time / duration - 1));
-                case fgui.EaseType.ExpoOut:
-                    if (time == duration)
-                        return 1;
-                    return (-Math.pow(2, -10 * time / duration) + 1);
-                case fgui.EaseType.ExpoInOut:
-                    if (time == 0)
-                        return 0;
-                    if (time == duration)
-                        return 1;
-                    if ((time /= duration * 0.5) < 1)
-                        return 0.5 * Math.pow(2, 10 * (time - 1));
-                    return 0.5 * (-Math.pow(2, -10 * --time) + 2);
-                case fgui.EaseType.CircIn:
-                    return -(Math.sqrt(1 - (time /= duration) * time) - 1);
-                case fgui.EaseType.CircOut:
-                    return Math.sqrt(1 - (time = time / duration - 1) * time);
-                case fgui.EaseType.CircInOut:
-                    if ((time /= duration * 0.5) < 1)
-                        return -0.5 * (Math.sqrt(1 - time * time) - 1);
-                    return 0.5 * (Math.sqrt(1 - (time -= 2) * time) + 1);
-                case fgui.EaseType.ElasticIn:
-                    var s0;
-                    if (time == 0)
-                        return 0;
-                    if ((time /= duration) == 1)
-                        return 1;
-                    if (period == 0)
-                        period = duration * 0.3;
-                    if (overshootOrAmplitude < 1) {
-                        overshootOrAmplitude = 1;
-                        s0 = period / 4;
-                    }
-                    else
-                        s0 = period / EaseManager._TwoPi * Math.asin(1 / overshootOrAmplitude);
-                    return -(overshootOrAmplitude * Math.pow(2, 10 * (time -= 1)) * Math.sin((time * duration - s0) * EaseManager._TwoPi / period));
-                case fgui.EaseType.ElasticOut:
-                    var s1;
-                    if (time == 0)
-                        return 0;
-                    if ((time /= duration) == 1)
-                        return 1;
-                    if (period == 0)
-                        period = duration * 0.3;
-                    if (overshootOrAmplitude < 1) {
-                        overshootOrAmplitude = 1;
-                        s1 = period / 4;
-                    }
-                    else
-                        s1 = period / EaseManager._TwoPi * Math.asin(1 / overshootOrAmplitude);
-                    return (overshootOrAmplitude * Math.pow(2, -10 * time) * Math.sin((time * duration - s1) * EaseManager._TwoPi / period) + 1);
-                case fgui.EaseType.ElasticInOut:
-                    var s;
-                    if (time == 0)
-                        return 0;
-                    if ((time /= duration * 0.5) == 2)
-                        return 1;
-                    if (period == 0)
-                        period = duration * (0.3 * 1.5);
-                    if (overshootOrAmplitude < 1) {
-                        overshootOrAmplitude = 1;
-                        s = period / 4;
-                    }
-                    else
-                        s = period / EaseManager._TwoPi * Math.asin(1 / overshootOrAmplitude);
-                    if (time < 1)
-                        return -0.5 * (overshootOrAmplitude * Math.pow(2, 10 * (time -= 1)) * Math.sin((time * duration - s) * EaseManager._TwoPi / period));
-                    return overshootOrAmplitude * Math.pow(2, -10 * (time -= 1)) * Math.sin((time * duration - s) * EaseManager._TwoPi / period) * 0.5 + 1;
-                case fgui.EaseType.BackIn:
-                    return (time /= duration) * time * ((overshootOrAmplitude + 1) * time - overshootOrAmplitude);
-                case fgui.EaseType.BackOut:
-                    return ((time = time / duration - 1) * time * ((overshootOrAmplitude + 1) * time + overshootOrAmplitude) + 1);
-                case fgui.EaseType.BackInOut:
-                    if ((time /= duration * 0.5) < 1)
-                        return 0.5 * (time * time * (((overshootOrAmplitude *= (1.525)) + 1) * time - overshootOrAmplitude));
-                    return 0.5 * ((time -= 2) * time * (((overshootOrAmplitude *= (1.525)) + 1) * time + overshootOrAmplitude) + 2);
-                case fgui.EaseType.BounceIn:
-                    return Bounce.easeIn(time, duration);
-                case fgui.EaseType.BounceOut:
-                    return Bounce.easeOut(time, duration);
-                case fgui.EaseType.BounceInOut:
-                    return Bounce.easeInOut(time, duration);
-                default:
-                    return -(time /= duration) * (time - 2);
-            }
-        };
-        EaseManager._PiOver2 = Math.PI * 0.5;
-        EaseManager._TwoPi = Math.PI * 2;
-        return EaseManager;
-    }());
-    fgui.EaseManager = EaseManager;
-    var Bounce = (function () {
-        function Bounce() {
+    }
+    fgui.evaluateEase = evaluateEase;
+    function bounce_easeIn(time, duration) {
+        return 1 - bounce_easeOut(duration - time, duration);
+    }
+    function bounce_easeOut(time, duration) {
+        if ((time /= duration) < (1 / 2.75)) {
+            return (7.5625 * time * time);
         }
-        Bounce.easeIn = function (time, duration) {
-            return 1 - Bounce.easeOut(duration - time, duration);
-        };
-        Bounce.easeOut = function (time, duration) {
-            if ((time /= duration) < (1 / 2.75)) {
-                return (7.5625 * time * time);
-            }
-            if (time < (2 / 2.75)) {
-                return (7.5625 * (time -= (1.5 / 2.75)) * time + 0.75);
-            }
-            if (time < (2.5 / 2.75)) {
-                return (7.5625 * (time -= (2.25 / 2.75)) * time + 0.9375);
-            }
-            return (7.5625 * (time -= (2.625 / 2.75)) * time + 0.984375);
-        };
-        Bounce.easeInOut = function (time, duration) {
-            if (time < duration * 0.5) {
-                return Bounce.easeIn(time * 2, duration) * 0.5;
-            }
-            return Bounce.easeOut(time * 2 - duration, duration) * 0.5 + 0.5;
-        };
-        return Bounce;
-    }());
+        if (time < (2 / 2.75)) {
+            return (7.5625 * (time -= (1.5 / 2.75)) * time + 0.75);
+        }
+        if (time < (2.5 / 2.75)) {
+            return (7.5625 * (time -= (2.25 / 2.75)) * time + 0.9375);
+        }
+        return (7.5625 * (time -= (2.625 / 2.75)) * time + 0.984375);
+    }
+    function bounce_easeInOut(time, duration) {
+        if (time < duration * 0.5) {
+            return bounce_easeIn(time * 2, duration) * 0.5;
+        }
+        return bounce_easeOut(time * 2 - duration, duration) * 0.5 + 0.5;
+    }
 })(fgui || (fgui = {}));
 
 (function (fgui) {
@@ -17421,24 +17403,26 @@ window.__extends = (this && this.__extends) || (function () {
             enumerable: false,
             configurable: true
         });
-        GPath.prototype.create2 = function (pt1, pt2, pt3, pt4) {
-            var points = new Array();
-            points.push(pt1);
-            points.push(pt2);
-            if (pt3)
-                points.push(pt3);
-            if (pt4)
-                points.push(pt4);
-            this.create(points);
-        };
-        GPath.prototype.create = function (points) {
+        GPath.prototype.create = function (pt1, pt2, pt3, pt4) {
+            var points;
+            if (Array.isArray(pt1))
+                points = pt1;
+            else {
+                points = new Array();
+                points.push(pt1);
+                points.push(pt2);
+                if (pt3)
+                    points.push(pt3);
+                if (pt4)
+                    points.push(pt4);
+            }
             this._segments.length = 0;
             this._points.length = 0;
             this._fullLength = 0;
             var cnt = points.length;
             if (cnt == 0)
                 return;
-            var splinePoints = GPath.helperPoints;
+            var splinePoints = s_points;
             splinePoints.length = 0;
             var prev = points[0];
             if (prev.curveType == fgui.CurveType.CRSpline)
@@ -17446,7 +17430,7 @@ window.__extends = (this && this.__extends) || (function () {
             for (var i = 1; i < cnt; i++) {
                 var current = points[i];
                 if (prev.curveType != fgui.CurveType.CRSpline) {
-                    var seg = new Segment();
+                    var seg = {};
                     seg.type = prev.curveType;
                     seg.ptStart = this._points.length;
                     if (prev.curveType == fgui.CurveType.Straight) {
@@ -17485,13 +17469,13 @@ window.__extends = (this && this.__extends) || (function () {
                 this.createSplineSegment();
         };
         GPath.prototype.createSplineSegment = function () {
-            var splinePoints = GPath.helperPoints;
+            var splinePoints = s_points;
             var cnt = splinePoints.length;
             splinePoints.splice(0, 0, splinePoints[0]);
             splinePoints.push(splinePoints[cnt]);
             splinePoints.push(splinePoints[cnt]);
             cnt += 3;
-            var seg = new Segment();
+            var seg = {};
             seg.type = fgui.CurveType.CRSpline;
             seg.ptStart = this._points.length;
             seg.ptCount = cnt;
@@ -17648,15 +17632,10 @@ window.__extends = (this && this.__extends) || (function () {
             }
             return result;
         };
-        GPath.helperPoints = new Array();
         return GPath;
     }());
     fgui.GPath = GPath;
-    var Segment = (function () {
-        function Segment() {
-        }
-        return Segment;
-    }());
+    var s_points = new Array();
 })(fgui || (fgui = {}));
 
 (function (fgui) {
@@ -17877,19 +17856,19 @@ window.__extends = (this && this.__extends) || (function () {
             enumerable: false,
             configurable: true
         });
-        GTweener.prototype.onUpdate = function (callback, caller) {
+        GTweener.prototype.onUpdate = function (callback, target) {
             this._onUpdate = callback;
-            this._onUpdateCaller = caller;
+            this._onUpdateCaller = target;
             return this;
         };
-        GTweener.prototype.onStart = function (callback, caller) {
+        GTweener.prototype.onStart = function (callback, target) {
             this._onStart = callback;
-            this._onStartCaller = caller;
+            this._onStartCaller = target;
             return this;
         };
-        GTweener.prototype.onComplete = function (callback, caller) {
+        GTweener.prototype.onComplete = function (callback, target) {
             this._onComplete = callback;
-            this._onCompleteCaller = caller;
+            this._onCompleteCaller = target;
             return this;
         };
         Object.defineProperty(GTweener.prototype, "startValue", {
@@ -18117,7 +18096,7 @@ window.__extends = (this && this.__extends) || (function () {
                 tt = this._duration;
                 this._ended = 1;
             }
-            this._normalizedTime = fgui.EaseManager.evaluate(this._easeType, reversed ? (this._duration - tt) : tt, this._duration, this._easeOvershootOrAmplitude, this._easePeriod);
+            this._normalizedTime = fgui.evaluateEase(this._easeType, reversed ? (this._duration - tt) : tt, this._duration, this._easeOvershootOrAmplitude, this._easePeriod);
             this._value.setZero();
             this._deltaValue.setZero();
             if (this._valueSize == 5) {
@@ -18136,7 +18115,7 @@ window.__extends = (this && this.__extends) || (function () {
                 }
             }
             else if (this._path) {
-                var pt = GTweener.helperPoint;
+                var pt = s_vec2;
                 this._path.getPointAt(this._normalizedTime, pt);
                 if (this._snapping) {
                     pt.x = Math.round(pt.x);
@@ -18220,42 +18199,46 @@ window.__extends = (this && this.__extends) || (function () {
                 }
             }
         };
-        GTweener.helperPoint = new cc.Vec2();
         return GTweener;
     }());
     fgui.GTweener = GTweener;
+    var s_vec2 = new cc.Vec2();
 })(fgui || (fgui = {}));
 
 (function (fgui) {
+    var _activeTweens = new Array(30);
+    var _tweenerPool = new Array();
+    var _totalActiveTweens = 0;
+    var _root;
     var TweenManager = (function () {
         function TweenManager() {
         }
         TweenManager.createTween = function () {
-            if (!TweenManager._root) {
-                TweenManager._root = new cc.Node("[TweenManager]");
-                cc.game["addPersistRootNode"](TweenManager._root);
-                cc.director.getScheduler().schedule(TweenManager.update, TweenManager._root, 0, false);
+            if (!_root) {
+                _root = new cc.Node("[TweenManager]");
+                cc.game["addPersistRootNode"](_root);
+                cc.director.getScheduler().schedule(TweenManager.update, _root, 0, false);
             }
             var tweener;
-            var cnt = TweenManager._tweenerPool.length;
+            var cnt = _tweenerPool.length;
             if (cnt > 0) {
-                tweener = TweenManager._tweenerPool.pop();
+                tweener = _tweenerPool.pop();
             }
             else
                 tweener = new fgui.GTweener();
             tweener._init();
-            TweenManager._activeTweens[TweenManager._totalActiveTweens++] = tweener;
-            if (TweenManager._totalActiveTweens == TweenManager._activeTweens.length)
-                TweenManager._activeTweens.length = TweenManager._activeTweens.length + Math.ceil(TweenManager._activeTweens.length * 0.5);
+            _activeTweens[_totalActiveTweens++] = tweener;
+            if (_totalActiveTweens == _activeTweens.length)
+                _activeTweens.length = _activeTweens.length + Math.ceil(_activeTweens.length * 0.5);
             return tweener;
         };
         TweenManager.isTweening = function (target, propType) {
             if (target == null)
                 return false;
             var anyType = propType == null || propType == undefined;
-            for (var i = 0; i < TweenManager._totalActiveTweens; i++) {
-                var tweener = TweenManager._activeTweens[i];
-                if (tweener != null && tweener.target == target && !tweener._killed
+            for (var i = 0; i < _totalActiveTweens; i++) {
+                var tweener = _activeTweens[i];
+                if (tweener && tweener.target == target && !tweener._killed
                     && (anyType || tweener._propType == propType))
                     return true;
             }
@@ -18265,11 +18248,11 @@ window.__extends = (this && this.__extends) || (function () {
             if (target == null)
                 return false;
             var flag = false;
-            var cnt = TweenManager._totalActiveTweens;
+            var cnt = _totalActiveTweens;
             var anyType = propType == null || propType == undefined;
             for (var i = 0; i < cnt; i++) {
-                var tweener = TweenManager._activeTweens[i];
-                if (tweener != null && tweener.target == target && !tweener._killed
+                var tweener = _activeTweens[i];
+                if (tweener && tweener.target == target && !tweener._killed
                     && (anyType || tweener._propType == propType)) {
                     tweener.kill(completed);
                     flag = true;
@@ -18280,11 +18263,11 @@ window.__extends = (this && this.__extends) || (function () {
         TweenManager.getTween = function (target, propType) {
             if (target == null)
                 return null;
-            var cnt = TweenManager._totalActiveTweens;
+            var cnt = _totalActiveTweens;
             var anyType = propType == null || propType == undefined;
             for (var i = 0; i < cnt; i++) {
-                var tweener = TweenManager._activeTweens[i];
-                if (tweener != null && tweener.target == target && !tweener._killed
+                var tweener = _activeTweens[i];
+                if (tweener && tweener.target == target && !tweener._killed
                     && (anyType || tweener._propType == propType)) {
                     return tweener;
                 }
@@ -18292,8 +18275,8 @@ window.__extends = (this && this.__extends) || (function () {
             return null;
         };
         TweenManager.update = function (dt) {
-            var tweens = TweenManager._activeTweens;
-            var cnt = TweenManager._totalActiveTweens;
+            var tweens = _activeTweens;
+            var cnt = _totalActiveTweens;
             var freePosStart = -1;
             for (var i = 0; i < cnt; i++) {
                 var tweener = tweens[i];
@@ -18303,7 +18286,7 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 else if (tweener._killed) {
                     tweener._reset();
-                    TweenManager._tweenerPool.push(tweener);
+                    _tweenerPool.push(tweener);
                     tweens[i] = null;
                     if (freePosStart == -1)
                         freePosStart = i;
@@ -18319,19 +18302,16 @@ window.__extends = (this && this.__extends) || (function () {
                 }
             }
             if (freePosStart >= 0) {
-                if (TweenManager._totalActiveTweens != cnt) {
+                if (_totalActiveTweens != cnt) {
                     var j = cnt;
-                    cnt = TweenManager._totalActiveTweens - cnt;
+                    cnt = _totalActiveTweens - cnt;
                     for (i = 0; i < cnt; i++)
                         tweens[freePosStart++] = tweens[j++];
                 }
-                TweenManager._totalActiveTweens = freePosStart;
+                _totalActiveTweens = freePosStart;
             }
             return false;
         };
-        TweenManager._activeTweens = new Array(30);
-        TweenManager._tweenerPool = new Array();
-        TweenManager._totalActiveTweens = 0;
         return TweenManager;
     }());
     fgui.TweenManager = TweenManager;
@@ -18400,9 +18380,7 @@ window.__extends = (this && this.__extends) || (function () {
         function ByteBuffer(buffer, offset, length) {
             if (offset === void 0) { offset = 0; }
             if (length === void 0) { length = -1; }
-            this.stringTable = null;
             this.version = 0;
-            this.littleEndian = false;
             if (length == -1)
                 length = buffer.byteLength - offset;
             this._bytes = new Uint8Array(buffer, offset, length);
@@ -18583,18 +18561,15 @@ window.__extends = (this && this.__extends) || (function () {
 
 (function (fgui) {
     var ColorMatrix = (function () {
-        function ColorMatrix() {
-            this.matrix = new Array(ColorMatrix.LENGTH);
+        function ColorMatrix(p_brightness, p_contrast, p_saturation, p_hue) {
+            this.matrix = new Array(LENGTH);
             this.reset();
+            if (p_brightness !== undefined || p_contrast !== undefined || p_saturation !== undefined || p_hue !== undefined)
+                this.adjustColor(p_brightness, p_contrast, p_saturation, p_hue);
         }
-        ColorMatrix.create = function (p_brightness, p_contrast, p_saturation, p_hue) {
-            var ret = new ColorMatrix();
-            ret.adjustColor(p_brightness, p_contrast, p_saturation, p_hue);
-            return ret;
-        };
         ColorMatrix.prototype.reset = function () {
-            for (var i = 0; i < ColorMatrix.LENGTH; i++) {
-                this.matrix[i] = ColorMatrix.IDENTITY_MATRIX[i];
+            for (var i = 0; i < LENGTH; i++) {
+                this.matrix[i] = IDENTITY_MATRIX[i];
             }
         };
         ColorMatrix.prototype.invert = function () {
@@ -18604,10 +18579,10 @@ window.__extends = (this && this.__extends) || (function () {
                 0, 0, 0, 1, 0]);
         };
         ColorMatrix.prototype.adjustColor = function (p_brightness, p_contrast, p_saturation, p_hue) {
-            this.adjustHue(p_hue);
-            this.adjustContrast(p_contrast);
-            this.adjustBrightness(p_brightness);
-            this.adjustSaturation(p_saturation);
+            this.adjustHue(p_hue || 0);
+            this.adjustContrast(p_contrast || 0);
+            this.adjustBrightness(p_brightness || 0);
+            this.adjustSaturation(p_saturation || 0);
         };
         ColorMatrix.prototype.adjustBrightness = function (p_val) {
             p_val = this.cleanValue(p_val, 1) * 255;
@@ -18633,9 +18608,9 @@ window.__extends = (this && this.__extends) || (function () {
             p_val = this.cleanValue(p_val, 1);
             p_val += 1;
             var invSat = 1 - p_val;
-            var invLumR = invSat * ColorMatrix.LUMA_R;
-            var invLumG = invSat * ColorMatrix.LUMA_G;
-            var invLumB = invSat * ColorMatrix.LUMA_B;
+            var invLumR = invSat * LUMA_R;
+            var invLumG = invSat * LUMA_G;
+            var invLumB = invSat * LUMA_B;
             this.multiplyMatrix([
                 (invLumR + p_val), invLumG, invLumB, 0, 0,
                 invLumR, (invLumG + p_val), invLumB, 0, 0,
@@ -18649,14 +18624,14 @@ window.__extends = (this && this.__extends) || (function () {
             var cos = Math.cos(p_val);
             var sin = Math.sin(p_val);
             this.multiplyMatrix([
-                ((ColorMatrix.LUMA_R + (cos * (1 - ColorMatrix.LUMA_R))) + (sin * -(ColorMatrix.LUMA_R))), ((ColorMatrix.LUMA_G + (cos * -(ColorMatrix.LUMA_G))) + (sin * -(ColorMatrix.LUMA_G))), ((ColorMatrix.LUMA_B + (cos * -(ColorMatrix.LUMA_B))) + (sin * (1 - ColorMatrix.LUMA_B))), 0, 0,
-                ((ColorMatrix.LUMA_R + (cos * -(ColorMatrix.LUMA_R))) + (sin * 0.143)), ((ColorMatrix.LUMA_G + (cos * (1 - ColorMatrix.LUMA_G))) + (sin * 0.14)), ((ColorMatrix.LUMA_B + (cos * -(ColorMatrix.LUMA_B))) + (sin * -0.283)), 0, 0,
-                ((ColorMatrix.LUMA_R + (cos * -(ColorMatrix.LUMA_R))) + (sin * -((1 - ColorMatrix.LUMA_R)))), ((ColorMatrix.LUMA_G + (cos * -(ColorMatrix.LUMA_G))) + (sin * ColorMatrix.LUMA_G)), ((ColorMatrix.LUMA_B + (cos * (1 - ColorMatrix.LUMA_B))) + (sin * ColorMatrix.LUMA_B)), 0, 0,
+                ((LUMA_R + (cos * (1 - LUMA_R))) + (sin * -(LUMA_R))), ((LUMA_G + (cos * -(LUMA_G))) + (sin * -(LUMA_G))), ((LUMA_B + (cos * -(LUMA_B))) + (sin * (1 - LUMA_B))), 0, 0,
+                ((LUMA_R + (cos * -(LUMA_R))) + (sin * 0.143)), ((LUMA_G + (cos * (1 - LUMA_G))) + (sin * 0.14)), ((LUMA_B + (cos * -(LUMA_B))) + (sin * -0.283)), 0, 0,
+                ((LUMA_R + (cos * -(LUMA_R))) + (sin * -((1 - LUMA_R)))), ((LUMA_G + (cos * -(LUMA_G))) + (sin * LUMA_G)), ((LUMA_B + (cos * (1 - LUMA_B))) + (sin * LUMA_B)), 0, 0,
                 0, 0, 0, 1, 0
             ]);
         };
         ColorMatrix.prototype.concat = function (p_matrix) {
-            if (p_matrix.length != ColorMatrix.LENGTH) {
+            if (p_matrix.length != LENGTH) {
                 return;
             }
             this.multiplyMatrix(p_matrix);
@@ -18667,7 +18642,7 @@ window.__extends = (this && this.__extends) || (function () {
             return result;
         };
         ColorMatrix.prototype.copyMatrix = function (p_matrix) {
-            var l = ColorMatrix.LENGTH;
+            var l = LENGTH;
             for (var i = 0; i < l; i++) {
                 this.matrix[i] = p_matrix[i];
             }
@@ -18690,19 +18665,19 @@ window.__extends = (this && this.__extends) || (function () {
         ColorMatrix.prototype.cleanValue = function (p_val, p_limit) {
             return Math.min(p_limit, Math.max(-p_limit, p_val));
         };
-        ColorMatrix.IDENTITY_MATRIX = [
-            1, 0, 0, 0, 0,
-            0, 1, 0, 0, 0,
-            0, 0, 1, 0, 0,
-            0, 0, 0, 1, 0
-        ];
-        ColorMatrix.LENGTH = ColorMatrix.IDENTITY_MATRIX.length;
-        ColorMatrix.LUMA_R = 0.299;
-        ColorMatrix.LUMA_G = 0.587;
-        ColorMatrix.LUMA_B = 0.114;
         return ColorMatrix;
     }());
     fgui.ColorMatrix = ColorMatrix;
+    var IDENTITY_MATRIX = [
+        1, 0, 0, 0, 0,
+        0, 1, 0, 0, 0,
+        0, 0, 1, 0, 0,
+        0, 0, 0, 1, 0
+    ];
+    var LENGTH = IDENTITY_MATRIX.length;
+    var LUMA_R = 0.299;
+    var LUMA_G = 0.587;
+    var LUMA_B = 0.114;
 })(fgui || (fgui = {}));
 
 (function (fgui) {
@@ -18874,7 +18849,8 @@ window.__extends = (this && this.__extends) || (function () {
             if (!str)
                 return "";
             else
-                return str.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;");
+                return str.replace(/&/g, "&amp;").replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;").replace(/'/g, "&apos;").replace(/"/g, "&quot;");
         };
         ToolSet.clamp = function (value, min, max) {
             if (value < min)
