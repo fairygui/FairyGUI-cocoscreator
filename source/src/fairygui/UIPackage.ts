@@ -13,7 +13,7 @@ namespace fgui {
         private _dependencies: Array<PackageDependency>;
         private _branches: Array<string>;
         public _branchIndex: number;
-        private _resBundle?: cc.AssetManager.Bundle;
+        private _bundle: cc.AssetManager.Bundle;
 
         public static _constructing: number = 0;
 
@@ -79,6 +79,7 @@ namespace fgui {
                 throw "Missing asset data.";
 
             pkg = new UIPackage();
+            pkg._bundle = cc.resources;
             pkg.loadPackage(new ByteBuffer(asset._buffer), path);
             UIPackage._instById[pkg.id] = pkg;
             UIPackage._instByName[pkg.name] = pkg;
@@ -139,9 +140,8 @@ namespace fgui {
                     onComplete = args[1];
             }
 
-            let loader = bundle || cc.resources;
-
-            loader.load(path, cc.BufferAsset, onProgress, function (err, asset: any) {
+            bundle = bundle || cc.resources;
+            bundle.load(path, cc.BufferAsset, onProgress, function (err, asset: any) {
                 if (err) {
                     if (onComplete != null)
                         onComplete(err, null);
@@ -149,27 +149,45 @@ namespace fgui {
                 }
 
                 let pkg: UIPackage = new UIPackage();
-                pkg._resBundle = bundle;
+                pkg._bundle = bundle;
                 pkg.loadPackage(new ByteBuffer(asset._buffer), path);
                 let cnt: number = pkg._items.length;
                 let urls: Array<string> = [];
+                let types: Array<typeof cc.Asset> = [];
                 for (var i: number = 0; i < cnt; i++) {
                     var pi: PackageItem = pkg._items[i];
-                    if (pi.type == PackageItemType.Atlas || pi.type == PackageItemType.Sound)
+                    if (pi.type == PackageItemType.Atlas || pi.type == PackageItemType.Sound) {
+                        let assetType = ItemTypeToAssetType[pi.type];
                         urls.push(pi.file);
+                        types.push(assetType);
+                    }
                 }
 
-                loader.load(urls, onProgress, function (err) {
-                    if (!err) {
+                let total = urls.length;
+                let lastErr;
+                let taskComplete = (err?) => {
+                    total--;
+                    if (err)
+                        lastErr = err;
+
+                    if (total <= 0) {
                         UIPackage._instById[pkg.id] = pkg;
                         UIPackage._instByName[pkg.name] = pkg;
-                        if (!bundle)
+                        if (pkg._path)
                             UIPackage._instByName[pkg._path] = pkg;
-                    }
 
-                    if (onComplete != null)
-                        onComplete(err, pkg);
-                });
+                        if (onComplete != null)
+                            onComplete(lastErr, pkg);
+                    }
+                }
+
+                if (total > 0) {
+                    urls.forEach((url, index) => {
+                        bundle.load(url, types[index], onProgress, taskComplete);
+                    });
+                }
+                else
+                    taskComplete();
             });
         }
 
@@ -182,7 +200,7 @@ namespace fgui {
             pkg.dispose();
             delete UIPackage._instById[pkg.id];
             delete UIPackage._instByName[pkg.name];
-            if (!pkg._resBundle && pkg._path)
+            if (pkg._path)
                 delete UIPackage._instById[pkg._path];
         }
 
@@ -319,6 +337,8 @@ namespace fgui {
             buffer.seek(indexTablePos, 1);
 
             var pi: PackageItem;
+            let pos = path.indexOf('/');
+            let shortPath = pos == -1 ? path : path.substr(0, pos + 1);
             path = path + "_";
 
             cnt = buffer.readShort();
@@ -390,6 +410,16 @@ namespace fgui {
                     case PackageItemType.Misc:
                         {
                             pi.file = path + cc.path.mainFileName(pi.file);
+                            break;
+                        }
+
+                    case PackageItemType.Spine:
+                    case PackageItemType.DragonBones:
+                        {
+                            pi.file = shortPath + cc.path.mainFileName(pi.file);
+                            pi.skeletonAnchor = new cc.Vec2();
+                            pi.skeletonAnchor.x = buffer.readFloat();
+                            pi.skeletonAnchor.y = buffer.readFloat();
                             break;
                         }
                 }
@@ -529,7 +559,7 @@ namespace fgui {
             return this.getItemAsset(pi);
         }
 
-        public getItemAsset(item: PackageItem): cc.Asset {
+        public getItemAsset(item: PackageItem, onComplete?: (err: Error, item: PackageItem) => void): cc.Asset {
             switch (item.type) {
                 case PackageItemType.Image:
                     if (!item.decoded) {
@@ -551,55 +581,73 @@ namespace fgui {
                             }
                         }
                     }
-                    return item.asset;
+                    break;
 
                 case PackageItemType.Atlas:
-                    if (!item.decoded) {
-                        item.decoded = true;
-                        item.asset = (this._resBundle || cc.resources).get(item.file, cc.Texture2D);
-                        if (!item.asset)
-                            console.log("Resource '" + item.file + "' not found!");
-                    }
-                    return item.asset;
-
                 case PackageItemType.Sound:
                     if (!item.decoded) {
                         item.decoded = true;
-                        item.asset = (this._resBundle || cc.resources).get(item.file, cc.AudioClip);
+                        item.asset = this._bundle.get(item.file, ItemTypeToAssetType[item.type]);
                         if (!item.asset)
-                            console.log("Resource '" + item.file + "' not found!");
+                            console.log("Resource '" + item.file + "' not found");
                     }
-                    return item.asset;
+                    break;
+
+                case PackageItemType.Spine:
+                    if (!item.decoded && !item.loading) {
+                        item.loading = true;
+                        this._bundle.load(item.file, sp.SkeletonData, (err: Error, asset: cc.Asset) => {
+                            item.decoded = true;
+                            item.asset = asset;
+
+                            onComplete(err, item);
+                        });
+                    }
+                    break;
+
+                case PackageItemType.DragonBones:
+                    if (!item.decoded && !item.loading) {
+                        item.loading = true;
+                        this._bundle.load(item.file, dragonBones.DragonBonesAsset, (err: Error, asset: cc.Asset) => {
+                            if (err) {
+                                item.decoded = true;
+                                onComplete(err, item);
+                                return;
+                            }
+
+                            item.asset = asset;
+                            let atlasFile = item.file.replace("_ske", "_tex");
+                            let pos = atlasFile.lastIndexOf('.');
+                            if (pos != -1)
+                                atlasFile = atlasFile.substr(0, pos + 1) + "json";
+                            this._bundle.load(atlasFile, dragonBones.DragonBonesAtlasAsset, (err: Error, asset: cc.Asset) => {
+                                item.decoded = true;
+                                item.atlasAsset = <dragonBones.DragonBonesAtlasAsset>asset;
+                                onComplete(err, item);
+                            });
+                        });
+                    }
+                    break;
 
                 case PackageItemType.Font:
                     if (!item.decoded) {
                         item.decoded = true;
                         this.loadFont(item);
                     }
-                    return item.asset;
+                    break;
 
                 case PackageItemType.MovieClip:
                     if (!item.decoded) {
                         item.decoded = true;
                         this.loadMovieClip(item);
                     }
-                    return null;
-
-                case PackageItemType.Misc:
-                    if (item.file)
-                        return (this._resBundle || cc.resources).get(item.file);
-                    else
-                        return null;
-
-                case PackageItemType.Spine:
-                    return null;
-
-                case PackageItemType.DragonBones:
-                    return null;
+                    break;
 
                 default:
-                    return null;
+                    break;
             }
+
+            return item.asset;
         }
 
         public loadAllAssets(): void {
@@ -766,4 +814,11 @@ namespace fgui {
         originalSize: cc.Size;
         rotated?: boolean;
     }
+
+    const ItemTypeToAssetType = {
+        [PackageItemType.Atlas]: cc.Texture2D,
+        [PackageItemType.Sound]: cc.AudioClip,
+        [PackageItemType.Spine]: sp.SkeletonData,
+        [PackageItemType.DragonBones]: dragonBones.DragonBonesAsset,
+    };
 }

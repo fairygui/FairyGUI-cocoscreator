@@ -5,15 +5,16 @@ namespace fgui {
         public owner: UIPackage;
 
         public type: PackageItemType;
-        public objectType: ObjectType;
+        public objectType?: ObjectType;
         public id: string;
         public name: string;
         public width: number = 0;
         public height: number = 0;
         public file: string;
-        public decoded: boolean;
+        public decoded?: boolean;
+        public loading?: boolean;
         public rawData?: ByteBuffer;
-        public asset: cc.Asset;
+        public asset?: cc.Asset;
 
         public highResolution?: Array<string>;
         public branches?: Array<string>;
@@ -33,6 +34,10 @@ namespace fgui {
 
         //componenet
         public extensionType?: any;
+
+        //skeleton
+        public skeletonAnchor?: cc.Vec2;
+        public atlasAsset?: dragonBones.DragonBonesAtlasAsset;
 
         public constructor() {
         }

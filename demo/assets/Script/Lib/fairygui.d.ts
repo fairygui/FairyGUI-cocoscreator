@@ -123,8 +123,9 @@ declare namespace fgui {
         Font = 5,
         Swf = 6,
         Misc = 7,
-        Spine = 8,
-        DragonBones = 9
+        Unknown = 8,
+        Spine = 9,
+        DragonBones = 10
     }
     enum ObjectType {
         Image = 0,
@@ -1032,6 +1033,7 @@ declare namespace fgui {
         private _frame;
         private _loop;
         private _animationName;
+        private _skinName;
         private _color;
         private _contentItem;
         private _container;
@@ -1057,12 +1059,25 @@ declare namespace fgui {
         set playing(value: boolean);
         get frame(): number;
         set frame(value: number);
+        get animationName(): string;
+        set animationName(value: string);
+        get skinName(): string;
+        set skinName(value: string);
+        get loop(): boolean;
+        set loop(value: boolean);
         get color(): cc.Color;
         set color(value: cc.Color);
+        get content(): sp.Skeleton | dragonBones.DragonBones;
         protected loadContent(): void;
         protected loadFromPackage(itemURL: string): void;
-        protected loadExternal(): void;
         private onLoaded;
+        setSpine(asset: sp.SkeletonData, anchor: cc.Vec2, pma?: boolean): void;
+        setDragonBones(asset: dragonBones.DragonBonesAsset, atlasAsset: dragonBones.DragonBonesAtlasAsset, anchor: cc.Vec2, pma?: boolean): void;
+        private onChange;
+        private onChangeSpine;
+        private onChangeDragonBones;
+        protected loadExternal(): void;
+        private onLoaded2;
         private updateLayout;
         private clearContent;
         protected handleSizeChanged(): void;
@@ -1506,15 +1521,16 @@ declare namespace fgui {
     class PackageItem {
         owner: UIPackage;
         type: PackageItemType;
-        objectType: ObjectType;
+        objectType?: ObjectType;
         id: string;
         name: string;
         width: number;
         height: number;
         file: string;
-        decoded: boolean;
+        decoded?: boolean;
+        loading?: boolean;
         rawData?: ByteBuffer;
-        asset: cc.Asset;
+        asset?: cc.Asset;
         highResolution?: Array<string>;
         branches?: Array<string>;
         scale9Grid?: cc.Rect;
@@ -1527,6 +1543,8 @@ declare namespace fgui {
         swing?: boolean;
         frames?: Array<Frame>;
         extensionType?: any;
+        skeletonAnchor?: cc.Vec2;
+        atlasAsset?: dragonBones.DragonBonesAtlasAsset;
         constructor();
         load(): cc.Asset;
         getBranch(): PackageItem;
@@ -1906,7 +1924,7 @@ declare namespace fgui {
         private _dependencies;
         private _branches;
         _branchIndex: number;
-        private _resBundle?;
+        private _bundle;
         static _constructing: number;
         private static _instById;
         private static _instByName;
@@ -1942,7 +1960,7 @@ declare namespace fgui {
         getItemById(itemId: string): PackageItem;
         getItemByName(resName: string): PackageItem;
         getItemAssetByName(resName: string): cc.Asset;
-        getItemAsset(item: PackageItem): cc.Asset;
+        getItemAsset(item: PackageItem, onComplete?: (err: Error, item: PackageItem) => void): cc.Asset;
         loadAllAssets(): void;
         private loadMovieClip;
         private loadFont;

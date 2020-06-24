@@ -55,6 +55,7 @@ namespace fgui {
         Font,
         Swf,
         Misc,
+        Unknown,
         Spine,
         DragonBones
     }

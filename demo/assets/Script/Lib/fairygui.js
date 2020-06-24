@@ -605,8 +605,9 @@ window.__extends = (this && this.__extends) || (function () {
         PackageItemType[PackageItemType["Font"] = 5] = "Font";
         PackageItemType[PackageItemType["Swf"] = 6] = "Swf";
         PackageItemType[PackageItemType["Misc"] = 7] = "Misc";
-        PackageItemType[PackageItemType["Spine"] = 8] = "Spine";
-        PackageItemType[PackageItemType["DragonBones"] = 9] = "DragonBones";
+        PackageItemType[PackageItemType["Unknown"] = 8] = "Unknown";
+        PackageItemType[PackageItemType["Spine"] = 9] = "Spine";
+        PackageItemType[PackageItemType["DragonBones"] = 10] = "DragonBones";
     })(PackageItemType = fgui.PackageItemType || (fgui.PackageItemType = {}));
     var ObjectType;
     (function (ObjectType) {
@@ -7728,6 +7729,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._playing != value) {
                     this._playing = value;
                     this.updateGear(5);
+                    this.onChange();
                 }
             },
             enumerable: false,
@@ -7741,6 +7743,46 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._frame != value) {
                     this._frame = value;
                     this.updateGear(5);
+                    this.onChange();
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "animationName", {
+            get: function () {
+                return this._animationName;
+            },
+            set: function (value) {
+                if (this._animationName != value) {
+                    this._animationName = value;
+                    this.onChange();
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "skinName", {
+            get: function () {
+                return this._skinName;
+            },
+            set: function (value) {
+                if (this._skinName != value) {
+                    this._skinName = value;
+                    this.onChange();
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "loop", {
+            get: function () {
+                return this._loop;
+            },
+            set: function (value) {
+                if (this._loop != value) {
+                    this._loop = value;
+                    this.onChange();
                 }
             },
             enumerable: false,
@@ -7754,8 +7796,16 @@ window.__extends = (this && this.__extends) || (function () {
                 if (!this._color.equals(value)) {
                     this._color.set(value);
                     this.updateGear(4);
-                    this._container.color = value;
+                    if (this._content)
+                        this._content.node.color = value;
                 }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "content", {
+            get: function () {
+                return;
             },
             enumerable: false,
             configurable: true
@@ -7776,41 +7826,105 @@ window.__extends = (this && this.__extends) || (function () {
                 this.sourceWidth = this._contentItem.width;
                 this.sourceHeight = this._contentItem.height;
                 this._contentItem = this._contentItem.getHighResolution();
-                this._contentItem.load();
                 if (this._autoSize)
                     this.setSize(this.sourceWidth, this.sourceHeight);
-                if (this._contentItem.type == fgui.PackageItemType.Spine) {
-                    if (this._contentItem.asset) {
-                        this.updateLayout();
-                    }
+                if (this._contentItem.type == fgui.PackageItemType.Spine || this._contentItem.type == fgui.PackageItemType.DragonBones)
+                    this._contentItem.owner.getItemAsset(this._contentItem, this.onLoaded.bind(this));
+            }
+        };
+        GLoader3D.prototype.onLoaded = function (err, item) {
+            if (this._contentItem != item)
+                return;
+            if (err)
+                console.warn(err);
+            if (!this._contentItem.asset)
+                return;
+            if (this._contentItem.type == fgui.PackageItemType.Spine)
+                this.setSpine(this._contentItem.asset, this._contentItem.skeletonAnchor);
+            else if (this._contentItem.type == fgui.PackageItemType.DragonBones)
+                this.setDragonBones(this._contentItem.asset, this._contentItem.atlasAsset, this._contentItem.skeletonAnchor);
+        };
+        GLoader3D.prototype.setSpine = function (asset, anchor, pma) {
+            this.url = null;
+            var node = new cc.Node();
+            node.color = this._color;
+            this._container.addChild(node);
+            node.setPosition(anchor.x, -anchor.y);
+            this._content = node.addComponent(sp.Skeleton);
+            this._content.premultipliedAlpha = pma;
+            this._content.skeletonData = asset;
+            this.onChangeSpine();
+            this.updateLayout();
+        };
+        GLoader3D.prototype.setDragonBones = function (asset, atlasAsset, anchor, pma) {
+            this.url = null;
+            var node = new cc.Node();
+            node.color = this._color;
+            this._container.addChild(node);
+            node.setPosition(anchor.x, -anchor.y);
+            this._content = node.addComponent(dragonBones.ArmatureDisplay);
+            this._content.premultipliedAlpha = pma;
+            this._content.dragonAsset = asset;
+            this._content.dragonAtlasAsset = atlasAsset;
+            var armatureKey = asset["init"](dragonBones.CCFactory.getInstance(), atlasAsset["_uuid"]);
+            var dragonBonesData = this._content["_factory"].getDragonBonesData(armatureKey);
+            this._content.armatureName = dragonBonesData.armatureNames[0];
+            this.onChangeDragonBones();
+            this.updateLayout();
+        };
+        GLoader3D.prototype.onChange = function () {
+            this.onChangeSpine();
+            this.onChangeDragonBones();
+        };
+        GLoader3D.prototype.onChangeSpine = function () {
+            if (!(this._content instanceof sp.Skeleton))
+                return;
+            if (this._animationName) {
+                var trackEntry = this._content.getCurrent(0);
+                if (!trackEntry || trackEntry.animation.name != this._animationName || trackEntry.isComplete() && !trackEntry.loop) {
+                    this._content.defaultAnimation = this._animationName;
+                    trackEntry = this._content.setAnimation(0, this._animationName, this._loop);
                 }
-                else if (this._contentItem.type == fgui.PackageItemType.DragonBones) {
+                if (this._playing)
+                    this._content.paused = false;
+                else {
+                    this._content.paused = true;
+                    trackEntry.trackTime = fgui.ToolSet.lerp(0, trackEntry.animationEnd - trackEntry.animationStart, this._frame / 100);
                 }
             }
+            else
+                this._content.clearTrack(0);
+            var skin = this._skinName || this._content.skeletonData.getRuntimeData().skins[0].name;
+            if (this._content["_skeleton"].skin != skin)
+                this._content.setSkin(skin);
+        };
+        GLoader3D.prototype.onChangeDragonBones = function () {
+            if (!(this._content instanceof dragonBones.ArmatureDisplay))
+                return;
+            if (this._animationName) {
+                if (this._playing)
+                    this._content.playAnimation(this._animationName, this._loop ? 0 : 1);
+                else
+                    this._content.armature().animation.gotoAndStopByFrame(this._animationName, this._frame);
+            }
+            else
+                this._content.armature().animation.reset();
         };
         GLoader3D.prototype.loadExternal = function () {
             if (fgui.ToolSet.startsWith(this._url, "http://")
                 || fgui.ToolSet.startsWith(this._url, "https://")
                 || fgui.ToolSet.startsWith(this._url, '/'))
-                cc.assetManager.loadRemote(this._url, this.onLoaded.bind(this));
+                cc.assetManager.loadRemote(this._url, sp.SkeletonData, this.onLoaded2.bind(this));
             else
-                cc.resources.load(this._url, cc.Asset, this.onLoaded.bind(this));
+                cc.resources.load(this._url, sp.SkeletonData, this.onLoaded2.bind(this));
         };
-        GLoader3D.prototype.onLoaded = function (err, asset) {
+        GLoader3D.prototype.onLoaded2 = function (err, asset) {
             if (!this._url || !cc.isValid(this._node))
                 return;
             if (err)
                 console.warn(err);
         };
         GLoader3D.prototype.updateLayout = function () {
-            if (this._content == null) {
-                if (this._autoSize) {
-                    this._updatingLayout = true;
-                    this.setSize(50, 30);
-                    this._updatingLayout = false;
-                }
-                return;
-            }
             var contentWidth = this.sourceWidth;
             var contentHeight = this.sourceHeight;
             var pivotCorrectX = -this.pivotX * this._width;
@@ -7823,10 +7937,11 @@ window.__extends = (this && this.__extends) || (function () {
                     contentHeight = 30;
                 this.setSize(contentWidth, contentHeight);
                 this._updatingLayout = false;
-                this._container.setContentSize(this._width, this._height);
-                this._container.setPosition(pivotCorrectX, pivotCorrectY);
-                if (contentWidth == this._width && contentHeight == this._height)
+                if (contentWidth == this._width && contentHeight == this._height) {
+                    this._container.setScale(1, 1);
+                    this._container.setPosition(pivotCorrectX, pivotCorrectY);
                     return;
+                }
             }
             var sx = 1, sy = 1;
             if (this._fill != fgui.LoaderFillType.None) {
@@ -7859,7 +7974,7 @@ window.__extends = (this && this.__extends) || (function () {
                     contentHeight = this.sourceHeight * sy;
                 }
             }
-            this._container.setContentSize(contentWidth, contentHeight);
+            this._container.setScale(sx, sy);
             var nx, ny;
             if (this._align == fgui.AlignType.Left)
                 nx = 0;
@@ -7878,6 +7993,10 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GLoader3D.prototype.clearContent = function () {
             this._contentItem = null;
+            if (this._content) {
+                this._content.node.destroy();
+                this._content = null;
+            }
         };
         GLoader3D.prototype.handleSizeChanged = function () {
             _super.prototype.handleSizeChanged.call(this);
@@ -7935,6 +8054,7 @@ window.__extends = (this && this.__extends) || (function () {
             this._shrinkOnly = buffer.readBool();
             this._autoSize = buffer.readBool();
             this._animationName = buffer.readS();
+            this._skinName = buffer.readS();
             this._playing = buffer.readBool();
             this._frame = buffer.readInt();
             this._loop = buffer.readBool();
@@ -14333,6 +14453,7 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
+    var _a;
     var UIPackage = (function () {
         function UIPackage() {
             this._items = new Array();
@@ -14381,6 +14502,7 @@ window.__extends = (this && this.__extends) || (function () {
             if (!asset._buffer)
                 throw "Missing asset data.";
             pkg = new UIPackage();
+            pkg._bundle = cc.resources;
             pkg.loadPackage(new fgui.ByteBuffer(asset._buffer), path);
             UIPackage._instById[pkg.id] = pkg;
             UIPackage._instByName[pkg.name] = pkg;
@@ -14415,33 +14537,49 @@ window.__extends = (this && this.__extends) || (function () {
                 else
                     onComplete = args[1];
             }
-            var loader = bundle || cc.resources;
-            loader.load(path, cc.BufferAsset, onProgress, function (err, asset) {
+            bundle = bundle || cc.resources;
+            bundle.load(path, cc.BufferAsset, onProgress, function (err, asset) {
                 if (err) {
                     if (onComplete != null)
                         onComplete(err, null);
                     return;
                 }
                 var pkg = new UIPackage();
-                pkg._resBundle = bundle;
+                pkg._bundle = bundle;
                 pkg.loadPackage(new fgui.ByteBuffer(asset._buffer), path);
                 var cnt = pkg._items.length;
                 var urls = [];
+                var types = [];
                 for (var i = 0; i < cnt; i++) {
                     var pi = pkg._items[i];
-                    if (pi.type == fgui.PackageItemType.Atlas || pi.type == fgui.PackageItemType.Sound)
+                    if (pi.type == fgui.PackageItemType.Atlas || pi.type == fgui.PackageItemType.Sound) {
+                        var assetType = ItemTypeToAssetType[pi.type];
                         urls.push(pi.file);
+                        types.push(assetType);
+                    }
                 }
-                loader.load(urls, onProgress, function (err) {
-                    if (!err) {
+                var total = urls.length;
+                var lastErr;
+                var taskComplete = function (err) {
+                    total--;
+                    if (err)
+                        lastErr = err;
+                    if (total <= 0) {
                         UIPackage._instById[pkg.id] = pkg;
                         UIPackage._instByName[pkg.name] = pkg;
-                        if (!bundle)
+                        if (pkg._path)
                             UIPackage._instByName[pkg._path] = pkg;
+                        if (onComplete != null)
+                            onComplete(lastErr, pkg);
                     }
-                    if (onComplete != null)
-                        onComplete(err, pkg);
-                });
+                };
+                if (total > 0) {
+                    urls.forEach(function (url, index) {
+                        bundle.load(url, types[index], onProgress, taskComplete);
+                    });
+                }
+                else
+                    taskComplete();
             });
         };
         UIPackage.removePackage = function (packageIdOrName) {
@@ -14453,7 +14591,7 @@ window.__extends = (this && this.__extends) || (function () {
             pkg.dispose();
             delete UIPackage._instById[pkg.id];
             delete UIPackage._instByName[pkg.name];
-            if (!pkg._resBundle && pkg._path)
+            if (pkg._path)
                 delete UIPackage._instById[pkg._path];
         };
         UIPackage.createObject = function (pkgName, resName, userClass) {
@@ -14565,6 +14703,8 @@ window.__extends = (this && this.__extends) || (function () {
             }
             buffer.seek(indexTablePos, 1);
             var pi;
+            var pos = path.indexOf('/');
+            var shortPath = pos == -1 ? path : path.substr(0, pos + 1);
             path = path + "_";
             cnt = buffer.readShort();
             for (i = 0; i < cnt; i++) {
@@ -14626,6 +14766,15 @@ window.__extends = (this && this.__extends) || (function () {
                     case fgui.PackageItemType.Misc:
                         {
                             pi.file = path + cc.path.mainFileName(pi.file);
+                            break;
+                        }
+                    case fgui.PackageItemType.Spine:
+                    case fgui.PackageItemType.DragonBones:
+                        {
+                            pi.file = shortPath + cc.path.mainFileName(pi.file);
+                            pi.skeletonAnchor = new cc.Vec2();
+                            pi.skeletonAnchor.x = buffer.readFloat();
+                            pi.skeletonAnchor.y = buffer.readFloat();
                             break;
                         }
                 }
@@ -14754,7 +14903,8 @@ window.__extends = (this && this.__extends) || (function () {
             }
             return this.getItemAsset(pi);
         };
-        UIPackage.prototype.getItemAsset = function (item) {
+        UIPackage.prototype.getItemAsset = function (item, onComplete) {
+            var _this = this;
             switch (item.type) {
                 case fgui.PackageItemType.Image:
                     if (!item.decoded) {
@@ -14774,47 +14924,64 @@ window.__extends = (this && this.__extends) || (function () {
                             }
                         }
                     }
-                    return item.asset;
+                    break;
                 case fgui.PackageItemType.Atlas:
-                    if (!item.decoded) {
-                        item.decoded = true;
-                        item.asset = (this._resBundle || cc.resources).get(item.file, cc.Texture2D);
-                        if (!item.asset)
-                            console.log("Resource '" + item.file + "' not found!");
-                    }
-                    return item.asset;
                 case fgui.PackageItemType.Sound:
                     if (!item.decoded) {
                         item.decoded = true;
-                        item.asset = (this._resBundle || cc.resources).get(item.file, cc.AudioClip);
+                        item.asset = this._bundle.get(item.file, ItemTypeToAssetType[item.type]);
                         if (!item.asset)
-                            console.log("Resource '" + item.file + "' not found!");
+                            console.log("Resource '" + item.file + "' not found");
                     }
-                    return item.asset;
+                    break;
+                case fgui.PackageItemType.Spine:
+                    if (!item.decoded && !item.loading) {
+                        item.loading = true;
+                        this._bundle.load(item.file, sp.SkeletonData, function (err, asset) {
+                            item.decoded = true;
+                            item.asset = asset;
+                            onComplete(err, item);
+                        });
+                    }
+                    break;
+                case fgui.PackageItemType.DragonBones:
+                    if (!item.decoded && !item.loading) {
+                        item.loading = true;
+                        this._bundle.load(item.file, dragonBones.DragonBonesAsset, function (err, asset) {
+                            if (err) {
+                                item.decoded = true;
+                                onComplete(err, item);
+                                return;
+                            }
+                            item.asset = asset;
+                            var atlasFile = item.file.replace("_ske", "_tex");
+                            var pos = atlasFile.lastIndexOf('.');
+                            if (pos != -1)
+                                atlasFile = atlasFile.substr(0, pos + 1) + "json";
+                            _this._bundle.load(atlasFile, dragonBones.DragonBonesAtlasAsset, function (err, asset) {
+                                item.decoded = true;
+                                item.atlasAsset = asset;
+                                onComplete(err, item);
+                            });
+                        });
+                    }
+                    break;
                 case fgui.PackageItemType.Font:
                     if (!item.decoded) {
                         item.decoded = true;
                         this.loadFont(item);
                     }
-                    return item.asset;
+                    break;
                 case fgui.PackageItemType.MovieClip:
                     if (!item.decoded) {
                         item.decoded = true;
                         this.loadMovieClip(item);
                     }
-                    return null;
-                case fgui.PackageItemType.Misc:
-                    if (item.file)
-                        return (this._resBundle || cc.resources).get(item.file);
-                    else
-                        return null;
-                case fgui.PackageItemType.Spine:
-                    return null;
-                case fgui.PackageItemType.DragonBones:
-                    return null;
+                    break;
                 default:
-                    return null;
+                    break;
             }
+            return item.asset;
         };
         UIPackage.prototype.loadAllAssets = function () {
             var cnt = this._items.length;
@@ -14950,6 +15117,12 @@ window.__extends = (this && this.__extends) || (function () {
         return UIPackage;
     }());
     fgui.UIPackage = UIPackage;
+    var ItemTypeToAssetType = (_a = {},
+        _a[fgui.PackageItemType.Atlas] = cc.Texture2D,
+        _a[fgui.PackageItemType.Sound] = cc.AudioClip,
+        _a[fgui.PackageItemType.Spine] = sp.SkeletonData,
+        _a[fgui.PackageItemType.DragonBones] = dragonBones.DragonBonesAsset,
+        _a);
 })(fgui || (fgui = {}));
 
 (function (fgui) {
