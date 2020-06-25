@@ -10,18 +10,11 @@ namespace fgui {
         private _frame: number = 0;
         private _loop: boolean;
         private _animationName: string;
-<<<<<<< HEAD
-        private _color: cc.Color;
-        private _contentItem: PackageItem;
-        private _container: cc.Node;
-        private _content: cc.Component;
-=======
         private _skinName: string;
         private _color: cc.Color;
         private _contentItem: PackageItem;
         private _container: cc.Node;
         private _content: sp.Skeleton | dragonBones.ArmatureDisplay;
->>>>>>> ccc2.4
         private _updatingLayout: boolean;
 
         public constructor() {
@@ -128,11 +121,8 @@ namespace fgui {
             if (this._playing != value) {
                 this._playing = value;
                 this.updateGear(5);
-<<<<<<< HEAD
-=======
 
                 this.onChange();
->>>>>>> ccc2.4
             }
         }
 
@@ -144,8 +134,6 @@ namespace fgui {
             if (this._frame != value) {
                 this._frame = value;
                 this.updateGear(5);
-<<<<<<< HEAD
-=======
 
                 this.onChange();
             }
@@ -181,7 +169,6 @@ namespace fgui {
             if (this._loop != value) {
                 this._loop = value;
                 this.onChange();
->>>>>>> ccc2.4
             }
         }
 
@@ -193,12 +180,6 @@ namespace fgui {
             if (!this._color.equals(value)) {
                 this._color.set(value);
                 this.updateGear(4);
-<<<<<<< HEAD
-                this._container.color = value;
-            }
-        }
-
-=======
 
                 if (this._content)
                     this._content.node.color = value;
@@ -209,7 +190,6 @@ namespace fgui {
             return
         }
 
->>>>>>> ccc2.4
         protected loadContent(): void {
             this.clearContent();
 
@@ -229,36 +209,10 @@ namespace fgui {
                 this.sourceWidth = this._contentItem.width;
                 this.sourceHeight = this._contentItem.height;
                 this._contentItem = this._contentItem.getHighResolution();
-<<<<<<< HEAD
-                this._contentItem.load();
-=======
->>>>>>> ccc2.4
 
                 if (this._autoSize)
                     this.setSize(this.sourceWidth, this.sourceHeight);
 
-<<<<<<< HEAD
-                if (this._contentItem.type == PackageItemType.Spine) {
-                    if (this._contentItem.asset) {
-                        this.updateLayout();
-                    }
-                }
-                else if (this._contentItem.type == PackageItemType.DragonBones) {
-                }
-            }
-        }
-
-        protected loadExternal(): void {
-            // if (ToolSet.startsWith(this._url, "http://")
-            //     || ToolSet.startsWith(this._url, "https://")
-            //     || ToolSet.startsWith(this._url, '/'))
-            //     cc.assetManager.loadRemote(this._url, this.onLoaded.bind(this));
-            // else
-            //     cc.resources.load(this._url, cc.Asset, this.onLoaded.bind(this));
-        }
-
-        private onLoaded(err, asset): void {
-=======
                 if (this._contentItem.type == PackageItemType.Spine || this._contentItem.type == PackageItemType.DragonBones)
                     this._contentItem.owner.getItemAsset(this._contentItem, this.onLoaded.bind(this));
             }
@@ -374,7 +328,6 @@ namespace fgui {
         }
 
         private onLoaded2(err, asset): void {
->>>>>>> ccc2.4
             //因为是异步返回的，而这时可能url已经被改变，所以不能直接用返回的结果
 
             if (!this._url || !cc.isValid(this._node))
@@ -385,18 +338,6 @@ namespace fgui {
         }
 
         private updateLayout(): void {
-<<<<<<< HEAD
-            if (this._content == null) {
-                if (this._autoSize) {
-                    this._updatingLayout = true;
-                    this.setSize(50, 30);
-                    this._updatingLayout = false;
-                }
-                return;
-            }
-
-=======
->>>>>>> ccc2.4
             let contentWidth = this.sourceWidth;
             let contentHeight = this.sourceHeight;
 
@@ -413,20 +354,12 @@ namespace fgui {
                 this.setSize(contentWidth, contentHeight);
                 this._updatingLayout = false;
 
-<<<<<<< HEAD
-                this._container.setContentSize(this._width, this._height);
-                this._container.setPosition(pivotCorrectX, pivotCorrectY);
-
-                if (contentWidth == this._width && contentHeight == this._height)
-                    return;
-=======
                 if (contentWidth == this._width && contentHeight == this._height) {
                     this._container.setScale(1, 1);
                     this._container.setPosition(pivotCorrectX, pivotCorrectY);
 
                     return;
                 }
->>>>>>> ccc2.4
             }
 
             var sx: number = 1, sy: number = 1;
@@ -462,11 +395,7 @@ namespace fgui {
                 }
             }
 
-<<<<<<< HEAD
-            this._container.setContentSize(contentWidth, contentHeight);
-=======
             this._container.setScale(sx, sy);
->>>>>>> ccc2.4
 
             var nx: number, ny: number;
             if (this._align == AlignType.Left)
@@ -487,13 +416,10 @@ namespace fgui {
 
         private clearContent(): void {
             this._contentItem = null;
-<<<<<<< HEAD
-=======
             if (this._content) {
                 this._content.node.destroy();
                 this._content = null;
             }
->>>>>>> ccc2.4
         }
 
         protected handleSizeChanged(): void {
@@ -561,10 +487,7 @@ namespace fgui {
             this._shrinkOnly = buffer.readBool();
             this._autoSize = buffer.readBool();
             this._animationName = buffer.readS();
-<<<<<<< HEAD
-=======
             this._skinName = buffer.readS();
->>>>>>> ccc2.4
             this._playing = buffer.readBool();
             this._frame = buffer.readInt();
             this._loop = buffer.readBool();
