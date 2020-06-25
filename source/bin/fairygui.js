@@ -8410,7 +8410,6 @@ window.__extends = (this && this.__extends) || (function () {
             _this._touchDisabled = true;
             _this._text = "";
             _this._color = new cc.Color(255, 255, 255, 255);
-            _this._strokeColor = new cc.Color();
             _this.createRenderer();
             _this.fontSize = 12;
             _this.leading = 3;
@@ -8493,20 +8492,22 @@ window.__extends = (this && this.__extends) || (function () {
         });
         Object.defineProperty(GTextField.prototype, "align", {
             get: function () {
-                return this._label.horizontalAlign;
+                return this._label ? this._label.horizontalAlign : 0;
             },
             set: function (value) {
-                this._label.horizontalAlign = value;
+                if (this._label)
+                    this._label.horizontalAlign = value;
             },
             enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextField.prototype, "verticalAlign", {
             get: function () {
-                return this._label.verticalAlign;
+                return this._label ? this._label.verticalAlign : 0;
             },
             set: function (value) {
-                this._label.verticalAlign = value;
+                if (this._label)
+                    this._label.verticalAlign = value;
             },
             enumerable: false,
             configurable: true
@@ -8527,12 +8528,12 @@ window.__extends = (this && this.__extends) || (function () {
         });
         Object.defineProperty(GTextField.prototype, "letterSpacing", {
             get: function () {
-                return this._label["spacingX"];
+                return this._label ? this._label.spacingX : 0;
             },
             set: function (value) {
-                if (this._label["spacingX"] != value) {
+                if (this._label && this._label.spacingX != value) {
                     this.markSizeChanged();
-                    this._label["spacingX"] = value;
+                    this._label.spacingX = value;
                 }
             },
             enumerable: false,
@@ -8540,37 +8541,44 @@ window.__extends = (this && this.__extends) || (function () {
         });
         Object.defineProperty(GTextField.prototype, "underline", {
             get: function () {
-                return false;
+                return this._label ? this._label.enableUnderline : false;
             },
             set: function (value) {
+                if (this._label)
+                    this._label.enableUnderline = value;
             },
             enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextField.prototype, "bold", {
             get: function () {
-                return false;
+                return this._label ? this._label.enableBold : false;
             },
             set: function (value) {
+                if (this._label)
+                    this._label.enableBold = value;
             },
             enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextField.prototype, "italic", {
             get: function () {
-                return false;
+                return this._label ? this._label.enableItalic : false;
             },
             set: function (value) {
+                if (this._label)
+                    this._label.enableItalic = value;
             },
             enumerable: false,
             configurable: true
         });
         Object.defineProperty(GTextField.prototype, "singleLine", {
             get: function () {
-                return !this._label.enableWrapText;
+                return this._label ? !this._label.enableWrapText : false;
             },
             set: function (value) {
-                this._label.enableWrapText = !value;
+                if (this._label)
+                    this._label.enableWrapText = !value;
             },
             enumerable: false,
             configurable: true
@@ -8602,10 +8610,53 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._strokeColor;
             },
             set: function (value) {
-                if (!this._strokeColor.equals(value)) {
+                if (!this._strokeColor || !this._strokeColor.equals(value)) {
+                    if (!this._strokeColor)
+                        this._strokeColor = new cc.Color();
                     this._strokeColor.set(value);
                     this.updateGear(4);
                     this.updateStrokeColor();
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(GTextField.prototype, "shadowOffset", {
+            get: function () {
+                return this._shadowOffset;
+            },
+            set: function (value) {
+                if (!this._shadowOffset || !this._shadowOffset.equals(value)) {
+                    if (!this._shadowOffset)
+                        this._shadowOffset = new cc.Vec2();
+                    this._shadowOffset.set(value);
+                    if (this._shadowOffset.x != 0 || this._shadowOffset.y != 0) {
+                        if (!this._shadow) {
+                            this._shadow = this._node.addComponent(cc.LabelShadow);
+                            this.updateShadowColor();
+                        }
+                        else
+                            this._shadow.enabled = true;
+                        this._shadow.offset.x = value.x;
+                        this._shadow.offset.y = -value.y;
+                    }
+                    else if (this._shadow)
+                        this._shadow.enabled = false;
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(GTextField.prototype, "shadowColor", {
+            get: function () {
+                return this._shadowColor;
+            },
+            set: function (value) {
+                if (!this._shadowColor || !this._shadowColor.equals(value)) {
+                    if (!this._shadowColor)
+                        this._shadowColor = new cc.Color();
+                    this._shadowColor.set(value);
+                    this.updateShadowColor();
                 }
             },
             enumerable: false,
@@ -8759,10 +8810,22 @@ window.__extends = (this && this.__extends) || (function () {
         GTextField.prototype.updateStrokeColor = function () {
             if (!this._outline)
                 return;
+            if (!this._strokeColor)
+                this._strokeColor = new cc.Color();
             if (this._grayed)
                 this._outline.color = fgui.ToolSet.toGrayed(this._strokeColor);
             else
                 this._outline.color = this._strokeColor;
+        };
+        GTextField.prototype.updateShadowColor = function () {
+            if (!this._shadow)
+                return;
+            if (!this._shadowColor)
+                this._shadowColor = new cc.Color();
+            if (this._grayed)
+                this._shadow.color = fgui.ToolSet.toGrayed(this._shadowColor);
+            else
+                this._shadow.color = this._shadowColor;
         };
         GTextField.prototype.updateFontSize = function () {
             var font = this._label.font;
@@ -8876,8 +8939,12 @@ window.__extends = (this && this.__extends) || (function () {
                 this.strokeColor = buffer.readColor();
                 this.stroke = buffer.readFloat();
             }
-            if (buffer.readBool())
-                buffer.skip(12);
+            if (buffer.readBool()) {
+                this.shadowColor = buffer.readColor();
+                var f1 = buffer.readFloat();
+                var f2 = buffer.readFloat();
+                this.shadowOffset = new cc.Vec2(f1, f2);
+            }
             if (buffer.readBool())
                 this._templateVars = {};
         };
@@ -8938,24 +9005,6 @@ window.__extends = (this && this.__extends) || (function () {
             enumerable: false,
             configurable: true
         });
-        Object.defineProperty(GRichTextField.prototype, "verticalAlign", {
-            get: function () {
-                return cc.Label.VerticalAlign.TOP;
-            },
-            set: function (value) {
-            },
-            enumerable: false,
-            configurable: true
-        });
-        Object.defineProperty(GRichTextField.prototype, "letterSpacing", {
-            get: function () {
-                return 0;
-            },
-            set: function (value) {
-            },
-            enumerable: false,
-            configurable: true
-        });
         Object.defineProperty(GRichTextField.prototype, "underline", {
             get: function () {
                 return this._underline;
@@ -8991,15 +9040,6 @@ window.__extends = (this && this.__extends) || (function () {
                     this._italics = value;
                     this.updateText();
                 }
-            },
-            enumerable: false,
-            configurable: true
-        });
-        Object.defineProperty(GRichTextField.prototype, "singleLine", {
-            get: function () {
-                return false;
-            },
-            set: function (value) {
             },
             enumerable: false,
             configurable: true
@@ -9936,15 +9976,6 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._editBox.placeholderLabel) {
                     this._editBox.placeholderLabel.verticalAlign = value;
                 }
-            },
-            enumerable: false,
-            configurable: true
-        });
-        Object.defineProperty(GTextInput.prototype, "letterSpacing", {
-            get: function () {
-                return 0;
-            },
-            set: function (value) {
             },
             enumerable: false,
             configurable: true
@@ -11554,11 +11585,11 @@ window.__extends = (this && this.__extends) || (function () {
             return _this;
         }
         ScrollPane.prototype.setup = function (buffer) {
-            this._owner = (this.node["$gobj"]);
+            var o = this._owner = (this.node["$gobj"]);
             this._maskContainer = new cc.Node("ScrollPane");
             this._maskContainer.setAnchorPoint(0, 1);
-            this._maskContainer.parent = this._owner.node;
-            this._container = this._owner._container;
+            this._maskContainer.parent = o.node;
+            this._container = o._container;
             this._container.parent = this._maskContainer;
             this._scrollBarMargin = new fgui.Margin();
             this._mouseWheelEnabled = true;
@@ -11584,10 +11615,10 @@ window.__extends = (this && this.__extends) || (function () {
             this._scrollStep = fgui.UIConfig.defaultScrollStep;
             this._mouseWheelStep = this._scrollStep * 2;
             this._decelerationRate = fgui.UIConfig.defaultScrollDecelerationRate;
-            this._owner.on(fgui.Event.TOUCH_BEGIN, this.onTouchBegin, this);
-            this._owner.on(fgui.Event.TOUCH_MOVE, this.onTouchMove, this);
-            this._owner.on(fgui.Event.TOUCH_END, this.onTouchEnd, this);
-            this._owner.on(fgui.Event.MOUSE_WHEEL, this.onMouseWheel, this);
+            o.on(fgui.Event.TOUCH_BEGIN, this.onTouchBegin, this);
+            o.on(fgui.Event.TOUCH_MOVE, this.onTouchMove, this);
+            o.on(fgui.Event.TOUCH_END, this.onTouchEnd, this);
+            o.on(fgui.Event.MOUSE_WHEEL, this.onMouseWheel, this);
             this._scrollType = buffer.readByte();
             var scrollBarDisplay = buffer.readByte();
             var flags = buffer.readInt();
@@ -11601,10 +11632,14 @@ window.__extends = (this && this.__extends) || (function () {
             var hzScrollBarRes = buffer.readS();
             var headerRes = buffer.readS();
             var footerRes = buffer.readS();
-            this._displayOnLeft = (flags & 1) != 0;
-            this._snapToItem = (flags & 2) != 0;
-            this._displayInDemand = (flags & 4) != 0;
-            this._pageMode = (flags & 8) != 0;
+            if ((flags & 1) != 0)
+                this._displayOnLeft = true;
+            if ((flags & 2) != 0)
+                this._snapToItem = true;
+            if ((flags & 4) != 0)
+                this._displayInDemand = true;
+            if ((flags & 8) != 0)
+                this._pageMode = true;
             if (flags & 16)
                 this._touchEffect = true;
             else if (flags & 32)
@@ -11617,10 +11652,14 @@ window.__extends = (this && this.__extends) || (function () {
                 this._bouncebackEffect = false;
             else
                 this._bouncebackEffect = fgui.UIConfig.defaultScrollBounceEffect;
-            this._inertiaDisabled = (flags & 256) != 0;
+            if ((flags & 256) != 0)
+                this._inertiaDisabled = true;
             if ((flags & 512) == 0)
                 this._maskContainer.addComponent(cc.Mask);
-            this._floating = (flags & 1024) != 0;
+            if ((flags & 1024) != 0)
+                this._floating = true;
+            if ((flags & 2048) != 0)
+                this._dontClipMargin = true;
             if (scrollBarDisplay == fgui.ScrollBarDisplayType.Default)
                 scrollBarDisplay = fgui.UIConfig.defaultScrollBarDisplay;
             if (scrollBarDisplay != fgui.ScrollBarDisplayType.Hidden) {
@@ -11631,7 +11670,7 @@ window.__extends = (this && this.__extends) || (function () {
                         if (!this._vtScrollBar)
                             throw "cannot create scrollbar from " + res;
                         this._vtScrollBar.setScrollPane(this, true);
-                        this._vtScrollBar.node.parent = this._owner.node;
+                        this._vtScrollBar.node.parent = o.node;
                     }
                 }
                 if (this._scrollType == fgui.ScrollType.Both || this._scrollType == fgui.ScrollType.Horizontal) {
@@ -11641,17 +11680,18 @@ window.__extends = (this && this.__extends) || (function () {
                         if (!this._hzScrollBar)
                             throw "cannot create scrollbar from " + res;
                         this._hzScrollBar.setScrollPane(this, false);
-                        this._hzScrollBar.node.parent = this._owner.node;
+                        this._hzScrollBar.node.parent = o.node;
                     }
                 }
-                this._scrollBarDisplayAuto = scrollBarDisplay == fgui.ScrollBarDisplayType.Auto;
+                if (scrollBarDisplay == fgui.ScrollBarDisplayType.Auto)
+                    this._scrollBarDisplayAuto = true;
                 if (this._scrollBarDisplayAuto) {
                     if (this._vtScrollBar)
                         this._vtScrollBar.node.active = false;
                     if (this._hzScrollBar)
                         this._hzScrollBar.node.active = false;
-                    this._owner.on(fgui.Event.ROLL_OVER, this.onRollOver, this);
-                    this._owner.on(fgui.Event.ROLL_OUT, this.onRollOut, this);
+                    o.on(fgui.Event.ROLL_OVER, this.onRollOver, this);
+                    o.on(fgui.Event.ROLL_OUT, this.onRollOut, this);
                 }
             }
             if (headerRes) {
@@ -11669,7 +11709,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._maskContainer.insertChild(this._footer.node, 0);
             }
             this._refreshBarAxis = (this._scrollType == fgui.ScrollType.Both || this._scrollType == fgui.ScrollType.Vertical) ? "y" : "x";
-            this.setSize(this._owner.width, this._owner.height);
+            this.setSize(o.width, o.height);
         };
         ScrollPane.prototype.onDestroy = function () {
             this._pageController = null;
@@ -12187,12 +12227,16 @@ window.__extends = (this && this.__extends) || (function () {
         ScrollPane.prototype.adjustMaskContainer = function () {
             var mx = 0;
             if (this._displayOnLeft && this._vtScrollBar && !this._floating)
-                mx = Math.floor(this._owner.margin.left + this._vtScrollBar.width);
-            this._maskContainer.setAnchorPoint(this._owner._alignOffset.x / this._viewSize.x, 1 - this._owner._alignOffset.y / this._viewSize.y);
-            if (this._owner._customMask)
-                this._maskContainer.setPosition(mx + this._owner._alignOffset.x, -this._owner._alignOffset.y);
+                mx = this._vtScrollBar.width;
+            var o = this._owner;
+            if (this._dontClipMargin)
+                this._maskContainer.setAnchorPoint((o.margin.left + o._alignOffset.x) / o.width, 1 - (o.margin.top + o._alignOffset.y) / o.height);
             else
-                this._maskContainer.setPosition(this._owner._pivotCorrectX + mx + this._owner._alignOffset.x, this._owner._pivotCorrectY - this._owner._alignOffset.y);
+                this._maskContainer.setAnchorPoint(o._alignOffset.x / this._viewSize.x, 1 - o._alignOffset.y / this._viewSize.y);
+            if (o._customMask)
+                this._maskContainer.setPosition(mx + o._alignOffset.x, -o._alignOffset.y);
+            else
+                this._maskContainer.setPosition(o._pivotCorrectX + mx + o._alignOffset.x, o._pivotCorrectY - o._alignOffset.y);
         };
         ScrollPane.prototype.setSize = function (aWidth, aHeight) {
             if (this._hzScrollBar) {
@@ -12317,6 +12361,10 @@ window.__extends = (this && this.__extends) || (function () {
                 maskWidth += this._vtScrollBar.width;
             if (this._hScrollNone && this._hzScrollBar)
                 maskHeight += this._hzScrollBar.height;
+            if (this._dontClipMargin) {
+                maskWidth += (this._owner.margin.left + this._owner.margin.right);
+                maskHeight += (this._owner.margin.top + this._owner.margin.bottom);
+            }
             this._maskContainer.setContentSize(maskWidth, maskHeight);
             if (this._vtScrollBar)
                 this._vtScrollBar.handlePositionChanged();

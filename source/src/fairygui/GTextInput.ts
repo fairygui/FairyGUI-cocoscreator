@@ -92,7 +92,7 @@ namespace fgui {
 
         public set align(value: cc.Label.HorizontalAlign) {
             this._editBox.textLabel.horizontalAlign = value;
-            if (this._editBox.placeholderLabel){
+            if (this._editBox.placeholderLabel) {
                 this._editBox.placeholderLabel.horizontalAlign = value;
             }
         }
@@ -103,17 +103,9 @@ namespace fgui {
 
         public set verticalAlign(value: cc.Label.VerticalAlign) {
             this._editBox.textLabel.verticalAlign = value;
-            if (this._editBox.placeholderLabel){
+            if (this._editBox.placeholderLabel) {
                 this._editBox.placeholderLabel.verticalAlign = value;
             }
-        }
-
-        public get letterSpacing(): number {
-            return 0;
-        }
-
-        public set letterSpacing(value: number) {
-            //not supported
         }
 
         public get singleLine(): boolean {
@@ -196,8 +188,8 @@ namespace fgui {
                 this.password = true;
 
             //同步一下对齐方式
-       
-            if(this._editBox.placeholderLabel){
+
+            if (this._editBox.placeholderLabel) {
                 let hAlign = this._editBox.textLabel.horizontalAlign;
                 this._editBox.placeholderLabel.horizontalAlign = hAlign;
 

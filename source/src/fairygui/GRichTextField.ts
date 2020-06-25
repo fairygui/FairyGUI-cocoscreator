@@ -53,22 +53,6 @@ namespace fgui {
             this._richText.horizontalAlign = <cc.macro.TextAlignment><any>value;
         }
 
-        public get verticalAlign(): cc.Label.VerticalAlign {
-            return cc.Label.VerticalAlign.TOP;
-        }
-
-        public set verticalAlign(value: cc.Label.VerticalAlign) {
-            //not supported
-        }
-
-        public get letterSpacing(): number {
-            return 0;
-        }
-
-        public set letterSpacing(value: number) {
-            //not supported
-        }
-
         public get underline(): boolean {
             return this._underline;
         }
@@ -103,14 +87,6 @@ namespace fgui {
 
                 this.updateText();
             }
-        }
-
-        public get singleLine(): boolean {
-            return false;
-        }
-
-        public set singleLine(value: boolean) {
-            //not supported
         }
 
         protected markSizeChanged(): void {

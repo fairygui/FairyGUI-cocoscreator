@@ -8,7 +8,9 @@ namespace fgui {
         protected _realFont: string | cc.Font;
         protected _fontSize: number = 0;
         protected _color: cc.Color;
-        protected _strokeColor: cc.Color;
+        protected _strokeColor?: cc.Color;
+        protected _shadowOffset?: cc.Vec2;
+        protected _shadowColor?: cc.Color;
         protected _leading: number = 0;
         protected _text: string;
         protected _ubbEnabled: boolean;
@@ -17,6 +19,7 @@ namespace fgui {
         protected _updatingSize: boolean;
         protected _sizeDirty: boolean;
         protected _outline?: cc.LabelOutline;
+        protected _shadow?: cc.LabelShadow;
 
         public constructor() {
             super();
@@ -26,7 +29,6 @@ namespace fgui {
 
             this._text = "";
             this._color = new cc.Color(255, 255, 255, 255);
-            this._strokeColor = new cc.Color();
 
             this.createRenderer();
 
@@ -112,19 +114,19 @@ namespace fgui {
         }
 
         public get align(): cc.Label.HorizontalAlign {
-            return this._label.horizontalAlign;
+            return this._label ? this._label.horizontalAlign : 0;
         }
 
         public set align(value: cc.Label.HorizontalAlign) {
-            this._label.horizontalAlign = value;
+            if (this._label) this._label.horizontalAlign = value;
         }
 
         public get verticalAlign(): cc.Label.VerticalAlign {
-            return this._label.verticalAlign;
+            return this._label ? this._label.verticalAlign : 0;
         }
 
         public set verticalAlign(value: cc.Label.VerticalAlign) {
-            this._label.verticalAlign = value;
+            if (this._label) this._label.verticalAlign = value;
         }
 
         public get leading(): number {
@@ -141,44 +143,46 @@ namespace fgui {
         }
 
         public get letterSpacing(): number {
-            return this._label["spacingX"];
+            return this._label ? this._label.spacingX : 0;
         }
 
         public set letterSpacing(value: number) {
-            if (this._label["spacingX"] != value) {
-
+            if (this._label && this._label.spacingX != value) {
                 this.markSizeChanged();
-                this._label["spacingX"] = value;
+                this._label.spacingX = value;
             }
         }
 
         public get underline(): boolean {
-            return false
+            return this._label ? this._label.enableUnderline : false;
         }
 
         public set underline(value: boolean) {
+            if (this._label) this._label.enableUnderline = value;
         }
 
         public get bold(): boolean {
-            return false;
+            return this._label ? this._label.enableBold : false;
         }
 
         public set bold(value: boolean) {
+            if (this._label) this._label.enableBold = value;
         }
 
         public get italic(): boolean {
-            return false;
+            return this._label ? this._label.enableItalic : false;
         }
 
         public set italic(value: boolean) {
+            if (this._label) this._label.enableItalic = value;
         }
 
         public get singleLine(): boolean {
-            return !this._label.enableWrapText;
+            return this._label ? !this._label.enableWrapText : false;
         }
 
         public set singleLine(value: boolean) {
-            this._label.enableWrapText = !value;
+            if (this._label) this._label.enableWrapText = !value;
         }
 
         public get stroke(): number {
@@ -206,10 +210,49 @@ namespace fgui {
         }
 
         public set strokeColor(value: cc.Color) {
-            if (!this._strokeColor.equals(value)) {
+            if (!this._strokeColor || !this._strokeColor.equals(value)) {
+                if (!this._strokeColor)
+                    this._strokeColor = new cc.Color();
                 this._strokeColor.set(value);
                 this.updateGear(4);
                 this.updateStrokeColor();
+            }
+        }
+
+        public get shadowOffset(): cc.Vec2 {
+            return this._shadowOffset;
+        }
+
+        public set shadowOffset(value: cc.Vec2) {
+            if (!this._shadowOffset || !this._shadowOffset.equals(value)) {
+                if (!this._shadowOffset)
+                    this._shadowOffset = new cc.Vec2();
+                this._shadowOffset.set(value);
+                if (this._shadowOffset.x != 0 || this._shadowOffset.y != 0) {
+                    if (!this._shadow) {
+                        this._shadow = this._node.addComponent(cc.LabelShadow);
+                        this.updateShadowColor();
+                    }
+                    else
+                        this._shadow.enabled = true;
+                    this._shadow.offset.x = value.x;
+                    this._shadow.offset.y = -value.y;
+                }
+                else if (this._shadow)
+                    this._shadow.enabled = false;
+            }
+        }
+
+        public get shadowColor(): cc.Color {
+            return this._shadowColor;
+        }
+
+        public set shadowColor(value: cc.Color) {
+            if (!this._shadowColor || !this._shadowColor.equals(value)) {
+                if (!this._shadowColor)
+                    this._shadowColor = new cc.Color();
+                this._shadowColor.set(value);
+                this.updateShadowColor();
             }
         }
 
@@ -375,10 +418,23 @@ namespace fgui {
         protected updateStrokeColor() {
             if (!this._outline)
                 return;
+            if (!this._strokeColor)
+                this._strokeColor = new cc.Color();
             if (this._grayed)
-                this._outline.color = ToolSet.toGrayed(this._strokeColor)
+                this._outline.color = ToolSet.toGrayed(this._strokeColor);
             else
                 this._outline.color = this._strokeColor;
+        }
+
+        protected updateShadowColor() {
+            if (!this._shadow)
+                return;
+            if (!this._shadowColor)
+                this._shadowColor = new cc.Color();
+            if (this._grayed)
+                this._shadow.color = ToolSet.toGrayed(this._shadowColor)
+            else
+                this._shadow.color = this._shadowColor;
         }
 
         protected updateFontSize() {
@@ -508,8 +564,12 @@ namespace fgui {
                 this.stroke = buffer.readFloat();
             }
 
-            if (buffer.readBool()) //shadow
-                buffer.skip(12);
+            if (buffer.readBool()) {
+                this.shadowColor = buffer.readColor();
+                let f1 = buffer.readFloat();
+                let f2 = buffer.readFloat();
+                this.shadowOffset = new cc.Vec2(f1, f2);
+            }
 
             if (buffer.readBool())
                 this._templateVars = {};

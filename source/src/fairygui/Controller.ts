@@ -8,7 +8,7 @@ namespace fgui {
         private _previousIndex: number = 0;
         private _pageIds: Array<string>;
         private _pageNames: Array<string>;
-        private _actions: Array<ControllerAction>;
+        private _actions?: Array<ControllerAction>;
 
         public name: string;
         public parent: GComponent;
