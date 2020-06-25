@@ -13,19 +13,20 @@ namespace fgui {
         private _scrollBarMargin: Margin;
         private _bouncebackEffect: boolean;
         private _touchEffect: boolean;
-        private _scrollBarDisplayAuto: boolean;
+        private _scrollBarDisplayAuto?: boolean;
         private _vScrollNone: boolean;
         private _hScrollNone: boolean;
         private _needRefresh: boolean;
         private _refreshBarAxis: string;
 
-        private _displayOnLeft: boolean;
-        private _snapToItem: boolean;
-        public _displayInDemand: boolean;
+        private _displayOnLeft?: boolean;
+        private _snapToItem?: boolean;
+        public _displayInDemand?: boolean;
         private _mouseWheelEnabled: boolean;
-        private _pageMode: boolean;
-        private _inertiaDisabled: boolean;
-        private _floating: boolean;
+        private _pageMode?: boolean;
+        private _inertiaDisabled?: boolean;
+        private _floating?: boolean;
+        private _dontClipMargin?: boolean;
 
         private _xPos: number;
         private _yPos: number;
@@ -56,23 +57,23 @@ namespace fgui {
         private _tweenStart: cc.Vec2;
         private _tweenChange: cc.Vec2;
 
-        private _pageController: Controller;
+        private _pageController?: Controller;
 
-        private _hzScrollBar: GScrollBar;
-        private _vtScrollBar: GScrollBar;
-        private _header: GComponent;
-        private _footer: GComponent;
+        private _hzScrollBar?: GScrollBar;
+        private _vtScrollBar?: GScrollBar;
+        private _header?: GComponent;
+        private _footer?: GComponent;
 
         public static draggingPane: ScrollPane;
 
         public setup(buffer: ByteBuffer): void {
-            this._owner = <GComponent>(this.node["$gobj"]);
+            const o = this._owner = <GComponent>(this.node["$gobj"]);
 
             this._maskContainer = new cc.Node("ScrollPane");
             this._maskContainer.setAnchorPoint(0, 1);
-            this._maskContainer.parent = this._owner.node;
+            this._maskContainer.parent = o.node;
 
-            this._container = this._owner._container;
+            this._container = o._container;
             this._container.parent = this._maskContainer;
 
             this._scrollBarMargin = new Margin();
@@ -100,10 +101,10 @@ namespace fgui {
             this._mouseWheelStep = this._scrollStep * 2;
             this._decelerationRate = UIConfig.defaultScrollDecelerationRate;
 
-            this._owner.on(Event.TOUCH_BEGIN, this.onTouchBegin, this);
-            this._owner.on(Event.TOUCH_MOVE, this.onTouchMove, this);
-            this._owner.on(Event.TOUCH_END, this.onTouchEnd, this);
-            this._owner.on(Event.MOUSE_WHEEL, this.onMouseWheel, this);
+            o.on(Event.TOUCH_BEGIN, this.onTouchBegin, this);
+            o.on(Event.TOUCH_MOVE, this.onTouchMove, this);
+            o.on(Event.TOUCH_END, this.onTouchEnd, this);
+            o.on(Event.MOUSE_WHEEL, this.onMouseWheel, this);
 
             this._scrollType = buffer.readByte();
             var scrollBarDisplay: ScrollBarDisplayType = buffer.readByte();
@@ -121,10 +122,10 @@ namespace fgui {
             var headerRes: string = buffer.readS();
             var footerRes: string = buffer.readS();
 
-            this._displayOnLeft = (flags & 1) != 0;
-            this._snapToItem = (flags & 2) != 0;
-            this._displayInDemand = (flags & 4) != 0;
-            this._pageMode = (flags & 8) != 0;
+            if ((flags & 1) != 0) this._displayOnLeft = true;
+            if ((flags & 2) != 0) this._snapToItem = true;
+            if ((flags & 4) != 0) this._displayInDemand = true;
+            if ((flags & 8) != 0) this._pageMode = true;
             if (flags & 16)
                 this._touchEffect = true;
             else if (flags & 32)
@@ -137,10 +138,10 @@ namespace fgui {
                 this._bouncebackEffect = false;
             else
                 this._bouncebackEffect = UIConfig.defaultScrollBounceEffect;
-            this._inertiaDisabled = (flags & 256) != 0;
-            if ((flags & 512) == 0)
-                this._maskContainer.addComponent(cc.Mask);
-            this._floating = (flags & 1024) != 0;
+            if ((flags & 256) != 0) this._inertiaDisabled = true;
+            if ((flags & 512) == 0) this._maskContainer.addComponent(cc.Mask);
+            if ((flags & 1024) != 0) this._floating = true;
+            if ((flags & 2048) != 0) this._dontClipMargin = true;
 
             if (scrollBarDisplay == ScrollBarDisplayType.Default)
                 scrollBarDisplay = UIConfig.defaultScrollBarDisplay;
@@ -153,7 +154,7 @@ namespace fgui {
                         if (!this._vtScrollBar)
                             throw "cannot create scrollbar from " + res;
                         this._vtScrollBar.setScrollPane(this, true);
-                        this._vtScrollBar.node.parent = this._owner.node;
+                        this._vtScrollBar.node.parent = o.node;
                     }
                 }
                 if (this._scrollType == ScrollType.Both || this._scrollType == ScrollType.Horizontal) {
@@ -163,19 +164,20 @@ namespace fgui {
                         if (!this._hzScrollBar)
                             throw "cannot create scrollbar from " + res;
                         this._hzScrollBar.setScrollPane(this, false);
-                        this._hzScrollBar.node.parent = this._owner.node;
+                        this._hzScrollBar.node.parent = o.node;
                     }
                 }
 
-                this._scrollBarDisplayAuto = scrollBarDisplay == ScrollBarDisplayType.Auto;
+                if (scrollBarDisplay == ScrollBarDisplayType.Auto)
+                    this._scrollBarDisplayAuto = true;
                 if (this._scrollBarDisplayAuto) {
                     if (this._vtScrollBar)
                         this._vtScrollBar.node.active = false;
                     if (this._hzScrollBar)
                         this._hzScrollBar.node.active = false;
 
-                    this._owner.on(Event.ROLL_OVER, this.onRollOver, this);
-                    this._owner.on(Event.ROLL_OUT, this.onRollOut, this);
+                    o.on(Event.ROLL_OVER, this.onRollOver, this);
+                    o.on(Event.ROLL_OUT, this.onRollOut, this);
                 }
             }
 
@@ -197,7 +199,7 @@ namespace fgui {
 
             this._refreshBarAxis = (this._scrollType == ScrollType.Both || this._scrollType == ScrollType.Vertical) ? "y" : "x";
 
-            this.setSize(this._owner.width, this._owner.height);
+            this.setSize(o.width, o.height);
         }
 
         protected onDestroy(): void {
@@ -695,14 +697,20 @@ namespace fgui {
         public adjustMaskContainer(): void {
             var mx: number = 0;
             if (this._displayOnLeft && this._vtScrollBar && !this._floating)
-                mx = Math.floor(this._owner.margin.left + this._vtScrollBar.width);
+                mx = this._vtScrollBar.width;
 
-            this._maskContainer.setAnchorPoint(this._owner._alignOffset.x / this._viewSize.x, 1 - this._owner._alignOffset.y / this._viewSize.y);
+            const o = this._owner;
 
-            if (this._owner._customMask)
-                this._maskContainer.setPosition(mx + this._owner._alignOffset.x, -this._owner._alignOffset.y);
+            if (this._dontClipMargin)
+                this._maskContainer.setAnchorPoint((o.margin.left + o._alignOffset.x) / o.width,
+                    1 - (o.margin.top + o._alignOffset.y) / o.height);
             else
-                this._maskContainer.setPosition(this._owner._pivotCorrectX + mx + this._owner._alignOffset.x, this._owner._pivotCorrectY - this._owner._alignOffset.y);
+                this._maskContainer.setAnchorPoint(o._alignOffset.x / this._viewSize.x, 1 - o._alignOffset.y / this._viewSize.y);
+
+            if (o._customMask)
+                this._maskContainer.setPosition(mx + o._alignOffset.x, -o._alignOffset.y);
+            else
+                this._maskContainer.setPosition(o._pivotCorrectX + mx + o._alignOffset.x, o._pivotCorrectY - o._alignOffset.y);
         }
 
         public setSize(aWidth: number, aHeight: number): void {
@@ -847,6 +855,10 @@ namespace fgui {
                 maskWidth += this._vtScrollBar.width;
             if (this._hScrollNone && this._hzScrollBar)
                 maskHeight += this._hzScrollBar.height;
+            if (this._dontClipMargin) {
+                maskWidth += (this._owner.margin.left + this._owner.margin.right);
+                maskHeight += (this._owner.margin.top + this._owner.margin.bottom);
+            }
             this._maskContainer.setContentSize(maskWidth, maskHeight);
 
             if (this._vtScrollBar)
