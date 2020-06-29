@@ -183,7 +183,7 @@ namespace fgui {
                         done = true;
                 }
 
-                if (!done && this.node != null) {
+                if (!done && this.node) {
                     evt2.unuse();
                     evt2.type = Event.TOUCH_MOVE;
                     this.node.dispatchEvent(evt2);
@@ -212,7 +212,7 @@ namespace fgui {
             }
             ti.touchMonitors.length = 0;
 
-            if (ti.target && ti.target.node != null) {
+            if (ti.target && ti.target.node) {
                 if (ti.target instanceof GRichTextField)
                     ti.target.node.getComponent(cc.RichText)["_onTouchEnded"](evt2);
 
@@ -250,7 +250,7 @@ namespace fgui {
             for (let i = 0; i < cnt; i++) {
                 let mm = ti.touchMonitors[i];
                 if (mm == ti.target || mm.node == null || !mm.node.activeInHierarchy
-                    || (mm instanceof GComponent) && (<GComponent>mm).isAncestorOf(ti.target))
+                    || (mm instanceof GComponent) && mm.isAncestorOf(ti.target))
                     continue;
 
                 evt2.initiator = mm;
@@ -258,7 +258,7 @@ namespace fgui {
             }
             ti.touchMonitors.length = 0;
 
-            if (ti.target && ti.target.node != null) {
+            if (ti.target && ti.target.node) {
                 evt2.bubbles = true;
                 ti.target.node.dispatchEvent(evt2);
             }
@@ -308,7 +308,7 @@ namespace fgui {
                         done = true;
                 }
 
-                if (!done && this.node != null) {
+                if (!done && this.node) {
                     evt2.initiator = this._owner;
                     this.node.dispatchEvent(evt2);
                     Event._return(evt2);
@@ -333,14 +333,14 @@ namespace fgui {
                 camera.getScreenToWorldPoint(pos, this._touchPos);
             else
                 this._touchPos.set(pos);
+            this._touchPos.y = GRoot.inst.height - this._touchPos.y;
             let target = this._owner.hitTest(this._touchPos);
             if (!target)
                 target = this._owner;
 
             let ti = this.getInfo(touchId);
             ti.target = target;
-            ti.pos.x = pos.x;
-            ti.pos.y = GRoot.inst.height - pos.y;
+            ti.pos.set(this._touchPos);
             ti.button = cc.Event.EventMouse.BUTTON_LEFT;
             ti.touch = touch;
 
@@ -377,7 +377,7 @@ namespace fgui {
 
             ti.downTargets.length = 0;
             let obj: GObject = ti.target;
-            while (obj != null) {
+            while (obj) {
                 ti.downTargets.push(obj);
                 obj = obj.findParent();
             }
@@ -407,13 +407,13 @@ namespace fgui {
                 return null;
 
             let obj = ti.downTargets[0];
-            if (obj && obj.node != null && obj.node.activeInHierarchy)
+            if (obj && obj.node && obj.node.activeInHierarchy)
                 return obj;
 
             obj = ti.target;
-            while (obj != null) {
+            while (obj) {
                 let index = ti.downTargets.indexOf(obj);
-                if (index != -1 && obj.node != null && obj.node.activeInHierarchy)
+                if (index != -1 && obj.node && obj.node.activeInHierarchy)
                     break;
 
                 obj = obj.findParent();
@@ -427,13 +427,13 @@ namespace fgui {
                 return;
 
             let element: GObject = ti.lastRollOver;
-            while (element != null && element.node != null) {
+            while (element && element.node) {
                 this._rollOutChain.push(element);
                 element = element.findParent();
             }
 
             element = target;
-            while (element != null && element.node != null) {
+            while (element && element.node) {
                 let i = this._rollOutChain.indexOf(element);
                 if (i != -1) {
                     this._rollOutChain.length = i;
@@ -449,7 +449,7 @@ namespace fgui {
             let cnt = this._rollOutChain.length;
             for (let i = 0; i < cnt; i++) {
                 element = this._rollOutChain[i];
-                if (element.node != null && element.node.activeInHierarchy) {
+                if (element.node && element.node.activeInHierarchy) {
                     let evt = this.getEvent(ti, element, Event.ROLL_OUT, false);
                     element.node.dispatchEvent(evt);
                     Event._return(evt);
@@ -459,7 +459,7 @@ namespace fgui {
             cnt = this._rollOverChain.length;
             for (let i = 0; i < cnt; i++) {
                 element = this._rollOverChain[i];
-                if (element.node != null && element.node.activeInHierarchy) {
+                if (element.node && element.node.activeInHierarchy) {
                     let evt = this.getEvent(ti, element, Event.ROLL_OVER, false);
                     element.node.dispatchEvent(evt);
                     Event._return(evt);
@@ -486,9 +486,6 @@ namespace fgui {
     }
 
     class TouchInfo {
-        constructor() {
-        }
-
         public target: GObject;
         public touch: cc.Touch;
         public pos: cc.Vec2 = new cc.Vec2();

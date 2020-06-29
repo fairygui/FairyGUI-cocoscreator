@@ -71,7 +71,7 @@ namespace fgui {
             this._itemList.length = 0;
             this._objectPool.length = 0;
 
-            var di: DisplayListItem = new DisplayListItem(item, 0);
+            var di: DisplayListItem = { pi: item, type: item.objectType };
             di.childCount = this.collectComponentChildren(item);
             this._itemList.push(di);
 
@@ -119,13 +119,13 @@ namespace fgui {
                         pkg = item.owner;
 
                     pi = pkg != null ? pkg.getItemById(src) : null;
-                    di = new DisplayListItem(pi, type);
+                    di = { pi: pi, type: type };
 
-                    if (pi != null && pi.type == PackageItemType.Component)
+                    if (pi && pi.type == PackageItemType.Component)
                         di.childCount = this.collectComponentChildren(pi);
                 }
                 else {
-                    di = new DisplayListItem(null, type);
+                    di = { type: type };
                     if (type == ObjectType.List) //list
                         di.listItemCount = this.collectListChildren(buffer);
                 }
@@ -158,8 +158,8 @@ namespace fgui {
                     url = defaultItem;
                 if (url) {
                     pi = UIPackage.getItemByURL(url);
-                    if (pi != null) {
-                        di = new DisplayListItem(pi, pi.objectType);
+                    if (pi) {
+                        di = { pi: pi, type: pi.objectType };
                         if (pi.type == PackageItemType.Component)
                             di.childCount = this.collectComponentChildren(pi);
 
@@ -184,15 +184,15 @@ namespace fgui {
 
             while (this._index < totalItems) {
                 di = this._itemList[this._index];
-                if (di.packageItem != null) {
-                    obj = UIObjectFactory.newObject(di.packageItem);
+                if (di.pi) {
+                    obj = UIObjectFactory.newObject(di.pi);
                     this._objectPool.push(obj);
 
                     UIPackage._constructing++;
-                    if (di.packageItem.type == PackageItemType.Component) {
+                    if (di.pi.type == PackageItemType.Component) {
                         poolStart = this._objectPool.length - di.childCount - 1;
 
-                        (<GComponent><any>obj).constructFromResource2(this._objectPool, poolStart);
+                        (<GComponent>obj).constructFromResource2(this._objectPool, poolStart);
 
                         this._objectPool.splice(poolStart, di.childCount);
                     }
@@ -202,14 +202,14 @@ namespace fgui {
                     UIPackage._constructing--;
                 }
                 else {
-                    obj = UIObjectFactory.newObject2(di.type);
+                    obj = UIObjectFactory.newObject(di.type);
                     this._objectPool.push(obj);
 
                     if (di.type == ObjectType.List && di.listItemCount > 0) {
                         poolStart = this._objectPool.length - di.listItemCount - 1;
 
                         for (k = 0; k < di.listItemCount; k++) //把他们都放到pool里，这样GList在创建时就不需要创建对象了
-                            (<GList><any>obj).itemPool.returnObject(this._objectPool[k + poolStart]);
+                            (<GList>obj).itemPool.returnObject(this._objectPool[k + poolStart]);
 
                         this._objectPool.splice(poolStart, di.listItemCount);
                     }
@@ -228,15 +228,10 @@ namespace fgui {
         }
     }
 
-    class DisplayListItem {
-        public packageItem: PackageItem;
-        public type: ObjectType;
-        public childCount: number;
-        public listItemCount: number;
-
-        public constructor(packageItem: PackageItem, type: ObjectType) {
-            this.packageItem = packageItem;
-            this.type = type;
-        }
+    interface DisplayListItem {
+        type: ObjectType;
+        pi?: PackageItem;
+        childCount?: number;
+        listItemCount?: number;
     }
 }

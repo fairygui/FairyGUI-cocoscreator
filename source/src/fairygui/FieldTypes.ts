@@ -55,7 +55,9 @@ namespace fgui {
         Font,
         Swf,
         Misc,
-        Unknown
+        Unknown,
+        Spine,
+        DragonBones
     }
     export enum ObjectType {
         Image,
@@ -75,7 +77,8 @@ namespace fgui {
         ProgressBar,
         Slider,
         ScrollBar,
-        Tree
+        Tree,
+        Loader3D
     }
     export enum ProgressTitleType {
         Percent,
@@ -145,12 +148,6 @@ namespace fgui {
         BottomExt_Bottom = 23,
 
         Size = 24
-    }
-
-    export enum GraphType {
-        PlaceHolder,
-        Rect,
-        Ellipse
     }
 
     export enum FillMethod {

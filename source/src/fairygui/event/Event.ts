@@ -61,11 +61,10 @@ namespace fgui {
                 this._processor.addTouchMonitor(this.touchId, obj);
         }
 
-        private static _eventPool: Array<Event> = new Array<Event>();
         public static _borrow(type: string, bubbles?: boolean): Event {
             let evt: Event;
-            if (Event._eventPool.length) {
-                evt = Event._eventPool.pop();
+            if (eventPool.length) {
+                evt = eventPool.pop();
                 evt.type = type;
                 evt.bubbles = bubbles;
             }
@@ -80,7 +79,9 @@ namespace fgui {
             evt.touch = null;
             evt.unuse();
 
-            Event._eventPool.push(evt);
+            eventPool.push(evt);
         }
     }
+
+    var eventPool: Array<Event> = new Array<Event>();
 }

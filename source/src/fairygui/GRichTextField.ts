@@ -53,22 +53,6 @@ namespace fgui {
             this._richText.horizontalAlign = <cc.macro.TextAlignment><any>value;
         }
 
-        public get verticalAlign(): cc.Label.VerticalAlign {
-            return cc.Label.VerticalAlign.TOP;
-        }
-
-        public set verticalAlign(value: cc.Label.VerticalAlign) {
-            //not supported
-        }
-
-        public get letterSpacing(): number {
-            return 0;
-        }
-
-        public set letterSpacing(value: number) {
-            //not supported
-        }
-
         public get underline(): boolean {
             return this._underline;
         }
@@ -105,14 +89,6 @@ namespace fgui {
             }
         }
 
-        public get singleLine(): boolean {
-            return false;
-        }
-
-        public set singleLine(value: boolean) {
-            //not supported
-        }
-
         protected markSizeChanged(): void {
             //RichText貌似没有延迟重建文本，所以这里不需要
         }
@@ -120,7 +96,7 @@ namespace fgui {
         protected updateText(): void {
             var text2: string = this._text;
 
-            if (this._templateVars != null)
+            if (this._templateVars)
                 text2 = this.parseTemplate(text2);
 
             if (this._ubbEnabled) {

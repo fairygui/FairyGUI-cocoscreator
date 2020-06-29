@@ -1,20 +1,18 @@
 namespace fgui {
     export class GearBase {
-        public static disableAllTweenEffect: boolean = false;
+        public static disableAllTweenEffect: boolean;
 
         protected _owner: GObject;
         protected _controller: Controller;
-        protected _tweenConfig: GearTweenConfig;
-
-        private static Classes: Array<typeof GearBase>;
+        protected _tweenConfig?: GearTweenConfig;
 
         public static create(owner: GObject, index: number): GearBase {
-            if (!GearBase.Classes)
-                GearBase.Classes = [
+            if (!Classes)
+                Classes = [
                     GearDisplay, GearXY, GearSize, GearLook, GearColor,
                     GearAnimation, GearText, GearIcon, GearDisplay2, GearFontSize
                 ];
-            return new (GearBase.Classes[index])(owner);
+            return new (Classes[index])(owner);
         }
 
         constructor(owner: GObject) {
@@ -22,7 +20,7 @@ namespace fgui {
         }
 
         public dispose(): void {
-            if (this._tweenConfig != null && this._tweenConfig._tweener != null) {
+            if (this._tweenConfig && this._tweenConfig._tweener) {
                 this._tweenConfig._tweener.kill();
                 this._tweenConfig._tweener = null;
             }
@@ -41,7 +39,7 @@ namespace fgui {
         }
 
         public get tweenConfig(): GearTweenConfig {
-            if (this._tweenConfig == null)
+            if (!this._tweenConfig)
                 this._tweenConfig = new GearTweenConfig();
             return this._tweenConfig;
         }
@@ -55,10 +53,10 @@ namespace fgui {
             var cnt: number = buffer.readShort();
 
             if (this instanceof GearDisplay) {
-                (<GearDisplay>this).pages = buffer.readSArray(cnt);
+                this.pages = buffer.readSArray(cnt);
             }
             else if (this instanceof GearDisplay2) {
-                (<GearDisplay2>this).pages = buffer.readSArray(cnt);
+                this.pages = buffer.readSArray(cnt);
             }
             else {
                 for (i = 0; i < cnt; i++) {
@@ -83,21 +81,21 @@ namespace fgui {
             if (buffer.version >= 2) {
                 if (this instanceof GearXY) {
                     if (buffer.readBool()) {
-                        (<GearXY>this).positionsInPercent = true;
+                        this.positionsInPercent = true;
                         for (i = 0; i < cnt; i++) {
                             page = buffer.readS();
                             if (page == null)
                                 continue;
 
-                            (<GearXY>this).addExtStatus(page, buffer);
+                            this.addExtStatus(page, buffer);
                         }
 
                         if (buffer.readBool())
-                            (<GearXY>this).addExtStatus(null, buffer);
+                            this.addExtStatus(null, buffer);
                     }
                 }
                 else if (this instanceof GearDisplay2)
-                    (<GearDisplay2>this).condition = buffer.readByte();
+                    this.condition = buffer.readByte();
             }
         }
 
@@ -120,6 +118,7 @@ namespace fgui {
         }
     }
 
+    var Classes: Array<typeof GearBase>;
 
     export class GearTweenConfig {
         public tween: boolean;

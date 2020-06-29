@@ -37,8 +37,6 @@ namespace fgui {
         private _elapsedTime: number;
         private _normalizedTime: number;
 
-        private static helperPoint: cc.Vec2 = new cc.Vec2();
-
         public constructor() {
             this._startValue = new TweenValue();
             this._endValue = new TweenValue();
@@ -110,9 +108,9 @@ namespace fgui {
             this._target = value;
             this._propType = propType;
             if (value instanceof GObject)
-                this._node = (<GObject>value).node;
+                this._node = value.node;
             else if (value instanceof cc.Node)
-                this._node = <cc.Node>value;
+                this._node = value;
             return this;
         }
 
@@ -134,21 +132,21 @@ namespace fgui {
             return this._userData;
         }
 
-        public onUpdate(callback: Function, caller: any): GTweener {
+        public onUpdate(callback: Function, target?: any): GTweener {
             this._onUpdate = callback;
-            this._onUpdateCaller = caller;
+            this._onUpdateCaller = target;
             return this;
         }
 
-        public onStart(callback: Function, caller: any): GTweener {
+        public onStart(callback: Function, target?: any): GTweener {
             this._onStart = callback;
-            this._onStartCaller = caller;
+            this._onStartCaller = target;
             return this;
         }
 
-        public onComplete(callback: Function, caller: any): GTweener {
+        public onComplete(callback: Function, target?: any): GTweener {
             this._onComplete = callback;
-            this._onCompleteCaller = caller;
+            this._onCompleteCaller = target;
             return this;
         }
 
@@ -392,7 +390,7 @@ namespace fgui {
                 this._ended = 1;
             }
 
-            this._normalizedTime = EaseManager.evaluate(this._easeType, reversed ? (this._duration - tt) : tt, this._duration,
+            this._normalizedTime = evaluateEase(this._easeType, reversed ? (this._duration - tt) : tt, this._duration,
                 this._easeOvershootOrAmplitude, this._easePeriod);
 
             this._value.setZero();
@@ -415,7 +413,7 @@ namespace fgui {
                 }
             }
             else if (this._path) {
-                var pt: cc.Vec2 = GTweener.helperPoint;
+                var pt: cc.Vec2 = s_vec2;
                 this._path.getPointAt(this._normalizedTime, pt);
                 if (this._snapping) {
                     pt.x = Math.round(pt.x);
@@ -505,4 +503,6 @@ namespace fgui {
             }
         }
     }
+
+    var s_vec2: cc.Vec2 = new cc.Vec2();
 }

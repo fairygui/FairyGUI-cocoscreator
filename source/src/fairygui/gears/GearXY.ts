@@ -1,9 +1,16 @@
 namespace fgui {
+    interface Value {
+        x?: number;
+        y?: number;
+        px?: number;
+        py?: number;
+    }
+
     export class GearXY extends GearBase {
         public positionsInPercent: boolean;
 
-        private _storage: Object;
-        private _default: any;
+        private _storage: { [index: string]: Value };
+        private _default: Value;
 
         constructor(owner: GObject) {
             super(owner);
@@ -11,26 +18,26 @@ namespace fgui {
 
         protected init(): void {
             this._default = {
-                x: this._owner.x, y: this._owner.y,
-                px: this._owner.x / this._owner.parent.width, py: this._owner.y / this._owner.parent.height
+                x: this._owner.x,
+                y: this._owner.y,
+                px: this._owner.x / this._owner.parent.width,
+                py: this._owner.y / this._owner.parent.height
             };
             this._storage = {};
         }
 
         protected addStatus(pageId: string, buffer: ByteBuffer): void {
-            var gv: any;
+            var gv: Value;
             if (pageId == null)
                 gv = this._default;
-            else {
-                gv = {};
-                this._storage[pageId] = gv;
-            }
+            else
+                this._storage[pageId] = gv = {};
             gv.x = buffer.readInt();
             gv.y = buffer.readInt();
         }
 
         public addExtStatus(pageId: string, buffer: ByteBuffer): void {
-            var gv: any;
+            var gv: Value;
             if (pageId == null)
                 gv = this._default;
             else
@@ -40,24 +47,24 @@ namespace fgui {
         }
 
         public apply(): void {
-            var pt: any = this._storage[this._controller.selectedPageId];
-            if (!pt)
-                pt = this._default;
+            var gv: Value = this._storage[this._controller.selectedPageId];
+            if (!gv)
+                gv = this._default;
 
             var ex: number;
             var ey: number;
 
             if (this.positionsInPercent && this._owner.parent) {
-                ex = pt.px * this._owner.parent.width;
-                ey = pt.py * this._owner.parent.height;
+                ex = gv.px * this._owner.parent.width;
+                ey = gv.py * this._owner.parent.height;
             }
             else {
-                ex = pt.x;
-                ey = pt.y;
+                ex = gv.x;
+                ey = gv.y;
             }
 
-            if (this._tweenConfig != null && this._tweenConfig.tween && !UIPackage._constructing && !GearBase.disableAllTweenEffect) {
-                if (this._tweenConfig._tweener != null) {
+            if (this._tweenConfig && this._tweenConfig.tween && !UIPackage._constructing && !GearBase.disableAllTweenEffect) {
+                if (this._tweenConfig._tweener) {
                     if (this._tweenConfig._tweener.endValue.x != ex || this._tweenConfig._tweener.endValue.y != ey) {
                         this._tweenConfig._tweener.kill(true);
                         this._tweenConfig._tweener = null;
@@ -103,16 +110,14 @@ namespace fgui {
         }
 
         public updateState(): void {
-            var pt: any = this._storage[this._controller.selectedPageId];
-            if (!pt) {
-                pt = {};
-                this._storage[this._controller.selectedPageId] = pt;
-            }
+            var gv: Value = this._storage[this._controller.selectedPageId];
+            if (!gv)
+                this._storage[this._controller.selectedPageId] = gv = {};
 
-            pt.x = this._owner.x;
-            pt.y = this._owner.y;
-            pt.px = this._owner.x / this._owner.parent.width;
-            pt.py = this._owner.y / this._owner.parent.height;
+            gv.x = this._owner.x;
+            gv.y = this._owner.y;
+            gv.px = this._owner.x / this._owner.parent.width;
+            gv.py = this._owner.y / this._owner.parent.height;
         }
 
         public updateFromRelations(dx: number, dy: number): void {
@@ -120,7 +125,7 @@ namespace fgui {
                 return;
 
             for (var key in this._storage) {
-                var pt: any = this._storage[key];
+                var pt: Value = this._storage[key];
                 pt.x += dx;
                 pt.y += dy;
             }

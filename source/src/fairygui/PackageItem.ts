@@ -5,39 +5,44 @@ namespace fgui {
         public owner: UIPackage;
 
         public type: PackageItemType;
-        public objectType: ObjectType;
+        public objectType?: ObjectType;
         public id: string;
         public name: string;
         public width: number = 0;
         public height: number = 0;
         public file: string;
-        public decoded: boolean;
-        public rawData: ByteBuffer;
-        public asset: cc.Texture2D | cc.SpriteFrame | cc.AudioClip | cc.LabelAtlas;
+        public decoded?: boolean;
+        public loading?: boolean;
+        public rawData?: ByteBuffer;
+        public asset?: cc.Asset;
 
-        public highResolution: Array<string>;
-        public branches: Array<string>;
+        public highResolution?: Array<string>;
+        public branches?: Array<string>;
 
         //image
-        public scale9Grid: cc.Rect;
-        public scaleByTile: boolean;
-        public tileGridIndice: number = 0;
-        public smoothing: boolean;
-        public hitTestData: PixelHitTestData;
+        public scale9Grid?: cc.Rect;
+        public scaleByTile?: boolean;
+        public tileGridIndice?: number;
+        public smoothing?: boolean;
+        public hitTestData?: PixelHitTestData;
 
         //movieclip
-        public interval: number = 0;
-        public repeatDelay: number = 0;
-        public swing: boolean;
-        public frames: Array<Frame>;
+        public interval?: number;
+        public repeatDelay?: number;
+        public swing?: boolean;
+        public frames?: Array<Frame>;
 
         //componenet
-        public extensionType: any;
+        public extensionType?: any;
+
+        //skeleton
+        public skeletonAnchor?: cc.Vec2;
+        public atlasAsset?: dragonBones.DragonBonesAtlasAsset;
 
         public constructor() {
         }
 
-        public load(): any {
+        public load(): cc.Asset {
             return this.owner.getItemAsset(this);
         }
 

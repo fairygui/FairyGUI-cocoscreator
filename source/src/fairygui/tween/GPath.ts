@@ -4,8 +4,6 @@ namespace fgui {
         private _points: Array<cc.Vec2>;
         private _fullLength: number;
 
-        private static helperPoints: Array<cc.Vec2> = new Array<cc.Vec2>();
-
         constructor() {
             this._segments = new Array<Segment>();
             this._points = new Array<cc.Vec2>();
@@ -15,18 +13,20 @@ namespace fgui {
             return this._fullLength;
         }
 
-        public create2(pt1: GPathPoint, pt2: GPathPoint, pt3?: GPathPoint, pt4?: GPathPoint): void {
-            var points: Array<GPathPoint> = new Array<GPathPoint>();
-            points.push(pt1);
-            points.push(pt2);
-            if (pt3)
-                points.push(pt3);
-            if (pt4)
-                points.push(pt4);
-            this.create(points);
-        }
-
-        public create(points: Array<GPathPoint>): void {
+        public create(pt1: Array<GPathPoint> | GPathPoint, pt2?: GPathPoint, pt3?: GPathPoint, pt4?: GPathPoint): void {
+            var points: Array<GPathPoint>;
+            if (Array.isArray(pt1))
+                points = pt1;
+            else {
+                points = new Array<GPathPoint>();
+                points.push(pt1);
+                points.push(pt2);
+                if (pt3)
+                    points.push(pt3);
+                if (pt4)
+                    points.push(pt4);
+            }
+            
             this._segments.length = 0;
             this._points.length = 0;
             this._fullLength = 0;
@@ -35,7 +35,7 @@ namespace fgui {
             if (cnt == 0)
                 return;
 
-            var splinePoints: Array<cc.Vec2> = GPath.helperPoints;
+            var splinePoints: Array<cc.Vec2> = s_points;
             splinePoints.length = 0;
 
             var prev: GPathPoint = points[0];
@@ -46,7 +46,7 @@ namespace fgui {
                 var current: GPathPoint = points[i];
 
                 if (prev.curveType != CurveType.CRSpline) {
-                    var seg: Segment = new Segment();
+                    var seg: Segment = {};
                     seg.type = prev.curveType;
                     seg.ptStart = this._points.length;
                     if (prev.curveType == CurveType.Straight) {
@@ -89,14 +89,14 @@ namespace fgui {
         }
 
         private createSplineSegment(): void {
-            var splinePoints: Array<cc.Vec2> = GPath.helperPoints;
+            var splinePoints: Array<cc.Vec2> = s_points;
             var cnt: number = splinePoints.length;
             splinePoints.splice(0, 0, splinePoints[0]);
             splinePoints.push(splinePoints[cnt]);
             splinePoints.push(splinePoints[cnt]);
             cnt += 3;
 
-            var seg: Segment = new Segment();
+            var seg: Segment = {};
             seg.type = CurveType.CRSpline;
             seg.ptStart = this._points.length;
             seg.ptCount = cnt;
@@ -288,10 +288,12 @@ namespace fgui {
         }
     }
 
-    class Segment {
-        public type: number;
-        public length: number;
-        public ptStart: number;
-        public ptCount: number;
+    var s_points: Array<cc.Vec2> = new Array<cc.Vec2>();
+
+    interface Segment {
+        type?: number;
+        length?: number;
+        ptStart?: number;
+        ptCount?: number;
     }
 }

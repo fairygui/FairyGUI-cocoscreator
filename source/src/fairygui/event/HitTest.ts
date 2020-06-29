@@ -1,7 +1,7 @@
 namespace fgui {
 
     export interface IHitTest {
-        hitTest(obj: GComponent, x: number, y: number): boolean;
+        hitTest(pt: cc.Vec2, globalPt: cc.Vec2): boolean;
     }
 
     export class PixelHitTest implements IHitTest {
@@ -21,9 +21,9 @@ namespace fgui {
             this.scaleY = 1;
         }
 
-        public hitTest(obj: GComponent, x: number, y: number): boolean {
-            x = Math.floor((x / this.scaleX - this.offsetX) * this._data.scale);
-            y = Math.floor((y / this.scaleY - this.offsetY) * this._data.scale);
+        public hitTest(pt: cc.Vec2): boolean {
+            let x: number = Math.floor((pt.x / this.scaleX - this.offsetX) * this._data.scale);
+            let y: number = Math.floor((pt.y / this.scaleY - this.offsetY) * this._data.scale);
             if (x < 0 || y < 0 || x >= this._data.pixelWidth)
                 return false;
 
@@ -52,18 +52,14 @@ namespace fgui {
     }
 
     export class ChildHitArea implements IHitTest {
-
         private _child: GObject;
-        private _reversed: boolean;
 
-        constructor(child: GObject, reversed?: boolean) {
+        constructor(child: GObject) {
             this._child = child;
-            this._reversed = reversed;
         }
 
-        public hitTest(obj: GComponent, x: number, y: number): boolean {
-            //TODO
-            return false;
+        public hitTest(pt: cc.Vec2, globalPt: cc.Vec2): boolean {
+            return this._child.hitTest(globalPt, false) != null;
         }
     }
 }

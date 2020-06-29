@@ -1,31 +1,33 @@
 
 namespace fgui {
+    type PackageDependency = { id: string, name: string };
 
     export class UIPackage {
         private _id: string;
         private _name: string;
+        private _path: string;
         private _items: Array<PackageItem>;
-        private _itemsById: any;
-        private _itemsByName: any;
-        private _url: string;
-        private _sprites: any;
-        private _dependencies: Array<any>;
+        private _itemsById: { [index: string]: PackageItem };
+        private _itemsByName: { [index: string]: PackageItem };
+        private _sprites: { [index: string]: AtlasSprite };
+        private _dependencies: Array<PackageDependency>;
         private _branches: Array<string>;
         public _branchIndex: number;
+        private _bundle: cc.AssetManager.Bundle;
 
         public static _constructing: number = 0;
 
-        private static _instById: any = {};
-        private static _instByName: any = {};
+        private static _instById: { [index: string]: UIPackage } = {};
+        private static _instByName: { [index: string]: UIPackage } = {};
         private static _branch: string = "";
-        private static _vars: any = {};
+        private static _vars: { [index: string]: string } = {};
 
         public constructor() {
             this._items = new Array<PackageItem>();
             this._itemsById = {};
             this._itemsByName = {};
             this._sprites = {};
-            this._dependencies = Array<any>();
+            this._dependencies = Array<PackageDependency>();
             this._branches = Array<string>();
             this._branchIndex = -1;
         }
@@ -44,11 +46,11 @@ namespace fgui {
             }
         }
 
-        public static getVar(key: string): any {
+        public static getVar(key: string): string {
             return UIPackage._vars[key];
         }
 
-        public static setVar(key: string, value: any) {
+        public static setVar(key: string, value: string) {
             UIPackage._vars[key] = value;
         }
 
@@ -60,54 +62,132 @@ namespace fgui {
             return UIPackage._instByName[name];
         }
 
-        public static addPackage(url: string): UIPackage {
-            let pkg: UIPackage = UIPackage._instById[url];
+        /**
+         * 注册一个包。包的所有资源必须放在resources下，且已经预加载。
+         * @param path 相对 resources 的路径。
+         */
+        public static addPackage(path: string): UIPackage {
+            let pkg: UIPackage = UIPackage._instById[path];
             if (pkg)
                 return pkg;
 
-            let asset: any = cc.loader.getRes(url);
+            let asset: any = cc.resources.get(path, cc.BufferAsset);
             if (!asset)
-                throw "Resource '" + url + "' not ready";
+                throw "Resource '" + path + "' not ready";
 
-            if (!asset.rawBuffer)
-                throw "Missing asset data. Call UIConfig.registerLoader first!";
+            if (!asset._buffer)
+                throw "Missing asset data.";
 
             pkg = new UIPackage();
-            pkg.loadPackage(new ByteBuffer(asset.rawBuffer), url);
+            pkg._bundle = cc.resources;
+            pkg.loadPackage(new ByteBuffer(asset._buffer), path);
             UIPackage._instById[pkg.id] = pkg;
             UIPackage._instByName[pkg.name] = pkg;
-            UIPackage._instById[pkg._url] = pkg;
+            UIPackage._instById[pkg._path] = pkg;
             return pkg;
         }
 
-        public static loadPackage(url: string, completeCallback: ((error: any) => void) | null): void {
-            cc.loader.loadRes(url, function (err, asset) {
+        /**
+         * 载入一个包。包的资源从Asset Bundle加载.
+         * @param bundle Asset Bundle 对象.
+         * @param path 资源相对 Asset Bundle 目录的路径.
+         * @param onComplete 载入成功后的回调.
+         */
+        public static loadPackage(bundle: cc.AssetManager.Bundle, path: string, onComplete?: (error: any, pkg: UIPackage) => void): void;
+        /**
+         * 载入一个包。包的资源从Asset Bundle加载.
+         * @param bundle Asset Bundle 对象.
+         * @param path 资源相对 Asset Bundle 目录的路径.
+         * @param onProgress 加载进度回调.
+         * @param onComplete 载入成功后的回调.
+         */
+        public static loadPackage(bundle: cc.AssetManager.Bundle, path: string, onProgress?: (finish: number, total: number, item: cc.AssetManager.RequestItem) => void, onComplete?: (error: any, pkg: UIPackage) => void): void;
+        /**
+         * 载入一个包。包的资源从resources加载.
+         * @param path 资源相对 resources 的路径.
+         * @param onComplete 载入成功后的回调.
+         */
+        public static loadPackage(path: string, onComplete?: (error: any, pkg: UIPackage) => void): void;
+        /**
+         * 载入一个包。包的资源从resources加载.
+         * @param path 资源相对 resources 的路径.
+         * @param onProgress 加载进度回调.
+         * @param onComplete 载入成功后的回调.
+         */
+        public static loadPackage(path: string, onProgress?: (finish: number, total: number, item: cc.AssetManager.RequestItem) => void, onComplete?: (error: any, pkg: UIPackage) => void): void;
+        public static loadPackage(...args: any[]) {
+            let path: string;
+            let onProgress: (finish: number, total: number, item: cc.AssetManager.RequestItem) => void;
+            let onComplete: (error: any, pkg: UIPackage) => void;
+            let bundle: cc.AssetManager.Bundle;
+            if (args[0] instanceof cc.AssetManager.Bundle) {
+                bundle = args[0];
+                path = args[1];
+                if (args.length > 3) {
+                    onProgress = args[2];
+                    onComplete = args[3];
+                }
+                else
+                    onComplete = args[2];
+            }
+            else {
+                path = args[0];
+                if (args.length > 2) {
+                    onProgress = args[1];
+                    onComplete = args[2];
+                }
+                else
+                    onComplete = args[1];
+            }
+
+            bundle = bundle || cc.resources;
+            bundle.load(path, cc.BufferAsset, onProgress, function (err, asset: any) {
                 if (err) {
-                    completeCallback(err);
+                    if (onComplete != null)
+                        onComplete(err, null);
                     return;
                 }
 
-                if (!asset.rawBuffer)
-                    throw "Missing asset data. Call UIConfig.registerLoader first!";
-
                 let pkg: UIPackage = new UIPackage();
-                pkg.loadPackage(new ByteBuffer(asset.rawBuffer), url);
+                pkg._bundle = bundle;
+                pkg.loadPackage(new ByteBuffer(asset._buffer), path);
                 let cnt: number = pkg._items.length;
-                let urls = [];
+                let urls: Array<string> = [];
+                let types: Array<typeof cc.Asset> = [];
                 for (var i: number = 0; i < cnt; i++) {
                     var pi: PackageItem = pkg._items[i];
-                    if (pi.type == PackageItemType.Atlas || pi.type == PackageItemType.Sound)
+                    if (pi.type == PackageItemType.Atlas || pi.type == PackageItemType.Sound) {
+                        let assetType = ItemTypeToAssetType[pi.type];
                         urls.push(pi.file);
+                        types.push(assetType);
+                    }
                 }
 
-                cc.loader.loadResArray(urls, function (err, assets) {
-                    if (!err) {
+                let total = urls.length;
+                let lastErr;
+                let taskComplete = (err?) => {
+                    total--;
+                    if (err)
+                        lastErr = err;
+
+                    if (total <= 0) {
                         UIPackage._instById[pkg.id] = pkg;
                         UIPackage._instByName[pkg.name] = pkg;
-                    }
+                        if (pkg._path)
+                            UIPackage._instByName[pkg._path] = pkg;
 
-                    completeCallback(err);
-                });
+                        if (onComplete != null)
+                            onComplete(lastErr, pkg);
+                    }
+                }
+
+                if (total > 0) {
+                    urls.forEach((url, index) => {
+                        bundle.load(url, types[index], onProgress, taskComplete);
+                    });
+                }
+                else
+                    taskComplete();
             });
         }
 
@@ -119,12 +199,12 @@ namespace fgui {
                 throw "No package found: " + packageIdOrName;
             pkg.dispose();
             delete UIPackage._instById[pkg.id];
-            if (pkg._url != null)
-                delete UIPackage._instById[pkg._url];
             delete UIPackage._instByName[pkg.name];
+            if (pkg._path)
+                delete UIPackage._instById[pkg._path];
         }
 
-        public static createObject(pkgName: string, resName: string, userClass?: any): GObject {
+        public static createObject(pkgName: string, resName: string, userClass?: new () => GObject): GObject {
             var pkg: UIPackage = UIPackage.getByName(pkgName);
             if (pkg)
                 return pkg.createObject(resName, userClass);
@@ -132,7 +212,7 @@ namespace fgui {
                 return null;
         }
 
-        public static createObjectFromURL(url: string, userClass?: any): GObject {
+        public static createObjectFromURL(url: string, userClass?: new () => GObject): GObject {
             var pi: PackageItem = UIPackage.getItemByURL(url);
             if (pi)
                 return pi.owner.internalCreateObject(pi, userClass);
@@ -201,11 +281,11 @@ namespace fgui {
             TranslationHelper.loadFromXML(source);
         }
 
-        private loadPackage(buffer: ByteBuffer, url: string): void {
+        private loadPackage(buffer: ByteBuffer, path: string): void {
             if (buffer.readUint() != 0x46475549)
-                throw "FairyGUI: old package format found in '" + url + "'";
+                throw "FairyGUI: old package format found in '" + path + "'";
 
-            this._url = url;
+            this._path = path;
             buffer.version = buffer.readInt();
             var ver2: boolean = buffer.version >= 2;
             var compressed: boolean = buffer.readBool();
@@ -257,7 +337,9 @@ namespace fgui {
             buffer.seek(indexTablePos, 1);
 
             var pi: PackageItem;
-            url = url + "_";
+            let pos = path.indexOf('/');
+            let shortPath = pos == -1 ? path : path.substr(0, pos + 1);
+            path = path + "_";
 
             cnt = buffer.readShort();
             for (i = 0; i < cnt; i++) {
@@ -327,7 +409,17 @@ namespace fgui {
                     case PackageItemType.Sound:
                     case PackageItemType.Misc:
                         {
-                            pi.file = url + cc.path.mainFileName(pi.file);
+                            pi.file = path + cc.path.mainFileName(pi.file);
+                            break;
+                        }
+
+                    case PackageItemType.Spine:
+                    case PackageItemType.DragonBones:
+                        {
+                            pi.file = shortPath + cc.path.mainFileName(pi.file);
+                            pi.skeletonAnchor = new cc.Vec2();
+                            pi.skeletonAnchor.x = buffer.readFloat();
+                            pi.skeletonAnchor.y = buffer.readFloat();
                             break;
                         }
                 }
@@ -368,12 +460,12 @@ namespace fgui {
                 var itemId: string = buffer.readS();
                 pi = this._itemsById[buffer.readS()];
 
-                var sprite: AtlasSprite = new AtlasSprite();
-                sprite.atlas = pi;
-                sprite.rect.x = buffer.readInt();
-                sprite.rect.y = buffer.readInt();
-                sprite.rect.width = buffer.readInt();
-                sprite.rect.height = buffer.readInt();
+                let rect: cc.Rect = new cc.Rect();
+                rect.x = buffer.readInt();
+                rect.y = buffer.readInt();
+                rect.width = buffer.readInt();
+                rect.height = buffer.readInt();
+                var sprite: AtlasSprite = { atlas: pi, rect: rect, offset: new cc.Vec2(), originalSize: new cc.Size(0, 0) };
                 sprite.rotated = buffer.readBool();
                 if (ver2 && buffer.readBool()) {
                     sprite.offset.x = buffer.readInt();
@@ -410,7 +502,7 @@ namespace fgui {
             for (var i: number = 0; i < cnt; i++) {
                 var pi: PackageItem = this._items[i];
                 if (pi.asset)
-                    cc.loader.releaseAsset(pi.asset);
+                    cc.assetManager.releaseAsset(pi.asset);
             }
         }
 
@@ -422,11 +514,15 @@ namespace fgui {
             return this._name;
         }
 
-        public get url(): string {
-            return this._url;
+        public get path(): string {
+            return this._path;
         }
 
-        public createObject(resName: string, userClass?: any): GObject {
+        public get dependencies(): Array<PackageDependency> {
+            return this._dependencies;
+        }
+
+        public createObject(resName: string, userClass?: new () => GObject): GObject {
             var pi: PackageItem = this._itemsByName[resName];
             if (pi)
                 return this.internalCreateObject(pi, userClass);
@@ -434,7 +530,7 @@ namespace fgui {
                 return null;
         }
 
-        public internalCreateObject(item: PackageItem, userClass?: any): GObject {
+        public internalCreateObject(item: PackageItem, userClass?: new () => GObject): GObject {
             var g: GObject = UIObjectFactory.newObject(item, userClass);
 
             if (g == null)
@@ -454,7 +550,7 @@ namespace fgui {
             return this._itemsByName[resName];
         }
 
-        public getItemAssetByName(resName: string): any {
+        public getItemAssetByName(resName: string): cc.Asset {
             var pi: PackageItem = this._itemsByName[resName];
             if (pi == null) {
                 throw "Resource not found -" + resName;
@@ -463,15 +559,15 @@ namespace fgui {
             return this.getItemAsset(pi);
         }
 
-        public getItemAsset(item: PackageItem): cc.Asset {
+        public getItemAsset(item: PackageItem, onComplete?: (err: Error, item: PackageItem) => void): cc.Asset {
             switch (item.type) {
                 case PackageItemType.Image:
                     if (!item.decoded) {
                         item.decoded = true;
                         var sprite: AtlasSprite = this._sprites[item.id];
-                        if (sprite != null) {
+                        if (sprite) {
                             let atlasTexture: cc.Texture2D = <cc.Texture2D>this.getItemAsset(sprite.atlas);
-                            if (atlasTexture != null) {
+                            if (atlasTexture) {
                                 let sf = new cc.SpriteFrame(atlasTexture, sprite.rect, sprite.rotated,
                                     new cc.Vec2(sprite.offset.x - (sprite.originalSize.width - sprite.rect.width) / 2, -(sprite.offset.y - (sprite.originalSize.height - sprite.rect.height) / 2)),
                                     sprite.originalSize);
@@ -485,49 +581,73 @@ namespace fgui {
                             }
                         }
                     }
-                    return item.asset;
+                    break;
 
                 case PackageItemType.Atlas:
-                    if (!item.decoded) {
-                        item.decoded = true;
-                        item.asset = cc.loader.getRes(item.file);
-                        if (!item.asset)
-                            console.log("Resource '" + item.file + "' not found, please check default.res.json!");
-                    }
-                    return item.asset;
-
                 case PackageItemType.Sound:
                     if (!item.decoded) {
                         item.decoded = true;
-                        item.asset = cc.loader.getRes(item.file);
+                        item.asset = this._bundle.get(item.file, ItemTypeToAssetType[item.type]);
                         if (!item.asset)
-                            console.log("Resource '" + item.file + "' not found, please check default.res.json!");
+                            console.log("Resource '" + item.file + "' not found");
                     }
-                    return item.asset;
+                    break;
+
+                case PackageItemType.Spine:
+                    if (!item.decoded && !item.loading) {
+                        item.loading = true;
+                        this._bundle.load(item.file, sp.SkeletonData, (err: Error, asset: cc.Asset) => {
+                            item.decoded = true;
+                            item.asset = asset;
+
+                            onComplete(err, item);
+                        });
+                    }
+                    break;
+
+                case PackageItemType.DragonBones:
+                    if (!item.decoded && !item.loading) {
+                        item.loading = true;
+                        this._bundle.load(item.file, dragonBones.DragonBonesAsset, (err: Error, asset: cc.Asset) => {
+                            if (err) {
+                                item.decoded = true;
+                                onComplete(err, item);
+                                return;
+                            }
+
+                            item.asset = asset;
+                            let atlasFile = item.file.replace("_ske", "_tex");
+                            let pos = atlasFile.lastIndexOf('.');
+                            if (pos != -1)
+                                atlasFile = atlasFile.substr(0, pos + 1) + "json";
+                            this._bundle.load(atlasFile, dragonBones.DragonBonesAtlasAsset, (err: Error, asset: cc.Asset) => {
+                                item.decoded = true;
+                                item.atlasAsset = <dragonBones.DragonBonesAtlasAsset>asset;
+                                onComplete(err, item);
+                            });
+                        });
+                    }
+                    break;
 
                 case PackageItemType.Font:
                     if (!item.decoded) {
                         item.decoded = true;
                         this.loadFont(item);
                     }
-                    return item.asset;
+                    break;
 
                 case PackageItemType.MovieClip:
                     if (!item.decoded) {
                         item.decoded = true;
                         this.loadMovieClip(item);
                     }
-                    return null;
-
-                case PackageItemType.Misc:
-                    if (item.file)
-                        return cc.loader.getRes(item.file);
-                    else
-                        return null;
+                    break;
 
                 default:
-                    return null;
+                    break;
             }
+
+            return item.asset;
         }
 
         public loadAllAssets(): void {
@@ -560,17 +680,18 @@ namespace fgui {
                 var nextPos: number = buffer.readShort();
                 nextPos += buffer.position;
 
-                frame = new Frame();
-                frame.rect.x = buffer.readInt();
-                frame.rect.y = buffer.readInt();
-                frame.rect.width = buffer.readInt();
-                frame.rect.height = buffer.readInt();
-                frame.addDelay = buffer.readInt() / 1000;
+                let rect: cc.Rect = new cc.Rect();
+                rect.x = buffer.readInt();
+                rect.y = buffer.readInt();
+                rect.width = buffer.readInt();
+                rect.height = buffer.readInt();
+                let addDelay = buffer.readInt() / 1000;
+                let frame: Frame = { rect: rect, addDelay: addDelay };
                 spriteId = buffer.readS();
 
                 if (spriteId != null && (sprite = this._sprites[spriteId]) != null) {
                     let atlasTexture: cc.Texture2D = <cc.Texture2D>this.getItemAsset(sprite.atlas);
-                    if (atlasTexture != null) {
+                    if (atlasTexture) {
                         let sx: number = item.width / frame.rect.width;
                         frame.texture = new cc.SpriteFrame(atlasTexture, sprite.rect, sprite.rotated,
                             new cc.Vec2(frame.rect.x - (item.width - frame.rect.width) / 2, -(frame.rect.y - (item.height - frame.rect.height) / 2)),
@@ -609,12 +730,12 @@ namespace fgui {
 
             let mainTexture: cc.Texture2D;
             var mainSprite: AtlasSprite = this._sprites[item.id];
-            if (mainSprite != null)
+            if (mainSprite)
                 mainTexture = <cc.Texture2D>(this.getItemAsset(mainSprite.atlas));
 
             buffer.seek(0, 1);
 
-            var bg: any = null;
+            var bg: any;
             var cnt: number = buffer.readInt();
             for (var i: number = 0; i < cnt; i++) {
                 var nextPos: number = buffer.readShort();
@@ -686,17 +807,18 @@ namespace fgui {
         }
     }
 
-    class AtlasSprite {
-        public atlas: PackageItem;
-        public rect: cc.Rect;
-        public offset: cc.Vec2;
-        public originalSize: cc.Size;
-        public rotated: boolean;
-
-        public constructor() {
-            this.rect = new cc.Rect();
-            this.offset = new cc.Vec2(0, 0);
-            this.originalSize = new cc.Size(0, 0);
-        }
+    interface AtlasSprite {
+        atlas: PackageItem;
+        rect: cc.Rect;
+        offset: cc.Vec2;
+        originalSize: cc.Size;
+        rotated?: boolean;
     }
+
+    const ItemTypeToAssetType = {
+        [PackageItemType.Atlas]: cc.Texture2D,
+        [PackageItemType.Sound]: cc.AudioClip,
+        [PackageItemType.Spine]: sp.SkeletonData,
+        [PackageItemType.DragonBones]: dragonBones.DragonBonesAsset,
+    };
 }

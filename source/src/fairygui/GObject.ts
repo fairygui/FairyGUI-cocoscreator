@@ -2,8 +2,8 @@
 namespace fgui {
 
     export class GObject {
-        public data: any;
-        public packageItem: PackageItem;
+        public data?: any;
+        public packageItem?: PackageItem;
         public static draggingObject: GObject;
 
         protected _x: number = 0;
@@ -11,25 +11,25 @@ namespace fgui {
         protected _alpha: number = 1;
         protected _visible: boolean = true;
         protected _touchable: boolean = true;
-        protected _grayed: boolean = false;
-        protected _draggable: boolean = false;
+        protected _grayed?: boolean;
+        protected _draggable?: boolean;
         protected _skewX: number = 0;
         protected _skewY: number = 0;
-        protected _pivotAsAnchor: boolean = false;
+        protected _pivotAsAnchor?: boolean;
         protected _sortingOrder: number = 0;
         protected _internalVisible: boolean = true;
-        protected _handlingController: boolean = false;
-        protected _tooltips: string;
+        protected _handlingController?: boolean;
+        protected _tooltips?: string;
         protected _blendMode: BlendMode;
-        protected _pixelSnapping: boolean = false;
-        protected _dragTesting: boolean = false;
-        protected _dragStartPoint: cc.Vec2;
+        protected _pixelSnapping?: boolean;
+        protected _dragTesting?: boolean;
+        protected _dragStartPoint?: cc.Vec2;
 
         protected _relations: Relations;
         protected _group: GGroup;
         protected _gears: GearBase[];
         protected _node: cc.Node;
-        protected _dragBounds: cc.Rect;
+        protected _dragBounds?: cc.Rect;
 
         public sourceWidth: number = 0;
         public sourceHeight: number = 0;
@@ -48,11 +48,13 @@ namespace fgui {
         public _id: string;
         public _name: string;
         public _underConstruct: boolean;
-        public _gearLocked: boolean;
+        public _gearLocked?: boolean;
         public _sizePercentInGroup: number = 0;
-        public _touchDisabled: boolean = false;
+        public _touchDisabled?: boolean;
         public _partner: GObjectPartner;
-        public _treeNode: GTreeNode;
+        public _treeNode?: GTreeNode;
+
+        private _hitTestPt?: cc.Vec2;
 
         public static _defaultGroupIndex: number = -1;
 
@@ -121,19 +123,19 @@ namespace fgui {
 
                 this.handlePositionChanged();
                 if (this instanceof GGroup)
-                    (<GGroup>this).moveChildren(dx, dy);
+                    this.moveChildren(dx, dy);
 
                 this.updateGear(1);
 
                 if (this._parent && !(this._parent instanceof GList)) {
                     this._parent.setBoundsChangedFlag();
-                    if (this._group != null)
+                    if (this._group)
                         this._group.setBoundsChangedFlag(true);
                     this._node.emit(Event.XY_CHANGED, this);
                 }
 
-                if (GObject.draggingObject == this && !GObject.sUpdateInDragging)
-                    this.localToGlobalRect(0, 0, this._width, this._height, GObject.sGlobalRect);
+                if (GObject.draggingObject == this && !sUpdateInDragging)
+                    this.localToGlobalRect(0, 0, this._width, this._height, sGlobalRect);
             }
         }
 
@@ -172,7 +174,7 @@ namespace fgui {
 
         public center(restraint?: boolean): void {
             var r: GComponent;
-            if (this._parent != null)
+            if (this._parent)
                 r = this.parent;
             else
                 r = this.root;
@@ -230,14 +232,14 @@ namespace fgui {
                     this.handlePositionChanged();
 
                 if (this instanceof GGroup)
-                    (<GGroup>this).resizeChildren(dWidth, dHeight);
+                    this.resizeChildren(dWidth, dHeight);
 
                 this.updateGear(2);
 
                 if (this._parent) {
                     this._relations.onOwnerSizeChanged(dWidth, dHeight, this._pivotAsAnchor || !ignorePivot);
                     this._parent.setBoundsChangedFlag();
-                    if (this._group != null)
+                    if (this._group)
                         this._group.setBoundsChangedFlag();
                 }
 
@@ -395,7 +397,7 @@ namespace fgui {
                 this._node.opacity = this._alpha * 255;
 
                 if (this instanceof GGroup)
-                    (<GGroup>this).handleAlphaChanged();
+                    this.handleAlphaChanged();
 
                 this.updateGear(3);
             }
@@ -434,7 +436,7 @@ namespace fgui {
             if (this._sortingOrder != value) {
                 var old: number = this._sortingOrder;
                 this._sortingOrder = value;
-                if (this._parent != null)
+                if (this._parent)
                     this._parent.childSortingOrderChanged(this, old, this._sortingOrder);
             }
         }
@@ -453,7 +455,6 @@ namespace fgui {
             }
 
             this._tooltips = value;
-
 
             if (this._tooltips) {
                 this._node.on(fgui.Event.ROLL_OVER, this.onRollOver, this);
@@ -477,7 +478,7 @@ namespace fgui {
         }
 
         public get resourceURL(): string {
-            if (this.packageItem != null)
+            if (this.packageItem)
                 return "ui://" + this.packageItem.owner.id + this.packageItem.id;
             else
                 return null;
@@ -485,10 +486,10 @@ namespace fgui {
 
         public set group(value: GGroup) {
             if (this._group != value) {
-                if (this._group != null)
+                if (this._group)
                     this._group.setBoundsChangedFlag();
                 this._group = value;
-                if (this._group != null)
+                if (this._group)
                     this._group.setBoundsChangedFlag();
             }
         }
@@ -499,7 +500,7 @@ namespace fgui {
 
         public getGear(index: number): GearBase {
             var gear: GearBase = this._gears[index];
-            if (gear == null)
+            if (!gear)
                 this._gears[index] = gear = GearBase.create(this, index);
             return gear;
         }
@@ -509,16 +510,16 @@ namespace fgui {
                 return;
 
             var gear: GearBase = this._gears[index];
-            if (gear != null && gear.controller != null)
+            if (gear && gear.controller)
                 gear.updateState();
         }
 
         public checkGearController(index: number, c: Controller): boolean {
-            return this._gears[index] != null && this._gears[index].controller == c;
+            return this._gears[index] && this._gears[index].controller == c;
         }
 
         public updateGearFromRelations(index: number, dx: number, dy: number): void {
-            if (this._gears[index] != null)
+            if (this._gears[index])
                 this._gears[index].updateFromRelations(dx, dy);
         }
 
@@ -615,12 +616,12 @@ namespace fgui {
 
         public get root(): GRoot {
             if (this instanceof GRoot)
-                return <GRoot>this;
+                return this;
 
             var p: GObject = this._parent;
             while (p) {
                 if (p instanceof GRoot)
-                    return <GRoot>p;
+                    return p;
                 p = p.parent;
             }
             return GRoot.inst;
@@ -725,7 +726,7 @@ namespace fgui {
 
             for (var i: number = 0; i < 10; i++) {
                 var gear: GearBase = this._gears[i];
-                if (gear != null)
+                if (gear)
                     gear.dispose();
             }
         }
@@ -803,77 +804,68 @@ namespace fgui {
             return GObject.draggingObject == this;
         }
 
-        public localToGlobal(ax?: number, ay?: number, resultPoint?: cc.Vec2): cc.Vec2 {
-            if (ax == undefined) ax = 0;
-            if (ay == undefined) ay = 0;
-            let pt = resultPoint || new cc.Vec2();
-            pt.x = ax;
-            pt.y = ay;
-            pt.y = -pt.y;
-            if (!this._pivotAsAnchor) {
-                pt.x -= this.node.anchorX * this._width;
-                pt.y += (1 - this.node.anchorY) * this._height;
-            }
-
-            let v3 = this._node.convertToWorldSpaceAR(pt);
-            pt.x = v3.x;
-            pt.y = GRoot.inst.height - v3.y;
-            return pt;
+        public localToGlobal(ax?: number, ay?: number, result?: cc.Vec2): cc.Vec2 {
+            ax = ax || 0;
+            ay = ay || 0;
+            result = result || new cc.Vec2();
+            result.x = ax;
+            result.y = ay;
+            result.y = -result.y;
+            result.x -= this.node.anchorX * this._width;
+            result.y += (1 - this.node.anchorY) * this._height;
+            this._node.convertToWorldSpaceAR(result, result);
+            result.y = GRoot.inst.height - result.y;
+            return result;
         }
 
-        public globalToLocal(ax?: number, ay?: number, resultPoint?: cc.Vec2): cc.Vec2 {
-            if (ax == undefined) ax = 0;
-            if (ay == undefined) ay = 0;
-            let pt = resultPoint || new cc.Vec2();
-            pt.x = ax;
-            pt.y = GRoot.inst.height - ay;
-
-            let v3 = this._node.convertToNodeSpaceAR(pt);
-            pt.x = v3.x;
-            pt.y = v3.y;
-            if (!this._pivotAsAnchor) {
-                pt.x -= this._node.anchorX * this._width;
-                pt.y += (1 - this._node.anchorY) * this._height;
-            }
-            pt.y = -pt.y;
-            return pt;
+        public globalToLocal(ax?: number, ay?: number, result?: cc.Vec2): cc.Vec2 {
+            ax = ax || 0;
+            ay = ay || 0;
+            result = result || new cc.Vec2();
+            result.x = ax;
+            result.y = GRoot.inst.height - ay;
+            this._node.convertToNodeSpaceAR(result, result);
+            result.x += this._node.anchorX * this._width;
+            result.y -= (1 - this._node.anchorY) * this._height;
+            result.y = -result.y;
+            return result;
         }
 
-        public localToGlobalRect(ax?: number, ay?: number, aw?: number, ah?: number, resultRect?: cc.Rect): cc.Rect {
-            if (ax == undefined) ax = 0;
-            if (ay == undefined) ay = 0;
-            if (aw == undefined) aw = 0;
-            if (ah == undefined) ah = 0;
-            let ret = resultRect || new cc.Rect();
+        public localToGlobalRect(ax?: number, ay?: number, aw?: number, ah?: number, result?: cc.Rect): cc.Rect {
+            ax = ax || 0;
+            ay = ay || 0;
+            aw = aw || 0;
+            ah = ah || 0;
+            result = result || new cc.Rect();
             var pt: cc.Vec2 = this.localToGlobal(ax, ay);
-            ret.x = pt.x;
-            ret.y = pt.y;
+            result.x = pt.x;
+            result.y = pt.y;
             pt = this.localToGlobal(ax + aw, ay + ah, pt);
-            ret.xMax = pt.x;
-            ret.yMax = pt.y;
-            return ret;
+            result.xMax = pt.x;
+            result.yMax = pt.y;
+            return result;
         }
 
-        public globalToLocalRect(ax?: number, ay?: number, aw?: number, ah?: number, resultRect?: cc.Rect): cc.Rect {
-            if (ax == undefined) ax = 0;
-            if (ay == undefined) ay = 0;
-            if (aw == undefined) aw = 0;
-            if (ah == undefined) ah = 0;
-            let ret = resultRect || new cc.Rect();
+        public globalToLocalRect(ax?: number, ay?: number, aw?: number, ah?: number, result?: cc.Rect): cc.Rect {
+            ax = ax || 0;
+            ay = ay || 0;
+            aw = aw || 0;
+            ah = ah || 0;
+            result = result || new cc.Rect();
             var pt: cc.Vec2 = this.globalToLocal(ax, ay);
-            ret.x = pt.x;
-            ret.y = pt.y;
+            result.x = pt.x;
+            result.y = pt.y;
             pt = this.globalToLocal(ax + aw, ay + ah, pt);
-            ret.xMax = pt.x;
-            ret.yMax = pt.y;
-            return ret;
+            result.xMax = pt.x;
+            result.yMax = pt.y;
+            return result;
         }
 
         public handleControllerChanged(c: Controller): void {
             this._handlingController = true;
             for (var i: number = 0; i < 10; i++) {
                 var gear: GearBase = this._gears[i];
-                if (gear != null && gear.controller == c)
+                if (gear && gear.controller == c)
                     gear.apply();
             }
             this._handlingController = false;
@@ -911,19 +903,24 @@ namespace fgui {
             this._node.active = this._finalVisible;
 
             if (this instanceof GGroup)
-                (<GGroup>this).handleVisibleChanged();
+                this.handleVisibleChanged();
 
             if (this._parent)
                 this._parent.setBoundsChangedFlag();
         }
 
-        public hitTest(globalPt: cc.Vec2): GObject {
-            if (this._touchDisabled || !this._touchable || !this._node.activeInHierarchy)
+        public hitTest(globalPt: cc.Vec2, forTouch?: boolean): GObject {
+            if (forTouch == null) forTouch = true;
+            if (forTouch && (this._touchDisabled || !this._touchable || !this._node.activeInHierarchy))
                 return null;
 
-            let pt: cc.Vec3 = this._node.convertToNodeSpaceAR(globalPt);
-            pt.x += this._node.anchorX * this._width;
-            pt.y += this._node.anchorY * this._height;
+            if (!this._hitTestPt)
+                this._hitTestPt = new cc.Vec2();
+            this.globalToLocal(globalPt.x, globalPt.y, this._hitTestPt);
+            return this._hitTest(this._hitTestPt, globalPt);
+        }
+
+        protected _hitTest(pt: cc.Vec2, globalPt: cc.Vec2): GObject {
             if (pt.x >= 0 && pt.y >= 0 && pt.x < this._width && pt.y < this._height)
                 return this;
             else
@@ -1075,16 +1072,8 @@ namespace fgui {
             this.root.hideTooltips();
         };
 
-
         //drag support
         //-------------------------------------------------------------------
-        private static sGlobalDragStart: cc.Vec2 = new cc.Vec2();
-        private static sGlobalRect: cc.Rect = new cc.Rect();
-        private static sHelperPoint: cc.Vec2 = new cc.Vec2();
-        private static sDragHelperRect: cc.Rect = new cc.Rect();
-        private static sUpdateInDragging: boolean;
-        private static sDragQuery: boolean = false;
-
         private initDrag(): void {
             if (this._draggable) {
                 this.on(Event.TOUCH_BEGIN, this.onTouchBegin_0, this);
@@ -1099,7 +1088,7 @@ namespace fgui {
         }
 
         private dragBegin(touchId: number): void {
-            if (GObject.draggingObject != null) {
+            if (GObject.draggingObject) {
                 let tmp: GObject = GObject.draggingObject;
                 tmp.stopDrag();
                 GObject.draggingObject = null;
@@ -1110,8 +1099,8 @@ namespace fgui {
             if (touchId == undefined)
                 touchId = GRoot.inst.inputProcessor.getAllTouches()[0];
 
-            GObject.sGlobalDragStart.set(GRoot.inst.getTouchPosition(touchId));
-            this.localToGlobalRect(0, 0, this._width, this._height, GObject.sGlobalRect);
+            sGlobalDragStart.set(GRoot.inst.getTouchPosition(touchId));
+            this.localToGlobalRect(0, 0, this._width, this._height, sGlobalRect);
 
             GObject.draggingObject = this;
             this._dragTesting = true;
@@ -1126,7 +1115,7 @@ namespace fgui {
                 this._dragTesting = false;
                 GObject.draggingObject = null;
             }
-            GObject.sDragQuery = false;
+            sDragQuery = false;
         }
 
         private onTouchBegin_0(evt: Event): void {
@@ -1146,42 +1135,42 @@ namespace fgui {
                     return;
 
                 this._dragTesting = false;
-                GObject.sDragQuery = true;
+                sDragQuery = true;
                 this._node.emit(Event.DRAG_START, evt);
 
-                if (GObject.sDragQuery)
+                if (sDragQuery)
                     this.dragBegin(evt.touchId);
             }
 
             if (GObject.draggingObject == this) {
 
-                var xx: number = evt.pos.x - GObject.sGlobalDragStart.x + GObject.sGlobalRect.x;
-                var yy: number = evt.pos.y - GObject.sGlobalDragStart.y + GObject.sGlobalRect.y;
+                var xx: number = evt.pos.x - sGlobalDragStart.x + sGlobalRect.x;
+                var yy: number = evt.pos.y - sGlobalDragStart.y + sGlobalRect.y;
 
-                if (this._dragBounds != null) {
+                if (this._dragBounds) {
                     var rect: cc.Rect = GRoot.inst.localToGlobalRect(this._dragBounds.x, this._dragBounds.y,
-                        this._dragBounds.width, this._dragBounds.height, GObject.sDragHelperRect);
+                        this._dragBounds.width, this._dragBounds.height, sDragHelperRect);
                     if (xx < rect.x)
                         xx = rect.x;
-                    else if (xx + GObject.sGlobalRect.width > rect.xMax) {
-                        xx = rect.xMax - GObject.sGlobalRect.width;
+                    else if (xx + sGlobalRect.width > rect.xMax) {
+                        xx = rect.xMax - sGlobalRect.width;
                         if (xx < rect.x)
                             xx = rect.x;
                     }
 
                     if (yy < rect.y)
                         yy = rect.y;
-                    else if (yy + GObject.sGlobalRect.height > rect.yMax) {
-                        yy = rect.yMax - GObject.sGlobalRect.height;
+                    else if (yy + sGlobalRect.height > rect.yMax) {
+                        yy = rect.yMax - sGlobalRect.height;
                         if (yy < rect.y)
                             yy = rect.y;
                     }
                 }
 
-                GObject.sUpdateInDragging = true;
-                var pt: cc.Vec2 = this.parent.globalToLocal(xx, yy, GObject.sHelperPoint);
+                sUpdateInDragging = true;
+                var pt: cc.Vec2 = this.parent.globalToLocal(xx, yy, sHelperPoint);
                 this.setPosition(Math.round(pt.x), Math.round(pt.y));
-                GObject.sUpdateInDragging = false;
+                sUpdateInDragging = false;
 
                 this._node.emit(Event.DRAG_MOVE, evt);
             }
@@ -1196,6 +1185,15 @@ namespace fgui {
         }
         //-------------------------------------------------------------------
     }
+
+    var sGlobalDragStart: cc.Vec2 = new cc.Vec2();
+    var sGlobalRect: cc.Rect = new cc.Rect();
+    var sHelperPoint: cc.Vec2 = new cc.Vec2();
+    var sDragHelperRect: cc.Rect = new cc.Rect();
+    var sUpdateInDragging: boolean;
+    var sDragQuery: boolean = false;
+
+    //-------------------------------------------------------------------
 
     export class GObjectPartner extends cc.Component {
         public _emitDisplayEvents: boolean = false;

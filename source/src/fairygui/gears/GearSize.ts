@@ -1,28 +1,36 @@
 
 namespace fgui {
+    interface Value {
+        width?: number;
+        height?: number;
+        scaleX?: number;
+        scaleY?: number;
+    }
 
     export class GearSize extends GearBase {
-        private _storage: any;
-        private _default: GearSizeValue;
+        private _storage: { [index: string]: Value };
+        private _default: Value;
 
         public constructor(owner: GObject) {
             super(owner);
         }
 
         protected init(): void {
-            this._default = new GearSizeValue(this._owner.width, this._owner.height,
-                this._owner.scaleX, this._owner.scaleY);
+            this._default = {
+                width: this._owner.width,
+                height: this._owner.height,
+                scaleX: this._owner.scaleX,
+                scaleY: this._owner.scaleY
+            };
             this._storage = {};
         }
 
         protected addStatus(pageId: string, buffer: ByteBuffer): void {
-            var gv: GearSizeValue;
+            var gv: Value;
             if (pageId == null)
                 gv = this._default;
-            else {
-                gv = new GearSizeValue();
-                this._storage[pageId] = gv;
-            }
+            else
+                this._storage[pageId] = gv = {};
 
             gv.width = buffer.readInt();
             gv.height = buffer.readInt();
@@ -31,12 +39,12 @@ namespace fgui {
         }
 
         public apply(): void {
-            var gv: GearSizeValue = this._storage[this._controller.selectedPageId];
+            var gv: Value = this._storage[this._controller.selectedPageId];
             if (!gv)
                 gv = this._default;
 
             if (this._tweenConfig && this._tweenConfig.tween && !UIPackage._constructing && !GearBase.disableAllTweenEffect) {
-                if (this._tweenConfig._tweener != null) {
+                if (this._tweenConfig._tweener) {
                     if (this._tweenConfig._tweener.endValue.x != gv.width || this._tweenConfig._tweener.endValue.y != gv.height
                         || this._tweenConfig._tweener.endValue.z != gv.scaleX || this._tweenConfig._tweener.endValue.w != gv.scaleY) {
                         this._tweenConfig._tweener.kill(true);
@@ -46,8 +54,8 @@ namespace fgui {
                         return;
                 }
 
-                var a: Boolean = gv.width != this._owner.width || gv.height != this._owner.height;
-                var b: Boolean = gv.scaleX != this._owner.scaleX || gv.scaleY != this._owner.scaleY;
+                var a: boolean = gv.width != this._owner.width || gv.height != this._owner.height;
+                var b: boolean = gv.scaleX != this._owner.scaleX || gv.scaleY != this._owner.scaleY;
                 if (a || b) {
                     if (this._owner.checkGearController(0, this._controller))
                         this._tweenConfig._displayLockToken = this._owner.addDisplayLock();
@@ -88,12 +96,9 @@ namespace fgui {
         }
 
         public updateState(): void {
-            var gv: GearSizeValue = this._storage[this._controller.selectedPageId];
-            if (!gv) {
-                gv = new GearSizeValue();
-                this._storage[this._controller.selectedPageId] = gv;
-            }
-
+            var gv: Value = this._storage[this._controller.selectedPageId];
+            if (!gv)
+                this._storage[this._controller.selectedPageId] = {};
             gv.width = this._owner.width;
             gv.height = this._owner.height;
             gv.scaleX = this._owner.scaleX;
@@ -105,7 +110,7 @@ namespace fgui {
                 return;
 
             for (var key in this._storage) {
-                var gv: GearSizeValue = this._storage[key];
+                var gv: Value = this._storage[key];
                 gv.width += dx;
                 gv.height += dy;
             }
@@ -113,20 +118,6 @@ namespace fgui {
             this._default.height += dy;
 
             this.updateState();
-        }
-    }
-
-    class GearSizeValue {
-        public width: number;
-        public height: number;
-        public scaleX: number;
-        public scaleY: number;
-
-        public constructor(width: number = 0, height: number = 0, scaleX: number = 0, scaleY: number = 0) {
-            this.width = width;
-            this.height = height;
-            this.scaleX = scaleX;
-            this.scaleY = scaleY;
         }
     }
 }

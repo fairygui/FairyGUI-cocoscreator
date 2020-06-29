@@ -6,7 +6,7 @@ namespace fgui {
 
         private static _inst: DragDropManager;
         public static get inst(): DragDropManager {
-            if (DragDropManager._inst == null)
+            if (!DragDropManager._inst)
                 DragDropManager._inst = new DragDropManager();
             return DragDropManager._inst;
         }
@@ -32,7 +32,7 @@ namespace fgui {
         }
 
         public startDrag(source: GObject, icon: string, sourceData?: any, touchId?: number): void {
-            if (this._agent.parent != null)
+            if (this._agent.parent)
                 return;
 
             this._sourceData = sourceData;
@@ -45,7 +45,7 @@ namespace fgui {
         }
 
         public cancel(): void {
-            if (this._agent.parent != null) {
+            if (this._agent.parent) {
                 this._agent.stopDrag();
                 GRoot.inst.removeChild(this._agent);
                 this._sourceData = null;
@@ -53,7 +53,7 @@ namespace fgui {
         }
 
         private onDragEnd(): void {
-            if (this._agent.parent == null) //cancelled
+            if (!this._agent.parent) //cancelled
                 return;
 
             GRoot.inst.removeChild(this._agent);
@@ -62,7 +62,7 @@ namespace fgui {
             this._sourceData = null;
 
             var obj: GObject = GRoot.inst.touchTarget;
-            while (obj != null) {
+            while (obj) {
                 if (obj.node.hasEventListener(Event.DROP)) {
                     obj.requestFocus();
                     obj.node.emit(Event.DROP, obj, sourceData);

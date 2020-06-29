@@ -10,9 +10,9 @@ namespace fgui {
         private _frame: GComponent;
         private _modal: boolean;
 
-        private _uiSources: Array<IUISource>;
-        private _inited: boolean;
-        private _loading: boolean;
+        private _uiSources?: Array<IUISource>;
+        private _inited?: boolean;
+        private _loading?: boolean;
 
         protected _requestingCmd: number = 0;
 
@@ -32,15 +32,15 @@ namespace fgui {
 
         public set contentPane(val: GComponent) {
             if (this._contentPane != val) {
-                if (this._contentPane != null)
+                if (this._contentPane)
                     this.removeChild(this._contentPane);
                 this._contentPane = val;
-                if (this._contentPane != null) {
+                if (this._contentPane) {
                     this.addChild(this._contentPane);
                     this.setSize(this._contentPane.width, this._contentPane.height);
                     this._contentPane.addRelation(this, RelationType.Size);
-                    this._frame = <GComponent><any>(this._contentPane.getChild("frame"));
-                    if (this._frame != null) {
+                    this._frame = <GComponent>(this._contentPane.getChild("frame"));
+                    if (this._frame) {
                         this.closeButton = this._frame.getChild("closeButton");
                         this.dragArea = this._frame.getChild("dragArea");
                         this.contentArea = this._frame.getChild("contentArea");
@@ -62,10 +62,10 @@ namespace fgui {
         }
 
         public set closeButton(value: GObject) {
-            if (this._closeButton != null)
+            if (this._closeButton)
                 this._closeButton.offClick(this.closeEventHandler, this);
             this._closeButton = value;
-            if (this._closeButton != null)
+            if (this._closeButton)
                 this._closeButton.onClick(this.closeEventHandler, this);
         }
 
@@ -75,13 +75,13 @@ namespace fgui {
 
         public set dragArea(value: GObject) {
             if (this._dragArea != value) {
-                if (this._dragArea != null) {
+                if (this._dragArea) {
                     this._dragArea.draggable = false;
                     this._dragArea.off(Event.DRAG_START, this.onDragStart_1, this);
                 }
 
                 this._dragArea = value;
-                if (this._dragArea != null) {
+                if (this._dragArea) {
                     this._dragArea.draggable = true;
                     this._dragArea.on(Event.DRAG_START, this.onDragStart_1, this);
                 }
@@ -110,7 +110,7 @@ namespace fgui {
         }
 
         public hideImmediately(): void {
-            var r: GRoot = (this.parent instanceof GRoot) ? <GRoot><any>(this.parent) : null;
+            var r: GRoot = (this.parent instanceof GRoot) ? this.parent : null;
             if (!r)
                 r = GRoot.inst;
             r.hideWindowImmediately(this);
@@ -136,7 +136,7 @@ namespace fgui {
         }
 
         public get isTop(): boolean {
-            return this.parent != null && this.parent.getChildIndex(this) == this.parent.numChildren - 1;
+            return this.parent && this.parent.getChildIndex(this) == this.parent.numChildren - 1;
         }
 
         public get modal(): boolean {
@@ -166,7 +166,7 @@ namespace fgui {
         }
 
         protected layoutModalWaitPane(): void {
-            if (this._contentArea != null) {
+            if (this._contentArea) {
                 var pt: cc.Vec2 = this._frame.localToGlobal();
                 pt = this.globalToLocal(pt.x, pt.y, pt);
                 this._modalWaitPane.setPosition(pt.x + this._contentArea.x, pt.y + this._contentArea.y);
@@ -183,7 +183,7 @@ namespace fgui {
             }
             this._requestingCmd = 0;
 
-            if (this._modalWaitPane && this._modalWaitPane.parent != null)
+            if (this._modalWaitPane && this._modalWaitPane.parent)
                 this.removeChild(this._modalWaitPane);
 
             return true;
@@ -254,7 +254,7 @@ namespace fgui {
         }
 
         public dispose(): void {
-            if (this.parent != null)
+            if (this.parent)
                 this.hideImmediately();
 
             super.dispose();

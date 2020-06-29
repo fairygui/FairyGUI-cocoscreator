@@ -4,13 +4,13 @@ namespace fgui {
         protected _contentPane: GComponent;
         protected _list: GList;
 
-        public constructor(url: string = null) {
+        public constructor(url?: string) {
             if (!url) {
                 url = UIConfig.popupMenu;
                 if (!url)
                     throw "UIConfig.popupMenu not defined";
             }
-            this._contentPane = UIPackage.createObjectFromURL(url).asCom;
+            this._contentPane = <GComponent>UIPackage.createObjectFromURL(url);
             this._contentPane.on(Event.DISPLAY, this.onDisplay, this);
             this._list = <GList>(this._contentPane.getChild("list"));
             this._list.removeChildrenToPool();
@@ -25,24 +25,24 @@ namespace fgui {
         }
 
         public addItem(caption: string, callback?: (item?: fgui.GObject, evt?: fgui.Event) => void): GButton {
-            var item: GButton = this._list.addItemFromPool().asButton;
+            var item: GButton = <GButton>this._list.addItemFromPool();
             item.title = caption;
             item.data = callback;
             item.grayed = false;
             var c: Controller = item.getController("checked");
-            if (c != null)
+            if (c)
                 c.selectedIndex = 0;
             return item;
         }
 
         public addItemAt(caption: string, index: number, callback?: (item?: fgui.GObject, evt?: fgui.Event) => void): GButton {
-            var item: GButton = this._list.getFromPool().asButton;
+            var item: GButton = <GButton>this._list.getFromPool();
             this._list.addChildAt(item, index);
             item.title = caption;
             item.data = callback;
             item.grayed = false;
             var c: Controller = item.getController("checked");
-            if (c != null)
+            if (c)
                 c.selectedIndex = 0;
             return item;
         }
@@ -59,12 +59,12 @@ namespace fgui {
         }
 
         public setItemText(name: string, caption: string) {
-            var item: GButton = this._list.getChild(name).asButton;
+            var item: GButton = <GButton>this._list.getChild(name);
             item.title = caption;
         }
 
         public setItemVisible(name: string, visible: boolean) {
-            var item: GButton = this._list.getChild(name).asButton;
+            var item: GButton = <GButton>this._list.getChild(name);
             if (item.visible != visible) {
                 item.visible = visible;
                 this._list.setBoundsChangedFlag();
@@ -72,14 +72,14 @@ namespace fgui {
         }
 
         public setItemGrayed(name: string, grayed: boolean) {
-            var item: GButton = this._list.getChild(name).asButton;
+            var item: GButton = <GButton>this._list.getChild(name);
             item.grayed = grayed;
         }
 
         public setItemCheckable(name: string, checkable: boolean) {
-            var item: GButton = this._list.getChild(name).asButton;
+            var item: GButton = <GButton>this._list.getChild(name);
             var c: Controller = item.getController("checked");
-            if (c != null) {
+            if (c) {
                 if (checkable) {
                     if (c.selectedIndex == 0)
                         c.selectedIndex = 1;
@@ -90,24 +90,24 @@ namespace fgui {
         }
 
         public setItemChecked(name: string, checked: boolean) {
-            var item: GButton = this._list.getChild(name).asButton;
+            var item: GButton = <GButton>this._list.getChild(name);
             var c: Controller = item.getController("checked");
-            if (c != null)
+            if (c)
                 c.selectedIndex = checked ? 2 : 1;
         }
 
         public isItemChecked(name: string): boolean {
-            var item: GButton = this._list.getChild(name).asButton;
+            var item: GButton = <GButton>this._list.getChild(name);
             var c: Controller = item.getController("checked");
-            if (c != null)
+            if (c)
                 return c.selectedIndex == 2;
             else
                 return false;
         }
 
         public removeItem(name: string): boolean {
-            var item: GButton = <GButton>this._list.getChild(name);
-            if (item != null) {
+            var item: GObject = this._list.getChild(name);
+            if (item) {
                 var index: number = this._list.getChildIndex(item);
                 this._list.removeChildToPoolAt(index);
                 return true;
@@ -132,28 +132,28 @@ namespace fgui {
             return this._list;
         }
 
-        public show(target: GObject = null, downward?: any) {
+        public show(target: GObject = null, dir?: PopupDirection | boolean) {
             var r: GRoot = target != null ? target.root : GRoot.inst;
-            r.showPopup(this.contentPane, (target instanceof GRoot) ? null : target, downward);
+            r.showPopup(this.contentPane, (target instanceof GRoot) ? null : target, dir);
         }
 
-        private onClickItem(itemObject, evt): void {
+        private onClickItem(item, evt): void {
             let _this = this;
             this._list._partner.callLater(function (dt) {
-                _this.onClickItem2(itemObject, evt);
+                _this.onClickItem2(item, evt);
             }, 0.1);
         }
 
-        private onClickItem2(itemObject, evt): void {
-            var item: GButton = itemObject.asButton;
-            if (item == null)
+        private onClickItem2(item, evt): void {
+            if (!(item instanceof GButton))
                 return;
+
             if (item.grayed) {
                 this._list.selectedIndex = -1;
                 return;
             }
             var c: Controller = item.getController("checked");
-            if (c != null && c.selectedIndex != 0) {
+            if (c && c.selectedIndex != 0) {
                 if (c.selectedIndex == 1)
                     c.selectedIndex = 2;
                 else
