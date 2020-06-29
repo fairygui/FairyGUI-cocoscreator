@@ -10,7 +10,7 @@ namespace fgui {
 
         private _items: Array<string>;
         private _values: Array<string>;
-        private _icons: Array<string>;
+        private _icons?: Array<string>;
 
         private _visibleItemCount: number = 0;
         private _itemsUpdated: boolean;

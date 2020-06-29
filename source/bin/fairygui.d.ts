@@ -566,14 +566,14 @@ declare namespace fgui {
         private _sound;
         private _soundVolumeScale;
         private _buttonController;
-        private _relatedController;
+        private _relatedController?;
         private _relatedPageId;
         private _changeStateOnClick;
-        private _linkedPopup;
+        private _linkedPopup?;
         private _downEffect;
         private _downEffectValue;
-        private _downColor;
-        private _downScaled;
+        private _downColor?;
+        private _downScaled?;
         private _down;
         private _over;
         static UP: string;
@@ -638,7 +638,7 @@ declare namespace fgui {
         protected _list: GList;
         private _items;
         private _values;
-        private _icons;
+        private _icons?;
         private _visibleItemCount;
         private _itemsUpdated;
         private _selectedIndex;
@@ -1528,7 +1528,7 @@ declare namespace fgui {
         height: number;
         file: string;
         decoded?: boolean;
-        loading?: boolean;
+        loading?: Array<Function>;
         rawData?: ByteBuffer;
         asset?: cc.Asset;
         highResolution?: Array<string>;
@@ -1961,10 +1961,13 @@ declare namespace fgui {
         getItemById(itemId: string): PackageItem;
         getItemByName(resName: string): PackageItem;
         getItemAssetByName(resName: string): cc.Asset;
-        getItemAsset(item: PackageItem, onComplete?: (err: Error, item: PackageItem) => void): cc.Asset;
+        getItemAsset(item: PackageItem): cc.Asset;
+        getItemAssetAsync(item: PackageItem, onComplete?: (err: Error, item: PackageItem) => void): void;
         loadAllAssets(): void;
         private loadMovieClip;
         private loadFont;
+        private loadSpine;
+        private loadDragonBones;
     }
     export {};
 }
@@ -2497,9 +2500,9 @@ declare namespace fgui {
         static toColor(start: number, end: number, duration: number): GTweener;
         static delayedCall(delay: number): GTweener;
         static shake(startX: number, startY: number, amplitude: number, duration: number): GTweener;
-        static isTweening(target: Object, propType?: any): Boolean;
-        static kill(target: Object, complete?: boolean, propType?: any): void;
-        static getTween(target: Object, propType?: any): GTweener;
+        static isTweening(target: any, propType?: any): Boolean;
+        static kill(target: any, complete?: boolean, propType?: any): void;
+        static getTween(target: any, propType?: any): GTweener;
     }
 }
 declare namespace fgui {
@@ -2549,8 +2552,8 @@ declare namespace fgui {
         get repeat(): number;
         setTimeScale(value: number): GTweener;
         setSnapping(value: boolean): GTweener;
-        setTarget(value: Object, propType?: Object): GTweener;
-        get target(): Object;
+        setTarget(value: any, propType?: any): GTweener;
+        get target(): any;
         setPath(value: GPath): GTweener;
         setUserData(value: any): GTweener;
         get userData(): any;

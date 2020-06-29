@@ -15,14 +15,14 @@ namespace fgui {
         private _sound: string;
         private _soundVolumeScale: number;
         private _buttonController: Controller;
-        private _relatedController: Controller;
+        private _relatedController?: Controller;
         private _relatedPageId: string;
         private _changeStateOnClick: boolean;
-        private _linkedPopup: GObject;
+        private _linkedPopup?: GObject;
         private _downEffect: number;
         private _downEffectValue: number;
-        private _downColor: cc.Color;
-        private _downScaled: boolean;
+        private _downColor?: cc.Color;
+        private _downScaled?: boolean;
         private _down: boolean;
         private _over: boolean;
 

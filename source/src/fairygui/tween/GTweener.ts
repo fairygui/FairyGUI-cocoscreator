@@ -104,7 +104,7 @@ namespace fgui {
             return this;
         }
 
-        public setTarget(value: Object, propType?: Object): GTweener {
+        public setTarget(value: any, propType?: any): GTweener {
             this._target = value;
             this._propType = propType;
             if (value instanceof GObject)
@@ -114,7 +114,7 @@ namespace fgui {
             return this;
         }
 
-        public get target(): Object {
+        public get target(): any {
             return this._target;
         }
 

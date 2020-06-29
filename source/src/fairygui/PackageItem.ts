@@ -12,7 +12,7 @@ namespace fgui {
         public height: number = 0;
         public file: string;
         public decoded?: boolean;
-        public loading?: boolean;
+        public loading?: Array<Function>;
         public rawData?: ByteBuffer;
         public asset?: cc.Asset;
 

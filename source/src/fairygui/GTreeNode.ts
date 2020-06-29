@@ -145,7 +145,9 @@ namespace fgui {
             }
         }
 
-        public removeChildren(beginIndex: number = 0, endIndex: number = -1): void {
+        public removeChildren(beginIndex?: number, endIndex?: number): void {
+            beginIndex = beginIndex || 0;
+            if (endIndex == null) endIndex = -1;
             if (endIndex < 0 || endIndex >= this.numChildren)
                 endIndex = this.numChildren - 1;
 

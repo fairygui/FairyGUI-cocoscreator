@@ -377,20 +377,20 @@ namespace fgui {
                 return;
             }
 
-            let contentWidth = this.sourceWidth;
-            let contentHeight = this.sourceHeight;
+            let cw = this.sourceWidth;
+            let ch = this.sourceHeight;
 
             let pivotCorrectX = -this.pivotX * this._width;
             let pivotCorrectY = this.pivotY * this._height;
 
             if (this._autoSize) {
                 this._updatingLayout = true;
-                if (contentWidth == 0)
-                    contentWidth = 50;
-                if (contentHeight == 0)
-                    contentHeight = 30;
+                if (cw == 0)
+                    cw = 50;
+                if (ch == 0)
+                    ch = 30;
 
-                this.setSize(contentWidth, contentHeight);
+                this.setSize(cw, ch);
                 this._updatingLayout = false;
 
                 this._container.setContentSize(this._width, this._height);
@@ -399,7 +399,7 @@ namespace fgui {
                     this._content2.setPosition(pivotCorrectX + this._width * this.pivotX, pivotCorrectY - this._height * this.pivotY);
                     this._content2.setScale(1, 1);
                 }
-                if (contentWidth == this._width && contentHeight == this._height)
+                if (cw == this._width && ch == this._height)
                     return;
             }
 
@@ -431,12 +431,12 @@ namespace fgui {
                         if (sy > 1)
                             sy = 1;
                     }
-                    contentWidth = this.sourceWidth * sx;
-                    contentHeight = this.sourceHeight * sy;
+                    cw = this.sourceWidth * sx;
+                    ch = this.sourceHeight * sy;
                 }
             }
 
-            this._container.setContentSize(contentWidth, contentHeight);
+            this._container.setContentSize(cw, ch);
             if (this._content2) {
                 this._content2.setPosition(pivotCorrectX + this._width * this.pivotX, pivotCorrectY - this._height * this.pivotY);
                 this._content2.setScale(sx, sy);
@@ -446,15 +446,15 @@ namespace fgui {
             if (this._align == AlignType.Left)
                 nx = 0;
             else if (this._align == AlignType.Center)
-                nx = Math.floor((this._width - contentWidth) / 2);
+                nx = Math.floor((this._width - cw) / 2);
             else
-                nx = this._width - contentWidth;
+                nx = this._width - cw;
             if (this._verticalAlign == VertAlignType.Top)
                 ny = 0;
             else if (this._verticalAlign == VertAlignType.Middle)
-                ny = Math.floor((this._height - contentHeight) / 2);
+                ny = Math.floor((this._height - ch) / 2);
             else
-                ny = this._height - contentHeight;
+                ny = this._height - ch;
             ny = -ny;
             this._container.setPosition(pivotCorrectX + nx, pivotCorrectY + ny);
         }

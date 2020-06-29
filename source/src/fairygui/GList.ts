@@ -795,25 +795,25 @@ namespace fgui {
                 var index: number;
                 if (this._layout == ListLayoutType.SingleColumn || this._layout == ListLayoutType.FlowHorizontal) {
                     saved = yValue;
-                    GList.pos_param = yValue;
+                    s_n = yValue;
                     index = this.getIndexOnPos1(false);
-                    yValue = GList.pos_param;
+                    yValue = s_n;
                     if (index < this._virtualItems.length && saved - yValue > this._virtualItems[index].height / 2 && index < this._realNumItems)
                         yValue += this._virtualItems[index].height + this._lineGap;
                 }
                 else if (this._layout == ListLayoutType.SingleRow || this._layout == ListLayoutType.FlowVertical) {
                     saved = xValue;
-                    GList.pos_param = xValue;
+                    s_n = xValue;
                     index = this.getIndexOnPos2(false);
-                    xValue = GList.pos_param;
+                    xValue = s_n;
                     if (index < this._virtualItems.length && saved - xValue > this._virtualItems[index].width / 2 && index < this._realNumItems)
                         xValue += this._virtualItems[index].width + this._columnGap;
                 }
                 else {
                     saved = xValue;
-                    GList.pos_param = xValue;
+                    s_n = xValue;
                     index = this.getIndexOnPos3(false);
-                    xValue = GList.pos_param;
+                    xValue = s_n;
                     if (index < this._virtualItems.length && saved - xValue > this._virtualItems[index].width / 2 && index < this._realNumItems)
                         xValue += this._virtualItems[index].width + this._columnGap;
                 }
@@ -861,7 +861,6 @@ namespace fgui {
                         ii.width, ii.height);
                 }
 
-                setFirst = true;//因为在可变item大小的情况下，只有设置在最顶端，位置才不会因为高度变化而改变，所以只能支持setFirst=true
                 if (this._scrollPane)
                     this._scrollPane.scrollToView(rect, ani, setFirst);
             }
@@ -1181,7 +1180,7 @@ namespace fgui {
 
         private getIndexOnPos1(forceUpdate: boolean): number {
             if (this._realNumItems < this._curLineItemCount) {
-                GList.pos_param = 0;
+                s_n = 0;
                 return 0;
             }
 
@@ -1191,29 +1190,29 @@ namespace fgui {
 
             if (this.numChildren > 0 && !forceUpdate) {
                 pos2 = this.getChildAt(0).y;
-                if (pos2 > GList.pos_param) {
+                if (pos2 > s_n) {
                     for (i = this._firstIndex - this._curLineItemCount; i >= 0; i -= this._curLineItemCount) {
                         pos2 -= (this._virtualItems[i].height + this._lineGap);
-                        if (pos2 <= GList.pos_param) {
-                            GList.pos_param = pos2;
+                        if (pos2 <= s_n) {
+                            s_n = pos2;
                             return i;
                         }
                     }
 
-                    GList.pos_param = 0;
+                    s_n = 0;
                     return 0;
                 }
                 else {
                     for (i = this._firstIndex; i < this._realNumItems; i += this._curLineItemCount) {
                         pos3 = pos2 + this._virtualItems[i].height + this._lineGap;
-                        if (pos3 > GList.pos_param) {
-                            GList.pos_param = pos2;
+                        if (pos3 > s_n) {
+                            s_n = pos2;
                             return i;
                         }
                         pos2 = pos3;
                     }
 
-                    GList.pos_param = pos2;
+                    s_n = pos2;
                     return this._realNumItems - this._curLineItemCount;
                 }
             }
@@ -1221,21 +1220,21 @@ namespace fgui {
                 pos2 = 0;
                 for (i = 0; i < this._realNumItems; i += this._curLineItemCount) {
                     pos3 = pos2 + this._virtualItems[i].height + this._lineGap;
-                    if (pos3 > GList.pos_param) {
-                        GList.pos_param = pos2;
+                    if (pos3 > s_n) {
+                        s_n = pos2;
                         return i;
                     }
                     pos2 = pos3;
                 }
 
-                GList.pos_param = pos2;
+                s_n = pos2;
                 return this._realNumItems - this._curLineItemCount;
             }
         }
 
         private getIndexOnPos2(forceUpdate: boolean): number {
             if (this._realNumItems < this._curLineItemCount) {
-                GList.pos_param = 0;
+                s_n = 0;
                 return 0;
             }
 
@@ -1245,29 +1244,29 @@ namespace fgui {
 
             if (this.numChildren > 0 && !forceUpdate) {
                 pos2 = this.getChildAt(0).x;
-                if (pos2 > GList.pos_param) {
+                if (pos2 > s_n) {
                     for (i = this._firstIndex - this._curLineItemCount; i >= 0; i -= this._curLineItemCount) {
                         pos2 -= (this._virtualItems[i].width + this._columnGap);
-                        if (pos2 <= GList.pos_param) {
-                            GList.pos_param = pos2;
+                        if (pos2 <= s_n) {
+                            s_n = pos2;
                             return i;
                         }
                     }
 
-                    GList.pos_param = 0;
+                    s_n = 0;
                     return 0;
                 }
                 else {
                     for (i = this._firstIndex; i < this._realNumItems; i += this._curLineItemCount) {
                         pos3 = pos2 + this._virtualItems[i].width + this._columnGap;
-                        if (pos3 > GList.pos_param) {
-                            GList.pos_param = pos2;
+                        if (pos3 > s_n) {
+                            s_n = pos2;
                             return i;
                         }
                         pos2 = pos3;
                     }
 
-                    GList.pos_param = pos2;
+                    s_n = pos2;
                     return this._realNumItems - this._curLineItemCount;
                 }
             }
@@ -1275,40 +1274,40 @@ namespace fgui {
                 pos2 = 0;
                 for (i = 0; i < this._realNumItems; i += this._curLineItemCount) {
                     pos3 = pos2 + this._virtualItems[i].width + this._columnGap;
-                    if (pos3 > GList.pos_param) {
-                        GList.pos_param = pos2;
+                    if (pos3 > s_n) {
+                        s_n = pos2;
                         return i;
                     }
                     pos2 = pos3;
                 }
 
-                GList.pos_param = pos2;
+                s_n = pos2;
                 return this._realNumItems - this._curLineItemCount;
             }
         }
 
         private getIndexOnPos3(forceUpdate: boolean): number {
             if (this._realNumItems < this._curLineItemCount) {
-                GList.pos_param = 0;
+                s_n = 0;
                 return 0;
             }
 
             var viewWidth: number = this.viewWidth;
-            var page: number = Math.floor(GList.pos_param / viewWidth);
+            var page: number = Math.floor(s_n / viewWidth);
             var startIndex: number = page * (this._curLineItemCount * this._curLineItemCount2);
             var pos2: number = page * viewWidth;
             var i: number;
             var pos3: number;
             for (i = 0; i < this._curLineItemCount; i++) {
                 pos3 = pos2 + this._virtualItems[startIndex + i].width + this._columnGap;
-                if (pos3 > GList.pos_param) {
-                    GList.pos_param = pos2;
+                if (pos3 > s_n) {
+                    s_n = pos2;
                     return startIndex + i;
                 }
                 pos2 = pos3;
             }
 
-            GList.pos_param = pos2;
+            s_n = pos2;
             return startIndex + this._curLineItemCount - 1;
         }
 
@@ -1355,9 +1354,9 @@ namespace fgui {
             var end: boolean = max == this._scrollPane.contentHeight;//这个标志表示当前需要滚动到最末，无论内容变化大小
 
             //寻找当前位置的第一条项目
-            GList.pos_param = pos;
+            s_n = pos;
             var newFirstIndex: number = this.getIndexOnPos1(forceUpdate);
-            pos = GList.pos_param;
+            pos = s_n;
             if (newFirstIndex == this._firstIndex && !forceUpdate) {
                 return false;
             }
@@ -1510,9 +1509,9 @@ namespace fgui {
             var end: boolean = pos == this._scrollPane.contentWidth;//这个标志表示当前需要滚动到最末，无论内容变化大小
 
             //寻找当前位置的第一条项目
-            GList.pos_param = pos;
+            s_n = pos;
             var newFirstIndex: number = this.getIndexOnPos2(forceUpdate);
-            pos = GList.pos_param;
+            pos = s_n;
             if (newFirstIndex == this._firstIndex && !forceUpdate) {
                 return false;
             }
@@ -1663,9 +1662,9 @@ namespace fgui {
             var pos: number = this._scrollPane.scrollingPosX;
 
             //寻找当前位置的第一条项目
-            GList.pos_param = pos;
+            s_n = pos;
             var newFirstIndex: number = this.getIndexOnPos3(forceUpdate);
-            pos = GList.pos_param;
+            pos = s_n;
             if (newFirstIndex == this._firstIndex && !forceUpdate)
                 return;
 
@@ -2358,4 +2357,6 @@ namespace fgui {
         updateFlag: number;
         selected?: boolean;
     }
+
+    var s_n: number = 0;
 }

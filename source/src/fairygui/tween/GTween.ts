@@ -32,15 +32,15 @@ namespace fgui {
             return TweenManager.createTween()._shake(startX, startY, amplitude, duration);
         }
 
-        public static isTweening(target: Object, propType?: any): Boolean {
+        public static isTweening(target: any, propType?: any): Boolean {
             return TweenManager.isTweening(target, propType);
         }
 
-        public static kill(target: Object, complete?: boolean, propType?: any): void {
+        public static kill(target: any, complete?: boolean, propType?: any): void {
             TweenManager.killTweens(target, complete, propType);
         }
 
-        public static getTween(target: Object, propType?: any): GTweener {
+        public static getTween(target: any, propType?: any): GTweener {
             return TweenManager.getTween(target, propType);
         }
     }

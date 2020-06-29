@@ -1135,9 +1135,9 @@ namespace fgui {
                     return;
 
                 this._dragTesting = false;
+                
                 sDragQuery = true;
                 this._node.emit(Event.DRAG_START, evt);
-
                 if (sDragQuery)
                     this.dragBegin(evt.touchId);
             }

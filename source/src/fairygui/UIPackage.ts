@@ -338,7 +338,7 @@ namespace fgui {
 
             var pi: PackageItem;
             let pos = path.indexOf('/');
-            let shortPath = pos == -1 ? path : path.substr(0, pos + 1);
+            let shortPath = pos == -1 ? "" : path.substr(0, pos + 1);
             path = path + "_";
 
             cnt = buffer.readShort();
@@ -559,7 +559,7 @@ namespace fgui {
             return this.getItemAsset(pi);
         }
 
-        public getItemAsset(item: PackageItem, onComplete?: (err: Error, item: PackageItem) => void): cc.Asset {
+        public getItemAsset(item: PackageItem): cc.Asset {
             switch (item.type) {
                 case PackageItemType.Image:
                     if (!item.decoded) {
@@ -593,42 +593,6 @@ namespace fgui {
                     }
                     break;
 
-                case PackageItemType.Spine:
-                    if (!item.decoded && !item.loading) {
-                        item.loading = true;
-                        this._bundle.load(item.file, sp.SkeletonData, (err: Error, asset: cc.Asset) => {
-                            item.decoded = true;
-                            item.asset = asset;
-
-                            onComplete(err, item);
-                        });
-                    }
-                    break;
-
-                case PackageItemType.DragonBones:
-                    if (!item.decoded && !item.loading) {
-                        item.loading = true;
-                        this._bundle.load(item.file, dragonBones.DragonBonesAsset, (err: Error, asset: cc.Asset) => {
-                            if (err) {
-                                item.decoded = true;
-                                onComplete(err, item);
-                                return;
-                            }
-
-                            item.asset = asset;
-                            let atlasFile = item.file.replace("_ske", "_tex");
-                            let pos = atlasFile.lastIndexOf('.');
-                            if (pos != -1)
-                                atlasFile = atlasFile.substr(0, pos + 1) + "json";
-                            this._bundle.load(atlasFile, dragonBones.DragonBonesAtlasAsset, (err: Error, asset: cc.Asset) => {
-                                item.decoded = true;
-                                item.atlasAsset = <dragonBones.DragonBonesAtlasAsset>asset;
-                                onComplete(err, item);
-                            });
-                        });
-                    }
-                    break;
-
                 case PackageItemType.Font:
                     if (!item.decoded) {
                         item.decoded = true;
@@ -648,6 +612,35 @@ namespace fgui {
             }
 
             return item.asset;
+        }
+
+        public getItemAssetAsync(item: PackageItem, onComplete?: (err: Error, item: PackageItem) => void): void {
+            if (item.decoded) {
+                onComplete(null, item);
+                return;
+            }
+
+            if (item.loading) {
+                item.loading.push(onComplete);
+                return;
+            }
+
+            switch (item.type) {
+                case PackageItemType.Spine:
+                    item.loading = [onComplete];
+                    this.loadSpine(item);
+                    break;
+
+                case PackageItemType.DragonBones:
+                    item.loading = [onComplete];
+                    this.loadDragonBones(item);
+                    break;
+
+                default:
+                    this.getItemAsset(item);
+                    onComplete(null, item);
+                    break;
+            }
         }
 
         public loadAllAssets(): void {
@@ -673,7 +666,6 @@ namespace fgui {
             item.frames = Array<Frame>(frameCount);
 
             var spriteId: string;
-            var frame: Frame;
             var sprite: AtlasSprite;
 
             for (var i: number = 0; i < frameCount; i++) {
@@ -804,6 +796,42 @@ namespace fgui {
             spriteFrame.setTexture(mainTexture);
             font.spriteFrame = spriteFrame;
             font.onLoad();
+        }
+
+        private loadSpine(item: PackageItem): void {
+            this._bundle.load(item.file, sp.SkeletonData, (err: Error, asset: cc.Asset) => {
+                item.decoded = true;
+                item.asset = asset;
+                let arr = item.loading;
+                delete item.loading;
+                arr.forEach(e => e(err, item));
+            });
+        }
+
+        private loadDragonBones(item: PackageItem): void {
+            this._bundle.load(item.file, dragonBones.DragonBonesAsset, (err: Error, asset: cc.Asset) => {
+                if (err) {
+                    item.decoded = true;
+                    let arr = item.loading;
+                    delete item.loading;
+                    arr.forEach(e => e(err, item));
+                    return;
+                }
+
+                item.asset = asset;
+                let atlasFile = item.file.replace("_ske", "_tex");
+                let pos = atlasFile.lastIndexOf('.');
+                if (pos != -1)
+                    atlasFile = atlasFile.substr(0, pos + 1) + "json";
+                this._bundle.load(atlasFile, dragonBones.DragonBonesAtlasAsset, (err: Error, asset: cc.Asset) => {
+                    item.decoded = true;
+                    item.atlasAsset = <dragonBones.DragonBonesAtlasAsset>asset;
+
+                    let arr = item.loading;
+                    delete item.loading;
+                    arr.forEach(e => e(err, item));
+                });
+            });
         }
     }
 
