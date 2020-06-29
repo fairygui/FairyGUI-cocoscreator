@@ -203,7 +203,7 @@ namespace fgui {
         }
 
         protected onDestroy(): void {
-            this._pageController = null;
+            delete this._pageController;
 
             if (this._hzScrollBar)
                 this._hzScrollBar.dispose();

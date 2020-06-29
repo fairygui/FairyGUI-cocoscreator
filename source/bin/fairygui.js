@@ -2111,7 +2111,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (!obj)
                     break;
                 if (i != cnt - 1) {
-                    if (!(gcom instanceof GComponent)) {
+                    if (!(obj instanceof GComponent)) {
                         obj = null;
                         break;
                     }
@@ -7921,19 +7921,19 @@ window.__extends = (this && this.__extends) || (function () {
                 console.warn(err);
         };
         GLoader3D.prototype.updateLayout = function () {
-            var contentWidth = this.sourceWidth;
-            var contentHeight = this.sourceHeight;
+            var cw = this.sourceWidth;
+            var ch = this.sourceHeight;
             var pivotCorrectX = -this.pivotX * this._width;
             var pivotCorrectY = this.pivotY * this._height;
             if (this._autoSize) {
                 this._updatingLayout = true;
-                if (contentWidth == 0)
-                    contentWidth = 50;
-                if (contentHeight == 0)
-                    contentHeight = 30;
-                this.setSize(contentWidth, contentHeight);
+                if (cw == 0)
+                    cw = 50;
+                if (ch == 0)
+                    ch = 30;
+                this.setSize(cw, ch);
                 this._updatingLayout = false;
-                if (contentWidth == this._width && contentHeight == this._height) {
+                if (cw == this._width && ch == this._height) {
                     this._container.setScale(1, 1);
                     this._container.setPosition(pivotCorrectX, pivotCorrectY);
                     return;
@@ -7966,8 +7966,8 @@ window.__extends = (this && this.__extends) || (function () {
                         if (sy > 1)
                             sy = 1;
                     }
-                    contentWidth = this.sourceWidth * sx;
-                    contentHeight = this.sourceHeight * sy;
+                    cw = this.sourceWidth * sx;
+                    ch = this.sourceHeight * sy;
                 }
             }
             this._container.setScale(sx, sy);
@@ -7975,15 +7975,15 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._align == fgui.AlignType.Left)
                 nx = 0;
             else if (this._align == fgui.AlignType.Center)
-                nx = Math.floor((this._width - contentWidth) / 2);
+                nx = Math.floor((this._width - cw) / 2);
             else
-                nx = this._width - contentWidth;
+                nx = this._width - cw;
             if (this._verticalAlign == fgui.VertAlignType.Top)
                 ny = 0;
             else if (this._verticalAlign == fgui.VertAlignType.Middle)
-                ny = Math.floor((this._height - contentHeight) / 2);
+                ny = Math.floor((this._height - ch) / 2);
             else
-                ny = this._height - contentHeight;
+                ny = this._height - ch;
             ny = -ny;
             this._container.setPosition(pivotCorrectX + nx, pivotCorrectY + ny);
         };
@@ -11713,7 +11713,7 @@ window.__extends = (this && this.__extends) || (function () {
             this.setSize(o.width, o.height);
         };
         ScrollPane.prototype.onDestroy = function () {
-            this._pageController = null;
+            delete this._pageController;
             if (this._hzScrollBar)
                 this._hzScrollBar.dispose();
             if (this._vtScrollBar)

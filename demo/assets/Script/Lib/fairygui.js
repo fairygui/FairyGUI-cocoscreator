@@ -2111,7 +2111,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (!obj)
                     break;
                 if (i != cnt - 1) {
-                    if (!(gcom instanceof GComponent)) {
+                    if (!(obj instanceof GComponent)) {
                         obj = null;
                         break;
                     }
@@ -5675,25 +5675,25 @@ window.__extends = (this && this.__extends) || (function () {
                 var index;
                 if (this._layout == fgui.ListLayoutType.SingleColumn || this._layout == fgui.ListLayoutType.FlowHorizontal) {
                     saved = yValue;
-                    GList.pos_param = yValue;
+                    s_n = yValue;
                     index = this.getIndexOnPos1(false);
-                    yValue = GList.pos_param;
+                    yValue = s_n;
                     if (index < this._virtualItems.length && saved - yValue > this._virtualItems[index].height / 2 && index < this._realNumItems)
                         yValue += this._virtualItems[index].height + this._lineGap;
                 }
                 else if (this._layout == fgui.ListLayoutType.SingleRow || this._layout == fgui.ListLayoutType.FlowVertical) {
                     saved = xValue;
-                    GList.pos_param = xValue;
+                    s_n = xValue;
                     index = this.getIndexOnPos2(false);
-                    xValue = GList.pos_param;
+                    xValue = s_n;
                     if (index < this._virtualItems.length && saved - xValue > this._virtualItems[index].width / 2 && index < this._realNumItems)
                         xValue += this._virtualItems[index].width + this._columnGap;
                 }
                 else {
                     saved = xValue;
-                    GList.pos_param = xValue;
+                    s_n = xValue;
                     index = this.getIndexOnPos3(false);
-                    xValue = GList.pos_param;
+                    xValue = s_n;
                     if (index < this._virtualItems.length && saved - xValue > this._virtualItems[index].width / 2 && index < this._realNumItems)
                         xValue += this._virtualItems[index].width + this._columnGap;
                 }
@@ -5732,7 +5732,6 @@ window.__extends = (this && this.__extends) || (function () {
                     var page = index / (this._curLineItemCount * this._curLineItemCount2);
                     rect = new cc.Rect(page * this.viewWidth + (index % this._curLineItemCount) * (ii.width + this._columnGap), (index / this._curLineItemCount) % this._curLineItemCount2 * (ii.height + this._lineGap), ii.width, ii.height);
                 }
-                setFirst = true;
                 if (this._scrollPane)
                     this._scrollPane.scrollToView(rect, ani, setFirst);
             }
@@ -6002,7 +6001,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GList.prototype.getIndexOnPos1 = function (forceUpdate) {
             if (this._realNumItems < this._curLineItemCount) {
-                GList.pos_param = 0;
+                s_n = 0;
                 return 0;
             }
             var i;
@@ -6010,27 +6009,27 @@ window.__extends = (this && this.__extends) || (function () {
             var pos3;
             if (this.numChildren > 0 && !forceUpdate) {
                 pos2 = this.getChildAt(0).y;
-                if (pos2 > GList.pos_param) {
+                if (pos2 > s_n) {
                     for (i = this._firstIndex - this._curLineItemCount; i >= 0; i -= this._curLineItemCount) {
                         pos2 -= (this._virtualItems[i].height + this._lineGap);
-                        if (pos2 <= GList.pos_param) {
-                            GList.pos_param = pos2;
+                        if (pos2 <= s_n) {
+                            s_n = pos2;
                             return i;
                         }
                     }
-                    GList.pos_param = 0;
+                    s_n = 0;
                     return 0;
                 }
                 else {
                     for (i = this._firstIndex; i < this._realNumItems; i += this._curLineItemCount) {
                         pos3 = pos2 + this._virtualItems[i].height + this._lineGap;
-                        if (pos3 > GList.pos_param) {
-                            GList.pos_param = pos2;
+                        if (pos3 > s_n) {
+                            s_n = pos2;
                             return i;
                         }
                         pos2 = pos3;
                     }
-                    GList.pos_param = pos2;
+                    s_n = pos2;
                     return this._realNumItems - this._curLineItemCount;
                 }
             }
@@ -6038,19 +6037,19 @@ window.__extends = (this && this.__extends) || (function () {
                 pos2 = 0;
                 for (i = 0; i < this._realNumItems; i += this._curLineItemCount) {
                     pos3 = pos2 + this._virtualItems[i].height + this._lineGap;
-                    if (pos3 > GList.pos_param) {
-                        GList.pos_param = pos2;
+                    if (pos3 > s_n) {
+                        s_n = pos2;
                         return i;
                     }
                     pos2 = pos3;
                 }
-                GList.pos_param = pos2;
+                s_n = pos2;
                 return this._realNumItems - this._curLineItemCount;
             }
         };
         GList.prototype.getIndexOnPos2 = function (forceUpdate) {
             if (this._realNumItems < this._curLineItemCount) {
-                GList.pos_param = 0;
+                s_n = 0;
                 return 0;
             }
             var i;
@@ -6058,27 +6057,27 @@ window.__extends = (this && this.__extends) || (function () {
             var pos3;
             if (this.numChildren > 0 && !forceUpdate) {
                 pos2 = this.getChildAt(0).x;
-                if (pos2 > GList.pos_param) {
+                if (pos2 > s_n) {
                     for (i = this._firstIndex - this._curLineItemCount; i >= 0; i -= this._curLineItemCount) {
                         pos2 -= (this._virtualItems[i].width + this._columnGap);
-                        if (pos2 <= GList.pos_param) {
-                            GList.pos_param = pos2;
+                        if (pos2 <= s_n) {
+                            s_n = pos2;
                             return i;
                         }
                     }
-                    GList.pos_param = 0;
+                    s_n = 0;
                     return 0;
                 }
                 else {
                     for (i = this._firstIndex; i < this._realNumItems; i += this._curLineItemCount) {
                         pos3 = pos2 + this._virtualItems[i].width + this._columnGap;
-                        if (pos3 > GList.pos_param) {
-                            GList.pos_param = pos2;
+                        if (pos3 > s_n) {
+                            s_n = pos2;
                             return i;
                         }
                         pos2 = pos3;
                     }
-                    GList.pos_param = pos2;
+                    s_n = pos2;
                     return this._realNumItems - this._curLineItemCount;
                 }
             }
@@ -6086,36 +6085,36 @@ window.__extends = (this && this.__extends) || (function () {
                 pos2 = 0;
                 for (i = 0; i < this._realNumItems; i += this._curLineItemCount) {
                     pos3 = pos2 + this._virtualItems[i].width + this._columnGap;
-                    if (pos3 > GList.pos_param) {
-                        GList.pos_param = pos2;
+                    if (pos3 > s_n) {
+                        s_n = pos2;
                         return i;
                     }
                     pos2 = pos3;
                 }
-                GList.pos_param = pos2;
+                s_n = pos2;
                 return this._realNumItems - this._curLineItemCount;
             }
         };
         GList.prototype.getIndexOnPos3 = function (forceUpdate) {
             if (this._realNumItems < this._curLineItemCount) {
-                GList.pos_param = 0;
+                s_n = 0;
                 return 0;
             }
             var viewWidth = this.viewWidth;
-            var page = Math.floor(GList.pos_param / viewWidth);
+            var page = Math.floor(s_n / viewWidth);
             var startIndex = page * (this._curLineItemCount * this._curLineItemCount2);
             var pos2 = page * viewWidth;
             var i;
             var pos3;
             for (i = 0; i < this._curLineItemCount; i++) {
                 pos3 = pos2 + this._virtualItems[startIndex + i].width + this._columnGap;
-                if (pos3 > GList.pos_param) {
-                    GList.pos_param = pos2;
+                if (pos3 > s_n) {
+                    s_n = pos2;
                     return startIndex + i;
                 }
                 pos2 = pos3;
             }
-            GList.pos_param = pos2;
+            s_n = pos2;
             return startIndex + this._curLineItemCount - 1;
         };
         GList.prototype.handleScroll = function (forceUpdate) {
@@ -6154,9 +6153,9 @@ window.__extends = (this && this.__extends) || (function () {
             var pos = this._scrollPane.scrollingPosY;
             var max = pos + this._scrollPane.viewHeight;
             var end = max == this._scrollPane.contentHeight;
-            GList.pos_param = pos;
+            s_n = pos;
             var newFirstIndex = this.getIndexOnPos1(forceUpdate);
-            pos = GList.pos_param;
+            pos = s_n;
             if (newFirstIndex == this._firstIndex && !forceUpdate) {
                 return false;
             }
@@ -6287,9 +6286,9 @@ window.__extends = (this && this.__extends) || (function () {
             var pos = this._scrollPane.scrollingPosX;
             var max = pos + this._scrollPane.viewWidth;
             var end = pos == this._scrollPane.contentWidth;
-            GList.pos_param = pos;
+            s_n = pos;
             var newFirstIndex = this.getIndexOnPos2(forceUpdate);
-            pos = GList.pos_param;
+            pos = s_n;
             if (newFirstIndex == this._firstIndex && !forceUpdate) {
                 return false;
             }
@@ -6418,9 +6417,9 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GList.prototype.handleScroll3 = function (forceUpdate) {
             var pos = this._scrollPane.scrollingPosX;
-            GList.pos_param = pos;
+            s_n = pos;
             var newFirstIndex = this.getIndexOnPos3(forceUpdate);
-            pos = GList.pos_param;
+            pos = s_n;
             if (newFirstIndex == this._firstIndex && !forceUpdate)
                 return;
             var oldFirstIndex = this._firstIndex;
@@ -7009,6 +7008,7 @@ window.__extends = (this && this.__extends) || (function () {
         return GList;
     }(fgui.GComponent));
     fgui.GList = GList;
+    var s_n = 0;
 })(fgui || (fgui = {}));
 
 (function (fgui) {
@@ -7429,17 +7429,17 @@ window.__extends = (this && this.__extends) || (function () {
                 }
                 return;
             }
-            var contentWidth = this.sourceWidth;
-            var contentHeight = this.sourceHeight;
+            var cw = this.sourceWidth;
+            var ch = this.sourceHeight;
             var pivotCorrectX = -this.pivotX * this._width;
             var pivotCorrectY = this.pivotY * this._height;
             if (this._autoSize) {
                 this._updatingLayout = true;
-                if (contentWidth == 0)
-                    contentWidth = 50;
-                if (contentHeight == 0)
-                    contentHeight = 30;
-                this.setSize(contentWidth, contentHeight);
+                if (cw == 0)
+                    cw = 50;
+                if (ch == 0)
+                    ch = 30;
+                this.setSize(cw, ch);
                 this._updatingLayout = false;
                 this._container.setContentSize(this._width, this._height);
                 this._container.setPosition(pivotCorrectX, pivotCorrectY);
@@ -7447,7 +7447,7 @@ window.__extends = (this && this.__extends) || (function () {
                     this._content2.setPosition(pivotCorrectX + this._width * this.pivotX, pivotCorrectY - this._height * this.pivotY);
                     this._content2.setScale(1, 1);
                 }
-                if (contentWidth == this._width && contentHeight == this._height)
+                if (cw == this._width && ch == this._height)
                     return;
             }
             var sx = 1, sy = 1;
@@ -7477,11 +7477,11 @@ window.__extends = (this && this.__extends) || (function () {
                         if (sy > 1)
                             sy = 1;
                     }
-                    contentWidth = this.sourceWidth * sx;
-                    contentHeight = this.sourceHeight * sy;
+                    cw = this.sourceWidth * sx;
+                    ch = this.sourceHeight * sy;
                 }
             }
-            this._container.setContentSize(contentWidth, contentHeight);
+            this._container.setContentSize(cw, ch);
             if (this._content2) {
                 this._content2.setPosition(pivotCorrectX + this._width * this.pivotX, pivotCorrectY - this._height * this.pivotY);
                 this._content2.setScale(sx, sy);
@@ -7490,15 +7490,15 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._align == fgui.AlignType.Left)
                 nx = 0;
             else if (this._align == fgui.AlignType.Center)
-                nx = Math.floor((this._width - contentWidth) / 2);
+                nx = Math.floor((this._width - cw) / 2);
             else
-                nx = this._width - contentWidth;
+                nx = this._width - cw;
             if (this._verticalAlign == fgui.VertAlignType.Top)
                 ny = 0;
             else if (this._verticalAlign == fgui.VertAlignType.Middle)
-                ny = Math.floor((this._height - contentHeight) / 2);
+                ny = Math.floor((this._height - ch) / 2);
             else
-                ny = this._height - contentHeight;
+                ny = this._height - ch;
             ny = -ny;
             this._container.setPosition(pivotCorrectX + nx, pivotCorrectY + ny);
         };
@@ -7825,7 +7825,7 @@ window.__extends = (this && this.__extends) || (function () {
                 if (this._autoSize)
                     this.setSize(this.sourceWidth, this.sourceHeight);
                 if (this._contentItem.type == fgui.PackageItemType.Spine || this._contentItem.type == fgui.PackageItemType.DragonBones)
-                    this._contentItem.owner.getItemAsset(this._contentItem, this.onLoaded.bind(this));
+                    this._contentItem.owner.getItemAssetAsync(this._contentItem, this.onLoaded.bind(this));
             }
         };
         GLoader3D.prototype.onLoaded = function (err, item) {
@@ -7921,19 +7921,19 @@ window.__extends = (this && this.__extends) || (function () {
                 console.warn(err);
         };
         GLoader3D.prototype.updateLayout = function () {
-            var contentWidth = this.sourceWidth;
-            var contentHeight = this.sourceHeight;
+            var cw = this.sourceWidth;
+            var ch = this.sourceHeight;
             var pivotCorrectX = -this.pivotX * this._width;
             var pivotCorrectY = this.pivotY * this._height;
             if (this._autoSize) {
                 this._updatingLayout = true;
-                if (contentWidth == 0)
-                    contentWidth = 50;
-                if (contentHeight == 0)
-                    contentHeight = 30;
-                this.setSize(contentWidth, contentHeight);
+                if (cw == 0)
+                    cw = 50;
+                if (ch == 0)
+                    ch = 30;
+                this.setSize(cw, ch);
                 this._updatingLayout = false;
-                if (contentWidth == this._width && contentHeight == this._height) {
+                if (cw == this._width && ch == this._height) {
                     this._container.setScale(1, 1);
                     this._container.setPosition(pivotCorrectX, pivotCorrectY);
                     return;
@@ -7966,8 +7966,8 @@ window.__extends = (this && this.__extends) || (function () {
                         if (sy > 1)
                             sy = 1;
                     }
-                    contentWidth = this.sourceWidth * sx;
-                    contentHeight = this.sourceHeight * sy;
+                    cw = this.sourceWidth * sx;
+                    ch = this.sourceHeight * sy;
                 }
             }
             this._container.setScale(sx, sy);
@@ -7975,15 +7975,15 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._align == fgui.AlignType.Left)
                 nx = 0;
             else if (this._align == fgui.AlignType.Center)
-                nx = Math.floor((this._width - contentWidth) / 2);
+                nx = Math.floor((this._width - cw) / 2);
             else
-                nx = this._width - contentWidth;
+                nx = this._width - cw;
             if (this._verticalAlign == fgui.VertAlignType.Top)
                 ny = 0;
             else if (this._verticalAlign == fgui.VertAlignType.Middle)
-                ny = Math.floor((this._height - contentHeight) / 2);
+                ny = Math.floor((this._height - ch) / 2);
             else
-                ny = this._height - contentHeight;
+                ny = this._height - ch;
             ny = -ny;
             this._container.setPosition(pivotCorrectX + nx, pivotCorrectY + ny);
         };
@@ -10549,8 +10549,9 @@ window.__extends = (this && this.__extends) || (function () {
             }
         };
         GTreeNode.prototype.removeChildren = function (beginIndex, endIndex) {
-            if (beginIndex === void 0) { beginIndex = 0; }
-            if (endIndex === void 0) { endIndex = -1; }
+            beginIndex = beginIndex || 0;
+            if (endIndex == null)
+                endIndex = -1;
             if (endIndex < 0 || endIndex >= this.numChildren)
                 endIndex = this.numChildren - 1;
             for (var i = beginIndex; i <= endIndex; ++i)
@@ -11459,7 +11460,7 @@ window.__extends = (this && this.__extends) || (function () {
             this._items.push(newItem);
         };
         Relations.prototype.remove = function (target, relationType) {
-            if (relationType === void 0) { relationType = 0; }
+            relationType = relationType || 0;
             var cnt = this._items.length;
             var i = 0;
             while (i < cnt) {
@@ -11712,7 +11713,7 @@ window.__extends = (this && this.__extends) || (function () {
             this.setSize(o.width, o.height);
         };
         ScrollPane.prototype.onDestroy = function () {
-            this._pageController = null;
+            delete this._pageController;
             if (this._hzScrollBar)
                 this._hzScrollBar.dispose();
             if (this._vtScrollBar)
@@ -14748,7 +14749,7 @@ window.__extends = (this && this.__extends) || (function () {
             buffer.seek(indexTablePos, 1);
             var pi;
             var pos = path.indexOf('/');
-            var shortPath = pos == -1 ? path : path.substr(0, pos + 1);
+            var shortPath = pos == -1 ? "" : path.substr(0, pos + 1);
             path = path + "_";
             cnt = buffer.readShort();
             for (i = 0; i < cnt; i++) {
@@ -14947,8 +14948,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
             return this.getItemAsset(pi);
         };
-        UIPackage.prototype.getItemAsset = function (item, onComplete) {
-            var _this = this;
+        UIPackage.prototype.getItemAsset = function (item) {
             switch (item.type) {
                 case fgui.PackageItemType.Image:
                     if (!item.decoded) {
@@ -14978,38 +14978,6 @@ window.__extends = (this && this.__extends) || (function () {
                             console.log("Resource '" + item.file + "' not found");
                     }
                     break;
-                case fgui.PackageItemType.Spine:
-                    if (!item.decoded && !item.loading) {
-                        item.loading = true;
-                        this._bundle.load(item.file, sp.SkeletonData, function (err, asset) {
-                            item.decoded = true;
-                            item.asset = asset;
-                            onComplete(err, item);
-                        });
-                    }
-                    break;
-                case fgui.PackageItemType.DragonBones:
-                    if (!item.decoded && !item.loading) {
-                        item.loading = true;
-                        this._bundle.load(item.file, dragonBones.DragonBonesAsset, function (err, asset) {
-                            if (err) {
-                                item.decoded = true;
-                                onComplete(err, item);
-                                return;
-                            }
-                            item.asset = asset;
-                            var atlasFile = item.file.replace("_ske", "_tex");
-                            var pos = atlasFile.lastIndexOf('.');
-                            if (pos != -1)
-                                atlasFile = atlasFile.substr(0, pos + 1) + "json";
-                            _this._bundle.load(atlasFile, dragonBones.DragonBonesAtlasAsset, function (err, asset) {
-                                item.decoded = true;
-                                item.atlasAsset = asset;
-                                onComplete(err, item);
-                            });
-                        });
-                    }
-                    break;
                 case fgui.PackageItemType.Font:
                     if (!item.decoded) {
                         item.decoded = true;
@@ -15026,6 +14994,30 @@ window.__extends = (this && this.__extends) || (function () {
                     break;
             }
             return item.asset;
+        };
+        UIPackage.prototype.getItemAssetAsync = function (item, onComplete) {
+            if (item.decoded) {
+                onComplete(null, item);
+                return;
+            }
+            if (item.loading) {
+                item.loading.push(onComplete);
+                return;
+            }
+            switch (item.type) {
+                case fgui.PackageItemType.Spine:
+                    item.loading = [onComplete];
+                    this.loadSpine(item);
+                    break;
+                case fgui.PackageItemType.DragonBones:
+                    item.loading = [onComplete];
+                    this.loadDragonBones(item);
+                    break;
+                default:
+                    this.getItemAsset(item);
+                    onComplete(null, item);
+                    break;
+            }
         };
         UIPackage.prototype.loadAllAssets = function () {
             var cnt = this._items.length;
@@ -15044,7 +15036,6 @@ window.__extends = (this && this.__extends) || (function () {
             var frameCount = buffer.readShort();
             item.frames = Array(frameCount);
             var spriteId;
-            var frame;
             var sprite;
             for (var i = 0; i < frameCount; i++) {
                 var nextPos = buffer.readShort();
@@ -15055,16 +15046,16 @@ window.__extends = (this && this.__extends) || (function () {
                 rect.width = buffer.readInt();
                 rect.height = buffer.readInt();
                 var addDelay = buffer.readInt() / 1000;
-                var frame_1 = { rect: rect, addDelay: addDelay };
+                var frame = { rect: rect, addDelay: addDelay };
                 spriteId = buffer.readS();
                 if (spriteId != null && (sprite = this._sprites[spriteId]) != null) {
                     var atlasTexture = this.getItemAsset(sprite.atlas);
                     if (atlasTexture) {
-                        var sx = item.width / frame_1.rect.width;
-                        frame_1.texture = new cc.SpriteFrame(atlasTexture, sprite.rect, sprite.rotated, new cc.Vec2(frame_1.rect.x - (item.width - frame_1.rect.width) / 2, -(frame_1.rect.y - (item.height - frame_1.rect.height) / 2)), new cc.Size(item.width, item.height));
+                        var sx = item.width / frame.rect.width;
+                        frame.texture = new cc.SpriteFrame(atlasTexture, sprite.rect, sprite.rotated, new cc.Vec2(frame.rect.x - (item.width - frame.rect.width) / 2, -(frame.rect.y - (item.height - frame.rect.height) / 2)), new cc.Size(item.width, item.height));
                     }
                 }
-                item.frames[i] = frame_1;
+                item.frames[i] = frame;
                 buffer.position = nextPos;
             }
         };
@@ -15152,6 +15143,39 @@ window.__extends = (this && this.__extends) || (function () {
             spriteFrame.setTexture(mainTexture);
             font.spriteFrame = spriteFrame;
             font.onLoad();
+        };
+        UIPackage.prototype.loadSpine = function (item) {
+            this._bundle.load(item.file, sp.SkeletonData, function (err, asset) {
+                item.decoded = true;
+                item.asset = asset;
+                var arr = item.loading;
+                delete item.loading;
+                arr.forEach(function (e) { return e(err, item); });
+            });
+        };
+        UIPackage.prototype.loadDragonBones = function (item) {
+            var _this = this;
+            this._bundle.load(item.file, dragonBones.DragonBonesAsset, function (err, asset) {
+                if (err) {
+                    item.decoded = true;
+                    var arr = item.loading;
+                    delete item.loading;
+                    arr.forEach(function (e) { return e(err, item); });
+                    return;
+                }
+                item.asset = asset;
+                var atlasFile = item.file.replace("_ske", "_tex");
+                var pos = atlasFile.lastIndexOf('.');
+                if (pos != -1)
+                    atlasFile = atlasFile.substr(0, pos + 1) + "json";
+                _this._bundle.load(atlasFile, dragonBones.DragonBonesAtlasAsset, function (err, asset) {
+                    item.decoded = true;
+                    item.atlasAsset = asset;
+                    var arr = item.loading;
+                    delete item.loading;
+                    arr.forEach(function (e) { return e(err, item); });
+                });
+            });
         };
         UIPackage._constructing = 0;
         UIPackage._instById = {};
