@@ -15188,8 +15188,6 @@ window.__extends = (this && this.__extends) || (function () {
     var ItemTypeToAssetType = (_a = {},
         _a[fgui.PackageItemType.Atlas] = cc.Texture2D,
         _a[fgui.PackageItemType.Sound] = cc.AudioClip,
-        _a[fgui.PackageItemType.Spine] = sp.SkeletonData,
-        _a[fgui.PackageItemType.DragonBones] = dragonBones.DragonBonesAsset,
         _a);
 })(fgui || (fgui = {}));
 

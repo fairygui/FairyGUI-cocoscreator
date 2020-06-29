@@ -845,8 +845,6 @@ namespace fgui {
 
     const ItemTypeToAssetType = {
         [PackageItemType.Atlas]: cc.Texture2D,
-        [PackageItemType.Sound]: cc.AudioClip,
-        [PackageItemType.Spine]: sp.SkeletonData,
-        [PackageItemType.DragonBones]: dragonBones.DragonBonesAsset,
+        [PackageItemType.Sound]: cc.AudioClip
     };
 }
