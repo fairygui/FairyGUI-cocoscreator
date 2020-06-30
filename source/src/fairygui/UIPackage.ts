@@ -23,12 +23,12 @@ namespace fgui {
         private static _vars: { [index: string]: string } = {};
 
         public constructor() {
-            this._items = new Array<PackageItem>();
+            this._items = [];
             this._itemsById = {};
             this._itemsByName = {};
             this._sprites = {};
-            this._dependencies = Array<PackageDependency>();
-            this._branches = Array<string>();
+            this._dependencies = [];
+            this._branches = [];
             this._branchIndex = -1;
         }
 
@@ -337,7 +337,7 @@ namespace fgui {
             buffer.seek(indexTablePos, 1);
 
             var pi: PackageItem;
-            let pos = path.indexOf('/');
+            let pos = path.lastIndexOf('/');
             let shortPath = pos == -1 ? "" : path.substr(0, pos + 1);
             path = path + "_";
 

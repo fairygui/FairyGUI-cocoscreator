@@ -23,7 +23,7 @@ namespace fgui {
         protected _blendMode: BlendMode;
         protected _pixelSnapping?: boolean;
         protected _dragTesting?: boolean;
-        protected _dragStartPoint?: cc.Vec2;
+        protected _dragStartPos?: cc.Vec2;
 
         protected _relations: Relations;
         protected _group: GGroup;
@@ -1119,10 +1119,10 @@ namespace fgui {
         }
 
         private onTouchBegin_0(evt: Event): void {
-            if (this._dragStartPoint == null)
-                this._dragStartPoint = new cc.Vec2();
+            if (this._dragStartPos == null)
+                this._dragStartPos = new cc.Vec2();
 
-            this._dragStartPoint.set(evt.pos);
+            this._dragStartPos.set(evt.pos);
             this._dragTesting = true;
             evt.captureTouch();
         }
@@ -1130,8 +1130,9 @@ namespace fgui {
         private onTouchMove_0(evt: Event): void {
             if (GObject.draggingObject != this && this._draggable && this._dragTesting) {
                 var sensitivity: number = UIConfig.touchDragSensitivity;
-                if (Math.abs(this._dragStartPoint.x - evt.pos.x) < sensitivity
-                    && Math.abs(this._dragStartPoint.y - evt.pos.y) < sensitivity)
+                if (this._dragStartPos 
+                    && Math.abs(this._dragStartPos.x - evt.pos.x) < sensitivity
+                    && Math.abs(this._dragStartPos.y - evt.pos.y) < sensitivity)
                     return;
 
                 this._dragTesting = false;

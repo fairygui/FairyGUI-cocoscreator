@@ -206,8 +206,6 @@ window.__extends = (this && this.__extends) || (function () {
         __extends(Controller, _super);
         function Controller() {
             var _this = _super.call(this) || this;
-            _this._selectedIndex = 0;
-            _this._previousIndex = 0;
             _this._pageIds = [];
             _this._pageNames = [];
             _this._selectedIndex = -1;
@@ -412,7 +410,8 @@ window.__extends = (this && this.__extends) || (function () {
             var beginPos = buffer.position;
             buffer.seek(beginPos, 0);
             this.name = buffer.readS();
-            this.autoRadioGroupDepth = buffer.readBool();
+            if (buffer.readBool())
+                this.autoRadioGroupDepth = true;
             buffer.seek(beginPos, 1);
             var i;
             var nextPos;
@@ -1853,17 +1852,18 @@ window.__extends = (this && this.__extends) || (function () {
             sDragQuery = false;
         };
         GObject.prototype.onTouchBegin_0 = function (evt) {
-            if (this._dragStartPoint == null)
-                this._dragStartPoint = new cc.Vec2();
-            this._dragStartPoint.set(evt.pos);
+            if (this._dragStartPos == null)
+                this._dragStartPos = new cc.Vec2();
+            this._dragStartPos.set(evt.pos);
             this._dragTesting = true;
             evt.captureTouch();
         };
         GObject.prototype.onTouchMove_0 = function (evt) {
             if (GObject.draggingObject != this && this._draggable && this._dragTesting) {
                 var sensitivity = fgui.UIConfig.touchDragSensitivity;
-                if (Math.abs(this._dragStartPoint.x - evt.pos.x) < sensitivity
-                    && Math.abs(this._dragStartPoint.y - evt.pos.y) < sensitivity)
+                if (this._dragStartPos
+                    && Math.abs(this._dragStartPos.x - evt.pos.x) < sensitivity
+                    && Math.abs(this._dragStartPos.y - evt.pos.y) < sensitivity)
                     return;
                 this._dragTesting = false;
                 sDragQuery = true;
@@ -14501,12 +14501,12 @@ window.__extends = (this && this.__extends) || (function () {
     var _a;
     var UIPackage = (function () {
         function UIPackage() {
-            this._items = new Array();
+            this._items = [];
             this._itemsById = {};
             this._itemsByName = {};
             this._sprites = {};
-            this._dependencies = Array();
-            this._branches = Array();
+            this._dependencies = [];
+            this._branches = [];
             this._branchIndex = -1;
         }
         Object.defineProperty(UIPackage, "branch", {
@@ -14748,7 +14748,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
             buffer.seek(indexTablePos, 1);
             var pi;
-            var pos = path.indexOf('/');
+            var pos = path.lastIndexOf('/');
             var shortPath = pos == -1 ? "" : path.substr(0, pos + 1);
             path = path + "_";
             cnt = buffer.readShort();
@@ -15338,7 +15338,7 @@ window.__extends = (this && this.__extends) || (function () {
             this.root.bringToFront(this);
         };
         Window.prototype.showModalWait = function (requestingCmd) {
-            if (requestingCmd != undefined)
+            if (requestingCmd != null)
                 this._requestingCmd = requestingCmd;
             if (fgui.UIConfig.windowModalWaiting) {
                 if (!this._modalWaitPane)
@@ -15358,8 +15358,7 @@ window.__extends = (this && this.__extends) || (function () {
                 this._modalWaitPane.setSize(this.width, this.height);
         };
         Window.prototype.closeModalWait = function (requestingCmd) {
-            if (requestingCmd === void 0) { requestingCmd = 0; }
-            if (requestingCmd != 0) {
+            if (requestingCmd != null) {
                 if (this._requestingCmd != requestingCmd)
                     return false;
             }

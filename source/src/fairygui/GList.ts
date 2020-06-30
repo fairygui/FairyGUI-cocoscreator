@@ -18,7 +18,7 @@ namespace fgui {
         private _selectionMode: ListSelectionMode;
         private _align: AlignType;
         private _verticalAlign: VertAlignType;
-        private _selectionController: Controller;
+        private _selectionController?: Controller;
 
         private _lastSelectedIndex: number = 0;
         private _pool: GObjectPool;

@@ -262,7 +262,7 @@ declare namespace fgui {
         protected _blendMode: BlendMode;
         protected _pixelSnapping?: boolean;
         protected _dragTesting?: boolean;
-        protected _dragStartPoint?: cc.Vec2;
+        protected _dragStartPos?: cc.Vec2;
         protected _relations: Relations;
         protected _group: GGroup;
         protected _gears: GearBase[];
@@ -833,7 +833,7 @@ declare namespace fgui {
         private _selectionMode;
         private _align;
         private _verticalAlign;
-        private _selectionController;
+        private _selectionController?;
         private _lastSelectedIndex;
         private _pool;
         private _virtual?;
