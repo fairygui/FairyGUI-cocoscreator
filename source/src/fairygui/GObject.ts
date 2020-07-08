@@ -811,8 +811,10 @@ namespace fgui {
             result.x = ax;
             result.y = ay;
             result.y = -result.y;
-            result.x -= this.node.anchorX * this._width;
-            result.y += (1 - this.node.anchorY) * this._height;
+            if (!this._pivotAsAnchor) {
+                result.x -= this.node.anchorX * this._width;
+                result.y += (1 - this.node.anchorY) * this._height;
+            }
             this._node.convertToWorldSpaceAR(result, result);
             result.y = GRoot.inst.height - result.y;
             return result;
@@ -825,8 +827,10 @@ namespace fgui {
             result.x = ax;
             result.y = GRoot.inst.height - ay;
             this._node.convertToNodeSpaceAR(result, result);
-            result.x += this._node.anchorX * this._width;
-            result.y -= (1 - this._node.anchorY) * this._height;
+            if (!this._pivotAsAnchor) {
+                result.x += this._node.anchorX * this._width;
+                result.y -= (1 - this._node.anchorY) * this._height;
+            }
             result.y = -result.y;
             return result;
         }
@@ -917,6 +921,10 @@ namespace fgui {
             if (!this._hitTestPt)
                 this._hitTestPt = new cc.Vec2();
             this.globalToLocal(globalPt.x, globalPt.y, this._hitTestPt);
+            if (this._pivotAsAnchor) {
+                this._hitTestPt.x += this.node.anchorX * this._width;
+                this._hitTestPt.y += (1 - this.node.anchorY) * this._height;
+            }
             return this._hitTest(this._hitTestPt, globalPt);
         }
 
@@ -1130,13 +1138,13 @@ namespace fgui {
         private onTouchMove_0(evt: Event): void {
             if (GObject.draggingObject != this && this._draggable && this._dragTesting) {
                 var sensitivity: number = UIConfig.touchDragSensitivity;
-                if (this._dragStartPos 
+                if (this._dragStartPos
                     && Math.abs(this._dragStartPos.x - evt.pos.x) < sensitivity
                     && Math.abs(this._dragStartPos.y - evt.pos.y) < sensitivity)
                     return;
 
                 this._dragTesting = false;
-                
+
                 sDragQuery = true;
                 this._node.emit(Event.DRAG_START, evt);
                 if (sDragQuery)

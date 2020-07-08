@@ -1595,8 +1595,10 @@ window.__extends = (this && this.__extends) || (function () {
             result.x = ax;
             result.y = ay;
             result.y = -result.y;
-            result.x -= this.node.anchorX * this._width;
-            result.y += (1 - this.node.anchorY) * this._height;
+            if (!this._pivotAsAnchor) {
+                result.x -= this.node.anchorX * this._width;
+                result.y += (1 - this.node.anchorY) * this._height;
+            }
             this._node.convertToWorldSpaceAR(result, result);
             result.y = fgui.GRoot.inst.height - result.y;
             return result;
@@ -1608,8 +1610,10 @@ window.__extends = (this && this.__extends) || (function () {
             result.x = ax;
             result.y = fgui.GRoot.inst.height - ay;
             this._node.convertToNodeSpaceAR(result, result);
-            result.x += this._node.anchorX * this._width;
-            result.y -= (1 - this._node.anchorY) * this._height;
+            if (!this._pivotAsAnchor) {
+                result.x += this._node.anchorX * this._width;
+                result.y -= (1 - this._node.anchorY) * this._height;
+            }
             result.y = -result.y;
             return result;
         };
@@ -1687,6 +1691,10 @@ window.__extends = (this && this.__extends) || (function () {
             if (!this._hitTestPt)
                 this._hitTestPt = new cc.Vec2();
             this.globalToLocal(globalPt.x, globalPt.y, this._hitTestPt);
+            if (this._pivotAsAnchor) {
+                this._hitTestPt.x += this.node.anchorX * this._width;
+                this._hitTestPt.y += (1 - this.node.anchorY) * this._height;
+            }
             return this._hitTest(this._hitTestPt, globalPt);
         };
         GObject.prototype._hitTest = function (pt, globalPt) {

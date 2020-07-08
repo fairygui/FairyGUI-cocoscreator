@@ -114,7 +114,7 @@ namespace fgui {
         }
 
         public simulateClick(target: GObject) {
-            let evt;
+            let evt: fgui.Event;
 
             evt = Event._borrow(Event.TOUCH_BEGIN, true);
 
