@@ -378,7 +378,7 @@ namespace fgui {
                 text2 = this.parseTemplate(text2);
 
             if (this._ubbEnabled) //不支持同一个文本不同样式
-                text2 = UBBParser.inst.parse(ToolSet.encodeHTML(text2), true);
+                text2 = UBBParser.inst.parse(text2, true);
 
             this._label.string = text2;
         }

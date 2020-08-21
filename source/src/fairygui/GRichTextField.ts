@@ -103,7 +103,7 @@ namespace fgui {
                 UBBParser.inst.linkUnderline = this.linkUnderline;
                 UBBParser.inst.linkColor = this.linkColor;
 
-                text2 = UBBParser.inst.parse(ToolSet.encodeHTML(text2));
+                text2 = UBBParser.inst.parse(text2);
             }
 
             if (this._bold)
