@@ -7850,6 +7850,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GLoader3D.prototype.setSpine = function (asset, anchor, pma) {
             this.url = null;
+            this.clearContent();
             var node = new cc.Node();
             node.color = this._color;
             this._container.addChild(node);
@@ -7862,6 +7863,7 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GLoader3D.prototype.setDragonBones = function (asset, atlasAsset, anchor, pma) {
             this.url = null;
+            this.clearContent();
             var node = new cc.Node();
             node.color = this._color;
             this._container.addChild(node);
@@ -8785,7 +8787,7 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._templateVars)
                 text2 = this.parseTemplate(text2);
             if (this._ubbEnabled)
-                text2 = fgui.UBBParser.inst.parse(fgui.ToolSet.encodeHTML(text2), true);
+                text2 = fgui.UBBParser.inst.parse(text2, true);
             this._label.string = text2;
         };
         GTextField.prototype.assignFont = function (label, value) {
@@ -9061,7 +9063,7 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._ubbEnabled) {
                 fgui.UBBParser.inst.linkUnderline = this.linkUnderline;
                 fgui.UBBParser.inst.linkColor = this.linkColor;
-                text2 = fgui.UBBParser.inst.parse(fgui.ToolSet.encodeHTML(text2));
+                text2 = fgui.UBBParser.inst.parse(text2);
             }
             if (this._bold)
                 text2 = "<b>" + text2 + "</b>";
@@ -13257,7 +13259,7 @@ window.__extends = (this && this.__extends) || (function () {
             if (delay == 0)
                 this.onDelayedPlay();
             else
-                fgui.GTween.delayedCall(delay).onComplete(this.onDelayedPlay, this);
+                fgui.GTween.delayedCall(delay).setTarget(this).onComplete(this.onDelayedPlay, this);
         };
         Transition.prototype.stop = function (setToComplete, processCallback) {
             if (setToComplete == undefined)
@@ -13571,7 +13573,7 @@ window.__extends = (this && this.__extends) || (function () {
         Transition.prototype.internalPlay = function () {
             this._ownerBaseX = this._owner.x;
             this._ownerBaseY = this._owner.y;
-            this._totalTasks = 0;
+            this._totalTasks = 1;
             var cnt = this._items.length;
             var item;
             var needSkipAnimations = false;
@@ -13599,6 +13601,7 @@ window.__extends = (this && this.__extends) || (function () {
             }
             if (needSkipAnimations)
                 this.skipAnimations();
+            this._totalTasks--;
         };
         Transition.prototype.playItem = function (item) {
             var time;
@@ -13870,11 +13873,16 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._playing && this._totalTasks == 0) {
                 if (this._totalTimes < 0) {
                     this.internalPlay();
+                    if (this._totalTasks == 0)
+                        fgui.GTween.delayedCall(0).setTarget(this).onComplete(this.checkAllComplete, this);
                 }
                 else {
                     this._totalTimes--;
-                    if (this._totalTimes > 0)
+                    if (this._totalTimes > 0) {
                         this.internalPlay();
+                        if (this._totalTasks == 0)
+                            fgui.GTween.delayedCall(0).setTarget(this).onComplete(this.checkAllComplete, this);
+                    }
                     else {
                         this._playing = false;
                         var cnt = this._items.length;
@@ -13949,7 +13957,12 @@ window.__extends = (this && this.__extends) || (function () {
                     item.target.setSkew(value.f1, value.f2);
                     break;
                 case ActionType.Color:
-                    item.target.setProp(fgui.ObjectPropID.Color, value.f1);
+                    var color = item.target.getProp(fgui.ObjectPropID.Color);
+                    if (color instanceof cc.Color) {
+                        var i = Math.floor(value.f1);
+                        color.setR((i >> 16) & 0xFF).setG((i >> 8) & 0xFF).setB(i & 0xFF);
+                        item.target.setProp(fgui.ObjectPropID.Color, color);
+                    }
                     break;
                 case ActionType.Animation:
                     if (value.frame >= 0)
@@ -14091,7 +14104,8 @@ window.__extends = (this && this.__extends) || (function () {
                     value.f2 = buffer.readFloat();
                     break;
                 case ActionType.Color:
-                    value.f1 = buffer.readColor().toRGBValue();
+                    var color = buffer.readColor();
+                    value.f1 = (color.getR() << 16) + (color.getG() << 8) + color.getB();
                     break;
                 case ActionType.Animation:
                     value.playing = buffer.readBool();
@@ -15738,8 +15752,12 @@ window.__extends = (this && this.__extends) || (function () {
             configurable: true
         });
         Image.prototype.setupFill = function () {
-            if (this._fillMethod == fgui.FillMethod.Horizontal || this._fillMethod == fgui.FillMethod.Vertical) {
+            if (this._fillMethod == fgui.FillMethod.Horizontal) {
                 this._fillClockwise = this._fillOrigin == fgui.FillOrigin.Right || this._fillOrigin == fgui.FillOrigin.Bottom;
+                this.fillStart = this._fillClockwise ? 1 : 0;
+            }
+            else if (this._fillMethod == fgui.FillMethod.Vertical) {
+                this._fillClockwise = this._fillOrigin == fgui.FillOrigin.Left || this._fillOrigin == fgui.FillOrigin.Top;
                 this.fillStart = this._fillClockwise ? 1 : 0;
             }
             else {
