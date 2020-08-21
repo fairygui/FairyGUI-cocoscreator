@@ -97,8 +97,12 @@ namespace fgui {
         }
 
         private setupFill(): void {
-            if (this._fillMethod == FillMethod.Horizontal || this._fillMethod == FillMethod.Vertical) {
+            if (this._fillMethod == FillMethod.Horizontal) {
                 this._fillClockwise = this._fillOrigin == FillOrigin.Right || this._fillOrigin == FillOrigin.Bottom;
+                this.fillStart = this._fillClockwise ? 1 : 0;
+            }
+            else if (this._fillMethod == FillMethod.Vertical) {
+                this._fillClockwise = this._fillOrigin == FillOrigin.Left || this._fillOrigin == FillOrigin.Top;
                 this.fillStart = this._fillClockwise ? 1 : 0;
             }
             else {
