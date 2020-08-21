@@ -916,7 +916,12 @@ namespace fgui {
                     break;
 
                 case ActionType.Color:
-                    item.target.setProp(ObjectPropID.Color, value.f1);
+                    let color: any = item.target.getProp(ObjectPropID.Color);
+                    if (color instanceof cc.Color) {
+                        let i = Math.floor(value.f1);
+                        color.setR((i >> 16) & 0xFF).setG((i >> 8) & 0xFF).setB(i & 0xFF);
+                        item.target.setProp(ObjectPropID.Color, color);
+                    }
                     break;
 
                 case ActionType.Animation:
@@ -1094,7 +1099,8 @@ namespace fgui {
                     break;
 
                 case ActionType.Color:
-                    value.f1 = buffer.readColor().toRGBValue();
+                    let color = buffer.readColor();
+                    value.f1 = (color.getR() << 16) + (color.getG() << 8) + color.getB();
                     break;
 
                 case ActionType.Animation:
