@@ -236,6 +236,7 @@ namespace fgui {
 
         public setSpine(asset: sp.SkeletonData, anchor: cc.Vec2, pma?: boolean): void {
             this.url = null;
+            this.clearContent();
 
             let node = new cc.Node();
             node.color = this._color;
@@ -252,6 +253,7 @@ namespace fgui {
 
         public setDragonBones(asset: dragonBones.DragonBonesAsset, atlasAsset: dragonBones.DragonBonesAtlasAsset, anchor: cc.Vec2, pma?: boolean): void {
             this.url = null;
+            this.clearContent();
 
             let node = new cc.Node();
             node.color = this._color;
