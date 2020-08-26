@@ -162,11 +162,9 @@ namespace fgui {
         }
 
         public set color(value: cc.Color) {
-            if (!this._color.equals(value)) {
-                this._color.set(value);
-                this.updateGear(4);
-                this._container.color = value;
-            }
+            this._color.set(value);
+            this.updateGear(4);
+            this._container.color = value;
         }
 
         public get fillMethod(): FillMethod {

@@ -19,10 +19,8 @@ namespace fgui {
         }
 
         public set color(value: cc.Color) {
-            if (!this._node.color.equals(value)) {
-                this._node.color = value;
-                this.updateGear(4);
-            }
+            this._node.color = value;
+            this.updateGear(4);
         }
 
         public get flip(): FlipType {

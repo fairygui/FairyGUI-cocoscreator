@@ -4645,10 +4645,8 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._node.color;
             },
             set: function (value) {
-                if (!this._node.color.equals(value)) {
-                    this._node.color = value;
-                    this.updateGear(4);
-                }
+                this._node.color = value;
+                this.updateGear(4);
             },
             enumerable: false,
             configurable: true
@@ -7227,11 +7225,9 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._color;
             },
             set: function (value) {
-                if (!this._color.equals(value)) {
-                    this._color.set(value);
-                    this.updateGear(4);
-                    this._container.color = value;
-                }
+                this._color.set(value);
+                this.updateGear(4);
+                this._container.color = value;
             },
             enumerable: false,
             configurable: true
@@ -7797,12 +7793,10 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._color;
             },
             set: function (value) {
-                if (!this._color.equals(value)) {
-                    this._color.set(value);
-                    this.updateGear(4);
-                    if (this._content)
-                        this._content.node.color = value;
-                }
+                this._color.set(value);
+                this.updateGear(4);
+                if (this._content)
+                    this._content.node.color = value;
             },
             enumerable: false,
             configurable: true
@@ -8092,10 +8086,8 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._node.color;
             },
             set: function (value) {
-                if (!this._node.color.equals(value)) {
-                    this._node.color = value;
-                    this.updateGear(4);
-                }
+                this._node.color = value;
+                this.updateGear(4);
             },
             enumerable: false,
             configurable: true
@@ -8491,11 +8483,9 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._color;
             },
             set: function (value) {
-                if (!this._color.equals(value)) {
-                    this._color.set(value);
-                    this.updateGear(4);
-                    this.updateFontColor();
-                }
+                this._color.set(value);
+                this.updateGear(4);
+                this.updateFontColor();
             },
             enumerable: false,
             configurable: true
@@ -8620,13 +8610,11 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._strokeColor;
             },
             set: function (value) {
-                if (!this._strokeColor || !this._strokeColor.equals(value)) {
-                    if (!this._strokeColor)
-                        this._strokeColor = new cc.Color();
-                    this._strokeColor.set(value);
-                    this.updateGear(4);
-                    this.updateStrokeColor();
-                }
+                if (!this._strokeColor)
+                    this._strokeColor = new cc.Color();
+                this._strokeColor.set(value);
+                this.updateGear(4);
+                this.updateStrokeColor();
             },
             enumerable: false,
             configurable: true
@@ -8636,23 +8624,21 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._shadowOffset;
             },
             set: function (value) {
-                if (!this._shadowOffset || !this._shadowOffset.equals(value)) {
-                    if (!this._shadowOffset)
-                        this._shadowOffset = new cc.Vec2();
-                    this._shadowOffset.set(value);
-                    if (this._shadowOffset.x != 0 || this._shadowOffset.y != 0) {
-                        if (!this._shadow) {
-                            this._shadow = this._node.addComponent(cc.LabelShadow);
-                            this.updateShadowColor();
-                        }
-                        else
-                            this._shadow.enabled = true;
-                        this._shadow.offset.x = value.x;
-                        this._shadow.offset.y = -value.y;
+                if (!this._shadowOffset)
+                    this._shadowOffset = new cc.Vec2();
+                this._shadowOffset.set(value);
+                if (this._shadowOffset.x != 0 || this._shadowOffset.y != 0) {
+                    if (!this._shadow) {
+                        this._shadow = this._node.addComponent(cc.LabelShadow);
+                        this.updateShadowColor();
                     }
-                    else if (this._shadow)
-                        this._shadow.enabled = false;
+                    else
+                        this._shadow.enabled = true;
+                    this._shadow.offset.x = value.x;
+                    this._shadow.offset.y = -value.y;
                 }
+                else if (this._shadow)
+                    this._shadow.enabled = false;
             },
             enumerable: false,
             configurable: true
@@ -8662,12 +8648,10 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._shadowColor;
             },
             set: function (value) {
-                if (!this._shadowColor || !this._shadowColor.equals(value)) {
-                    if (!this._shadowColor)
-                        this._shadowColor = new cc.Color();
-                    this._shadowColor.set(value);
-                    this.updateShadowColor();
-                }
+                if (!this._shadowColor)
+                    this._shadowColor = new cc.Color();
+                this._shadowColor.set(value);
+                this.updateShadowColor();
             },
             enumerable: false,
             configurable: true

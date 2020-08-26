@@ -177,13 +177,11 @@ namespace fgui {
         }
 
         public set color(value: cc.Color) {
-            if (!this._color.equals(value)) {
-                this._color.set(value);
-                this.updateGear(4);
+            this._color.set(value);
+            this.updateGear(4);
 
-                if (this._content)
-                    this._content.node.color = value;
-            }
+            if (this._content)
+                this._content.node.color = value;
         }
 
         public get content(): sp.Skeleton | dragonBones.DragonBones {
