@@ -25,8 +25,8 @@ namespace fgui {
             this._touchDisabled = true;
 
             this._text = "";
-            this._color = cc.Color.WHITE;
-            this._strokeColor = cc.Color.BLACK;
+            this._color = new cc.Color(255, 255, 255, 255);
+            this._strokeColor = new cc.Color();
             this._templateVars = null;
 
             this.createRenderer();
@@ -104,8 +104,8 @@ namespace fgui {
         }
 
         public set color(value: cc.Color) {
-            if (this._color != value) {
-                this._color = value;
+            if (!this._color.equals(value)) {
+                this._color.set(value);
                 this.updateGear(4);
 
                 this.updateFontColor();
@@ -207,8 +207,8 @@ namespace fgui {
         }
 
         public set strokeColor(value: cc.Color) {
-            if (this._strokeColor != value) {
-                this._strokeColor = value;
+            if (!this._strokeColor.equals(value)) {
+                this._strokeColor.set(value);
                 this.updateGear(4);
                 this.updateStrokeColor();
             }
@@ -505,7 +505,7 @@ namespace fgui {
             this.bold = buffer.readBool();
             this.singleLine = buffer.readBool();
             if (buffer.readBool()) {
-                this.strokeColor = buffer.readColor();
+                this.strokeColor= buffer.readColor();
                 this.stroke = buffer.readFloat();
             }
 

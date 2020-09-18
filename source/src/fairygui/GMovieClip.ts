@@ -10,8 +10,6 @@ namespace fgui {
             this._node.name = "GMovieClip";
             this._touchDisabled = true;
             this._content = this._node.addComponent(MovieClip);
-
-            //需要这里设置，等Image中的onLoad设置就太晚，图片尺寸会使用第一帧尺寸。
             this._content.sizeMode = cc.Sprite.SizeMode.CUSTOM;
             this._content.trim = false;
         }

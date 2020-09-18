@@ -37,8 +37,6 @@ namespace fgui {
 
         public constructor() {
             super();
-
-            this.setPlaySettings();
         }
 
         public get frames(): Array<Frame> {
