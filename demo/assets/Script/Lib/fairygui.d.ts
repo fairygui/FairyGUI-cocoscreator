@@ -121,7 +121,9 @@ declare namespace fgui {
         Font = 5,
         Swf = 6,
         Misc = 7,
-        Unknown = 8
+        Unknown = 8,
+        Spine = 9,
+        DragonBones = 10
     }
     enum ObjectType {
         Image = 0,
@@ -141,7 +143,8 @@ declare namespace fgui {
         ProgressBar = 14,
         Slider = 15,
         ScrollBar = 16,
-        Tree = 17
+        Tree = 17,
+        Loader3D = 18
     }
     enum ProgressTitleType {
         Percent = 0,
@@ -916,6 +919,60 @@ declare namespace fgui {
     }
 }
 declare namespace fgui {
+    class GLoader3D extends GObject {
+        private _url;
+        private _align;
+        private _verticalAlign;
+        private _autoSize;
+        private _fill;
+        private _shrinkOnly;
+        private _playing;
+        private _frame;
+        private _loop;
+        private _animationName;
+        private _skinName;
+        private _color;
+        private _contentItem;
+        private _container;
+        private _content;
+        private _updatingLayout;
+        constructor();
+        dispose(): void;
+        url: string;
+        icon: string;
+        align: AlignType;
+        verticalAlign: VertAlignType;
+        fill: LoaderFillType;
+        shrinkOnly: boolean;
+        autoSize: boolean;
+        playing: boolean;
+        frame: number;
+        animationName: string;
+        skinName: string;
+        loop: boolean;
+        color: cc.Color;
+        readonly content: sp.Skeleton | dragonBones.DragonBones;
+        protected loadContent(): void;
+        protected loadFromPackage(itemURL: string): void;
+        private onLoaded;
+        setSpine(asset: sp.SkeletonData, anchor: cc.Vec2, pma?: boolean): void;
+        setDragonBones(asset: dragonBones.DragonBonesAsset, atlasAsset: dragonBones.DragonBonesAtlasAsset, anchor: cc.Vec2, pma?: boolean): void;
+        private onChange;
+        private onChangeSpine;
+        private onChangeDragonBones;
+        protected loadExternal(): void;
+        private onLoaded2;
+        private updateLayout;
+        private clearContent;
+        protected handleSizeChanged(): void;
+        protected handleAnchorChanged(): void;
+        protected handleGrayedChanged(): void;
+        getProp(index: number): any;
+        setProp(index: number, value: any): void;
+        setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void;
+    }
+}
+declare namespace fgui {
     class GMovieClip extends GObject {
         _content: MovieClip;
         constructor();
@@ -1291,27 +1348,30 @@ declare namespace fgui {
     class PackageItem {
         owner: UIPackage;
         type: PackageItemType;
-        objectType: ObjectType;
+        objectType?: ObjectType;
         id: string;
         name: string;
         width: number;
         height: number;
         file: string;
-        decoded: boolean;
-        rawData: ByteBuffer;
-        asset: cc.Texture2D | cc.SpriteFrame | cc.AudioClip | cc.LabelAtlas;
-        highResolution: Array<string>;
-        branches: Array<string>;
-        scale9Grid: cc.Rect;
-        scaleByTile: boolean;
-        tileGridIndice: number;
-        smoothing: boolean;
-        hitTestData: PixelHitTestData;
-        interval: number;
-        repeatDelay: number;
-        swing: boolean;
-        frames: Array<Frame>;
-        extensionType: any;
+        decoded?: boolean;
+        loading?: Array<Function>;
+        rawData?: ByteBuffer;
+        asset?: cc.Texture2D | cc.SpriteFrame | cc.AudioClip | cc.LabelAtlas;
+        highResolution?: Array<string>;
+        branches?: Array<string>;
+        scale9Grid?: cc.Rect;
+        scaleByTile?: boolean;
+        tileGridIndice?: number;
+        smoothing?: boolean;
+        hitTestData?: PixelHitTestData;
+        interval?: number;
+        repeatDelay?: number;
+        swing?: boolean;
+        frames?: Array<Frame>;
+        extensionType?: any;
+        skeletonAnchor?: cc.Vec2;
+        atlasAsset?: dragonBones.DragonBonesAtlasAsset;
         constructor();
         load(): any;
         getBranch(): PackageItem;
@@ -1709,9 +1769,12 @@ declare namespace fgui {
         getItemByName(resName: string): PackageItem;
         getItemAssetByName(resName: string): any;
         getItemAsset(item: PackageItem): cc.Asset;
+        getItemAssetAsync(item: PackageItem, onComplete?: (err: Error, item: PackageItem) => void): void;
         loadAllAssets(): void;
         private loadMovieClip;
         private loadFont;
+        private loadSpine;
+        private loadDragonBones;
     }
 }
 declare namespace fgui {

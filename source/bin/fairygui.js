@@ -611,6 +611,8 @@ window.__extends = (this && this.__extends) || (function () {
         PackageItemType[PackageItemType["Swf"] = 6] = "Swf";
         PackageItemType[PackageItemType["Misc"] = 7] = "Misc";
         PackageItemType[PackageItemType["Unknown"] = 8] = "Unknown";
+        PackageItemType[PackageItemType["Spine"] = 9] = "Spine";
+        PackageItemType[PackageItemType["DragonBones"] = 10] = "DragonBones";
     })(PackageItemType = fgui.PackageItemType || (fgui.PackageItemType = {}));
     var ObjectType;
     (function (ObjectType) {
@@ -632,6 +634,7 @@ window.__extends = (this && this.__extends) || (function () {
         ObjectType[ObjectType["Slider"] = 15] = "Slider";
         ObjectType[ObjectType["ScrollBar"] = 16] = "ScrollBar";
         ObjectType[ObjectType["Tree"] = 17] = "Tree";
+        ObjectType[ObjectType["Loader3D"] = 18] = "Loader3D";
     })(ObjectType = fgui.ObjectType || (fgui.ObjectType = {}));
     var ProgressTitleType;
     (function (ProgressTitleType) {
@@ -7659,6 +7662,458 @@ window.__extends = (this && this.__extends) || (function () {
 })(fgui || (fgui = {}));
 
 (function (fgui) {
+    var GLoader3D = (function (_super) {
+        __extends(GLoader3D, _super);
+        function GLoader3D() {
+            var _this = _super.call(this) || this;
+            _this._frame = 0;
+            _this._node.name = "GLoader3D";
+            _this._playing = true;
+            _this._url = "";
+            _this._fill = fgui.LoaderFillType.None;
+            _this._align = fgui.AlignType.Left;
+            _this._verticalAlign = fgui.VertAlignType.Top;
+            _this._color = new cc.Color(255, 255, 255, 255);
+            _this._container = new cc.Node("Wrapper");
+            _this._container.setAnchorPoint(0, 1);
+            _this._node.addChild(_this._container);
+            return _this;
+        }
+        GLoader3D.prototype.dispose = function () {
+            _super.prototype.dispose.call(this);
+        };
+        Object.defineProperty(GLoader3D.prototype, "url", {
+            get: function () {
+                return this._url;
+            },
+            set: function (value) {
+                if (this._url == value)
+                    return;
+                this._url = value;
+                this.loadContent();
+                this.updateGear(7);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "icon", {
+            get: function () {
+                return this._url;
+            },
+            set: function (value) {
+                this.url = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "align", {
+            get: function () {
+                return this._align;
+            },
+            set: function (value) {
+                if (this._align != value) {
+                    this._align = value;
+                    this.updateLayout();
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "verticalAlign", {
+            get: function () {
+                return this._verticalAlign;
+            },
+            set: function (value) {
+                if (this._verticalAlign != value) {
+                    this._verticalAlign = value;
+                    this.updateLayout();
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "fill", {
+            get: function () {
+                return this._fill;
+            },
+            set: function (value) {
+                if (this._fill != value) {
+                    this._fill = value;
+                    this.updateLayout();
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "shrinkOnly", {
+            get: function () {
+                return this._shrinkOnly;
+            },
+            set: function (value) {
+                if (this._shrinkOnly != value) {
+                    this._shrinkOnly = value;
+                    this.updateLayout();
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "autoSize", {
+            get: function () {
+                return this._autoSize;
+            },
+            set: function (value) {
+                if (this._autoSize != value) {
+                    this._autoSize = value;
+                    this.updateLayout();
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "playing", {
+            get: function () {
+                return this._playing;
+            },
+            set: function (value) {
+                if (this._playing != value) {
+                    this._playing = value;
+                    this.updateGear(5);
+                    this.onChange();
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "frame", {
+            get: function () {
+                return this._frame;
+            },
+            set: function (value) {
+                if (this._frame != value) {
+                    this._frame = value;
+                    this.updateGear(5);
+                    this.onChange();
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "animationName", {
+            get: function () {
+                return this._animationName;
+            },
+            set: function (value) {
+                if (this._animationName != value) {
+                    this._animationName = value;
+                    this.onChange();
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "skinName", {
+            get: function () {
+                return this._skinName;
+            },
+            set: function (value) {
+                if (this._skinName != value) {
+                    this._skinName = value;
+                    this.onChange();
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "loop", {
+            get: function () {
+                return this._loop;
+            },
+            set: function (value) {
+                if (this._loop != value) {
+                    this._loop = value;
+                    this.onChange();
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "color", {
+            get: function () {
+                return this._color;
+            },
+            set: function (value) {
+                this._color.set(value);
+                this.updateGear(4);
+                if (this._content)
+                    this._content.node.color = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GLoader3D.prototype, "content", {
+            get: function () {
+                return;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        GLoader3D.prototype.loadContent = function () {
+            this.clearContent();
+            if (!this._url)
+                return;
+            if (fgui.ToolSet.startsWith(this._url, "ui://"))
+                this.loadFromPackage(this._url);
+            else
+                this.loadExternal();
+        };
+        GLoader3D.prototype.loadFromPackage = function (itemURL) {
+            this._contentItem = fgui.UIPackage.getItemByURL(itemURL);
+            if (this._contentItem) {
+                this._contentItem = this._contentItem.getBranch();
+                this.sourceWidth = this._contentItem.width;
+                this.sourceHeight = this._contentItem.height;
+                this._contentItem = this._contentItem.getHighResolution();
+                if (this._autoSize)
+                    this.setSize(this.sourceWidth, this.sourceHeight);
+                if (this._contentItem.type == fgui.PackageItemType.Spine || this._contentItem.type == fgui.PackageItemType.DragonBones)
+                    this._contentItem.owner.getItemAssetAsync(this._contentItem, this.onLoaded.bind(this));
+            }
+        };
+        GLoader3D.prototype.onLoaded = function (err, item) {
+            if (this._contentItem != item)
+                return;
+            if (err)
+                console.warn(err);
+            if (!this._contentItem.asset)
+                return;
+            if (this._contentItem.type == fgui.PackageItemType.Spine)
+                this.setSpine(this._contentItem.asset, this._contentItem.skeletonAnchor);
+            else if (this._contentItem.type == fgui.PackageItemType.DragonBones)
+                this.setDragonBones(this._contentItem.asset, this._contentItem.atlasAsset, this._contentItem.skeletonAnchor);
+        };
+        GLoader3D.prototype.setSpine = function (asset, anchor, pma) {
+            this.url = null;
+            this.clearContent();
+            var node = new cc.Node();
+            node.color = this._color;
+            this._container.addChild(node);
+            node.setPosition(anchor.x, -anchor.y);
+            this._content = node.addComponent(sp.Skeleton);
+            this._content.premultipliedAlpha = pma;
+            this._content.skeletonData = asset;
+            this.onChangeSpine();
+            this.updateLayout();
+        };
+        GLoader3D.prototype.setDragonBones = function (asset, atlasAsset, anchor, pma) {
+            this.url = null;
+            this.clearContent();
+            var node = new cc.Node();
+            node.color = this._color;
+            this._container.addChild(node);
+            node.setPosition(anchor.x, -anchor.y);
+            this._content = node.addComponent(dragonBones.ArmatureDisplay);
+            this._content.premultipliedAlpha = pma;
+            this._content.dragonAsset = asset;
+            this._content.dragonAtlasAsset = atlasAsset;
+            var armatureKey = asset["init"](dragonBones.CCFactory.getInstance(), atlasAsset["_uuid"]);
+            var dragonBonesData = this._content["_factory"].getDragonBonesData(armatureKey);
+            this._content.armatureName = dragonBonesData.armatureNames[0];
+            this.onChangeDragonBones();
+            this.updateLayout();
+        };
+        GLoader3D.prototype.onChange = function () {
+            this.onChangeSpine();
+            this.onChangeDragonBones();
+        };
+        GLoader3D.prototype.onChangeSpine = function () {
+            if (!(this._content instanceof sp.Skeleton))
+                return;
+            if (this._animationName) {
+                var trackEntry = this._content.getCurrent(0);
+                if (!trackEntry || trackEntry.animation.name != this._animationName || trackEntry.isComplete() && !trackEntry.loop) {
+                    this._content.defaultAnimation = this._animationName;
+                    trackEntry = this._content.setAnimation(0, this._animationName, this._loop);
+                }
+                if (this._playing)
+                    this._content.paused = false;
+                else {
+                    this._content.paused = true;
+                    trackEntry.trackTime = fgui.ToolSet.lerp(0, trackEntry.animationEnd - trackEntry.animationStart, this._frame / 100);
+                }
+            }
+            else
+                this._content.clearTrack(0);
+            var skin = this._skinName || this._content.skeletonData.getRuntimeData().skins[0].name;
+            if (this._content["_skeleton"].skin != skin)
+                this._content.setSkin(skin);
+        };
+        GLoader3D.prototype.onChangeDragonBones = function () {
+            if (!(this._content instanceof dragonBones.ArmatureDisplay))
+                return;
+            if (this._animationName) {
+                if (this._playing)
+                    this._content.playAnimation(this._animationName, this._loop ? 0 : 1);
+                else
+                    this._content.armature().animation.gotoAndStopByFrame(this._animationName, this._frame);
+            }
+            else
+                this._content.armature().animation.reset();
+        };
+        GLoader3D.prototype.loadExternal = function () {
+            cc.loader.loadRes(this._url, sp.SkeletonData, this.onLoaded2.bind(this));
+        };
+        GLoader3D.prototype.onLoaded2 = function (err, asset) {
+            if (!this._url || !cc.isValid(this._node))
+                return;
+            if (err)
+                console.warn(err);
+        };
+        GLoader3D.prototype.updateLayout = function () {
+            var cw = this.sourceWidth;
+            var ch = this.sourceHeight;
+            var pivotCorrectX = -this.pivotX * this._width;
+            var pivotCorrectY = this.pivotY * this._height;
+            if (this._autoSize) {
+                this._updatingLayout = true;
+                if (cw == 0)
+                    cw = 50;
+                if (ch == 0)
+                    ch = 30;
+                this.setSize(cw, ch);
+                this._updatingLayout = false;
+                if (cw == this._width && ch == this._height) {
+                    this._container.setScale(1, 1);
+                    this._container.setPosition(pivotCorrectX, pivotCorrectY);
+                    return;
+                }
+            }
+            var sx = 1, sy = 1;
+            if (this._fill != fgui.LoaderFillType.None) {
+                sx = this.width / this.sourceWidth;
+                sy = this.height / this.sourceHeight;
+                if (sx != 1 || sy != 1) {
+                    if (this._fill == fgui.LoaderFillType.ScaleMatchHeight)
+                        sx = sy;
+                    else if (this._fill == fgui.LoaderFillType.ScaleMatchWidth)
+                        sy = sx;
+                    else if (this._fill == fgui.LoaderFillType.Scale) {
+                        if (sx > sy)
+                            sx = sy;
+                        else
+                            sy = sx;
+                    }
+                    else if (this._fill == fgui.LoaderFillType.ScaleNoBorder) {
+                        if (sx > sy)
+                            sy = sx;
+                        else
+                            sx = sy;
+                    }
+                    if (this._shrinkOnly) {
+                        if (sx > 1)
+                            sx = 1;
+                        if (sy > 1)
+                            sy = 1;
+                    }
+                    cw = this.sourceWidth * sx;
+                    ch = this.sourceHeight * sy;
+                }
+            }
+            this._container.setScale(sx, sy);
+            var nx, ny;
+            if (this._align == fgui.AlignType.Left)
+                nx = 0;
+            else if (this._align == fgui.AlignType.Center)
+                nx = Math.floor((this._width - cw) / 2);
+            else
+                nx = this._width - cw;
+            if (this._verticalAlign == fgui.VertAlignType.Top)
+                ny = 0;
+            else if (this._verticalAlign == fgui.VertAlignType.Middle)
+                ny = Math.floor((this._height - ch) / 2);
+            else
+                ny = this._height - ch;
+            ny = -ny;
+            this._container.setPosition(pivotCorrectX + nx, pivotCorrectY + ny);
+        };
+        GLoader3D.prototype.clearContent = function () {
+            this._contentItem = null;
+            if (this._content) {
+                this._content.node.destroy();
+                this._content = null;
+            }
+        };
+        GLoader3D.prototype.handleSizeChanged = function () {
+            _super.prototype.handleSizeChanged.call(this);
+            if (!this._updatingLayout)
+                this.updateLayout();
+        };
+        GLoader3D.prototype.handleAnchorChanged = function () {
+            _super.prototype.handleAnchorChanged.call(this);
+            if (!this._updatingLayout)
+                this.updateLayout();
+        };
+        GLoader3D.prototype.handleGrayedChanged = function () {
+        };
+        GLoader3D.prototype.getProp = function (index) {
+            switch (index) {
+                case fgui.ObjectPropID.Color:
+                    return this.color;
+                case fgui.ObjectPropID.Playing:
+                    return this.playing;
+                case fgui.ObjectPropID.Frame:
+                    return this.frame;
+                case fgui.ObjectPropID.TimeScale:
+                    return 1;
+                default:
+                    return _super.prototype.getProp.call(this, index);
+            }
+        };
+        GLoader3D.prototype.setProp = function (index, value) {
+            switch (index) {
+                case fgui.ObjectPropID.Color:
+                    this.color = value;
+                    break;
+                case fgui.ObjectPropID.Playing:
+                    this.playing = value;
+                    break;
+                case fgui.ObjectPropID.Frame:
+                    this.frame = value;
+                    break;
+                case fgui.ObjectPropID.TimeScale:
+                    break;
+                case fgui.ObjectPropID.DeltaTime:
+                    break;
+                default:
+                    _super.prototype.setProp.call(this, index, value);
+                    break;
+            }
+        };
+        GLoader3D.prototype.setup_beforeAdd = function (buffer, beginPos) {
+            _super.prototype.setup_beforeAdd.call(this, buffer, beginPos);
+            buffer.seek(beginPos, 5);
+            this._url = buffer.readS();
+            this._align = buffer.readByte();
+            this._verticalAlign = buffer.readByte();
+            this._fill = buffer.readByte();
+            this._shrinkOnly = buffer.readBool();
+            this._autoSize = buffer.readBool();
+            this._animationName = buffer.readS();
+            this._skinName = buffer.readS();
+            this._playing = buffer.readBool();
+            this._frame = buffer.readInt();
+            this._loop = buffer.readBool();
+            if (buffer.readBool())
+                this.color = buffer.readColor();
+            if (this._url)
+                this.loadContent();
+        };
+        return GLoader3D;
+    }(fgui.GObject));
+    fgui.GLoader3D = GLoader3D;
+})(fgui || (fgui = {}));
+
+(function (fgui) {
     var GMovieClip = (function (_super) {
         __extends(GMovieClip, _super);
         function GMovieClip() {
@@ -10236,9 +10691,6 @@ window.__extends = (this && this.__extends) || (function () {
         function PackageItem() {
             this.width = 0;
             this.height = 0;
-            this.tileGridIndice = 0;
-            this.interval = 0;
-            this.repeatDelay = 0;
         }
         PackageItem.prototype.load = function () {
             return this.owner.getItemAsset(this);
@@ -14120,6 +14572,8 @@ window.__extends = (this && this.__extends) || (function () {
                     return new fgui.GComboBox();
                 case fgui.ObjectType.Tree:
                     return new fgui.GTree();
+                case fgui.ObjectType.Loader3D:
+                    return new fgui.GLoader3D();
                 default:
                     return null;
             }
@@ -14333,6 +14787,8 @@ window.__extends = (this && this.__extends) || (function () {
             }
             buffer.seek(indexTablePos, 1);
             var pi;
+            var pos = url.lastIndexOf('/');
+            var shortPath = pos == -1 ? "" : url.substr(0, pos + 1);
             url = url + "_";
             cnt = buffer.readShort();
             for (i = 0; i < cnt; i++) {
@@ -14394,6 +14850,15 @@ window.__extends = (this && this.__extends) || (function () {
                     case fgui.PackageItemType.Misc:
                         {
                             pi.file = url + cc.path.mainFileName(pi.file);
+                            break;
+                        }
+                    case fgui.PackageItemType.Spine:
+                    case fgui.PackageItemType.DragonBones:
+                        {
+                            pi.file = shortPath + cc.path.mainFileName(pi.file);
+                            pi.skeletonAnchor = new cc.Vec2();
+                            pi.skeletonAnchor.x = buffer.readFloat();
+                            pi.skeletonAnchor.y = buffer.readFloat();
                             break;
                         }
                 }
@@ -14573,6 +15038,30 @@ window.__extends = (this && this.__extends) || (function () {
                     return null;
             }
         };
+        UIPackage.prototype.getItemAssetAsync = function (item, onComplete) {
+            if (item.decoded) {
+                onComplete(null, item);
+                return;
+            }
+            if (item.loading) {
+                item.loading.push(onComplete);
+                return;
+            }
+            switch (item.type) {
+                case fgui.PackageItemType.Spine:
+                    item.loading = [onComplete];
+                    this.loadSpine(item);
+                    break;
+                case fgui.PackageItemType.DragonBones:
+                    item.loading = [onComplete];
+                    this.loadDragonBones(item);
+                    break;
+                default:
+                    this.getItemAsset(item);
+                    onComplete(null, item);
+                    break;
+            }
+        };
         UIPackage.prototype.loadAllAssets = function () {
             var cnt = this._items.length;
             for (var i = 0; i < cnt; i++) {
@@ -14697,6 +15186,38 @@ window.__extends = (this && this.__extends) || (function () {
             spriteFrame.setTexture(mainTexture);
             font.spriteFrame = spriteFrame;
             font.onLoad();
+        };
+        UIPackage.prototype.loadSpine = function (item) {
+            cc.loader.loadRes(item.file, sp.SkeletonData, function (err, asset) {
+                item.decoded = true;
+                item.asset = asset;
+                var arr = item.loading;
+                delete item.loading;
+                arr.forEach(function (e) { return e(err, item); });
+            });
+        };
+        UIPackage.prototype.loadDragonBones = function (item) {
+            cc.loader.loadRes(item.file, dragonBones.DragonBonesAsset, function (err, asset) {
+                if (err) {
+                    item.decoded = true;
+                    var arr = item.loading;
+                    delete item.loading;
+                    arr.forEach(function (e) { return e(err, item); });
+                    return;
+                }
+                item.asset = asset;
+                var atlasFile = item.file.replace("_ske", "_tex");
+                var pos = atlasFile.lastIndexOf('.');
+                if (pos != -1)
+                    atlasFile = atlasFile.substr(0, pos + 1) + "json";
+                cc.loader.loadRes(atlasFile, dragonBones.DragonBonesAtlasAsset, function (err, asset) {
+                    item.decoded = true;
+                    item.atlasAsset = asset;
+                    var arr = item.loading;
+                    delete item.loading;
+                    arr.forEach(function (e) { return e(err, item); });
+                });
+            });
         };
         UIPackage._constructing = 0;
         UIPackage._instById = {};
@@ -15298,14 +15819,24 @@ window.__extends = (this && this.__extends) || (function () {
                     if (!material) {
                         material = cc.Material.getBuiltinMaterial('2d-gray-sprite');
                     }
-                    material = this._graySpriteMaterial = cc.Material.getInstantiatedMaterial(material, this);
+                    if (cc.Material.getInstantiatedMaterial) {
+                        material = this._graySpriteMaterial = cc.Material.getInstantiatedMaterial(material, this);
+                    }
+                    else {
+                        material = this._graySpriteMaterial = cc.Material.create(material, this);
+                    }
                 }
                 else {
                     material = this._spriteMaterial;
                     if (!material) {
                         material = cc.Material.getBuiltinMaterial('2d-sprite', this);
                     }
-                    material = this._spriteMaterial = cc.Material.getInstantiatedMaterial(material, this);
+                    if (cc.Material.getInstantiatedMaterial) {
+                        material = this._spriteMaterial = cc.Material.getInstantiatedMaterial(material, this);
+                    }
+                    else {
+                        material = this._spriteMaterial = cc.Material.create(material, this);
+                    }
                 }
                 this.setMaterial(0, material);
             },

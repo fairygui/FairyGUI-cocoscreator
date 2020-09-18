@@ -257,6 +257,8 @@ namespace fgui {
             buffer.seek(indexTablePos, 1);
 
             var pi: PackageItem;
+            let pos = url.lastIndexOf('/');
+            let shortPath = pos == -1 ? "" : url.substr(0, pos + 1);
             url = url + "_";
 
             cnt = buffer.readShort();
@@ -328,6 +330,16 @@ namespace fgui {
                     case PackageItemType.Misc:
                         {
                             pi.file = url + cc.path.mainFileName(pi.file);
+                            break;
+                        }
+
+                    case PackageItemType.Spine:
+                    case PackageItemType.DragonBones:
+                        {
+                            pi.file = shortPath + cc.path.mainFileName(pi.file);
+                            pi.skeletonAnchor = new cc.Vec2();
+                            pi.skeletonAnchor.x = buffer.readFloat();
+                            pi.skeletonAnchor.y = buffer.readFloat();
                             break;
                         }
                 }
@@ -530,6 +542,35 @@ namespace fgui {
             }
         }
 
+        public getItemAssetAsync(item: PackageItem, onComplete?: (err: Error, item: PackageItem) => void): void {
+            if (item.decoded) {
+                onComplete(null, item);
+                return;
+            }
+
+            if (item.loading) {
+                item.loading.push(onComplete);
+                return;
+            }
+
+            switch (item.type) {
+                case PackageItemType.Spine:
+                    item.loading = [onComplete];
+                    this.loadSpine(item);
+                    break;
+
+                case PackageItemType.DragonBones:
+                    item.loading = [onComplete];
+                    this.loadDragonBones(item);
+                    break;
+
+                default:
+                    this.getItemAsset(item);
+                    onComplete(null, item);
+                    break;
+            }
+        }
+
         public loadAllAssets(): void {
             var cnt: number = this._items.length;
             for (var i: number = 0; i < cnt; i++) {
@@ -683,6 +724,42 @@ namespace fgui {
             spriteFrame.setTexture(mainTexture);
             font.spriteFrame = spriteFrame;
             font.onLoad();
+        }
+
+        private loadSpine(item: PackageItem): void {
+            cc.loader.loadRes(item.file, sp.SkeletonData, (err: Error, asset: cc.Asset) => {
+                item.decoded = true;
+                item.asset = asset;
+                let arr = item.loading;
+                delete item.loading;
+                arr.forEach(e => e(err, item));
+            });
+        }
+
+        private loadDragonBones(item: PackageItem): void {
+            cc.loader.loadRes(item.file, dragonBones.DragonBonesAsset, (err: Error, asset: cc.Asset) => {
+                if (err) {
+                    item.decoded = true;
+                    let arr = item.loading;
+                    delete item.loading;
+                    arr.forEach(e => e(err, item));
+                    return;
+                }
+
+                item.asset = asset;
+                let atlasFile = item.file.replace("_ske", "_tex");
+                let pos = atlasFile.lastIndexOf('.');
+                if (pos != -1)
+                    atlasFile = atlasFile.substr(0, pos + 1) + "json";
+                cc.loader.loadRes(atlasFile, dragonBones.DragonBonesAtlasAsset, (err: Error, asset: cc.Asset) => {
+                    item.decoded = true;
+                    item.atlasAsset = <dragonBones.DragonBonesAtlasAsset>asset;
+
+                    let arr = item.loading;
+                    delete item.loading;
+                    arr.forEach(e => e(err, item));
+                });
+            });
         }
     }
 
