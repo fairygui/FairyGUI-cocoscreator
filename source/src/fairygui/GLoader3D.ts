@@ -184,8 +184,8 @@ namespace fgui {
                 this._content.node.color = value;
         }
 
-        public get content(): sp.Skeleton | dragonBones.DragonBones {
-            return
+        public get content(): sp.Skeleton | dragonBones.ArmatureDisplay {
+            return this._content;
         }
 
         protected loadContent(): void {

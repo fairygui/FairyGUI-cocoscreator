@@ -47,11 +47,11 @@ namespace fgui {
             }
         }
 
-        public onChanged(callback: Function, target: any): void {
+        public onChanged(callback: Function, target?: any): void {
             this.on(Event.STATUS_CHANGED, callback, target);
         }
 
-        public offChanged(callback: Function, target: any): void {
+        public offChanged(callback: Function, target?: any): void {
             this.off(Event.STATUS_CHANGED, callback, target);
         }
 

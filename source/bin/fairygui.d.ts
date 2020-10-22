@@ -24,8 +24,8 @@ declare namespace fgui {
         dispose(): void;
         get selectedIndex(): number;
         set selectedIndex(value: number);
-        onChanged(callback: Function, target: any): void;
-        offChanged(callback: Function, target: any): void;
+        onChanged(callback: Function, target?: any): void;
+        offChanged(callback: Function, target?: any): void;
         setSelectedIndex(value: number): void;
         get previsousIndex(): number;
         get selectedPage(): string;
@@ -1067,7 +1067,7 @@ declare namespace fgui {
         set loop(value: boolean);
         get color(): cc.Color;
         set color(value: cc.Color);
-        get content(): sp.Skeleton | dragonBones.DragonBones;
+        get content(): sp.Skeleton | dragonBones.ArmatureDisplay;
         protected loadContent(): void;
         protected loadFromPackage(itemURL: string): void;
         private onLoaded;

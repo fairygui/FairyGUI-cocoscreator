@@ -7803,7 +7803,7 @@ window.__extends = (this && this.__extends) || (function () {
         });
         Object.defineProperty(GLoader3D.prototype, "content", {
             get: function () {
-                return;
+                return this._content;
             },
             enumerable: false,
             configurable: true
