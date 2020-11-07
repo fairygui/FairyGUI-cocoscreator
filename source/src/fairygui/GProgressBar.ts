@@ -28,6 +28,11 @@ namespace fgui {
             this._max = 100;
         }
 
+        public dispose(): void {
+            GTween.kill(this);
+            super.dispose();
+        }
+
         public get titleType(): ProgressTitleType {
             return this._titleType;
         }
