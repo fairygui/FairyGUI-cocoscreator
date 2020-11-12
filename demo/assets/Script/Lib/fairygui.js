@@ -1533,6 +1533,9 @@ window.__extends = (this && this.__extends) || (function () {
         GObject.prototype.onClick = function (listener, target) {
             this._node.on(fgui.Event.CLICK, listener, target);
         };
+        GObject.prototype.onceClick = function (listener, target) {
+            this._node.once(fgui.Event.CLICK, listener, target);
+        };
         GObject.prototype.offClick = function (listener, target) {
             this._node.off(fgui.Event.CLICK, listener, target);
         };
@@ -1546,6 +1549,11 @@ window.__extends = (this && this.__extends) || (function () {
             if (type == fgui.Event.DISPLAY || type == fgui.Event.UNDISPLAY)
                 this._partner._emitDisplayEvents = true;
             this._node.on(type, listener, target);
+        };
+        GObject.prototype.once = function (type, listener, target) {
+            if (type == fgui.Event.DISPLAY || type == fgui.Event.UNDISPLAY)
+                this._partner._emitDisplayEvents = true;
+            this._node.once(type, listener, target);
         };
         GObject.prototype.off = function (type, listener, target) {
             this._node.off(type, listener, target);
@@ -4615,7 +4623,7 @@ window.__extends = (this && this.__extends) || (function () {
             if (buffer.version >= 2) {
                 this._excludeInvisibles = buffer.readBool();
                 this._autoSizeDisabled = buffer.readBool();
-                this._mainChildIndex = buffer.readInt();
+                this._mainGridIndex = buffer.readShort();
             }
         };
         GGroup.prototype.setup_afterAdd = function (buffer, beginPos) {
@@ -5175,7 +5183,8 @@ window.__extends = (this && this.__extends) || (function () {
         };
         GList.prototype.removeChildAt = function (index, dispose) {
             var child = _super.prototype.removeChildAt.call(this, index, dispose);
-            child.off(fgui.Event.CLICK, this.onClickItem, this);
+            if (!dispose)
+                child.off(fgui.Event.CLICK, this.onClickItem, this);
             return child;
         };
         GList.prototype.removeChildToPoolAt = function (index) {
@@ -8134,8 +8143,8 @@ window.__extends = (this && this.__extends) || (function () {
         GMovieClip.prototype.syncStatus = function (anotherMc) {
             this._content.syncStatus(anotherMc._content);
         };
-        GMovieClip.prototype.advance = function (timeInMiniseconds) {
-            this._content.advance(timeInMiniseconds);
+        GMovieClip.prototype.advance = function (timeInSeconds) {
+            this._content.advance(timeInSeconds);
         };
         GMovieClip.prototype.setPlaySettings = function (start, end, times, endAt, endCallback, callbackObj) {
             this._content.setPlaySettings(start, end, times, endAt, endCallback, callbackObj);
@@ -8974,6 +8983,7 @@ window.__extends = (this && this.__extends) || (function () {
         return RichTextImageAtlas;
     }(cc.SpriteAtlas));
     fgui.RichTextImageAtlas = RichTextImageAtlas;
+    var imageAtlas = new RichTextImageAtlas();
     var GRichTextField = (function (_super) {
         __extends(GRichTextField, _super);
         function GRichTextField() {
@@ -8987,7 +8997,7 @@ window.__extends = (this && this.__extends) || (function () {
             this._richText = this._node.addComponent(cc.RichText);
             this._richText.handleTouchEvent = false;
             this.autoSize = fgui.AutoSizeType.None;
-            this._richText.imageAtlas = GRichTextField.imageAtlas;
+            this._richText.imageAtlas = imageAtlas;
         };
         Object.defineProperty(GRichTextField.prototype, "align", {
             get: function () {
@@ -9083,7 +9093,7 @@ window.__extends = (this && this.__extends) || (function () {
                     fontSize = font._fntConfig.fontSize;
             }
             this._richText.fontSize = fontSize;
-            this._richText.lineHeight = fontSize + this._leading;
+            this._richText.lineHeight = fontSize + this._leading * 2;
         };
         GRichTextField.prototype.updateOverflow = function () {
             if (this._autoSize == fgui.AutoSizeType.Both)
@@ -9097,7 +9107,6 @@ window.__extends = (this && this.__extends) || (function () {
             if (this._autoSize != fgui.AutoSizeType.Both)
                 this._richText.maxWidth = this._width;
         };
-        GRichTextField.imageAtlas = new RichTextImageAtlas();
         return GRichTextField;
     }(fgui.GTextField));
     fgui.GRichTextField = GRichTextField;
@@ -13726,7 +13735,7 @@ window.__extends = (this && this.__extends) || (function () {
                 target.setProp(fgui.ObjectPropID.Playing, playStartTime >= 0);
                 target.setProp(fgui.ObjectPropID.Frame, frame);
                 if (playTotalTime > 0)
-                    target.setProp(fgui.ObjectPropID.DeltaTime, playTotalTime * 1000);
+                    target.setProp(fgui.ObjectPropID.DeltaTime, playTotalTime);
             }
         };
         Transition.prototype.onDelayedPlayItem = function (tweener) {
@@ -15901,19 +15910,19 @@ window.__extends = (this && this.__extends) || (function () {
             this._repeatedCount = anotherMc._repeatedCount;
             this.drawFrame();
         };
-        MovieClip.prototype.advance = function (timeInMiniseconds) {
+        MovieClip.prototype.advance = function (timeInSeconds) {
             var beginFrame = this._frame;
             var beginReversed = this._reversed;
-            var backupTime = timeInMiniseconds;
+            var backupTime = timeInSeconds;
             while (true) {
                 var tt = this.interval + this._frames[this._frame].addDelay;
                 if (this._frame == 0 && this._repeatedCount > 0)
                     tt += this.repeatDelay;
-                if (timeInMiniseconds < tt) {
+                if (timeInSeconds < tt) {
                     this._frameElapsed = 0;
                     break;
                 }
-                timeInMiniseconds -= tt;
+                timeInSeconds -= tt;
                 if (this.swing) {
                     if (this._reversed) {
                         this._frame--;
@@ -15940,8 +15949,8 @@ window.__extends = (this && this.__extends) || (function () {
                     }
                 }
                 if (this._frame == beginFrame && this._reversed == beginReversed) {
-                    var roundTime = backupTime - timeInMiniseconds;
-                    timeInMiniseconds -= Math.floor(timeInMiniseconds / roundTime) * roundTime;
+                    var roundTime = backupTime - timeInSeconds;
+                    timeInSeconds -= Math.floor(timeInSeconds / roundTime) * roundTime;
                 }
             }
             this.drawFrame();
@@ -18371,7 +18380,9 @@ window.__extends = (this && this.__extends) || (function () {
                         freePosStart = i;
                 }
                 else {
-                    if (!tweener._paused)
+                    if ((tweener._target instanceof fgui.GObject) && tweener._target.node == null)
+                        tweener._killed = true;
+                    else if (!tweener._paused)
                         tweener._update(dt);
                     if (freePosStart != -1) {
                         tweens[freePosStart] = tweener;

@@ -403,10 +403,12 @@ declare namespace fgui {
         protected onUpdate(): void;
         protected onDestroy(): void;
         onClick(listener: Function, target?: any): void;
+        onceClick(listener: Function, target?: any): void;
         offClick(listener: Function, target?: any): void;
         clearClick(): void;
         hasClickListener(): boolean;
         on(type: string, listener: Function, target?: any): void;
+        once(type: string, listener: Function, target?: any): void;
         off(type: string, listener?: Function, target?: any): void;
         get draggable(): boolean;
         set draggable(value: boolean);
@@ -1102,7 +1104,7 @@ declare namespace fgui {
         set timeScale(value: number);
         rewind(): void;
         syncStatus(anotherMc: GMovieClip): void;
-        advance(timeInMiniseconds: number): void;
+        advance(timeInSeconds: number): void;
         setPlaySettings(start?: number, end?: number, times?: number, endAt?: number, endCallback?: Function, callbackObj?: any): void;
         protected handleGrayedChanged(): void;
         protected handleSizeChanged(): void;
@@ -1246,7 +1248,6 @@ declare namespace fgui {
         private _underline;
         linkUnderline: boolean;
         linkColor: string;
-        static imageAtlas: RichTextImageAtlas;
         constructor();
         protected createRenderer(): void;
         get align(): cc.Label.HorizontalAlign;
@@ -2146,7 +2147,7 @@ declare namespace fgui {
         set smoothing(value: boolean);
         rewind(): void;
         syncStatus(anotherMc: MovieClip): void;
-        advance(timeInMiniseconds: number): void;
+        advance(timeInSeconds: number): void;
         setPlaySettings(start?: number, end?: number, times?: number, endAt?: number, endCallback?: Function, callbackObj?: any): void;
         protected update(dt: number): void;
         private drawFrame;
