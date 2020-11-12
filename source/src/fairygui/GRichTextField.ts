@@ -18,6 +18,8 @@ namespace fgui {
         }
     }
 
+    const imageAtlas: RichTextImageAtlas = new RichTextImageAtlas();
+
     export class GRichTextField extends GTextField {
         public _richText: cc.RichText;
 
@@ -27,8 +29,6 @@ namespace fgui {
 
         public linkUnderline: boolean;
         public linkColor: string;
-
-        public static imageAtlas: RichTextImageAtlas = new RichTextImageAtlas();
 
         public constructor() {
             super();
@@ -42,7 +42,7 @@ namespace fgui {
             this._richText = this._node.addComponent(cc.RichText);
             this._richText.handleTouchEvent = false;
             this.autoSize = AutoSizeType.None;
-            this._richText.imageAtlas = GRichTextField.imageAtlas;
+            this._richText.imageAtlas = imageAtlas;
         }
 
         public get align(): cc.Label.HorizontalAlign {
@@ -145,7 +145,7 @@ namespace fgui {
             }
 
             this._richText.fontSize = fontSize;
-            this._richText.lineHeight = fontSize + this._leading;
+            this._richText.lineHeight = fontSize + this._leading * 2;
         }
 
         protected updateOverflow() {
