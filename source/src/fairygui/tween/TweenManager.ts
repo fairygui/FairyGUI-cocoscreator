@@ -98,7 +98,9 @@ namespace fgui {
                         freePosStart = i;
                 }
                 else {
-                    if (!tweener._paused)
+                    if ((tweener._target instanceof GObject) && (<GObject>tweener._target).node == null)
+                        tweener._killed = true;
+                    else if (!tweener._paused)
                         tweener._update(dt);
 
                     if (freePosStart != -1) {
