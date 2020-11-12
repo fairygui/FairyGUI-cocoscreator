@@ -119,21 +119,21 @@ namespace fgui {
             this.drawFrame();
         }
 
-        public advance(timeInMiniseconds: number): void {
+        public advance(timeInSeconds: number): void {
             var beginFrame: number = this._frame;
             var beginReversed: boolean = this._reversed;
-            var backupTime: number = timeInMiniseconds;
+            var backupTime: number = timeInSeconds;
 
             while (true) {
                 var tt: number = this.interval + this._frames[this._frame].addDelay;
                 if (this._frame == 0 && this._repeatedCount > 0)
                     tt += this.repeatDelay;
-                if (timeInMiniseconds < tt) {
+                if (timeInSeconds < tt) {
                     this._frameElapsed = 0;
                     break;
                 }
 
-                timeInMiniseconds -= tt;
+                timeInSeconds -= tt;
 
                 if (this.swing) {
                     if (this._reversed) {
@@ -163,8 +163,8 @@ namespace fgui {
 
                 if (this._frame == beginFrame && this._reversed == beginReversed) //走了一轮了
                 {
-                    var roundTime: number = backupTime - timeInMiniseconds; //这就是一轮需要的时间
-                    timeInMiniseconds -= Math.floor(timeInMiniseconds / roundTime) * roundTime; //跳过
+                    var roundTime: number = backupTime - timeInSeconds; //这就是一轮需要的时间
+                    timeInSeconds -= Math.floor(timeInSeconds / roundTime) * roundTime; //跳过
                 }
             }
 

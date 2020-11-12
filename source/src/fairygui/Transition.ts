@@ -668,7 +668,7 @@ namespace fgui {
                 target.setProp(ObjectPropID.Playing, playStartTime >= 0);
                 target.setProp(ObjectPropID.Frame, frame);
                 if (playTotalTime > 0)
-                    target.setProp(ObjectPropID.DeltaTime, playTotalTime * 1000);
+                    target.setProp(ObjectPropID.DeltaTime, playTotalTime);
             }
         }
 
