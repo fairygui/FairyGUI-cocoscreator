@@ -4977,6 +4977,7 @@ window.__extends = (this && this.__extends) || (function () {
             return _this;
         }
         GList.prototype.dispose = function () {
+            this._partner.unschedule(this._refreshVirtualList);
             this._pool.clear();
             _super.prototype.dispose.call(this);
         };
