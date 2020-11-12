@@ -53,6 +53,7 @@ namespace fgui {
         }
 
         public dispose(): void {
+            this._partner.unschedule(this._refreshVirtualList);
             this._pool.clear();
             super.dispose();
         }
