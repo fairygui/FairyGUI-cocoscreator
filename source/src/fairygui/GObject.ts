@@ -747,6 +747,10 @@ namespace fgui {
             this._node.on(Event.CLICK, listener, target);
         }
 
+        public onceClick(listener: Function, target?: any): void {
+            this._node.once(Event.CLICK, listener, target);
+        }
+
         public offClick(listener: Function, target?: any): void {
             this._node.off(Event.CLICK, listener, target);
         }
@@ -764,6 +768,13 @@ namespace fgui {
                 this._partner._emitDisplayEvents = true;
 
             this._node.on(type, listener, target);
+        }
+
+        public once(type: string, listener: Function, target?: any): void {
+            if (type == Event.DISPLAY || type == Event.UNDISPLAY)
+                this._partner._emitDisplayEvents = true;
+
+            this._node.once(type, listener, target);
         }
 
         public off(type: string, listener?: Function, target?: any): void {
