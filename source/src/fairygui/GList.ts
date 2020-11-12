@@ -242,7 +242,8 @@ namespace fgui {
 
         public removeChildAt(index: number, dispose?: boolean): GObject {
             var child: GObject = super.removeChildAt(index, dispose);
-            child.off(Event.CLICK, this.onClickItem, this);
+            if (!dispose)
+                child.off(Event.CLICK, this.onClickItem, this);
 
             return child;
         }
