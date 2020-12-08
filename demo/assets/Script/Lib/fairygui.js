@@ -7383,22 +7383,24 @@ window.__extends = (this && this.__extends) || (function () {
                 this.setErrorState();
         };
         GLoader.prototype.loadExternal = function () {
+            var _this = this;
+            var url = this.url;
+            var callback = function (err, asset) {
+                if (_this._url != url || !cc.isValid(_this._node))
+                    return;
+                if (err)
+                    console.warn(err);
+                if (asset instanceof cc.SpriteFrame)
+                    _this.onExternalLoadSuccess(asset);
+                else if (asset instanceof cc.Texture2D)
+                    _this.onExternalLoadSuccess(new cc.SpriteFrame(asset));
+            };
             if (fgui.ToolSet.startsWith(this._url, "http://")
                 || fgui.ToolSet.startsWith(this._url, "https://")
                 || fgui.ToolSet.startsWith(this._url, '/'))
-                cc.assetManager.loadRemote(this._url, this.onLoaded.bind(this));
+                cc.assetManager.loadRemote(this._url, callback);
             else
-                cc.resources.load(this._url, cc.Asset, this.onLoaded.bind(this));
-        };
-        GLoader.prototype.onLoaded = function (err, asset) {
-            if (!this._url || !cc.isValid(this._node))
-                return;
-            if (err)
-                console.warn(err);
-            if (asset instanceof cc.SpriteFrame)
-                this.onExternalLoadSuccess(asset);
-            else if (asset instanceof cc.Texture2D)
-                this.onExternalLoadSuccess(new cc.SpriteFrame(asset));
+                cc.resources.load(this._url, cc.Asset, callback);
         };
         GLoader.prototype.freeExternal = function (texture) {
         };
@@ -11620,6 +11622,7 @@ window.__extends = (this && this.__extends) || (function () {
             this._scrollStep = fgui.UIConfig.defaultScrollStep;
             this._mouseWheelStep = this._scrollStep * 2;
             this._decelerationRate = fgui.UIConfig.defaultScrollDecelerationRate;
+            this._snappingPolicy = 0;
             o.on(fgui.Event.TOUCH_BEGIN, this.onTouchBegin, this);
             o.on(fgui.Event.TOUCH_MOVE, this.onTouchMove, this);
             o.on(fgui.Event.TOUCH_END, this.onTouchEnd, this);
@@ -11839,6 +11842,16 @@ window.__extends = (this && this.__extends) || (function () {
             },
             set: function (value) {
                 this._snapToItem = value;
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(ScrollPane.prototype, "snappingPolicy", {
+            get: function () {
+                return this._snappingPolicy;
+            },
+            set: function (value) {
+                this._snappingPolicy = value;
             },
             enumerable: false,
             configurable: true
@@ -12288,6 +12301,8 @@ window.__extends = (this && this.__extends) || (function () {
             this._contentSize.x = aWidth;
             this._contentSize.y = aHeight;
             this.handleSizeChanged();
+            if (this._snapToItem && this._snappingPolicy != 0 && this._xPos == 0 && this._yPos == 0)
+                this.posChanged(false);
         };
         ScrollPane.prototype.changeContentSizeOnScrolling = function (deltaWidth, deltaHeight, deltaPosX, deltaPosY) {
             var isRightmost = this._xPos == this._overlapSize.x;
@@ -12891,6 +12906,23 @@ window.__extends = (this && this.__extends) || (function () {
             return value;
         };
         ScrollPane.prototype.alignPosition = function (pos, inertialScrolling) {
+            var ax = 0, ay = 0;
+            if (this._snappingPolicy == 1) {
+                if (this._owner.numChildren > 0) {
+                    var obj = this._owner.getChildAt(0);
+                    ax = Math.floor(this._viewSize.x * 0.5 - obj.width * 0.5);
+                    ay = Math.floor(this._viewSize.y * 0.5 - obj.height * 0.5);
+                }
+            }
+            else if (this._snappingPolicy == 2) {
+                if (this._owner.numChildren > 0) {
+                    var obj = this._owner.getChildAt(0);
+                    ax = Math.floor(this._viewSize.x - obj.width);
+                    ay = Math.floor(this._viewSize.y - obj.height);
+                }
+            }
+            pos.x -= ax;
+            pos.y -= ay;
             if (this._pageMode) {
                 pos.x = this.alignByPage(pos.x, "x", inertialScrolling);
                 pos.y = this.alignByPage(pos.y, "y", inertialScrolling);
@@ -12902,6 +12934,8 @@ window.__extends = (this && this.__extends) || (function () {
                 if (pos.y < 0 && pos.y > -this._overlapSize.y)
                     pos.y = -pt.y;
             }
+            pos.x += ax;
+            pos.y += ay;
         };
         ScrollPane.prototype.alignByPage = function (pos, axis, inertialScrolling) {
             var page;

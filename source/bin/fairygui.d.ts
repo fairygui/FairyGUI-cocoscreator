@@ -1006,7 +1006,6 @@ declare namespace fgui {
         protected loadContent(): void;
         protected loadFromPackage(itemURL: string): void;
         protected loadExternal(): void;
-        private onLoaded;
         protected freeExternal(texture: cc.SpriteFrame): void;
         protected onExternalLoadSuccess(texture: cc.SpriteFrame): void;
         protected onExternalLoadFailed(): void;
@@ -1655,6 +1654,7 @@ declare namespace fgui {
         private _refreshBarAxis;
         private _displayOnLeft?;
         private _snapToItem?;
+        private _snappingPolicy?;
         _displayInDemand?: boolean;
         private _mouseWheelEnabled;
         private _pageMode?;
@@ -1711,6 +1711,8 @@ declare namespace fgui {
         get scrollStep(): number;
         get snapToItem(): boolean;
         set snapToItem(value: boolean);
+        get snappingPolicy(): number;
+        set snappingPolicy(value: number);
         get mouseWheelEnabled(): boolean;
         set mouseWheelEnabled(value: boolean);
         get isDragged(): boolean;
