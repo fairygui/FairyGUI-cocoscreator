@@ -301,27 +301,27 @@ namespace fgui {
         }
 
         protected loadExternal(): void {
+            let url = this.url;
+            let callback = (err, asset) => {
+                //因为是异步返回的，而这时可能url已经被改变，所以不能直接用返回的结果
+
+                if (this._url != url || !cc.isValid(this._node))
+                    return;
+
+                if (err)
+                    console.warn(err);
+
+                if (asset instanceof cc.SpriteFrame)
+                    this.onExternalLoadSuccess(asset);
+                else if (asset instanceof cc.Texture2D)
+                    this.onExternalLoadSuccess(new cc.SpriteFrame(asset));
+            };
             if (ToolSet.startsWith(this._url, "http://")
                 || ToolSet.startsWith(this._url, "https://")
                 || ToolSet.startsWith(this._url, '/'))
-                cc.assetManager.loadRemote(this._url, this.onLoaded.bind(this));
+                cc.assetManager.loadRemote(this._url, callback);
             else
-                cc.resources.load(this._url, cc.Asset, this.onLoaded.bind(this));
-        }
-
-        private onLoaded(err, asset): void {
-            //因为是异步返回的，而这时可能url已经被改变，所以不能直接用返回的结果
-
-            if (!this._url || !cc.isValid(this._node))
-                return;
-
-            if (err)
-                console.warn(err);
-
-            if (asset instanceof cc.SpriteFrame)
-                this.onExternalLoadSuccess(asset);
-            else if (asset instanceof cc.Texture2D)
-                this.onExternalLoadSuccess(new cc.SpriteFrame(asset));
+                cc.resources.load(this._url, cc.Asset, callback);
         }
 
         protected freeExternal(texture: cc.SpriteFrame): void {
