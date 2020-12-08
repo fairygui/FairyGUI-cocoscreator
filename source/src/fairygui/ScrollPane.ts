@@ -21,6 +21,7 @@ namespace fgui {
 
         private _displayOnLeft?: boolean;
         private _snapToItem?: boolean;
+        private _snappingPolicy?: number;
         public _displayInDemand?: boolean;
         private _mouseWheelEnabled: boolean;
         private _pageMode?: boolean;
@@ -100,6 +101,7 @@ namespace fgui {
             this._scrollStep = UIConfig.defaultScrollStep;
             this._mouseWheelStep = this._scrollStep * 2;
             this._decelerationRate = UIConfig.defaultScrollDecelerationRate;
+            this._snappingPolicy = 0;
 
             o.on(Event.TOUCH_BEGIN, this.onTouchBegin, this);
             o.on(Event.TOUCH_MOVE, this.onTouchMove, this);
@@ -306,6 +308,14 @@ namespace fgui {
 
         public set snapToItem(value: boolean) {
             this._snapToItem = value;
+        }
+
+        public get snappingPolicy(): number {
+            return this._snappingPolicy;
+        }
+
+        public set snappingPolicy(value: number) {
+            this._snappingPolicy = value;
         }
 
         public get mouseWheelEnabled(): boolean {
@@ -763,6 +773,9 @@ namespace fgui {
             this._contentSize.x = aWidth;
             this._contentSize.y = aHeight;
             this.handleSizeChanged();
+
+            if (this._snapToItem && this._snappingPolicy != 0 && this._xPos == 0 && this._yPos == 0)
+                this.posChanged(false);
         }
 
         public changeContentSizeOnScrolling(deltaWidth: number, deltaHeight: number,
@@ -1485,6 +1498,26 @@ namespace fgui {
         }
 
         private alignPosition(pos: cc.Vec2, inertialScrolling: boolean): void {
+            let ax: number = 0, ay: number = 0;
+            if (this._snappingPolicy == 1) {
+                if (this._owner.numChildren > 0) {
+                    //assume all children are same size
+                    let obj = this._owner.getChildAt(0);
+                    ax = Math.floor(this._viewSize.x * 0.5 - obj.width * 0.5);
+                    ay = Math.floor(this._viewSize.y * 0.5 - obj.height * 0.5);
+                }
+            }
+            else if (this._snappingPolicy == 2) {
+                if (this._owner.numChildren > 0) {
+                    //assume all children are same size
+                    let obj = this._owner.getChildAt(0);
+                    ax = Math.floor(this._viewSize.x - obj.width);
+                    ay = Math.floor(this._viewSize.y - obj.height);
+                }
+            }
+
+            pos.x -= ax;
+            pos.y -= ay;
             if (this._pageMode) {
                 pos.x = this.alignByPage(pos.x, "x", inertialScrolling);
                 pos.y = this.alignByPage(pos.y, "y", inertialScrolling);
@@ -1496,6 +1529,8 @@ namespace fgui {
                 if (pos.y < 0 && pos.y > -this._overlapSize.y)
                     pos.y = -pt.y;
             }
+            pos.x += ax;
+            pos.y += ay;
         }
 
         private alignByPage(pos: number, axis: string, inertialScrolling: boolean): number {
