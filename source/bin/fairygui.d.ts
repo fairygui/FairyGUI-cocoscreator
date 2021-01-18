@@ -479,6 +479,7 @@ declare namespace fgui {
         get displayListContainer(): cc.Node;
         addChild(child: GObject): GObject;
         addChildAt(child: GObject, index: number): GObject;
+        GListaddChildAt(child: GObject, index: number): GObject;
         private getInsertPosForSortingChild;
         removeChild(child: GObject, dispose?: boolean): GObject;
         removeChildAt(index: number, dispose?: boolean): GObject;
@@ -880,6 +881,7 @@ declare namespace fgui {
         getFromPool(url?: string): GObject;
         returnToPool(obj: GObject): void;
         addChildAt(child: GObject, index: number): GObject;
+        GListaddChildAt(child: GObject, index: number): GObject;
         addItem(url?: string): GObject;
         addItemFromPool(url?: string): GObject;
         removeChildAt(index: number, dispose?: boolean): GObject;
