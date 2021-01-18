@@ -401,7 +401,7 @@ namespace fgui {
             if (this._childrenRenderOrder == ChildrenRenderOrder.Ascent)
                 child.node.setSiblingIndex(index);
             else if (this._childrenRenderOrder == ChildrenRenderOrder.Descent)
-                child.node.setSiblingIndex(0);
+                child.node.setSiblingIndex(cnt-index);
             else
                 this._partner.callLater(this.buildNativeDisplayList);
         }
