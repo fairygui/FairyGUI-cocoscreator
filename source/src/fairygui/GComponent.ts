@@ -119,6 +119,40 @@ namespace fgui {
             }
         }
 
+        public GListaddChildAt(child: GObject, index: number): GObject {
+            if (!child)
+                throw "child is null";
+            var numChildren = this._children.length;
+            if (index >= 0 && index <= numChildren) {
+                if (child.parent == this) {
+                    this.setChildIndex(child, index);
+                }
+                else {
+                    child.removeFromParent();
+                    child._parent = this;
+                    var cnt = this._children.length;
+                    if (child.sortingOrder != 0) {
+                        this._sortingChildCount++;
+                        index = this.getInsertPosForSortingChild(child);
+                    }
+                    else if (this._sortingChildCount > 0) {
+                        if (index > (cnt - this._sortingChildCount))
+                            index = cnt - this._sortingChildCount;
+                    }
+                    if (index == cnt)
+                        this._children.push(child);
+                    else
+                        this._children.splice(index, 0, child);
+                    this.onChildAdd(child, index+1);
+                    this.setBoundsChangedFlag();
+                }
+                return child;
+            }
+            else {
+                throw "Invalid child index";
+            }
+        }
+
         private getInsertPosForSortingChild(target: GObject): number {
             var cnt: number = this._children.length;
             var i: number = 0;
