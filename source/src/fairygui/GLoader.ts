@@ -68,6 +68,15 @@ namespace fgui {
             this.updateGear(7);
         }
 
+        public SetUrl(value: string, onComplete: Function,onCompleteBind:any) {
+            if (this._url == value)
+                return;
+
+            this._url = value;
+            this.loadContent(onComplete,onCompleteBind);
+            this.updateGear(7);
+        }
+
         public get icon(): string {
             return this._url;
         }
@@ -231,16 +240,20 @@ namespace fgui {
             this.updateLayout();
         }
 
-        protected loadContent(): void {
+        protected loadContent(onComplete:Function=null,onCompleteBind:any=null): void {
             this.clearContent();
 
             if (!this._url)
                 return;
 
             if (ToolSet.startsWith(this._url, "ui://"))
+            {
                 this.loadFromPackage(this._url);
+                if(onComplete)
+                onComplete.call(onCompleteBind);
+            }
             else
-                this.loadExternal();
+                this.loadExternal(onComplete,onCompleteBind);
         }
 
         protected loadFromPackage(itemURL: string) {
@@ -300,7 +313,7 @@ namespace fgui {
                 this.setErrorState();
         }
 
-        protected loadExternal(): void {
+        protected loadExternal(onComplete:Function=null,onCompleteBind:any=null): void {
             let url = this.url;
             let callback = (err, asset) => {
                 //因为是异步返回的，而这时可能url已经被改变，所以不能直接用返回的结果
@@ -315,6 +328,10 @@ namespace fgui {
                     this.onExternalLoadSuccess(asset);
                 else if (asset instanceof cc.Texture2D)
                     this.onExternalLoadSuccess(new cc.SpriteFrame(asset));
+
+                //调用自定义结束回调 add by xc
+                if(onComplete)
+                onComplete.call(onCompleteBind);
             };
             if (ToolSet.startsWith(this._url, "http://")
                 || ToolSet.startsWith(this._url, "https://")
