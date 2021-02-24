@@ -1281,6 +1281,7 @@ declare namespace fgui {
         private static _inst;
         static get inst(): GRoot;
         static create(): GRoot;
+        createModalLayer(): GComponent;
         constructor();
         protected onDestroy(): void;
         getTouchPosition(touchId?: number): cc.Vec2;
@@ -1295,7 +1296,7 @@ declare namespace fgui {
         closeAllExceptModals(): void;
         closeAllWindows(): void;
         getTopWindow(): Window;
-        get modalLayer(): GGraph;
+        get modalLayer(): GComponent;
         get hasModalWindow(): boolean;
         get modalWaiting(): boolean;
         getPopupPosition(popup: GObject, target?: GObject, dir?: PopupDirection | boolean, result?: cc.Vec2): cc.Vec2;
