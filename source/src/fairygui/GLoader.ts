@@ -244,7 +244,12 @@ namespace fgui {
             this.clearContent();
 
             if (!this._url)
+            {
+                if(onComplete)
+                onComplete.call(onCompleteBind);
                 return;
+            }
+             
 
             if (ToolSet.startsWith(this._url, "ui://"))
             {
