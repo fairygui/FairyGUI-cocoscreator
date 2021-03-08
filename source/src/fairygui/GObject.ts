@@ -597,6 +597,11 @@ namespace fgui {
                 this._parent.removeChild(this);
         }
 
+        public removeFromParentStayGroup(): void {
+            if (this._parent)
+                this._parent.removeChildStayGroup(this);
+        }
+
         public findParent(): GObject {
             if (this._parent)
                 return this._parent;

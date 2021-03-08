@@ -74,12 +74,12 @@ namespace fgui {
             return this._container;
         }
 
-        public addChild(child: GObject): GObject {
-            this.addChildAt(child, this._children.length);
+        public addChild(child: GObject,isStayGroup:boolean=false): GObject {
+            this.addChildAt(child, this._children.length,isStayGroup);
             return child;
         }
 
-        public addChildAt(child: GObject, index: number): GObject {
+        public addChildAt(child: GObject, index: number,isStayGroup:boolean=false): GObject {
             if (!child)
                 throw "child is null";
 
@@ -90,7 +90,12 @@ namespace fgui {
                     this.setChildIndex(child, index);
                 }
                 else {
+                    if(!isStayGroup)
                     child.removeFromParent();
+                    else
+                    child.removeFromParentStayGroup();
+
+
                     child._parent = this;
 
                     var cnt: number = this._children.length;
@@ -175,6 +180,14 @@ namespace fgui {
             return child;
         }
 
+        public removeChildStayGroup(child: GObject, dispose?: boolean): GObject {
+            var childIndex: number = this._children.indexOf(child);
+            if (childIndex != -1) {
+                this.removeChildAtStayGroup(childIndex, dispose);
+            }
+            return child;
+        }
+
         public removeChildAt(index: number, dispose?: boolean): GObject {
             if (index >= 0 && index < this.numChildren) {
                 var child: GObject = this._children[index];
@@ -185,6 +198,34 @@ namespace fgui {
 
                 this._children.splice(index, 1);
                 child.group = null;
+                this._container.removeChild(child.node);
+                if (this._childrenRenderOrder == ChildrenRenderOrder.Arch)
+                    this._partner.callLater(this.buildNativeDisplayList);
+
+                if (dispose)
+                    child.dispose();
+                else
+                    child.node.parent = null;
+
+                this.setBoundsChangedFlag();
+
+                return child;
+            }
+            else {
+                throw "Invalid child index";
+            }
+        }
+
+        public removeChildAtStayGroup(index: number, dispose?: boolean): GObject {
+            if (index >= 0 && index < this.numChildren) {
+                var child: GObject = this._children[index];
+                child._parent = null;
+
+                if (child.sortingOrder != 0)
+                    this._sortingChildCount--;
+
+                this._children.splice(index, 1);
+
                 this._container.removeChild(child.node);
                 if (this._childrenRenderOrder == ChildrenRenderOrder.Arch)
                     this._partner.callLater(this.buildNativeDisplayList);
