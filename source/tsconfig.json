@@ -1,16 +1,15 @@
 {
   "compilerOptions": {
-    "module": "amd",
-    "lib": [ "dom", "es5", "es2015.promise" ],
-    "target": "es5",
-    "skipLibCheck": true,
-    "outFile": "./fairygui.js",
     "declaration": true,
-    "sourceMap": false,
-    "removeComments": true
+    "target": "es6",
+    "module": "es6",
+    "strict": true,
+    "strictNullChecks": false,
+    "moduleResolution": "Node",
+    "skipLibCheck": true
   },
   "include": [
-    "src",
+    "./src/**/*",
     "lib"
   ],
   "exclude": [

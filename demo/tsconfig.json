@@ -1,17 +1,8 @@
 {
+  /* Base configuration. Do not edit this field. */
+  "extends": "./temp/tsconfig.cocos.json",
+  /* Add your custom configuration here. */
   "compilerOptions": {
-    "module": "commonjs",
-    "lib": [ "dom", "es5", "es2015.promise"],
-    "target": "es5",
-    "experimentalDecorators": true,
-    "skipLibCheck": true
-  },
-  "exclude": [
-    "node_modules",
-    "library",
-    "local",
-    "temp",
-    "build",
-    "settings"
-  ]
+    "allowSyntheticDefaultImports": true, // 需要开启
+  }
 }
