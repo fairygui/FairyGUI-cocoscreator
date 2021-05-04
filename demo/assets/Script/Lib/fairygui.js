@@ -14663,7 +14663,7 @@ window.__extends = (this && this.__extends) || (function () {
                         UIPackage._instById[pkg.id] = pkg;
                         UIPackage._instByName[pkg.name] = pkg;
                         if (pkg._path)
-                            UIPackage._instByName[pkg._path] = pkg;
+                            UIPackage._instById[pkg._path] = pkg;
                         if (onComplete != null)
                             onComplete(lastErr, pkg);
                     }
