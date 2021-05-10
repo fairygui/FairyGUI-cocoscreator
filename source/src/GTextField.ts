@@ -51,6 +51,7 @@ export class GTextField extends GObject {
 
     protected createRenderer() {
         this._label = this._node.addComponent(Label);
+        this._label.string = '';
         this.autoSize = AutoSizeType.Both;
     }
 
@@ -578,7 +579,11 @@ export class GTextField extends GObject {
         buffer.seek(beginPos, 6);
 
         var str: string = buffer.readS();
-        if (str != null)
+        if (str != null) {
             this.text = str;
+        }
+        else {
+            this.text = "";
+        }
     }
 }

@@ -384,6 +384,7 @@ export class GObject {
             this._alpha = value;
 
             this._node._uiProps.opacity = this._alpha;
+            this._node._uiProps.localOpacity = this._alpha;//3.1以后改成这样  或者 加一个 UIOpacity 组件才能有透明度显示,opacity 会被ccc内部修改所以无效了
 
             if (this instanceof GGroup)
                 this.handleAlphaChanged();

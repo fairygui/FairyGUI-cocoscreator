@@ -49,6 +49,9 @@ export class UIConfig {
     // Pixel offsets of finger to trigger scrolling.
     public static touchScrollSensitivity: number = 20;
 
+    //Default Gloader assetsBundle Name.
+    public static loaderAssetsBundleName:string;
+
     // Pixel offsets of finger to trigger dragging.
     public static touchDragSensitivity: number = 10;
 
