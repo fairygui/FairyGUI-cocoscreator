@@ -13,8 +13,17 @@ namespace fgui {
         private _volumeScale: number;
         private _inputProcessor: InputProcessor;
         private _thisOnResized: Function;
+        private _enableSound:boolean;
 
         private static _inst: GRoot;
+
+        public isPauseClickDispatch;
+
+        public isInCLiclkInterval;
+
+        private m_OnClickTimer:number;
+
+        private m_OnClickInterval:number;
 
         public static get inst(): GRoot {
             if (!GRoot._inst)
@@ -49,6 +58,11 @@ namespace fgui {
             this._inputProcessor = this.node.addComponent(InputProcessor);
             this._inputProcessor._captureCallback = this.onTouchBegin_1;
 
+            this.isPauseClickDispatch=false;
+            this.isInCLiclkInterval=false;
+            this.m_OnClickTimer=0;
+            this.m_OnClickInterval=0.2;
+
             if (CC_EDITOR) {
                 (<any>cc).engine.on('design-resolution-changed', this._thisOnResized);
             }
@@ -57,6 +71,27 @@ namespace fgui {
             }
 
             this.onWinResize();
+
+            this._enableSound=true;
+        }
+
+        protected onUpdate(dt): void
+        {
+            if(this.isInCLiclkInterval)
+            {
+                this.m_OnClickTimer+=dt;
+                if(this.m_OnClickTimer>=this.m_OnClickInterval)
+                {
+                    this.isInCLiclkInterval=false;
+                    this.m_OnClickTimer=0;
+                }
+            }
+        }
+
+        public ResetClickInterval()
+        {
+            this.m_OnClickTimer=0;
+            this.isInCLiclkInterval=true;
         }
 
         protected onDestroy(): void {
@@ -69,6 +104,11 @@ namespace fgui {
 
             if (this == GRoot._inst)
                 GRoot._inst = null;
+        }
+
+        public SetSoundEnable(value:boolean)
+        {
+            this._enableSound=value;
         }
 
         public getTouchPosition(touchId?: number): cc.Vec2 {
@@ -345,6 +385,7 @@ namespace fgui {
         }
 
         public playOneShotSound(clip: cc.AudioClip, volumeScale?: number) {
+            if(!this._enableSound) return;
             if (volumeScale === undefined) volumeScale = 1;
             cc.audioEngine.play(clip, false, this._volumeScale * volumeScale);
         }
