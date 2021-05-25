@@ -1047,7 +1047,7 @@ namespace fgui {
             if (GObject.draggingObject && GObject.draggingObject.onStage)
                 return;
 
-            if (ScrollPane.draggingPane && ScrollPane.draggingPane != this && ScrollPane.draggingPane._owner.onStage)
+            if (ScrollPane.draggingPane && ScrollPane.draggingPane != this && ScrollPane.draggingPane._owner && ScrollPane.draggingPane._owner.onStage)
                 return;
 
             var pt: cc.Vec2 = this._owner.globalToLocal(evt.pos.x, evt.pos.y, s_vec2);
