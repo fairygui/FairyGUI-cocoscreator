@@ -68,12 +68,12 @@ namespace fgui {
             this.updateGear(7);
         }
 
-        public SetUrl(value: string, onComplete: Function, onCompleteBind: any) {
+        public SetUrl(value: string, onComplete: Function,onCompleteBind:any) {
             if (this._url == value)
                 return;
 
             this._url = value;
-            this.loadContent(onComplete, onCompleteBind);
+            this.loadContent(onComplete,onCompleteBind);
             this.updateGear(7);
         }
 
@@ -240,23 +240,25 @@ namespace fgui {
             this.updateLayout();
         }
 
-        protected loadContent(onComplete: Function = null, onCompleteBind: any = null): void {
+        protected loadContent(onComplete:Function=null,onCompleteBind:any=null): void {
             this.clearContent();
 
-            if (!this._url) {
-                if (onComplete)
-                    onComplete.call(onCompleteBind);
+            if (!this._url)
+            {
+                if(onComplete)
+                onComplete.call(onCompleteBind);
                 return;
             }
+             
 
-
-            if (ToolSet.startsWith(this._url, "ui://")) {
+            if (ToolSet.startsWith(this._url, "ui://"))
+            {
                 this.loadFromPackage(this._url);
-                if (onComplete)
-                    onComplete.call(onCompleteBind);
+                if(onComplete)
+                onComplete.call(onCompleteBind);
             }
             else
-                this.loadExternal(onComplete, onCompleteBind);
+                this.loadExternal(onComplete,onCompleteBind);
         }
 
         protected loadFromPackage(itemURL: string) {
@@ -316,7 +318,7 @@ namespace fgui {
                 this.setErrorState();
         }
 
-        protected loadExternal(onComplete: Function = null, onCompleteBind: any = null): void {
+        protected loadExternal(onComplete:Function=null,onCompleteBind:any=null): void {
             let url = this.url;
             let callback = (err, asset) => {
                 //因为是异步返回的，而这时可能url已经被改变，所以不能直接用返回的结果
@@ -324,19 +326,8 @@ namespace fgui {
                 if (this._url != url || !cc.isValid(this._node))
                     return;
 
-                if (err) {
-                    
+                if (err)
                     console.warn(err);
-                    console.log(url, "资源拉取失败，尝试重新拉取");
-
-                    if (ToolSet.startsWith(this._url, "http://")
-                        || ToolSet.startsWith(this._url, "https://")
-                        || ToolSet.startsWith(this._url, '/'))
-                        cc.assetManager.loadRemote(this._url, callback);
-                    else
-                        cc.resources.load(this._url, cc.Asset, callback);
-                    return;
-                }
 
                 if (asset instanceof cc.SpriteFrame)
                     this.onExternalLoadSuccess(asset);
@@ -344,8 +335,8 @@ namespace fgui {
                     this.onExternalLoadSuccess(new cc.SpriteFrame(asset));
 
                 //调用自定义结束回调 add by xc
-                if (onComplete)
-                    onComplete.call(onCompleteBind);
+                if(onComplete)
+                onComplete.call(onCompleteBind);
             };
             if (ToolSet.startsWith(this._url, "http://")
                 || ToolSet.startsWith(this._url, "https://")
