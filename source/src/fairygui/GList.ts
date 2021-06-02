@@ -168,7 +168,7 @@ namespace fgui {
         }
 
         public set defaultItem(val: string) {
-            this._defaultItem = val;
+            this._defaultItem = UIPackage.normalizeURL(val);
         }
 
         public get autoResizeItem(): boolean {
@@ -1374,7 +1374,7 @@ namespace fgui {
             var needRender: boolean;
             var deltaSize: number = 0;
             var firstItemDeltaSize: number = 0;
-            var url: string = this.defaultItem;
+            var url: string = this._defaultItem;
             var ii: ItemInfo, ii2: ItemInfo;
             var i: number, j: number;
             var partSize: number = (this._scrollPane.viewWidth - this._columnGap * (this._curLineItemCount - 1)) / this._curLineItemCount;
@@ -1529,7 +1529,7 @@ namespace fgui {
             var needRender: boolean;
             var deltaSize: number = 0;
             var firstItemDeltaSize: number = 0;
-            var url: string = this.defaultItem;
+            var url: string = this._defaultItem;
             var ii: ItemInfo, ii2: ItemInfo;
             var i: number, j: number;
             var partSize: number = (this._scrollPane.viewHeight - this._lineGap * (this._curLineItemCount - 1)) / this._curLineItemCount;
@@ -2279,7 +2279,7 @@ namespace fgui {
 
                 str = buffer.readS();
                 if (str == null) {
-                    str = this.defaultItem;
+                    str = this._defaultItem;
                     if (!str) {
                         buffer.position = nextPos;
                         continue;

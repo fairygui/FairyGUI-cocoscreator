@@ -5107,7 +5107,7 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._defaultItem;
             },
             set: function (val) {
-                this._defaultItem = val;
+                this._defaultItem = fgui.UIPackage.normalizeURL(val);
             },
             enumerable: false,
             configurable: true
@@ -6186,7 +6186,7 @@ window.__extends = (this && this.__extends) || (function () {
             var needRender;
             var deltaSize = 0;
             var firstItemDeltaSize = 0;
-            var url = this.defaultItem;
+            var url = this._defaultItem;
             var ii, ii2;
             var i, j;
             var partSize = (this._scrollPane.viewWidth - this._columnGap * (this._curLineItemCount - 1)) / this._curLineItemCount;
@@ -6319,7 +6319,7 @@ window.__extends = (this && this.__extends) || (function () {
             var needRender;
             var deltaSize = 0;
             var firstItemDeltaSize = 0;
-            var url = this.defaultItem;
+            var url = this._defaultItem;
             var ii, ii2;
             var i, j;
             var partSize = (this._scrollPane.viewHeight - this._lineGap * (this._curLineItemCount - 1)) / this._curLineItemCount;
@@ -6960,7 +6960,7 @@ window.__extends = (this && this.__extends) || (function () {
                 nextPos += buffer.position;
                 str = buffer.readS();
                 if (str == null) {
-                    str = this.defaultItem;
+                    str = this._defaultItem;
                     if (!str) {
                         buffer.position = nextPos;
                         continue;
