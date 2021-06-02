@@ -178,7 +178,7 @@ export class GList extends GComponent {
     }
 
     public set defaultItem(val: string | null) {
-        this._defaultItem = val;
+        this._defaultItem = UIPackage.normalizeURL(val);
     }
 
     public get autoResizeItem(): boolean {
@@ -1384,7 +1384,7 @@ export class GList extends GComponent {
         var needRender: boolean;
         var deltaSize: number = 0;
         var firstItemDeltaSize: number = 0;
-        var url: string = this.defaultItem;
+        var url: string = this._defaultItem;
         var ii: ItemInfo, ii2: ItemInfo;
         var i: number, j: number;
         var partSize: number = (this._scrollPane.viewWidth - this._columnGap * (this._curLineItemCount - 1)) / this._curLineItemCount;
@@ -1539,7 +1539,7 @@ export class GList extends GComponent {
         var needRender: boolean;
         var deltaSize: number = 0;
         var firstItemDeltaSize: number = 0;
-        var url: string = this.defaultItem;
+        var url: string = this._defaultItem;
         var ii: ItemInfo, ii2: ItemInfo;
         var i: number, j: number;
         var partSize: number = (this._scrollPane.viewHeight - this._lineGap * (this._curLineItemCount - 1)) / this._curLineItemCount;
@@ -2289,7 +2289,7 @@ export class GList extends GComponent {
 
             str = buffer.readS();
             if (str == null) {
-                str = this.defaultItem;
+                str = this._defaultItem;
                 if (!str) {
                     buffer.position = nextPos;
                     continue;
