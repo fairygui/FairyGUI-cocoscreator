@@ -1068,7 +1068,7 @@ class GTweener {
         return this;
     }
     _toColor(start, end, duration) {
-        this._valueSize = 4;
+        this._valueSize = 5;
         this._startValue.color = start;
         this._endValue.color = end;
         this._value.color = start;
@@ -1076,7 +1076,7 @@ class GTweener {
         return this;
     }
     _shake(startX, startY, amplitude, duration) {
-        this._valueSize = 5;
+        this._valueSize = 6;
         this._startValue.x = startX;
         this._startValue.y = startY;
         this._startValue.w = amplitude;
@@ -1171,7 +1171,7 @@ class GTweener {
         this._normalizedTime = evaluateEase(this._easeType, reversed ? (this._duration - tt) : tt, this._duration, this._easeOvershootOrAmplitude, this._easePeriod);
         this._value.setZero();
         this._deltaValue.setZero();
-        if (this._valueSize == 5) {
+        if (this._valueSize == 6) {
             if (this._ended == 0) {
                 var r = this._startValue.w * (1 - this._normalizedTime);
                 var rx = r * (Math.random() > 0.5 ? 1 : -1);
