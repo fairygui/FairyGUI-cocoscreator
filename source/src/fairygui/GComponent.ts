@@ -158,7 +158,7 @@ namespace fgui {
                 if (dispose)
                     child.dispose();
                 else
-                    child.node.parent = null;
+                   if(child.node) child.node.parent = null;
 
                 this.setBoundsChangedFlag();
 
@@ -283,8 +283,8 @@ namespace fgui {
 
             var cnt: number = this._children.length;
             if (this._sortingChildCount > 0) {
-                if (index > (cnt - this._sortingChildCount - 1))
-                    index = cnt - this._sortingChildCount - 1;
+                if (index > (cnt - this._sortingChildCount ))
+                    index = cnt - this._sortingChildCount ;
             }
 
             if (oldIndex < index)

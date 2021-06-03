@@ -4,7 +4,7 @@ namespace fgui {
     export class GRoot extends GComponent {
         public static contentScaleLevel: number = 0;
 
-        private _modalLayer: GGraph;
+        private _modalLayer: GComponent;
         private _popupStack: Array<GObject>;
         private _justClosedPopups: Array<GObject>;
         private _modalWaitPane: GObject;
@@ -13,7 +13,7 @@ namespace fgui {
         private _volumeScale: number;
         private _inputProcessor: InputProcessor;
         private _thisOnResized: Function;
-
+        
         private static _inst: GRoot;
 
         public static get inst(): GRoot {
@@ -29,7 +29,18 @@ namespace fgui {
 
             return GRoot._inst;
         }
-
+        public createModalLayer(): GComponent {
+             
+            let layer = new GComponent();
+            layer.setSize(this.width, this.height);
+            let graph =  new GGraph();
+            graph.setSize(this.width, this.height);
+            graph.drawRect(0, cc.Color.TRANSPARENT, UIConfig.modalLayerColor);
+            graph.addRelation(this, RelationType.Size);
+            layer.addChild(graph);
+            layer.addRelation(this, RelationType.Size);
+            return layer;
+        }
         public constructor() {
             super();
 
@@ -39,10 +50,11 @@ namespace fgui {
             this._popupStack = new Array<GObject>();
             this._justClosedPopups = new Array<GObject>();
 
-            this._modalLayer = new GGraph();
-            this._modalLayer.setSize(this.width, this.height);
-            this._modalLayer.drawRect(0, cc.Color.TRANSPARENT, UIConfig.modalLayerColor);
-            this._modalLayer.addRelation(this, RelationType.Size);
+            this._modalLayer = this.createModalLayer();
+            // this._modalLayer = new GGraph();
+            // this._modalLayer.setSize(this.width, this.height);
+            // this._modalLayer.drawRect(0, cc.Color.TRANSPARENT, UIConfig.modalLayerColor);
+            // this._modalLayer.addRelation(this, RelationType.Size);
 
             this._thisOnResized = this.onWinResize.bind(this);
 
@@ -180,7 +192,7 @@ namespace fgui {
             return null;
         }
 
-        public get modalLayer(): GGraph {
+        public get modalLayer(): GComponent {
             return this._modalLayer;
         }
 
