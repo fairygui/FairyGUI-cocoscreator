@@ -1820,11 +1820,21 @@ namespace fgui {
 
             return newValue;
         }
+
+        public ChangeTheAniTime(time:number)
+        {
+            TWEEN_TIME_GO=time;
+        }
+
+        public ResetAniTime()
+        {
+            TWEEN_TIME_GO=0.5;
+        }
     }
 
     var _gestureFlag: number = 0;
 
-    const TWEEN_TIME_GO: number = 0.5; //调用SetPos(ani)时使用的缓动时间
+    var TWEEN_TIME_GO: number = 0.5; //调用SetPos(ani)时使用的缓动时间
     const TWEEN_TIME_DEFAULT: number = 0.3; //惯性滚动的最小缓动时间
     const PULL_RATIO: number = 0.5; //下拉过顶或者上拉过底时允许超过的距离占显示区域的比例
 
