@@ -74,12 +74,12 @@ namespace fgui {
             return this._container;
         }
 
-        public addChild(child: GObject): GObject {
-            this.addChildAt(child, this._children.length);
+        public addChild(child: GObject,isStayGroup:boolean=false): GObject {
+            this.addChildAt(child, this._children.length,isStayGroup);
             return child;
         }
 
-        public addChildAt(child: GObject, index: number): GObject {
+        public addChildAt(child: GObject, index: number,isStayGroup:boolean=false): GObject {
             if (!child)
                 throw "child is null";
 
@@ -90,7 +90,12 @@ namespace fgui {
                     this.setChildIndex(child, index);
                 }
                 else {
+                    if(!isStayGroup)
                     child.removeFromParent();
+                    else
+                    child.removeFromParentStayGroup();
+
+
                     child._parent = this;
 
                     var cnt: number = this._children.length;
@@ -112,6 +117,40 @@ namespace fgui {
                     this.setBoundsChangedFlag();
                 }
 
+                return child;
+            }
+            else {
+                throw "Invalid child index";
+            }
+        }
+
+        public GListaddChildAt(child: GObject, index: number): GObject {
+            if (!child)
+                throw "child is null";
+            var numChildren = this._children.length;
+            if (index >= 0 && index <= numChildren) {
+                if (child.parent == this) {
+                    this.setChildIndex(child, index);
+                }
+                else {
+                    child.removeFromParent();
+                    child._parent = this;
+                    var cnt = this._children.length;
+                    if (child.sortingOrder != 0) {
+                        this._sortingChildCount++;
+                        index = this.getInsertPosForSortingChild(child);
+                    }
+                    else if (this._sortingChildCount > 0) {
+                        if (index > (cnt - this._sortingChildCount))
+                            index = cnt - this._sortingChildCount;
+                    }
+                    if (index == cnt)
+                        this._children.push(child);
+                    else
+                        this._children.splice(index, 0, child);
+                    this.onChildAdd(child, index+1);
+                    this.setBoundsChangedFlag();
+                }
                 return child;
             }
             else {
@@ -141,6 +180,14 @@ namespace fgui {
             return child;
         }
 
+        public removeChildStayGroup(child: GObject, dispose?: boolean): GObject {
+            var childIndex: number = this._children.indexOf(child);
+            if (childIndex != -1) {
+                this.removeChildAtStayGroup(childIndex, dispose);
+            }
+            return child;
+        }
+
         public removeChildAt(index: number, dispose?: boolean): GObject {
             if (index >= 0 && index < this.numChildren) {
                 var child: GObject = this._children[index];
@@ -151,6 +198,34 @@ namespace fgui {
 
                 this._children.splice(index, 1);
                 child.group = null;
+                this._container.removeChild(child.node);
+                if (this._childrenRenderOrder == ChildrenRenderOrder.Arch)
+                    this._partner.callLater(this.buildNativeDisplayList);
+
+                if (dispose)
+                    child.dispose();
+                else
+                    child.node.parent = null;
+
+                this.setBoundsChangedFlag();
+
+                return child;
+            }
+            else {
+                throw "Invalid child index";
+            }
+        }
+
+        public removeChildAtStayGroup(index: number, dispose?: boolean): GObject {
+            if (index >= 0 && index < this.numChildren) {
+                var child: GObject = this._children[index];
+                child._parent = null;
+
+                if (child.sortingOrder != 0)
+                    this._sortingChildCount--;
+
+                this._children.splice(index, 1);
+
                 this._container.removeChild(child.node);
                 if (this._childrenRenderOrder == ChildrenRenderOrder.Arch)
                     this._partner.callLater(this.buildNativeDisplayList);
@@ -401,7 +476,7 @@ namespace fgui {
             if (this._childrenRenderOrder == ChildrenRenderOrder.Ascent)
                 child.node.setSiblingIndex(index);
             else if (this._childrenRenderOrder == ChildrenRenderOrder.Descent)
-                child.node.setSiblingIndex(cnt - index);
+                child.node.setSiblingIndex(cnt-index);
             else
                 this._partner.callLater(this.buildNativeDisplayList);
         }

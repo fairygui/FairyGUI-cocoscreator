@@ -230,6 +230,17 @@ namespace fgui {
             return child;
         }
 
+        public GListaddChildAt(child: GObject, index: number): GObject {
+            super.GListaddChildAt(child, index);
+
+            if (child instanceof fgui.GButton) {
+                child.selected = false;
+                child.changeStateOnClick = false;
+            }
+            child.on(fgui.Event.CLICK, this.onClickItem, this);
+            return child;
+        }
+
         public addItem(url?: string): GObject {
             if (!url)
                 url = this._defaultItem;
@@ -1436,14 +1447,22 @@ namespace fgui {
                     }
                     else {
                         ii.obj = this._pool.getObject(url);
-                        if (forward)
-                            this.addChildAt(ii.obj, curIndex - newFirstIndex);
-                        else
-                            this.addChild(ii.obj);
-                    }
-                    if (ii.obj instanceof GButton)
-                        ii.obj.selected = ii.selected;
+                        if (forward) {
+                            if (this._childrenRenderOrder == fgui.ChildrenRenderOrder.Descent)
+                                this.GListaddChildAt(ii.obj, curIndex - newFirstIndex);
+                            else
+                                this.addChildAt(ii.obj, curIndex - newFirstIndex);
+                        }
+                        else {
+                            if (this._childrenRenderOrder == fgui.ChildrenRenderOrder.Descent)
+                                this.GListaddChildAt(ii.obj, this._children.length);
+                            else
+                                this.addChild(ii.obj);
+                        }
 
+                    }
+                    if (ii.obj instanceof fgui.GButton)
+                        ii.obj.selected = ii.selected;
                     needRender = true;
                 }
                 else

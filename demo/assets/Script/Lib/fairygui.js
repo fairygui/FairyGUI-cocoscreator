@@ -2052,6 +2052,39 @@ window.__extends = (this && this.__extends) || (function () {
                 throw "Invalid child index";
             }
         };
+        GComponent.prototype.GListaddChildAt = function (child, index) {
+            if (!child)
+                throw "child is null";
+            var numChildren = this._children.length;
+            if (index >= 0 && index <= numChildren) {
+                if (child.parent == this) {
+                    this.setChildIndex(child, index);
+                }
+                else {
+                    child.removeFromParent();
+                    child._parent = this;
+                    var cnt = this._children.length;
+                    if (child.sortingOrder != 0) {
+                        this._sortingChildCount++;
+                        index = this.getInsertPosForSortingChild(child);
+                    }
+                    else if (this._sortingChildCount > 0) {
+                        if (index > (cnt - this._sortingChildCount))
+                            index = cnt - this._sortingChildCount;
+                    }
+                    if (index == cnt)
+                        this._children.push(child);
+                    else
+                        this._children.splice(index, 0, child);
+                    this.onChildAdd(child, index + 1);
+                    this.setBoundsChangedFlag();
+                }
+                return child;
+            }
+            else {
+                throw "Invalid child index";
+            }
+        };
         GComponent.prototype.getInsertPosForSortingChild = function (target) {
             var cnt = this._children.length;
             var i = 0;
@@ -5174,6 +5207,15 @@ window.__extends = (this && this.__extends) || (function () {
             child.on(fgui.Event.CLICK, this.onClickItem, this);
             return child;
         };
+        GList.prototype.GListaddChildAt = function (child, index) {
+            _super.prototype.GListaddChildAt.call(this, child, index);
+            if (child instanceof fgui.GButton) {
+                child.selected = false;
+                child.changeStateOnClick = false;
+            }
+            child.on(fgui.Event.CLICK, this.onClickItem, this);
+            return child;
+        };
         GList.prototype.addItem = function (url) {
             if (!url)
                 url = this._defaultItem;
@@ -6241,10 +6283,18 @@ window.__extends = (this && this.__extends) || (function () {
                     }
                     else {
                         ii.obj = this._pool.getObject(url);
-                        if (forward)
-                            this.addChildAt(ii.obj, curIndex - newFirstIndex);
-                        else
-                            this.addChild(ii.obj);
+                        if (forward) {
+                            if (this._childrenRenderOrder == fgui.ChildrenRenderOrder.Descent)
+                                this.GListaddChildAt(ii.obj, curIndex - newFirstIndex);
+                            else
+                                this.addChildAt(ii.obj, curIndex - newFirstIndex);
+                        }
+                        else {
+                            if (this._childrenRenderOrder == fgui.ChildrenRenderOrder.Descent)
+                                this.GListaddChildAt(ii.obj, this._children.length);
+                            else
+                                this.addChild(ii.obj);
+                        }
                     }
                     if (ii.obj instanceof fgui.GButton)
                         ii.obj.selected = ii.selected;

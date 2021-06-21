@@ -140,7 +140,12 @@ namespace fgui {
             evt.type = Event.CLICK;
             evt.bubbles = true;
 
-            target.node.dispatchEvent(evt);
+            if(!fgui.GRoot.inst.isPauseClickDispatch&&!fgui.GRoot.inst.isInCLiclkInterval)
+            {
+                fgui.GRoot.inst.ResetClickInterval();
+                target.node.dispatchEvent(evt);
+            }
+           
 
             Event._return(evt);
         }
@@ -227,7 +232,11 @@ namespace fgui {
             ti.target = this.clickTest(ti);
             if (ti.target) {
                 evt2 = this.getEvent(ti, ti.target, Event.CLICK, true);
-                ti.target.node.dispatchEvent(evt2);
+                if(!fgui.GRoot.inst.isPauseClickDispatch&&!fgui.GRoot.inst.isInCLiclkInterval)
+                {
+                    fgui.GRoot.inst.ResetClickInterval();
+                    ti.target.node.dispatchEvent(evt2);
+                }
                 Event._return(evt2);
             }
 
