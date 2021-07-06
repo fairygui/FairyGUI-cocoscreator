@@ -5107,7 +5107,7 @@ window.__extends = (this && this.__extends) || (function () {
                 return this._defaultItem;
             },
             set: function (val) {
-                this._defaultItem = val;
+                this._defaultItem = fgui.UIPackage.normalizeURL(val);
             },
             enumerable: false,
             configurable: true
@@ -6186,7 +6186,7 @@ window.__extends = (this && this.__extends) || (function () {
             var needRender;
             var deltaSize = 0;
             var firstItemDeltaSize = 0;
-            var url = this.defaultItem;
+            var url = this._defaultItem;
             var ii, ii2;
             var i, j;
             var partSize = (this._scrollPane.viewWidth - this._columnGap * (this._curLineItemCount - 1)) / this._curLineItemCount;
@@ -6319,7 +6319,7 @@ window.__extends = (this && this.__extends) || (function () {
             var needRender;
             var deltaSize = 0;
             var firstItemDeltaSize = 0;
-            var url = this.defaultItem;
+            var url = this._defaultItem;
             var ii, ii2;
             var i, j;
             var partSize = (this._scrollPane.viewHeight - this._lineGap * (this._curLineItemCount - 1)) / this._curLineItemCount;
@@ -6960,7 +6960,7 @@ window.__extends = (this && this.__extends) || (function () {
                 nextPos += buffer.position;
                 str = buffer.readS();
                 if (str == null) {
-                    str = this.defaultItem;
+                    str = this._defaultItem;
                     if (!str) {
                         buffer.position = nextPos;
                         continue;
@@ -14663,7 +14663,7 @@ window.__extends = (this && this.__extends) || (function () {
                         UIPackage._instById[pkg.id] = pkg;
                         UIPackage._instByName[pkg.name] = pkg;
                         if (pkg._path)
-                            UIPackage._instByName[pkg._path] = pkg;
+                            UIPackage._instById[pkg._path] = pkg;
                         if (onComplete != null)
                             onComplete(lastErr, pkg);
                     }
@@ -18117,14 +18117,14 @@ window.__extends = (this && this.__extends) || (function () {
             return this;
         };
         GTweener.prototype._toColor = function (start, end, duration) {
-            this._valueSize = 4;
+            this._valueSize = 5;
             this._startValue.color = start;
             this._endValue.color = end;
             this._duration = duration;
             return this;
         };
         GTweener.prototype._shake = function (startX, startY, amplitude, duration) {
-            this._valueSize = 5;
+            this._valueSize = 6;
             this._startValue.x = startX;
             this._startValue.y = startY;
             this._startValue.w = amplitude;
@@ -18222,7 +18222,7 @@ window.__extends = (this && this.__extends) || (function () {
             this._normalizedTime = fgui.evaluateEase(this._easeType, reversed ? (this._duration - tt) : tt, this._duration, this._easeOvershootOrAmplitude, this._easePeriod);
             this._value.setZero();
             this._deltaValue.setZero();
-            if (this._valueSize == 5) {
+            if (this._valueSize == 6) {
                 if (this._ended == 0) {
                     var r = this._startValue.w * (1 - this._normalizedTime);
                     var rx = r * (Math.random() > 0.5 ? 1 : -1);

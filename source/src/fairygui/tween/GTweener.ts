@@ -269,7 +269,7 @@ namespace fgui {
         }
 
         public _toColor(start: number, end: number, duration: number): GTweener {
-            this._valueSize = 4;
+            this._valueSize = 5;
             this._startValue.color = start;
             this._endValue.color = end;
             this._duration = duration;
@@ -277,7 +277,7 @@ namespace fgui {
         }
 
         public _shake(startX: number, startY: number, amplitude: number, duration: number): GTweener {
-            this._valueSize = 5;
+            this._valueSize = 6;
             this._startValue.x = startX;
             this._startValue.y = startY;
             this._startValue.w = amplitude;
@@ -396,7 +396,7 @@ namespace fgui {
             this._value.setZero();
             this._deltaValue.setZero();
 
-            if (this._valueSize == 5) {
+            if (this._valueSize == 6) {
                 if (this._ended == 0) {
                     var r: number = this._startValue.w * (1 - this._normalizedTime);
                     var rx: number = r * (Math.random() > 0.5 ? 1 : -1);
