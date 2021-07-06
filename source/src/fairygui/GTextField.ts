@@ -437,7 +437,7 @@ namespace fgui {
                     this._label.fontSize = this._fontSize;
                 else
                     this._label.fontSize = fntConfig.fontSize;
-                this._label.lineHeight = fntConfig.fontSize + (this._leading + 4) * fntConfig.fontSize / this._label.fontSize;
+                this._label.lineHeight = this._fontSize + this._leading;
             }
             else {
                 this._label.fontSize = this._fontSize;
