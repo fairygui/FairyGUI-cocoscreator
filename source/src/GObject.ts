@@ -75,12 +75,15 @@ export class GObject {
     public _partner: GObjectPartner;
     public _treeNode?: GTreeNode;
     public _uiTrans: UITransform;
+    public _uiOpacity: UIOpacity;
 
     private _hitTestPt?: Vec2;
 
     public constructor() {
         this._node = new Node();
         this._uiTrans = this._node.addComponent(UITransform);
+        this._uiOpacity = this.node.addComponent(UIOpacity);
+
         (<any>this._node)["$gobj"] = this;
         this._node.layer = UIConfig.defaultUILayer;
         this._uiTrans.setAnchorPoint(0, 1);
@@ -383,7 +386,7 @@ export class GObject {
         if (this._alpha != value) {
             this._alpha = value;
 
-            this._node._uiProps.opacity = this._alpha;
+            this._uiOpacity.opacity = this._alpha * 255;
 
             if (this instanceof GGroup)
                 this.handleAlphaChanged();
