@@ -1,4 +1,4 @@
-import { Asset, assetManager, Color, isValid, Node, resources, Sprite, SpriteFrame, Texture2D, UITransform, Vec2 } from "cc";
+import { Asset, assetManager, Color, ImageAsset, isValid, Node, resources, Sprite, SpriteFrame, Texture2D, UITransform, Vec2 } from "cc";
 import { MovieClip } from "./display/MovieClip";
 import { AlignType, VertAlignType, LoaderFillType, FillMethod, FillOrigin, PackageItemType, ObjectPropID } from "./FieldTypes";
 import { GComponent } from "./GComponent";
@@ -325,11 +325,32 @@ export class GLoader extends GObject {
                 sf.texture = asset;
                 this.onExternalLoadSuccess(sf);
             }
+            else if (asset instanceof ImageAsset) {
+                let texture: Texture2D = new Texture2D();
+                let sf = new SpriteFrame();
+                texture.image = asset;
+                sf.texture = texture;
+                this.onExternalLoadSuccess(sf);
+            }
         };
         if (this._url.startsWith("http://")
             || this._url.startsWith("https://")
             || this._url.startsWith('/'))
             assetManager.loadRemote(this._url, callback);
+        else if (this._url.startsWith('data:image/')) {
+            const img = new Image();
+            img.src = this._url;
+            img.onload = ()=>{
+                const tex = new Texture2D();
+                tex.reset({
+                    width: img.width,
+                    height: img.height,
+                  });
+                tex.uploadData(img, 0, 0);
+                tex.loaded = true;
+                callback(null,tex);
+            }
+        }
         else
             resources.load(this._url + "/spriteFrame", Asset, callback);
     }
