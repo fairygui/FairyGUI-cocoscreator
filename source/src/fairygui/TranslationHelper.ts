@@ -97,25 +97,25 @@ namespace fgui {
                             buffer.writeS(value);
                     }
 
-                    if (baseType == ObjectType.Component && buffer.version >= 2) {
-                        buffer.seek(curPos, 4);
-
-                        buffer.skip(2); //pageController
-
-                        buffer.skip(4 * buffer.readShort());
-
-                        var cpCount: number = buffer.readShort();
-                        for (var k: number = 0; k < cpCount; k++) {
-                            var target: string = buffer.readS();
-                            var propertyId: number = buffer.readShort();
-                            if (propertyId == 0 && (value = compStrings[elementId + "-cp-" + target]) != null)
-                                buffer.writeS(value);
-                            else
-                                buffer.skip(2);
-                        }
-                    }
-
                     buffer.position = nextPos;
+                }
+
+                if (baseType == ObjectType.Component && buffer.version >= 2) {
+                    buffer.seek(curPos, 4);
+
+                    buffer.skip(2); //pageController
+
+                    buffer.skip(4 * buffer.readShort());
+
+                    var cpCount: number = buffer.readShort();
+                    for (var k: number = 0; k < cpCount; k++) {
+                        var target: string = buffer.readS();
+                        var propertyId: number = buffer.readShort();
+                        if (propertyId == 0 && (value = compStrings[elementId + "-cp-" + target]) != null)
+                            buffer.writeS(value);
+                        else
+                            buffer.skip(2);
+                    }
                 }
 
                 switch (type) {

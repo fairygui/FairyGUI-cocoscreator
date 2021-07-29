@@ -14291,21 +14291,21 @@ window.__extends = (this && this.__extends) || (function () {
                         if (buffer.readBool() && (value = compStrings[elementId + "-texts_def"]) != null)
                             buffer.writeS(value);
                     }
-                    if (baseType == fgui.ObjectType.Component && buffer.version >= 2) {
-                        buffer.seek(curPos, 4);
-                        buffer.skip(2);
-                        buffer.skip(4 * buffer.readShort());
-                        var cpCount = buffer.readShort();
-                        for (var k = 0; k < cpCount; k++) {
-                            var target = buffer.readS();
-                            var propertyId = buffer.readShort();
-                            if (propertyId == 0 && (value = compStrings[elementId + "-cp-" + target]) != null)
-                                buffer.writeS(value);
-                            else
-                                buffer.skip(2);
-                        }
-                    }
                     buffer.position = nextPos;
+                }
+                if (baseType == fgui.ObjectType.Component && buffer.version >= 2) {
+                    buffer.seek(curPos, 4);
+                    buffer.skip(2);
+                    buffer.skip(4 * buffer.readShort());
+                    var cpCount = buffer.readShort();
+                    for (var k = 0; k < cpCount; k++) {
+                        var target = buffer.readS();
+                        var propertyId = buffer.readShort();
+                        if (propertyId == 0 && (value = compStrings[elementId + "-cp-" + target]) != null)
+                            buffer.writeS(value);
+                        else
+                            buffer.skip(2);
+                    }
                 }
                 switch (type) {
                     case fgui.ObjectType.Text:
