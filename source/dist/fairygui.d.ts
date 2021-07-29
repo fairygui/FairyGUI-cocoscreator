@@ -84,7 +84,7 @@ declare module 'fairygui-cc/GGroup' {
 }
 
 declare module 'fairygui-cc/GObject' {
-    import { Vec2, Rect, Component, Node, UITransform } from "cc";
+    import { Vec2, Rect, Component, Node, UITransform, UIOpacity } from "cc";
     import { Controller } from "fairygui-cc/Controller";
     import { BlendMode } from "fairygui-cc/display/BlendMode";
     import { GComponent } from "fairygui-cc/GComponent";
@@ -146,6 +146,7 @@ declare module 'fairygui-cc/GObject' {
         _partner: GObjectPartner;
         _treeNode?: GTreeNode;
         _uiTrans: UITransform;
+        _uiOpacity: UIOpacity;
         constructor();
         get id(): string;
         get name(): string;

@@ -1,4 +1,4 @@
-import { Vec2, Rect, Component, Node, UITransform } from "cc";
+import { Vec2, Rect, Component, Node, UITransform, UIOpacity } from "cc";
 import { Controller } from "./Controller";
 import { BlendMode } from "./display/BlendMode";
 import { GComponent } from "./GComponent";
@@ -60,6 +60,7 @@ export declare class GObject {
     _partner: GObjectPartner;
     _treeNode?: GTreeNode;
     _uiTrans: UITransform;
+    _uiOpacity: UIOpacity;
     private _hitTestPt?;
     constructor();
     get id(): string;

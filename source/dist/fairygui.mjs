@@ -1,4 +1,4 @@
-import { gfx, RenderComponent, Event as Event$1, Vec2, Node, game, director, macro, Color, Layers, UITransform, Rect, Component, Vec3, Graphics, misc, Sprite, Size, view, resources, BufferAsset, AssetManager, Asset, assetManager, SpriteFrame, BitmapFont, sp, dragonBones, ImageAsset, AudioClip, path, Label, LabelOutline, LabelShadow, Font, RichText, SpriteAtlas, sys, EventMouse, EventTarget, Mask, math, isValid, View, AudioSourceComponent, EditBox, Texture2D } from 'cc';
+import { gfx, RenderComponent, Event as Event$1, Vec2, Node, game, director, macro, Color, Layers, UITransform, UIOpacity, Rect, Component, Vec3, Graphics, misc, Sprite, Size, view, resources, BufferAsset, AssetManager, Asset, assetManager, SpriteFrame, BitmapFont, sp, dragonBones, ImageAsset, AudioClip, path, Label, LabelOutline, LabelShadow, Font, RichText, SpriteAtlas, sys, EventMouse, EventTarget, Mask, math, isValid, View, AudioSourceComponent, EditBox, Texture2D } from 'cc';
 import { EDITOR } from 'cc/env';
 
 var ButtonMode;
@@ -2476,6 +2476,7 @@ class GObject {
         this._sizePercentInGroup = 0;
         this._node = new Node();
         this._uiTrans = this._node.addComponent(UITransform);
+        this._uiOpacity = this.node.addComponent(UIOpacity);
         this._node["$gobj"] = this;
         this._node.layer = UIConfig.defaultUILayer;
         this._uiTrans.setAnchorPoint(0, 1);
@@ -2717,7 +2718,7 @@ class GObject {
     set alpha(value) {
         if (this._alpha != value) {
             this._alpha = value;
-            this._node._uiProps.opacity = this._alpha;
+            this._uiOpacity.opacity = this._alpha * 255;
             if (this instanceof GGroup)
                 this.handleAlphaChanged();
             this.updateGear(3);
@@ -4647,21 +4648,21 @@ class TranslationHelper {
                     if (buffer.readBool() && (value = compStrings[elementId + "-texts_def"]) != null)
                         buffer.writeS(value);
                 }
-                if (baseType == ObjectType.Component && buffer.version >= 2) {
-                    buffer.seek(curPos, 4);
-                    buffer.skip(2); //pageController
-                    buffer.skip(4 * buffer.readShort());
-                    var cpCount = buffer.readShort();
-                    for (var k = 0; k < cpCount; k++) {
-                        var target = buffer.readS();
-                        var propertyId = buffer.readShort();
-                        if (propertyId == 0 && (value = compStrings[elementId + "-cp-" + target]) != null)
-                            buffer.writeS(value);
-                        else
-                            buffer.skip(2);
-                    }
-                }
                 buffer.position = nextPos;
+            }
+            if (baseType == ObjectType.Component && buffer.version >= 2) {
+                buffer.seek(curPos, 4);
+                buffer.skip(2); //pageController
+                buffer.skip(4 * buffer.readShort());
+                var cpCount = buffer.readShort();
+                for (var k = 0; k < cpCount; k++) {
+                    var target = buffer.readS();
+                    var propertyId = buffer.readShort();
+                    if (propertyId == 0 && (value = compStrings[elementId + "-cp-" + target]) != null)
+                        buffer.writeS(value);
+                    else
+                        buffer.skip(2);
+                }
             }
             switch (type) {
                 case ObjectType.Text:

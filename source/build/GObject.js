@@ -1,4 +1,4 @@
-import { Vec2, Rect, Component, director, Node, UITransform, Vec3 } from "cc";
+import { Vec2, Rect, Component, director, Node, UITransform, UIOpacity, Vec3 } from "cc";
 import { BlendMode, BlendModeUtils } from "./display/BlendMode";
 import { Event as FUIEvent } from "./event/Event";
 import { RelationType, ObjectPropID } from "./FieldTypes";
@@ -42,6 +42,7 @@ export class GObject {
         this._sizePercentInGroup = 0;
         this._node = new Node();
         this._uiTrans = this._node.addComponent(UITransform);
+        this._uiOpacity = this.node.addComponent(UIOpacity);
         this._node["$gobj"] = this;
         this._node.layer = UIConfig.defaultUILayer;
         this._uiTrans.setAnchorPoint(0, 1);
@@ -283,7 +284,7 @@ export class GObject {
     set alpha(value) {
         if (this._alpha != value) {
             this._alpha = value;
-            this._node._uiProps.opacity = this._alpha;
+            this._uiOpacity.opacity = this._alpha * 255;
             if (this instanceof GGroup)
                 this.handleAlphaChanged();
             this.updateGear(3);
