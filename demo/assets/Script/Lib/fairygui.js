@@ -14291,21 +14291,21 @@ window.__extends = (this && this.__extends) || (function () {
                         if (buffer.readBool() && (value = compStrings[elementId + "-texts_def"]) != null)
                             buffer.writeS(value);
                     }
-                    if (baseType == fgui.ObjectType.Component && buffer.version >= 2) {
-                        buffer.seek(curPos, 4);
-                        buffer.skip(2);
-                        buffer.skip(4 * buffer.readShort());
-                        var cpCount = buffer.readShort();
-                        for (var k = 0; k < cpCount; k++) {
-                            var target = buffer.readS();
-                            var propertyId = buffer.readShort();
-                            if (propertyId == 0 && (value = compStrings[elementId + "-cp-" + target]) != null)
-                                buffer.writeS(value);
-                            else
-                                buffer.skip(2);
-                        }
-                    }
                     buffer.position = nextPos;
+                }
+                if (baseType == fgui.ObjectType.Component && buffer.version >= 2) {
+                    buffer.seek(curPos, 4);
+                    buffer.skip(2);
+                    buffer.skip(4 * buffer.readShort());
+                    var cpCount = buffer.readShort();
+                    for (var k = 0; k < cpCount; k++) {
+                        var target = buffer.readS();
+                        var propertyId = buffer.readShort();
+                        if (propertyId == 0 && (value = compStrings[elementId + "-cp-" + target]) != null)
+                            buffer.writeS(value);
+                        else
+                            buffer.skip(2);
+                    }
                 }
                 switch (type) {
                     case fgui.ObjectType.Text:
@@ -18250,7 +18250,8 @@ window.__extends = (this && this.__extends) || (function () {
                 this._value.y = pt.y;
             }
             else {
-                for (var i = 0; i < this._valueSize; i++) {
+                var cnt = Math.min(this._valueSize, 4);
+                for (var i = 0; i < cnt; i++) {
                     var n1 = this._startValue.getField(i);
                     var n2 = this._endValue.getField(i);
                     var f = n1 + (n2 - n1) * this._normalizedTime;
