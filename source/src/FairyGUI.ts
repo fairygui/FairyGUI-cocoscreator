@@ -29,10 +29,21 @@ export { UIPackage } from "./UIPackage";
 export { PackageItem } from "./PackageItem";
 export { GObjectPool } from "./GObjectPool";
 export { UIObjectFactory } from "./UIObjectFactory";
-export { UIConfig } from "./UIConfig";
+export { UIConfig, registerFont } from "./UIConfig";
 export { DragDropManager } from "./DragDropManager";
 export { AsyncOperation } from "./AsyncOperation";
 export { TranslationHelper } from "./TranslationHelper";
+export { GearAnimation } from "./gears/GearAnimation";
+export { GearBase } from "./gears/GearBase";
+export { GearColor } from "./gears/GearColor";
+export { GearDisplay } from "./gears/GearDisplay";
+export { GearDisplay2 } from "./gears/GearDisplay2";
+export { GearFontSize } from "./gears/GearFontSize";
+export { GearIcon } from "./gears/GearIcon";
+export { GearLook } from "./gears/GearLook";
+export { GearSize } from "./gears/GearSize";
+export { GearText } from "./gears/GearText";
+export { GearXY } from "./gears/GearXY";
 export * from "./FieldTypes"
 
 export { BlendMode } from "./display/BlendMode";
