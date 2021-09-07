@@ -206,12 +206,15 @@ namespace fgui {
                 pos = this.globalToLocal(pos.x, pos.y);
             }
 
-            if (pos.x + popup.width > this.width)
-                pos.x = pos.x + sizeW - popup.width;
+            const W = popup.pivotAsAnchor ? popup.width * (1 - popup.node.anchorX) : popup.width;
+            const H = popup.pivotAsAnchor ? popup.height * (1 - popup.node.anchorY) : popup.height;
+            if (pos.x + W > this.width)
+                pos.x = pos.x + sizeW - W;
             pos.y += sizeH;
-            if (((dir === undefined || dir === PopupDirection.Auto) && pos.y + popup.height > this.height)
+            if (((dir === undefined || dir === PopupDirection.Auto) && pos.y + H > this.height)
+                
                 || dir === false || dir === PopupDirection.Up) {
-                pos.y = pos.y - sizeH - popup.height - 1;
+                pos.y = pos.y - sizeH - H - 1;
                 if (pos.y < 0) {
                     pos.y = 0;
                     pos.x += sizeW / 2;
