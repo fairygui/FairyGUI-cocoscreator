@@ -56,6 +56,8 @@ namespace fgui {
 
         private _hitTestPt?: cc.Vec2;
 
+        protected _inited?: boolean;
+
         public static _defaultGroupIndex: number = -1;
 
         public constructor() {
@@ -364,6 +366,7 @@ namespace fgui {
                 this.updateGear(3);
             }
         }
+
 
         public get enabled(): boolean {
             return !this._grayed && this._touchable;
@@ -731,10 +734,30 @@ namespace fgui {
             }
         }
 
+        public init(): void {
+            this._inited = true;
+            this.onInit();
+        }
+
+        protected onInit(): void {
+        }
+
+        protected onShown(): void {
+        }
+
+        protected onHide(): void {
+        }
+
         protected onEnable() {
+            if (!this._inited) {
+                this._inited = true
+                this.init();
+            }
+            this.onShown();
         }
 
         protected onDisable() {
+            this.onHide();
         }
 
         protected onUpdate() {
