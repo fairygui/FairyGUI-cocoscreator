@@ -1,4 +1,4 @@
-import { gfx, RenderComponent, Event as Event$1, Vec2, Node, game, director, macro, Color, Layers, UITransform, UIOpacity, Rect, Component, Vec3, Graphics, misc, Sprite, Size, view, resources, BufferAsset, AssetManager, Asset, assetManager, SpriteFrame, BitmapFont, sp, dragonBones, ImageAsset, AudioClip, path, Label, LabelOutline, LabelShadow, Font, RichText, SpriteAtlas, sys, EventMouse, EventTarget, Mask, math, isValid, View, AudioSourceComponent, EditBox, Texture2D } from 'cc';
+import { gfx, RenderComponent, Event as Event$1, Vec2, Node, game, director, macro, Color, Layers, Font, resources, UITransform, UIOpacity, Rect, Component, Vec3, Graphics, misc, Sprite, Size, view, BufferAsset, AssetManager, Asset, assetManager, Texture2D, SpriteFrame, BitmapFont, sp, dragonBones, ImageAsset, AudioClip, path, Label, LabelOutline, LabelShadow, RichText, SpriteAtlas, sys, EventMouse, EventTarget, Mask, math, isValid, View, AudioSourceComponent, EditBox } from 'cc';
 import { EDITOR } from 'cc/env';
 
 var ButtonMode;
@@ -2446,6 +2446,15 @@ UIConfig.linkUnderline = true;
 //Default group name of UI node.<br/>
 UIConfig.defaultUILayer = Layers.Enum.UI_2D;
 let _fontRegistry = {};
+function registerFont(name, font, bundle) {
+    if (font instanceof Font)
+        _fontRegistry[name] = font;
+    else {
+        (bundle || resources).load(name, Font, (err, asset) => {
+            _fontRegistry[name] = asset;
+        });
+    }
+}
 function getFontByName(name) {
     return _fontRegistry[name];
 }
@@ -5085,7 +5094,7 @@ class UIPackage {
                     _instById[pkg.id] = pkg;
                     _instByName[pkg.name] = pkg;
                     if (pkg._path)
-                        _instByName[pkg._path] = pkg;
+                        _instById[pkg._path] = pkg;
                     if (onComplete != null)
                         onComplete(lastErr, pkg);
                 }
@@ -5437,8 +5446,19 @@ class UIPackage {
                     item.asset = this._bundle.get(item.file, ItemTypeToAssetType[item.type]);
                     if (!item.asset)
                         console.log("Resource '" + item.file + "' not found");
-                    else
-                        item.asset = item.asset._texture;
+                    else if (item.type == PackageItemType.Atlas) {
+                        const asset = item.asset;
+                        let tex = asset['_texture'];
+                        if (!tex) {
+                            tex = new Texture2D();
+                            tex.name = asset.nativeUrl;
+                            tex.image = asset;
+                        }
+                        item.asset = tex;
+                    }
+                    else {
+                        item.asset = item.asset;
+                    }
                 }
                 break;
             case PackageItemType.Font:
@@ -17145,4 +17165,4 @@ class AsyncOperationRunner extends Component {
     }
 }
 
-export { AlignType, AsyncOperation, AutoSizeType, BlendMode, ButtonMode, ByteBuffer, ChildrenRenderOrder, Controller, DragDropManager, EaseType, Event, FillMethod, FillOrigin, FlipType, GButton, GComboBox, GComponent, GGraph, GGroup, GImage, GLabel, GList, GLoader, GLoader3D, GMovieClip, GObject, GObjectPool, GProgressBar, GRichTextField, GRoot, GScrollBar, GSlider, GTextField, GTextInput, GTree, GTreeNode, GTween, GTweener, GroupLayoutType, Image, ListLayoutType, ListSelectionMode, LoaderFillType, MovieClip, ObjectPropID, ObjectType, OverflowType, PackageItem, PackageItemType, PopupDirection, PopupMenu, ProgressTitleType, RelationType, ScrollBarDisplayType, ScrollPane, ScrollType, Transition, TranslationHelper, UBBParser, UIConfig, UIObjectFactory, UIPackage, VertAlignType, Window };
+export { AlignType, AsyncOperation, AutoSizeType, BlendMode, ButtonMode, ByteBuffer, ChildrenRenderOrder, Controller, DragDropManager, EaseType, Event, FillMethod, FillOrigin, FlipType, GButton, GComboBox, GComponent, GGraph, GGroup, GImage, GLabel, GList, GLoader, GLoader3D, GMovieClip, GObject, GObjectPool, GProgressBar, GRichTextField, GRoot, GScrollBar, GSlider, GTextField, GTextInput, GTree, GTreeNode, GTween, GTweener, GearAnimation, GearBase, GearColor, GearDisplay, GearDisplay2, GearFontSize, GearIcon, GearLook, GearSize, GearText, GearXY, GroupLayoutType, Image, ListLayoutType, ListSelectionMode, LoaderFillType, MovieClip, ObjectPropID, ObjectType, OverflowType, PackageItem, PackageItemType, PopupDirection, PopupMenu, ProgressTitleType, RelationType, ScrollBarDisplayType, ScrollPane, ScrollType, Transition, TranslationHelper, UBBParser, UIConfig, UIObjectFactory, UIPackage, VertAlignType, Window, registerFont };

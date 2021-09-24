@@ -1,6 +1,6 @@
 {
   "name": "fairygui-cc",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A GUI Editor & framework for cocos creator",
   "main": "dist/fairygui.mjs",
   "types": "dist/fairygui.d.ts",

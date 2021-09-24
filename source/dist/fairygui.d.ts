@@ -34,10 +34,21 @@ declare module 'fairygui-cc' {
     export { PackageItem } from "fairygui-cc/PackageItem";
     export { GObjectPool } from "fairygui-cc/GObjectPool";
     export { UIObjectFactory } from "fairygui-cc/UIObjectFactory";
-    export { UIConfig } from "fairygui-cc/UIConfig";
+    export { UIConfig, registerFont } from "fairygui-cc/UIConfig";
     export { DragDropManager } from "fairygui-cc/DragDropManager";
     export { AsyncOperation } from "fairygui-cc/AsyncOperation";
     export { TranslationHelper } from "fairygui-cc/TranslationHelper";
+    export { GearAnimation } from "fairygui-cc/gears/GearAnimation";
+    export { GearBase } from "fairygui-cc/gears/GearBase";
+    export { GearColor } from "fairygui-cc/gears/GearColor";
+    export { GearDisplay } from "fairygui-cc/gears/GearDisplay";
+    export { GearDisplay2 } from "fairygui-cc/gears/GearDisplay2";
+    export { GearFontSize } from "fairygui-cc/gears/GearFontSize";
+    export { GearIcon } from "fairygui-cc/gears/GearIcon";
+    export { GearLook } from "fairygui-cc/gears/GearLook";
+    export { GearSize } from "fairygui-cc/gears/GearSize";
+    export { GearText } from "fairygui-cc/gears/GearText";
+    export { GearXY } from "fairygui-cc/gears/GearXY";
     export * from "fairygui-cc/FieldTypes";
     export { BlendMode } from "fairygui-cc/display/BlendMode";
     export { Image } from "fairygui-cc/display/Image";
@@ -1784,6 +1795,156 @@ declare module 'fairygui-cc/TranslationHelper' {
     }
 }
 
+declare module 'fairygui-cc/gears/GearAnimation' {
+    import { GearBase } from "fairygui-cc/gears/GearBase";
+    import { ByteBuffer } from "fairygui-cc/utils/ByteBuffer";
+    export class GearAnimation extends GearBase {
+        protected init(): void;
+        protected addStatus(pageId: string, buffer: ByteBuffer): void;
+        apply(): void;
+        updateState(): void;
+    }
+}
+
+declare module 'fairygui-cc/gears/GearBase' {
+    import { Controller } from "fairygui-cc/Controller";
+    import { GObject } from "fairygui-cc/GObject";
+    import { GTweener } from "fairygui-cc/tween/GTweener";
+    import { ByteBuffer } from "fairygui-cc/utils/ByteBuffer";
+    export class GearBase {
+        static disableAllTweenEffect?: boolean;
+        _owner: GObject;
+        protected _controller: Controller;
+        protected _tweenConfig: GearTweenConfig;
+        dispose(): void;
+        get controller(): Controller;
+        set controller(val: Controller);
+        get tweenConfig(): GearTweenConfig;
+        protected get allowTween(): boolean;
+        setup(buffer: ByteBuffer): void;
+        updateFromRelations(dx: number, dy: number): void;
+        protected addStatus(pageId: string, buffer: ByteBuffer): void;
+        protected init(): void;
+        apply(): void;
+        updateState(): void;
+    }
+    export class GearTweenConfig {
+        tween: boolean;
+        easeType: number;
+        duration: number;
+        delay: number;
+        _displayLockToken: number;
+        _tweener: GTweener;
+        constructor();
+    }
+    export interface IGearXY {
+    }
+}
+
+declare module 'fairygui-cc/gears/GearColor' {
+    import { ByteBuffer } from "fairygui-cc/utils/ByteBuffer";
+    import { GearBase } from "fairygui-cc/gears/GearBase";
+    export class GearColor extends GearBase {
+        protected init(): void;
+        protected addStatus(pageId: string, buffer: ByteBuffer): void;
+        apply(): void;
+        updateState(): void;
+    }
+}
+
+declare module 'fairygui-cc/gears/GearDisplay' {
+    import { GearBase } from "fairygui-cc/gears/GearBase";
+    export class GearDisplay extends GearBase {
+        pages: string[];
+        protected init(): void;
+        addLock(): number;
+        releaseLock(token: number): void;
+        get connected(): boolean;
+        apply(): void;
+    }
+}
+
+declare module 'fairygui-cc/gears/GearDisplay2' {
+    import { GearBase } from "fairygui-cc/gears/GearBase";
+    export class GearDisplay2 extends GearBase {
+        pages: string[];
+        condition: number;
+        protected init(): void;
+        apply(): void;
+        evaluate(connected: boolean): boolean;
+    }
+}
+
+declare module 'fairygui-cc/gears/GearFontSize' {
+    import { ByteBuffer } from "fairygui-cc/utils/ByteBuffer";
+    import { GearBase } from "fairygui-cc/gears/GearBase";
+    export class GearFontSize extends GearBase {
+        protected init(): void;
+        protected addStatus(pageId: string, buffer: ByteBuffer): void;
+        apply(): void;
+        updateState(): void;
+    }
+}
+
+declare module 'fairygui-cc/gears/GearIcon' {
+    import { ByteBuffer } from "fairygui-cc/utils/ByteBuffer";
+    import { GearBase } from "fairygui-cc/gears/GearBase";
+    export class GearIcon extends GearBase {
+        protected init(): void;
+        protected addStatus(pageId: string, buffer: ByteBuffer): void;
+        apply(): void;
+        updateState(): void;
+    }
+}
+
+declare module 'fairygui-cc/gears/GearLook' {
+    import { ByteBuffer } from "fairygui-cc/utils/ByteBuffer";
+    import { GearBase } from "fairygui-cc/gears/GearBase";
+    export class GearLook extends GearBase {
+        protected init(): void;
+        protected addStatus(pageId: string, buffer: ByteBuffer): void;
+        apply(): void;
+        updateState(): void;
+    }
+}
+
+declare module 'fairygui-cc/gears/GearSize' {
+    import { ByteBuffer } from "fairygui-cc/utils/ByteBuffer";
+    import { GearBase } from "fairygui-cc/gears/GearBase";
+    export class GearSize extends GearBase {
+        protected init(): void;
+        protected addStatus(pageId: string, buffer: ByteBuffer): void;
+        apply(): void;
+        updateState(): void;
+        updateFromRelations(dx: number, dy: number): void;
+    }
+}
+
+declare module 'fairygui-cc/gears/GearText' {
+    import { ByteBuffer } from "fairygui-cc/utils/ByteBuffer";
+    import { GearBase } from "fairygui-cc/gears/GearBase";
+    export class GearText extends GearBase {
+        protected init(): void;
+        protected addStatus(pageId: string, buffer: ByteBuffer): void;
+        apply(): void;
+        updateState(): void;
+    }
+}
+
+declare module 'fairygui-cc/gears/GearXY' {
+    import { ByteBuffer } from "fairygui-cc/utils/ByteBuffer";
+    import { GearBase } from "fairygui-cc/gears/GearBase";
+    export class GearXY extends GearBase {
+        positionsInPercent: boolean;
+        protected init(): void;
+        protected addStatus(pageId: string, buffer: ByteBuffer): void;
+        addExtStatus(pageId: string, buffer: ByteBuffer): void;
+        apply(): void;
+        updateState(): void;
+        updateFromRelations(dx: number, dy: number): void;
+    }
+}
+
 declare module 'fairygui-cc/display/BlendMode' {
     import { Node } from "cc";
     export enum BlendMode {
@@ -2064,78 +2225,6 @@ declare module 'fairygui-cc/utils/ByteBuffer' {
         readChar(): string;
         readBuffer(): ByteBuffer;
         seek(indexTablePos: number, blockIndex: number): boolean;
-    }
-}
-
-declare module 'fairygui-cc/gears/GearBase' {
-    import { Controller } from "fairygui-cc/Controller";
-    import { GObject } from "fairygui-cc/GObject";
-    import { GTweener } from "fairygui-cc/tween/GTweener";
-    import { ByteBuffer } from "fairygui-cc/utils/ByteBuffer";
-    export class GearBase {
-        static disableAllTweenEffect?: boolean;
-        _owner: GObject;
-        protected _controller: Controller;
-        protected _tweenConfig: GearTweenConfig;
-        dispose(): void;
-        get controller(): Controller;
-        set controller(val: Controller);
-        get tweenConfig(): GearTweenConfig;
-        protected get allowTween(): boolean;
-        setup(buffer: ByteBuffer): void;
-        updateFromRelations(dx: number, dy: number): void;
-        protected addStatus(pageId: string, buffer: ByteBuffer): void;
-        protected init(): void;
-        apply(): void;
-        updateState(): void;
-    }
-    export class GearTweenConfig {
-        tween: boolean;
-        easeType: number;
-        duration: number;
-        delay: number;
-        _displayLockToken: number;
-        _tweener: GTweener;
-        constructor();
-    }
-    export interface IGearXY {
-    }
-}
-
-declare module 'fairygui-cc/gears/GearLook' {
-    import { ByteBuffer } from "fairygui-cc/utils/ByteBuffer";
-    import { GearBase } from "fairygui-cc/gears/GearBase";
-    export class GearLook extends GearBase {
-        protected init(): void;
-        protected addStatus(pageId: string, buffer: ByteBuffer): void;
-        apply(): void;
-        updateState(): void;
-    }
-}
-
-declare module 'fairygui-cc/gears/GearSize' {
-    import { ByteBuffer } from "fairygui-cc/utils/ByteBuffer";
-    import { GearBase } from "fairygui-cc/gears/GearBase";
-    export class GearSize extends GearBase {
-        protected init(): void;
-        protected addStatus(pageId: string, buffer: ByteBuffer): void;
-        apply(): void;
-        updateState(): void;
-        updateFromRelations(dx: number, dy: number): void;
-    }
-}
-
-declare module 'fairygui-cc/gears/GearXY' {
-    import { ByteBuffer } from "fairygui-cc/utils/ByteBuffer";
-    import { GearBase } from "fairygui-cc/gears/GearBase";
-    export class GearXY extends GearBase {
-        positionsInPercent: boolean;
-        protected init(): void;
-        protected addStatus(pageId: string, buffer: ByteBuffer): void;
-        addExtStatus(pageId: string, buffer: ByteBuffer): void;
-        apply(): void;
-        updateState(): void;
-        updateFromRelations(dx: number, dy: number): void;
     }
 }
 

@@ -176,7 +176,7 @@ export class UIPackage {
                     _instById[pkg.id] = pkg;
                     _instByName[pkg.name] = pkg;
                     if (pkg._path)
-                        _instByName[pkg._path] = pkg;
+                        _instById[pkg._path] = pkg;
 
                     if (onComplete != null)
                         onComplete(lastErr, pkg);
@@ -596,8 +596,19 @@ export class UIPackage {
                     item.asset = this._bundle.get<Asset>(item.file, ItemTypeToAssetType[item.type]);
                     if (!item.asset)
                         console.log("Resource '" + item.file + "' not found");
-                    else
-                        item.asset = (<ImageAsset>item.asset)._texture;
+                    else if (item.type == PackageItemType.Atlas) {
+                        const asset: any = item.asset;
+                        let tex: Texture2D = asset['_texture'];
+                        if (!tex) {
+                            tex = new Texture2D();
+                            tex.name = asset.nativeUrl;
+                            tex.image = asset;
+                        }
+                        item.asset = tex;
+                    }
+                    else {
+                        item.asset = (<AudioClip>item.asset);
+                    }
                 }
                 break;
 

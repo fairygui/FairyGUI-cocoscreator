@@ -1,4 +1,4 @@
-import { Asset, assetManager, AssetManager, AudioClip, BitmapFont, BufferAsset, dragonBones, ImageAsset, path, Rect, resources, Size, sp, SpriteFrame, Vec2 } from "cc";
+import { Asset, assetManager, AssetManager, AudioClip, BitmapFont, BufferAsset, dragonBones, ImageAsset, path, Rect, resources, Size, sp, SpriteFrame, Texture2D, Vec2 } from "cc";
 var PathUtils = path;
 import { ObjectType, PackageItemType } from "./FieldTypes";
 import { constructingDepth } from "./GObject";
@@ -117,7 +117,7 @@ export class UIPackage {
                     _instById[pkg.id] = pkg;
                     _instByName[pkg.name] = pkg;
                     if (pkg._path)
-                        _instByName[pkg._path] = pkg;
+                        _instById[pkg._path] = pkg;
                     if (onComplete != null)
                         onComplete(lastErr, pkg);
                 }
@@ -469,8 +469,19 @@ export class UIPackage {
                     item.asset = this._bundle.get(item.file, ItemTypeToAssetType[item.type]);
                     if (!item.asset)
                         console.log("Resource '" + item.file + "' not found");
-                    else
-                        item.asset = item.asset._texture;
+                    else if (item.type == PackageItemType.Atlas) {
+                        const asset = item.asset;
+                        let tex = asset['_texture'];
+                        if (!tex) {
+                            tex = new Texture2D();
+                            tex.name = asset.nativeUrl;
+                            tex.image = asset;
+                        }
+                        item.asset = tex;
+                    }
+                    else {
+                        item.asset = item.asset;
+                    }
                 }
                 break;
             case PackageItemType.Font:
