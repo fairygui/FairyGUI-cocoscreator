@@ -760,7 +760,7 @@ namespace fgui {
             this.onHide();
         }
 
-        protected onUpdate() {
+        protected onUpdate(dt?:number) {
         }
 
         protected onDestroy() {
