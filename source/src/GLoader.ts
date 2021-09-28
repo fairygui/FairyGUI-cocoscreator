@@ -335,6 +335,7 @@ export class GLoader extends GObject {
     }
 
     protected freeExternal(texture: SpriteFrame): void {
+        assetManager.releaseAsset(texture);
     }
 
     protected onExternalLoadSuccess(texture: SpriteFrame): void {
