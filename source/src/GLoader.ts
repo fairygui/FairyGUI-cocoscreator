@@ -43,6 +43,7 @@ export class GLoader extends GObject {
         this._color = new Color(255, 255, 255, 255);
 
         this._container = new Node("Image");
+        this._container.layer = UIConfig.defaultUILayer;
         this._container.addComponent(UITransform).setAnchorPoint(0, 1);
         this._node.addChild(this._container);
 
