@@ -1,4 +1,4 @@
-import { Asset, assetManager, Color, isValid, Node, resources, Sprite, SpriteFrame, Texture2D, UITransform, Vec2 } from "cc";
+import { Asset, assetManager, Color, ImageAsset, isValid, Node, resources, Sprite, SpriteFrame, Texture2D, UITransform, Vec2 } from "cc";
 import { MovieClip } from "./display/MovieClip";
 import { AlignType, VertAlignType, LoaderFillType, FillMethod, FillOrigin, PackageItemType, ObjectPropID } from "./FieldTypes";
 import { GComponent } from "./GComponent";
@@ -324,6 +324,13 @@ export class GLoader extends GObject {
             else if (asset instanceof Texture2D) {
                 let sf = new SpriteFrame();
                 sf.texture = asset;
+                this.onExternalLoadSuccess(sf);
+            }
+            else if (asset instanceof ImageAsset) {
+                let sf = new SpriteFrame();
+                let texture = new Texture2D();
+                texture.image = asset;
+                sf.texture = texture;
                 this.onExternalLoadSuccess(sf);
             }
         };
