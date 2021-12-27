@@ -1,4 +1,4 @@
-import { Component, Vec2, RichText, sys, Node, Touch, Event, EventMouse, EventTouch, director, Vec3 } from "cc";
+import { Component, Vec2, RichText, sys, Node, Touch, Event, EventMouse, EventTouch, director, Vec3, ccenum } from "cc";
 import { GObject } from "../GObject";
 import { GRichTextField } from "../GRichTextField";
 import { UIContentScaler } from "../UIContentScaler";
@@ -150,8 +150,18 @@ export class InputProcessor extends Component {
 
     private touchBeginHandler(evt: EventTouch): Boolean {
         let ti: TouchInfo = this.updateInfo(evt.getID(), evt.getLocation());
-        this._touchListener.setSwallowTouches(ti.target != this._owner);
         this.setBegin(ti);
+        if (this._touchListener.setSwallowTouches) {
+            this._touchListener.setSwallowTouches(ti.target != this._owner);
+        } else {
+            // since cc3.4.0, setSwallowTouches removed
+            let e = evt as any;
+            if (ti.target == this._owner) {
+                e.preventSwallow = true;
+            } else {
+                e.preventSwallow = false;
+            }
+        }
 
         let evt2 = this.getEvent(ti, ti.target, FUIEvent.TOUCH_BEGIN, true);
 
@@ -167,6 +177,14 @@ export class InputProcessor extends Component {
 
     private touchMoveHandler(evt: EventTouch): void {
         let ti = this.updateInfo(evt.getID(), evt.getLocation());
+        if (!this._touchListener.setSwallowTouches) {
+            let e = evt as any;
+            if (ti.target == this._owner) {
+                e.preventSwallow = true;
+            } else {
+                e.preventSwallow = false;
+            }
+        }
         this.handleRollOver(ti, ti.target);
 
         if (ti.began) {
@@ -198,6 +216,14 @@ export class InputProcessor extends Component {
 
     private touchEndHandler(evt: EventTouch): void {
         let ti = this.updateInfo(evt.getID(), evt.getLocation());
+        if (!this._touchListener.setSwallowTouches) {
+            let e = evt as any;
+            if (ti.target == this._owner) {
+                e.preventSwallow = true;
+            } else {
+                e.preventSwallow = false;
+            }
+        }
         this.setEnd(ti);
 
         let evt2 = this.getEvent(ti, ti.target, FUIEvent.TOUCH_END, false);
@@ -246,6 +272,14 @@ export class InputProcessor extends Component {
 
     private touchCancelHandler(evt: EventTouch): void {
         let ti = this.updateInfo(evt.getID(), evt.getLocation());
+        if (!this._touchListener.setSwallowTouches) {
+            let e = evt as any;
+            if (ti.target == this._owner) {
+                e.preventSwallow = true;
+            } else {
+                e.preventSwallow = false;
+            }
+        }
 
         let evt2 = this.getEvent(ti, ti.target, FUIEvent.TOUCH_END, false);
 
