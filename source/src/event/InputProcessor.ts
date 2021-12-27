@@ -156,11 +156,7 @@ export class InputProcessor extends Component {
         } else {
             // since cc3.4.0, setSwallowTouches removed
             let e = evt as any;
-            if (ti.target == this._owner) {
-                e.preventSwallow = true;
-            } else {
-                e.preventSwallow = false;
-            }
+            e.preventSwallow = (ti.target == this._owner);
         }
 
         let evt2 = this.getEvent(ti, ti.target, FUIEvent.TOUCH_BEGIN, true);
@@ -179,11 +175,7 @@ export class InputProcessor extends Component {
         let ti = this.updateInfo(evt.getID(), evt.getLocation());
         if (!this._touchListener) {
             let e = evt as any;
-            if (ti.target == this._owner) {
-                e.preventSwallow = true;
-            } else {
-                e.preventSwallow = false;
-            }
+            e.preventSwallow = (ti.target == this._owner);
         }
         this.handleRollOver(ti, ti.target);
 
@@ -218,11 +210,7 @@ export class InputProcessor extends Component {
         let ti = this.updateInfo(evt.getID(), evt.getLocation());
         if (!this._touchListener) {
             let e = evt as any;
-            if (ti.target == this._owner) {
-                e.preventSwallow = true;
-            } else {
-                e.preventSwallow = false;
-            }
+            e.preventSwallow = (ti.target == this._owner);
         }
         this.setEnd(ti);
 
@@ -274,11 +262,7 @@ export class InputProcessor extends Component {
         let ti = this.updateInfo(evt.getID(), evt.getLocation());
         if (!this._touchListener) {
             let e = evt as any;
-            if (ti.target == this._owner) {
-                e.preventSwallow = true;
-            } else {
-                e.preventSwallow = false;
-            }
+            e.preventSwallow = (ti.target == this._owner);
         }
 
         let evt2 = this.getEvent(ti, ti.target, FUIEvent.TOUCH_END, false);
