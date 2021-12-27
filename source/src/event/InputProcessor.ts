@@ -151,7 +151,7 @@ export class InputProcessor extends Component {
     private touchBeginHandler(evt: EventTouch): Boolean {
         let ti: TouchInfo = this.updateInfo(evt.getID(), evt.getLocation());
         this.setBegin(ti);
-        if (this._touchListener.setSwallowTouches) {
+        if (this._touchListener) {
             this._touchListener.setSwallowTouches(ti.target != this._owner);
         } else {
             // since cc3.4.0, setSwallowTouches removed
@@ -177,7 +177,7 @@ export class InputProcessor extends Component {
 
     private touchMoveHandler(evt: EventTouch): void {
         let ti = this.updateInfo(evt.getID(), evt.getLocation());
-        if (!this._touchListener.setSwallowTouches) {
+        if (!this._touchListener) {
             let e = evt as any;
             if (ti.target == this._owner) {
                 e.preventSwallow = true;
@@ -216,7 +216,7 @@ export class InputProcessor extends Component {
 
     private touchEndHandler(evt: EventTouch): void {
         let ti = this.updateInfo(evt.getID(), evt.getLocation());
-        if (!this._touchListener.setSwallowTouches) {
+        if (!this._touchListener) {
             let e = evt as any;
             if (ti.target == this._owner) {
                 e.preventSwallow = true;
@@ -272,7 +272,7 @@ export class InputProcessor extends Component {
 
     private touchCancelHandler(evt: EventTouch): void {
         let ti = this.updateInfo(evt.getID(), evt.getLocation());
-        if (!this._touchListener.setSwallowTouches) {
+        if (!this._touchListener) {
             let e = evt as any;
             if (ti.target == this._owner) {
                 e.preventSwallow = true;
