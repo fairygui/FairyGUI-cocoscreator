@@ -114,8 +114,15 @@ export class InputProcessor extends Component {
     }
     touchBeginHandler(evt) {
         let ti = this.updateInfo(evt.getID(), evt.getLocation());
-        this._touchListener.setSwallowTouches(ti.target != this._owner);
         this.setBegin(ti);
+        if (this._touchListener) {
+            this._touchListener.setSwallowTouches(ti.target != this._owner);
+        }
+        else {
+            // since cc3.4.0, setSwallowTouches removed
+            let e = evt;
+            e.preventSwallow = (ti.target == this._owner);
+        }
         let evt2 = this.getEvent(ti, ti.target, FUIEvent.TOUCH_BEGIN, true);
         if (this._captureCallback)
             this._captureCallback.call(this._owner, evt2);
@@ -125,6 +132,10 @@ export class InputProcessor extends Component {
     }
     touchMoveHandler(evt) {
         let ti = this.updateInfo(evt.getID(), evt.getLocation());
+        if (!this._touchListener) {
+            let e = evt;
+            e.preventSwallow = (ti.target == this._owner);
+        }
         this.handleRollOver(ti, ti.target);
         if (ti.began) {
             let evt2 = this.getEvent(ti, ti.target, FUIEvent.TOUCH_MOVE, false);
@@ -150,6 +161,10 @@ export class InputProcessor extends Component {
     }
     touchEndHandler(evt) {
         let ti = this.updateInfo(evt.getID(), evt.getLocation());
+        if (!this._touchListener) {
+            let e = evt;
+            e.preventSwallow = (ti.target == this._owner);
+        }
         this.setEnd(ti);
         let evt2 = this.getEvent(ti, ti.target, FUIEvent.TOUCH_END, false);
         let cnt = ti.touchMonitors.length;
@@ -188,6 +203,10 @@ export class InputProcessor extends Component {
     }
     touchCancelHandler(evt) {
         let ti = this.updateInfo(evt.getID(), evt.getLocation());
+        if (!this._touchListener) {
+            let e = evt;
+            e.preventSwallow = (ti.target == this._owner);
+        }
         let evt2 = this.getEvent(ti, ti.target, FUIEvent.TOUCH_END, false);
         let cnt = ti.touchMonitors.length;
         for (let i = 0; i < cnt; i++) {

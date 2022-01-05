@@ -6526,8 +6526,15 @@ class InputProcessor extends Component {
     }
     touchBeginHandler(evt) {
         let ti = this.updateInfo(evt.getID(), evt.getLocation());
-        this._touchListener.setSwallowTouches(ti.target != this._owner);
         this.setBegin(ti);
+        if (this._touchListener) {
+            this._touchListener.setSwallowTouches(ti.target != this._owner);
+        }
+        else {
+            // since cc3.4.0, setSwallowTouches removed
+            let e = evt;
+            e.preventSwallow = (ti.target == this._owner);
+        }
         let evt2 = this.getEvent(ti, ti.target, Event.TOUCH_BEGIN, true);
         if (this._captureCallback)
             this._captureCallback.call(this._owner, evt2);
@@ -6537,6 +6544,10 @@ class InputProcessor extends Component {
     }
     touchMoveHandler(evt) {
         let ti = this.updateInfo(evt.getID(), evt.getLocation());
+        if (!this._touchListener) {
+            let e = evt;
+            e.preventSwallow = (ti.target == this._owner);
+        }
         this.handleRollOver(ti, ti.target);
         if (ti.began) {
             let evt2 = this.getEvent(ti, ti.target, Event.TOUCH_MOVE, false);
@@ -6562,6 +6573,10 @@ class InputProcessor extends Component {
     }
     touchEndHandler(evt) {
         let ti = this.updateInfo(evt.getID(), evt.getLocation());
+        if (!this._touchListener) {
+            let e = evt;
+            e.preventSwallow = (ti.target == this._owner);
+        }
         this.setEnd(ti);
         let evt2 = this.getEvent(ti, ti.target, Event.TOUCH_END, false);
         let cnt = ti.touchMonitors.length;
@@ -6600,6 +6615,10 @@ class InputProcessor extends Component {
     }
     touchCancelHandler(evt) {
         let ti = this.updateInfo(evt.getID(), evt.getLocation());
+        if (!this._touchListener) {
+            let e = evt;
+            e.preventSwallow = (ti.target == this._owner);
+        }
         let evt2 = this.getEvent(ti, ti.target, Event.TOUCH_END, false);
         let cnt = ti.touchMonitors.length;
         for (let i = 0; i < cnt; i++) {
@@ -11795,6 +11814,7 @@ class GLoader extends GObject {
         this._showErrorSign = true;
         this._color = new Color(255, 255, 255, 255);
         this._container = new Node("Image");
+        this._container.layer = UIConfig.defaultUILayer;
         this._container.addComponent(UITransform).setAnchorPoint(0, 1);
         this._node.addChild(this._container);
         this._content = this._container.addComponent(MovieClip);
@@ -12027,6 +12047,13 @@ class GLoader extends GObject {
             else if (asset instanceof Texture2D) {
                 let sf = new SpriteFrame();
                 sf.texture = asset;
+                this.onExternalLoadSuccess(sf);
+            }
+            else if (asset instanceof ImageAsset) {
+                let sf = new SpriteFrame();
+                let texture = new Texture2D();
+                texture.image = asset;
+                sf.texture = texture;
                 this.onExternalLoadSuccess(sf);
             }
         };
