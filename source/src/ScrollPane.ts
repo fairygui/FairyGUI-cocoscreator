@@ -85,6 +85,7 @@ export class ScrollPane extends Component {
         const o = this._owner = <GComponent>GObject.cast(this.node);
 
         this._maskContainer = new Node("ScrollPane");
+        this._maskContainer.layer = UIConfig.defaultUILayer;
         this._maskContainer.addComponent(UITransform).setAnchorPoint(0, 1);
         this._maskContainer.parent = o.node;
 

@@ -2,6 +2,7 @@ import { sp, dragonBones, assetManager, Color, isValid, resources, Vec2, Node, U
 import { AlignType, LoaderFillType, ObjectPropID, PackageItemType, VertAlignType } from "./FieldTypes";
 import { GObject } from "./GObject";
 import { PackageItem } from "./PackageItem";
+import { UIConfig } from "./UIConfig";
 import { UIPackage } from "./UIPackage";
 import { ByteBuffer } from "./utils/ByteBuffer";
 
@@ -35,6 +36,7 @@ export class GLoader3D extends GObject {
         this._color = new Color(255, 255, 255, 255);
 
         this._container = new Node("Wrapper");
+        this._container.layer = UIConfig.defaultUILayer;
         this._container.addComponent(UITransform).setAnchorPoint(0, 1);
         this._node.addChild(this._container);
     }
@@ -244,6 +246,7 @@ export class GLoader3D extends GObject {
 
         let node = new Node();
         this._container.addChild(node);
+        node.layer = UIConfig.defaultUILayer;
         node.setPosition(anchor.x, -anchor.y);
 
         this._content = node.addComponent(sp.Skeleton);
@@ -260,6 +263,7 @@ export class GLoader3D extends GObject {
         this.clearContent();
 
         let node = new Node();
+        node.layer = UIConfig.defaultUILayer;
         this._container.addChild(node);
         node.setPosition(anchor.x, -anchor.y);
 
