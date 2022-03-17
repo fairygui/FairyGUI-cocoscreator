@@ -7194,6 +7194,7 @@ class ScrollPane extends Component {
     setup(buffer) {
         const o = this._owner = GObject.cast(this.node);
         this._maskContainer = new Node("ScrollPane");
+        this._maskContainer.layer = UIConfig.defaultUILayer;
         this._maskContainer.addComponent(UITransform).setAnchorPoint(0, 1);
         this._maskContainer.parent = o.node;
         this._container = o._container;
@@ -10027,6 +10028,7 @@ class GComponent extends GObject {
         this._margin = new Margin();
         this._alignOffset = new Vec2();
         this._container = new Node("Container");
+        this._container.layer = UIConfig.defaultUILayer;
         this._container.addComponent(UITransform).setAnchorPoint(0, 1);
         this._node.addChild(this._container);
     }
@@ -10494,6 +10496,7 @@ class GComponent extends GObject {
                 return;
             if (!this._customMask) {
                 let maskNode = new Node("Mask");
+                maskNode.layer = UIConfig.defaultUILayer;
                 maskNode.addComponent(UITransform);
                 maskNode.parent = this._node;
                 if (this._scrollPane)
@@ -12294,6 +12297,7 @@ class GLoader3D extends GObject {
         this._verticalAlign = VertAlignType.Top;
         this._color = new Color(255, 255, 255, 255);
         this._container = new Node("Wrapper");
+        this._container.layer = UIConfig.defaultUILayer;
         this._container.addComponent(UITransform).setAnchorPoint(0, 1);
         this._node.addChild(this._container);
     }
@@ -12459,6 +12463,7 @@ class GLoader3D extends GObject {
         this.clearContent();
         let node = new Node();
         this._container.addChild(node);
+        node.layer = UIConfig.defaultUILayer;
         node.setPosition(anchor.x, -anchor.y);
         this._content = node.addComponent(sp.Skeleton);
         this._content.premultipliedAlpha = pma;
@@ -12471,6 +12476,7 @@ class GLoader3D extends GObject {
         this.url = null;
         this.clearContent();
         let node = new Node();
+        node.layer = UIConfig.defaultUILayer;
         this._container.addChild(node);
         node.setPosition(anchor.x, -anchor.y);
         this._content = node.addComponent(dragonBones.ArmatureDisplay);

@@ -10,6 +10,7 @@ import { Margin } from "./Margin";
 import { ScrollPane } from "./ScrollPane";
 import { Transition } from "./Transition";
 import { TranslationHelper } from "./TranslationHelper";
+import { UIConfig } from "./UIConfig";
 import { UIContentScaler } from "./UIContentScaler";
 import { Decls, UIPackage } from "./UIPackage";
 export class GComponent extends GObject {
@@ -25,6 +26,7 @@ export class GComponent extends GObject {
         this._margin = new Margin();
         this._alignOffset = new Vec2();
         this._container = new Node("Container");
+        this._container.layer = UIConfig.defaultUILayer;
         this._container.addComponent(UITransform).setAnchorPoint(0, 1);
         this._node.addChild(this._container);
     }
@@ -492,6 +494,7 @@ export class GComponent extends GObject {
                 return;
             if (!this._customMask) {
                 let maskNode = new Node("Mask");
+                maskNode.layer = UIConfig.defaultUILayer;
                 maskNode.addComponent(UITransform);
                 maskNode.parent = this._node;
                 if (this._scrollPane)
