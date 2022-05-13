@@ -241,8 +241,7 @@ export class GLoader3D extends GObject {
     }
 
     public setSpine(asset: sp.SkeletonData, anchor: Vec2, pma?: boolean): void {
-        this.url = null;
-        this.clearContent();
+        this.freeSpine();
 
         let node = new Node();
         this._container.addChild(node);
@@ -258,9 +257,14 @@ export class GLoader3D extends GObject {
         this.updateLayout();
     }
 
+    public freeSpine(){
+        if(this._content){
+            this._content.destroy();
+        }
+    }
+
     public setDragonBones(asset: dragonBones.DragonBonesAsset, atlasAsset: dragonBones.DragonBonesAtlasAsset, anchor: Vec2, pma?: boolean): void {
-        this.url = null;
-        this.clearContent();
+        this.freeDragonBones();
 
         let node = new Node();
         node.layer = UIConfig.defaultUILayer;
@@ -282,9 +286,22 @@ export class GLoader3D extends GObject {
         this.updateLayout();
     }
 
+    public freeDragonBones():void{
+        if(this._content){
+            this._content.destroy();
+        }
+    }
+
     private onChange(): void {
-        this.onChangeSpine();
-        this.onChangeDragonBones();
+        if(this._contentItem == null)
+            return;
+            
+        if(this._contentItem.type == PackageItemType.Spine){
+            this.onChangeSpine();
+        }
+        if(this._contentItem.type == PackageItemType.DragonBones){
+            this.onChangeDragonBones();
+        }
     }
 
     private onChangeSpine(): void {
