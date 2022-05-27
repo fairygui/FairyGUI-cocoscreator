@@ -24,7 +24,7 @@ namespace fgui {
             this.autoSize = AutoSizeType.None;
 
             //Fix:默认设置editbox的编辑模式为SINGLE_LINE 否则若是任意输入情况下，垂直居中对齐会无效，引擎会强制改为顶对齐，除非手动设置
-            this.singleLine = true;
+            this.singleLine = UIConfig.gInputFieldSingle;
 
         }
 
