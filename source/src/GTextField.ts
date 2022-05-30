@@ -51,6 +51,7 @@ export class GTextField extends GObject {
 
     protected createRenderer() {
         this._label = this._node.addComponent(Label);
+        this._label.string = "";
         this.autoSize = AutoSizeType.Both;
     }
 
