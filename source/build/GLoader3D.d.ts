@@ -52,7 +52,9 @@ export declare class GLoader3D extends GObject {
     protected loadFromPackage(itemURL: string): void;
     private onLoaded;
     setSpine(asset: sp.SkeletonData, anchor: Vec2, pma?: boolean): void;
+    freeSpine(): void;
     setDragonBones(asset: dragonBones.DragonBonesAsset, atlasAsset: dragonBones.DragonBonesAtlasAsset, anchor: Vec2, pma?: boolean): void;
+    freeDragonBones(): void;
     private onChange;
     private onChangeSpine;
     private onChangeDragonBones;

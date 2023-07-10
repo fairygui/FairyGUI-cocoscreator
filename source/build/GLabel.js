@@ -1,8 +1,11 @@
 import { Color } from "cc";
 import { ObjectPropID } from "./FieldTypes";
 import { GComponent } from "./GComponent";
+import { GRoot } from "./GRoot";
 import { GTextField } from "./GTextField";
 import { GTextInput } from "./GTextInput";
+import { UIPackage } from "./UIPackage";
+import { Event as FUIEvent } from "./event/Event";
 export class GLabel extends GComponent {
     constructor() {
         super();
@@ -158,6 +161,24 @@ export class GLabel extends GComponent {
             }
             else
                 buffer.skip(13);
+        }
+        str = buffer.readS();
+        if (str != null) {
+            this._sound = str;
+            if (buffer.readBool()) {
+                this._soundVolumeScale = buffer.readFloat();
+            }
+            this._node.on(FUIEvent.CLICK, this.onClick_1, this);
+        }
+    }
+    onClick_1() {
+        if (this._sound) {
+            var pi = UIPackage.getItemByURL(this._sound);
+            if (pi) {
+                var sound = pi.owner.getItemAsset(pi);
+                if (sound)
+                    GRoot.inst.playOneShotSound(sound, this._soundVolumeScale);
+            }
         }
     }
 }

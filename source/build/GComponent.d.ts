@@ -28,6 +28,7 @@ export declare class GComponent extends GObject {
     _scrollPane?: ScrollPane;
     _alignOffset: Vec2;
     _customMask?: Mask;
+    private _invertedMask;
     constructor();
     dispose(): void;
     get displayListContainer(): Node;

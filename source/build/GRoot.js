@@ -10,6 +10,17 @@ import { UIContentScaler, updateScaler } from "./UIContentScaler";
 import { UIPackage } from "./UIPackage";
 import { Window } from "./Window";
 export class GRoot extends GComponent {
+    static get inst() {
+        if (!GRoot._inst)
+            throw 'Call GRoot.create first!';
+        return GRoot._inst;
+    }
+    static create() {
+        GRoot._inst = new GRoot();
+        director.getScene().getChildByName('Canvas').addChild(GRoot._inst.node);
+        GRoot._inst.onWinResize();
+        return GRoot._inst;
+    }
     constructor() {
         super();
         this._node.name = "GRoot";
@@ -29,17 +40,6 @@ export class GRoot extends GComponent {
             View.instance.on('canvas-resize', this._thisOnResized);
             window.addEventListener('orientationchange', this._thisOnResized);
         }
-    }
-    static get inst() {
-        if (!GRoot._inst)
-            throw 'Call GRoot.create first!';
-        return GRoot._inst;
-    }
-    static create() {
-        GRoot._inst = new GRoot();
-        director.getScene().getChildByName('Canvas').addChild(GRoot._inst.node);
-        GRoot._inst.onWinResize();
-        return GRoot._inst;
     }
     onDestroy() {
         View.instance.off('design-resolution-changed', this.onWinResize, this);

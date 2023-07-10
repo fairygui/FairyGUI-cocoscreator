@@ -1,4 +1,4 @@
-import { gfx, RenderComponent, Event as Event$1, Vec2, Node, game, director, macro, Color, Layers, Font, resources, UITransform, UIOpacity, Rect, Component, Vec3, Graphics, misc, Sprite, Size, view, BufferAsset, AssetManager, Asset, assetManager, Texture2D, SpriteFrame, BitmapFont, sp, dragonBones, ImageAsset, AudioClip, path, Label, LabelOutline, LabelShadow, RichText, SpriteAtlas, sys, EventMouse, EventTarget, Mask, math, isValid, View, AudioSourceComponent, EditBox } from 'cc';
+import { gfx, UIRenderer, Event as Event$1, Vec2, Node, game, director, macro, Color, Layers, Font, resources, Vec3, Rect, UITransform, UIOpacity, Component, Graphics, misc, Sprite, Size, view, ImageAsset, AudioClip, BufferAsset, AssetManager, Asset, assetManager, Texture2D, SpriteFrame, BitmapFont, sp, dragonBones, path, Label, LabelOutline, LabelShadow, SpriteAtlas, RichText, sys, EventMouse, EventTarget, Mask, math, isValid, View, AudioSourceComponent, EditBox } from 'cc';
 import { EDITOR } from 'cc/env';
 
 var ButtonMode;
@@ -213,7 +213,7 @@ var BlendMode;
 class BlendModeUtils {
     static apply(node, blendMode) {
         let f = factors[blendMode];
-        let renderers = node.getComponentsInChildren(RenderComponent);
+        let renderers = node.getComponentsInChildren(UIRenderer);
         renderers.forEach(element => {
             element.srcBlendFactor = f[0];
             element.dstBlendFactor = f[1];
@@ -236,7 +236,7 @@ const factors = [
     [gfx.BlendFactor.ONE, gfx.BlendFactor.ZERO],
     [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA],
     [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA],
-    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA],
+    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA], //custom2
 ];
 
 class Event extends Event$1 {
@@ -658,6 +658,42 @@ class Pool {
 }
 
 // Author: Daniele Giardini - http://www.demigiant.com
+// Created: 2014/07/19 14:11
+// 
+// License Copyright (c) Daniele Giardini.
+// This work is subject to the terms at http://dotween.demigiant.com/license.php
+// 
+// =============================================================
+// Contains Daniele Giardini's C# port of the easing equations created by Robert Penner
+// (all easing equations except for Flash, InFlash, OutFlash, InOutFlash,
+// which use some parts of Robert Penner's equations but were created by Daniele Giardini)
+// http://robertpenner.com/easing, see license below:
+// =============================================================
+//
+// TERMS OF USE - EASING EQUATIONS
+//
+// Open source under the BSD License.
+//
+// Copyright ? 2001 Robert Penner
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without modification,
+// are permitted provided that the following conditions are met:
+//
+// - Redistributions of source code must retain the above copyright notice,
+// this list of conditions and the following disclaimer.
+// - Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+// - Neither the name of the author nor the names of contributors may be used to endorse
+// or promote products derived} from this software without specific prior written permission.
+// - THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+// STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+// EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 const _PiOver2 = Math.PI * 0.5;
 const _TwoPi = Math.PI * 2;
 function evaluateEase(easeType, time, duration, overshootOrAmplitude, period) {
@@ -5846,6 +5882,7 @@ class GTextField extends GObject {
     }
     createRenderer() {
         this._label = this._node.addComponent(Label);
+        this._label.string = "";
         this.autoSize = AutoSizeType.Both;
     }
     set text(value) {
@@ -10021,6 +10058,7 @@ class GComponent extends GObject {
         this._sortingChildCount = 0;
         this._childrenRenderOrder = ChildrenRenderOrder.Ascent;
         this._apexIndex = 0;
+        this._invertedMask = false;
         this._node.name = "GComponent";
         this._children = new Array();
         this._controllers = new Array();
@@ -10509,7 +10547,7 @@ class GComponent extends GObject {
             value.node.on(Node.EventType.TRANSFORM_CHANGED, this.onMaskContentChanged, this);
             value.node.on(Node.EventType.SIZE_CHANGED, this.onMaskContentChanged, this);
             value.node.on(Node.EventType.ANCHOR_CHANGED, this.onMaskContentChanged, this);
-            this._customMask.inverted = inverted;
+            this._invertedMask = inverted;
             if (this._node.activeInHierarchy)
                 this.onMaskReady();
             else
@@ -10536,16 +10574,17 @@ class GComponent extends GObject {
     onMaskReady() {
         this.off(Event.DISPLAY, this.onMaskReady, this);
         if (this._maskContent instanceof GImage) {
-            this._customMask.type = Mask.Type.IMAGE_STENCIL;
+            this._customMask.type = Mask.Type.SPRITE_STENCIL;
             this._customMask.alphaThreshold = 0.0001;
             this._customMask.spriteFrame = this._maskContent._content.spriteFrame;
         }
         else if (this._maskContent instanceof GGraph) {
             if (this._maskContent.type == 2)
-                this._customMask.type = Mask.Type.ELLIPSE;
+                this._customMask.type = Mask.Type.GRAPHICS_ELLIPSE;
             else
-                this._customMask.type = Mask.Type.RECT;
+                this._customMask.type = Mask.Type.GRAPHICS_RECT;
         }
+        this._customMask.inverted = this._invertedMask;
     }
     onMaskContentChanged() {
         let maskNode = this._customMask.node;
@@ -11253,6 +11292,17 @@ class Window extends GComponent {
 }
 
 class GRoot extends GComponent {
+    static get inst() {
+        if (!GRoot._inst)
+            throw 'Call GRoot.create first!';
+        return GRoot._inst;
+    }
+    static create() {
+        GRoot._inst = new GRoot();
+        director.getScene().getChildByName('Canvas').addChild(GRoot._inst.node);
+        GRoot._inst.onWinResize();
+        return GRoot._inst;
+    }
     constructor() {
         super();
         this._node.name = "GRoot";
@@ -11272,17 +11322,6 @@ class GRoot extends GComponent {
             View.instance.on('canvas-resize', this._thisOnResized);
             window.addEventListener('orientationchange', this._thisOnResized);
         }
-    }
-    static get inst() {
-        if (!GRoot._inst)
-            throw 'Call GRoot.create first!';
-        return GRoot._inst;
-    }
-    static create() {
-        GRoot._inst = new GRoot();
-        director.getScene().getChildByName('Canvas').addChild(GRoot._inst.node);
-        GRoot._inst.onWinResize();
-        return GRoot._inst;
     }
     onDestroy() {
         View.instance.off('design-resolution-changed', this.onWinResize, this);
@@ -12459,8 +12498,7 @@ class GLoader3D extends GObject {
             this.setDragonBones(this._contentItem.asset, this._contentItem.atlasAsset, this._contentItem.skeletonAnchor);
     }
     setSpine(asset, anchor, pma) {
-        this.url = null;
-        this.clearContent();
+        this.freeSpine();
         let node = new Node();
         this._container.addChild(node);
         node.layer = UIConfig.defaultUILayer;
@@ -12472,9 +12510,13 @@ class GLoader3D extends GObject {
         this.onChangeSpine();
         this.updateLayout();
     }
+    freeSpine() {
+        if (this._content) {
+            this._content.destroy();
+        }
+    }
     setDragonBones(asset, atlasAsset, anchor, pma) {
-        this.url = null;
-        this.clearContent();
+        this.freeDragonBones();
         let node = new Node();
         node.layer = UIConfig.defaultUILayer;
         this._container.addChild(node);
@@ -12490,11 +12532,23 @@ class GLoader3D extends GObject {
         this.onChangeDragonBones();
         this.updateLayout();
     }
+    freeDragonBones() {
+        if (this._content) {
+            this._content.destroy();
+        }
+    }
     onChange() {
-        this.onChangeSpine();
-        this.onChangeDragonBones();
+        if (this._contentItem == null)
+            return;
+        if (this._contentItem.type == PackageItemType.Spine) {
+            this.onChangeSpine();
+        }
+        if (this._contentItem.type == PackageItemType.DragonBones) {
+            this.onChangeDragonBones();
+        }
     }
     onChangeSpine() {
+        var _a;
         if (!(this._content instanceof sp.Skeleton))
             return;
         if (this._animationName) {
@@ -12513,7 +12567,7 @@ class GLoader3D extends GObject {
         else
             this._content.clearTrack(0);
         let skin = this._skinName || this._content.skeletonData.getRuntimeData().skins[0].name;
-        if (this._content["_skeleton"].skin != skin)
+        if (((_a = this._content["_skeleton"].skin) === null || _a === void 0 ? void 0 : _a.name) != skin)
             this._content.setSkin(skin);
     }
     onChangeDragonBones() {
@@ -12836,6 +12890,24 @@ class GLabel extends GComponent {
             }
             else
                 buffer.skip(13);
+        }
+        str = buffer.readS();
+        if (str != null) {
+            this._sound = str;
+            if (buffer.readBool()) {
+                this._soundVolumeScale = buffer.readFloat();
+            }
+            this._node.on(Event.CLICK, this.onClick_1, this);
+        }
+    }
+    onClick_1() {
+        if (this._sound) {
+            var pi = UIPackage.getItemByURL(this._sound);
+            if (pi) {
+                var sound = pi.owner.getItemAsset(pi);
+                if (sound)
+                    GRoot.inst.playOneShotSound(sound, this._soundVolumeScale);
+            }
         }
     }
 }
@@ -16963,6 +17035,11 @@ UIObjectFactory.extensions = {};
 Decls.UIObjectFactory = UIObjectFactory;
 
 class DragDropManager {
+    static get inst() {
+        if (!DragDropManager._inst)
+            DragDropManager._inst = new DragDropManager();
+        return DragDropManager._inst;
+    }
     constructor() {
         this._agent = new GLoader();
         this._agent.draggable = true;
@@ -16973,11 +17050,6 @@ class DragDropManager {
         this._agent.verticalAlign = VertAlignType.Middle;
         this._agent.sortingOrder = 1000000;
         this._agent.on(Event.DRAG_END, this.onDragEnd, this);
-    }
-    static get inst() {
-        if (!DragDropManager._inst)
-            DragDropManager._inst = new DragDropManager();
-        return DragDropManager._inst;
     }
     get dragAgent() {
         return this._agent;
@@ -17198,4 +17270,4 @@ class AsyncOperationRunner extends Component {
     }
 }
 
-export { AlignType, AsyncOperation, AutoSizeType, BlendMode, ButtonMode, ByteBuffer, ChildrenRenderOrder, Controller, DragDropManager, EaseType, Event, FillMethod, FillOrigin, FlipType, GButton, GComboBox, GComponent, GGraph, GGroup, GImage, GLabel, GList, GLoader, GLoader3D, GMovieClip, GObject, GObjectPool, GProgressBar, GRichTextField, GRoot, GScrollBar, GSlider, GTextField, GTextInput, GTree, GTreeNode, GTween, GTweener, GearAnimation, GearBase, GearColor, GearDisplay, GearDisplay2, GearFontSize, GearIcon, GearLook, GearSize, GearText, GearXY, GroupLayoutType, Image, ListLayoutType, ListSelectionMode, LoaderFillType, MovieClip, ObjectPropID, ObjectType, OverflowType, PackageItem, PackageItemType, PopupDirection, PopupMenu, ProgressTitleType, RelationType, ScrollBarDisplayType, ScrollPane, ScrollType, Transition, TranslationHelper, UBBParser, UIConfig, UIObjectFactory, UIPackage, VertAlignType, Window, registerFont };
+export { AlignType, AsyncOperation, AutoSizeType, BlendMode, ButtonMode, ByteBuffer, ChildrenRenderOrder, Controller, CurveType, DragDropManager, EaseType, Event, FillMethod, FillOrigin, FlipType, GButton, GComboBox, GComponent, GGraph, GGroup, GImage, GLabel, GList, GLoader, GLoader3D, GMovieClip, GObject, GObjectPool, GPath, GPathPoint, GProgressBar, GRichTextField, GRoot, GScrollBar, GSlider, GTextField, GTextInput, GTree, GTreeNode, GTween, GTweener, GearAnimation, GearBase, GearColor, GearDisplay, GearDisplay2, GearFontSize, GearIcon, GearLook, GearSize, GearText, GearXY, GroupLayoutType, Image, ListLayoutType, ListSelectionMode, LoaderFillType, MovieClip, ObjectPropID, ObjectType, OverflowType, PackageItem, PackageItemType, PopupDirection, PopupMenu, ProgressTitleType, RelationType, ScrollBarDisplayType, ScrollPane, ScrollType, Transition, TranslationHelper, UBBParser, UIConfig, UIObjectFactory, UIPackage, VertAlignType, Window, registerFont };

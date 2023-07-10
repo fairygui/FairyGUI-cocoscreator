@@ -1,4 +1,4 @@
-import { gfx, RenderComponent } from "cc";
+import { gfx, UIRenderer } from "cc";
 export var BlendMode;
 (function (BlendMode) {
     BlendMode[BlendMode["Normal"] = 0] = "Normal";
@@ -17,7 +17,7 @@ export var BlendMode;
 export class BlendModeUtils {
     static apply(node, blendMode) {
         let f = factors[blendMode];
-        let renderers = node.getComponentsInChildren(RenderComponent);
+        let renderers = node.getComponentsInChildren(UIRenderer);
         renderers.forEach(element => {
             element.srcBlendFactor = f[0];
             element.dstBlendFactor = f[1];
@@ -40,5 +40,5 @@ const factors = [
     [gfx.BlendFactor.ONE, gfx.BlendFactor.ZERO],
     [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA],
     [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA],
-    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA],
+    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA], //custom2
 ];

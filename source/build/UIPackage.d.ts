@@ -1,7 +1,7 @@
 import { Asset, AssetManager } from "cc";
 import { GObject } from "./GObject";
 import { PackageItem } from "./PackageItem";
-declare type PackageDependency = {
+type PackageDependency = {
     id: string;
     name: string;
 };

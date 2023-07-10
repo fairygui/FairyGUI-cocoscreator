@@ -1,9 +1,11 @@
 {
-  "ver": "2.0.12",
+  "ver": "2.3.8",
   "importer": "fbx",
   "imported": true,
   "uuid": "aade09ee-8f9d-413c-a9e8-8c686ea5e160",
-  "files": [],
+  "files": [
+    "__original-animation-0.cconb"
+  ],
   "subMetas": {
     "ef5e1": {
       "importer": "gltf-mesh",
@@ -11,7 +13,7 @@
       "displayName": "",
       "id": "ef5e1",
       "name": "grass.mesh",
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -19,7 +21,8 @@
       ],
       "subMetas": {},
       "userData": {
-        "gltfIndex": 0
+        "gltfIndex": 0,
+        "triangleCount": 77
       }
     },
     "73b7f": {
@@ -28,11 +31,10 @@
       "displayName": "",
       "id": "73b7f",
       "name": "Take 001.animation",
-      "ver": "1.0.14",
+      "ver": "1.0.17",
       "imported": true,
       "files": [
-        ".bin",
-        ".json"
+        ".cconb"
       ],
       "subMetas": {},
       "userData": {
@@ -64,13 +66,33 @@
         "jointsLength": 6
       }
     },
+    "80e0c": {
+      "importer": "gltf-embeded-image",
+      "uuid": "aade09ee-8f9d-413c-a9e8-8c686ea5e160@80e0c",
+      "displayName": "",
+      "id": "80e0c",
+      "name": "grass.png.image",
+      "userData": {
+        "gltfIndex": 0,
+        "fixAlphaTransparencyArtifacts": true,
+        "hasAlpha": false,
+        "type": "texture"
+      },
+      "ver": "1.0.3",
+      "imported": true,
+      "files": [
+        ".json",
+        ".png"
+      ],
+      "subMetas": {}
+    },
     "9787f": {
       "importer": "texture",
       "uuid": "aade09ee-8f9d-413c-a9e8-8c686ea5e160@9787f",
       "displayName": "",
       "id": "9787f",
       "name": "grass.texture",
-      "ver": "1.0.21",
+      "ver": "1.0.22",
       "imported": true,
       "files": [
         ".json"
@@ -84,8 +106,8 @@
         "mipfilter": "none",
         "premultiplyAlpha": false,
         "anisotropy": 1,
-        "isUuid": false,
-        "imageUuidOrDatabaseUri": "db://assets/model/helloWorld/grass/grass.png"
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "aade09ee-8f9d-413c-a9e8-8c686ea5e160@80e0c"
       }
     },
     "3022b": {
@@ -94,7 +116,7 @@
       "displayName": "",
       "id": "3022b",
       "name": "grass.prefab",
-      "ver": "1.0.12",
+      "ver": "1.0.13",
       "imported": true,
       "files": [
         ".json"
@@ -108,8 +130,8 @@
   "userData": {
     "imageMetas": [
       {
-        "name": "grass",
-        "uri": "db://assets/model/helloWorld/grass/grass.png"
+        "name": "grass.png",
+        "uri": "aade09ee-8f9d-413c-a9e8-8c686ea5e160@80e0c"
       }
     ],
     "animationImportSettings": [
@@ -122,7 +144,8 @@
             "name": "Take 001",
             "from": 0,
             "to": 3.3333332538604736,
-            "wrapMode": 2
+            "wrapMode": 2,
+            "previousId": "73b7f"
           }
         ]
       }
@@ -148,6 +171,29 @@
     "useVertexColors": true,
     "dumpMaterials": true,
     "materialDumpDir": "db://assets/model/helloWorld/grass",
-    "legacyFbxImporter": true
+    "legacyFbxImporter": true,
+    "fbx": {
+      "smartMaterialEnabled": false,
+      "matchMeshNames": false
+    },
+    "mountAllAnimationsOnPrefab": true,
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
   }
 }

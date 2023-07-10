@@ -52,5 +52,7 @@ export { Event } from "./event/Event";
 export { GTween } from "./tween/GTween";
 export { GTweener } from "./tween/GTweener";
 export { EaseType } from "./tween/EaseType";
+export * from "./tween/GPath";
+export * from "./tween/GPathPoint";
 export { UBBParser } from "./utils/UBBParser";
 export { ByteBuffer } from "./utils/ByteBuffer";

@@ -1,11 +1,11 @@
 {
-  "ver": "1.0.21",
+  "ver": "1.0.26",
   "importer": "image",
   "imported": true,
   "uuid": "6f891a7b-5a08-48e6-9841-ddb364ac86b1",
   "files": [
-    ".png",
-    ".json"
+    ".json",
+    ".png"
   ],
   "subMetas": {
     "6c48a": {
@@ -14,7 +14,7 @@
       "displayName": "soldier",
       "id": "6c48a",
       "name": "texture",
-      "ver": "1.0.21",
+      "ver": "1.0.22",
       "imported": true,
       "files": [
         ".json"
@@ -29,13 +29,15 @@
         "premultiplyAlpha": false,
         "anisotropy": 1,
         "isUuid": true,
-        "imageUuidOrDatabaseUri": "6f891a7b-5a08-48e6-9841-ddb364ac86b1"
+        "imageUuidOrDatabaseUri": "6f891a7b-5a08-48e6-9841-ddb364ac86b1",
+        "visible": false
       }
     }
   },
   "userData": {
     "type": "texture",
     "redirect": "6f891a7b-5a08-48e6-9841-ddb364ac86b1@6c48a",
-    "hasAlpha": true
+    "hasAlpha": true,
+    "fixAlphaTransparencyArtifacts": false
   }
 }

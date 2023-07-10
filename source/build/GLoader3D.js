@@ -177,8 +177,7 @@ export class GLoader3D extends GObject {
             this.setDragonBones(this._contentItem.asset, this._contentItem.atlasAsset, this._contentItem.skeletonAnchor);
     }
     setSpine(asset, anchor, pma) {
-        this.url = null;
-        this.clearContent();
+        this.freeSpine();
         let node = new Node();
         this._container.addChild(node);
         node.layer = UIConfig.defaultUILayer;
@@ -190,9 +189,13 @@ export class GLoader3D extends GObject {
         this.onChangeSpine();
         this.updateLayout();
     }
+    freeSpine() {
+        if (this._content) {
+            this._content.destroy();
+        }
+    }
     setDragonBones(asset, atlasAsset, anchor, pma) {
-        this.url = null;
-        this.clearContent();
+        this.freeDragonBones();
         let node = new Node();
         node.layer = UIConfig.defaultUILayer;
         this._container.addChild(node);
@@ -208,11 +211,23 @@ export class GLoader3D extends GObject {
         this.onChangeDragonBones();
         this.updateLayout();
     }
+    freeDragonBones() {
+        if (this._content) {
+            this._content.destroy();
+        }
+    }
     onChange() {
-        this.onChangeSpine();
-        this.onChangeDragonBones();
+        if (this._contentItem == null)
+            return;
+        if (this._contentItem.type == PackageItemType.Spine) {
+            this.onChangeSpine();
+        }
+        if (this._contentItem.type == PackageItemType.DragonBones) {
+            this.onChangeDragonBones();
+        }
     }
     onChangeSpine() {
+        var _a;
         if (!(this._content instanceof sp.Skeleton))
             return;
         if (this._animationName) {
@@ -231,7 +246,7 @@ export class GLoader3D extends GObject {
         else
             this._content.clearTrack(0);
         let skin = this._skinName || this._content.skeletonData.getRuntimeData().skins[0].name;
-        if (this._content["_skeleton"].skin != skin)
+        if (((_a = this._content["_skeleton"].skin) === null || _a === void 0 ? void 0 : _a.name) != skin)
             this._content.setSkin(skin);
     }
     onChangeDragonBones() {

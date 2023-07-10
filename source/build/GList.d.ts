@@ -6,7 +6,7 @@ import { GComponent } from "./GComponent";
 import { GObject } from "./GObject";
 import { GObjectPool } from "./GObjectPool";
 import { ByteBuffer } from "./utils/ByteBuffer";
-export declare type ListItemRenderer = (index: number, item: GObject) => void;
+export type ListItemRenderer = (index: number, item: GObject) => void;
 export declare class GList extends GComponent {
     itemRenderer: ListItemRenderer;
     itemProvider: (index: number) => string;

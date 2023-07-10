@@ -1,5 +1,5 @@
 {
-  "ver": "1.0.21",
+  "ver": "1.0.26",
   "importer": "image",
   "imported": true,
   "uuid": "95e5b02a-e338-423c-bdbb-17486db1d9eb",
@@ -14,7 +14,7 @@
       "displayName": "shield",
       "id": "6c48a",
       "name": "texture",
-      "ver": "1.0.21",
+      "ver": "1.0.22",
       "imported": true,
       "files": [
         ".json"
@@ -29,13 +29,15 @@
         "premultiplyAlpha": false,
         "anisotropy": 1,
         "isUuid": true,
-        "imageUuidOrDatabaseUri": "95e5b02a-e338-423c-bdbb-17486db1d9eb"
+        "imageUuidOrDatabaseUri": "95e5b02a-e338-423c-bdbb-17486db1d9eb",
+        "visible": false
       }
     }
   },
   "userData": {
     "type": "texture",
     "redirect": "95e5b02a-e338-423c-bdbb-17486db1d9eb@6c48a",
-    "hasAlpha": false
+    "hasAlpha": false,
+    "fixAlphaTransparencyArtifacts": false
   }
 }

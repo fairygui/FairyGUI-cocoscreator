@@ -326,7 +326,7 @@ export class GLoader3D extends GObject {
             this._content.clearTrack(0);
 
         let skin = this._skinName || this._content.skeletonData.getRuntimeData().skins[0].name;
-        if (this._content["_skeleton"].skin != skin)
+        if (this._content["_skeleton"].skin?.name != skin)
             this._content.setSkin(skin);
     }
 

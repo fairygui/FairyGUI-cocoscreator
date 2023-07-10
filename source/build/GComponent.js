@@ -19,6 +19,7 @@ export class GComponent extends GObject {
         this._sortingChildCount = 0;
         this._childrenRenderOrder = ChildrenRenderOrder.Ascent;
         this._apexIndex = 0;
+        this._invertedMask = false;
         this._node.name = "GComponent";
         this._children = new Array();
         this._controllers = new Array();
@@ -507,7 +508,7 @@ export class GComponent extends GObject {
             value.node.on(Node.EventType.TRANSFORM_CHANGED, this.onMaskContentChanged, this);
             value.node.on(Node.EventType.SIZE_CHANGED, this.onMaskContentChanged, this);
             value.node.on(Node.EventType.ANCHOR_CHANGED, this.onMaskContentChanged, this);
-            this._customMask.inverted = inverted;
+            this._invertedMask = inverted;
             if (this._node.activeInHierarchy)
                 this.onMaskReady();
             else
@@ -534,16 +535,17 @@ export class GComponent extends GObject {
     onMaskReady() {
         this.off(FUIEvent.DISPLAY, this.onMaskReady, this);
         if (this._maskContent instanceof GImage) {
-            this._customMask.type = Mask.Type.IMAGE_STENCIL;
+            this._customMask.type = Mask.Type.SPRITE_STENCIL;
             this._customMask.alphaThreshold = 0.0001;
             this._customMask.spriteFrame = this._maskContent._content.spriteFrame;
         }
         else if (this._maskContent instanceof GGraph) {
             if (this._maskContent.type == 2)
-                this._customMask.type = Mask.Type.ELLIPSE;
+                this._customMask.type = Mask.Type.GRAPHICS_ELLIPSE;
             else
-                this._customMask.type = Mask.Type.RECT;
+                this._customMask.type = Mask.Type.GRAPHICS_RECT;
         }
+        this._customMask.inverted = this._invertedMask;
     }
     onMaskContentChanged() {
         let maskNode = this._customMask.node;

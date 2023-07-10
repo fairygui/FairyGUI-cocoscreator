@@ -30,7 +30,7 @@ gulp.task("rollup", async function () {
         }
     };
     const subTask = await rollup.rollup(config);
-    await subTask.write(config);
+    await subTask.write(config.output);
 });
 
 gulp.task("uglify", function () {

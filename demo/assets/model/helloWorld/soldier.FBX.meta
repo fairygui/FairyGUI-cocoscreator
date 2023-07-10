@@ -1,9 +1,11 @@
 {
-  "ver": "2.0.12",
+  "ver": "2.3.8",
   "importer": "fbx",
   "imported": true,
   "uuid": "e3553cad-2f15-4293-859a-8f43c780f289",
-  "files": [],
+  "files": [
+    "__original-animation-0.cconb"
+  ],
   "subMetas": {
     "18751": {
       "importer": "gltf-mesh",
@@ -11,7 +13,7 @@
       "displayName": "",
       "id": "18751",
       "name": "soldier.mesh",
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -19,7 +21,8 @@
       ],
       "subMetas": {},
       "userData": {
-        "gltfIndex": 0
+        "gltfIndex": 0,
+        "triangleCount": 1160
       }
     },
     "30732": {
@@ -45,7 +48,7 @@
       "displayName": "",
       "id": "da6f3",
       "name": "shield.mesh",
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -53,7 +56,8 @@
       ],
       "subMetas": {},
       "userData": {
-        "gltfIndex": 1
+        "gltfIndex": 1,
+        "triangleCount": 80
       }
     },
     "4b929": {
@@ -62,7 +66,7 @@
       "displayName": "",
       "id": "4b929",
       "name": "sword.mesh",
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -70,7 +74,8 @@
       ],
       "subMetas": {},
       "userData": {
-        "gltfIndex": 2
+        "gltfIndex": 2,
+        "triangleCount": 44
       }
     },
     "39f7b": {
@@ -80,9 +85,10 @@
       "id": "39f7b",
       "name": "shield01.mesh",
       "userData": {
-        "gltfIndex": 3
+        "gltfIndex": 3,
+        "triangleCount": 8
       },
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -96,11 +102,10 @@
       "displayName": "",
       "id": "73b7f",
       "name": "Take 001.animation",
-      "ver": "1.0.14",
+      "ver": "1.0.17",
       "imported": true,
       "files": [
-        ".bin",
-        ".json"
+        ".cconb"
       ],
       "subMetas": {},
       "userData": {
@@ -173,7 +178,10 @@
       "id": "e94f1",
       "name": "shield.jpg.image",
       "userData": {
-        "gltfIndex": 1
+        "gltfIndex": 1,
+        "fixAlphaTransparencyArtifacts": true,
+        "hasAlpha": false,
+        "type": "texture"
       },
       "ver": "1.0.3",
       "imported": true,
@@ -200,7 +208,7 @@
         "isUuid": false,
         "imageUuidOrDatabaseUri": "db://assets/model/helloWorld/soldier.png"
       },
-      "ver": "1.0.21",
+      "ver": "1.0.22",
       "imported": true,
       "files": [
         ".json"
@@ -224,7 +232,7 @@
         "isUuid": true,
         "imageUuidOrDatabaseUri": "e3553cad-2f15-4293-859a-8f43c780f289@e94f1"
       },
-      "ver": "1.0.21",
+      "ver": "1.0.22",
       "imported": true,
       "files": [
         ".json"
@@ -237,7 +245,7 @@
       "displayName": "",
       "id": "d252c",
       "name": "soldier.prefab",
-      "ver": "1.0.12",
+      "ver": "1.0.13",
       "imported": true,
       "files": [
         ".json"
@@ -297,11 +305,35 @@
             "name": "Take 001",
             "from": 0.03333333333333333,
             "to": 1.3333333730697632,
-            "wrapMode": 2
+            "wrapMode": 2,
+            "previousId": "73b7f"
           }
         ]
       }
     ],
-    "legacyFbxImporter": true
+    "legacyFbxImporter": true,
+    "fbx": {
+      "smartMaterialEnabled": false,
+      "matchMeshNames": false
+    },
+    "mountAllAnimationsOnPrefab": true,
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
   }
 }

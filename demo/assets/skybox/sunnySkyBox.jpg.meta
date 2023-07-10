@@ -1,5 +1,5 @@
 {
-  "ver": "1.0.21",
+  "ver": "1.0.26",
   "importer": "image",
   "imported": true,
   "uuid": "5af201b5-5951-4e2c-a81f-ac4aad9132cb",
@@ -22,25 +22,25 @@
         "mipfilter": "linear",
         "anisotropy": 1,
         "isRGBE": false,
-        "imageDatabaseUri": "db://assets/skybox/sunnySkyBox.jpg"
+        "imageDatabaseUri": "5af201b5-5951-4e2c-a81f-ac4aad9132cb"
       },
-      "ver": "1.0.9",
+      "ver": "1.0.10",
       "imported": true,
       "files": [
         ".json"
       ],
       "subMetas": {
-        "7d38f": {
+        "e9a6d": {
           "importer": "texture-cube-face",
-          "uuid": "5af201b5-5951-4e2c-a81f-ac4aad9132cb@b47c0@7d38f",
+          "uuid": "5af201b5-5951-4e2c-a81f-ac4aad9132cb@b47c0@e9a6d",
           "displayName": "",
-          "id": "7d38f",
-          "name": "bottom",
+          "id": "e9a6d",
+          "name": "front",
           "userData": {},
           "ver": "1.0.0",
           "imported": true,
           "files": [
-            ".png",
+            ".jpg",
             ".json"
           ],
           "subMetas": {}
@@ -55,22 +55,7 @@
           "ver": "1.0.0",
           "imported": true,
           "files": [
-            ".png",
-            ".json"
-          ],
-          "subMetas": {}
-        },
-        "e9a6d": {
-          "importer": "texture-cube-face",
-          "uuid": "5af201b5-5951-4e2c-a81f-ac4aad9132cb@b47c0@e9a6d",
-          "displayName": "",
-          "id": "e9a6d",
-          "name": "front",
-          "userData": {},
-          "ver": "1.0.0",
-          "imported": true,
-          "files": [
-            ".png",
+            ".jpg",
             ".json"
           ],
           "subMetas": {}
@@ -85,7 +70,22 @@
           "ver": "1.0.0",
           "imported": true,
           "files": [
-            ".png",
+            ".jpg",
+            ".json"
+          ],
+          "subMetas": {}
+        },
+        "7d38f": {
+          "importer": "texture-cube-face",
+          "uuid": "5af201b5-5951-4e2c-a81f-ac4aad9132cb@b47c0@7d38f",
+          "displayName": "",
+          "id": "7d38f",
+          "name": "bottom",
+          "userData": {},
+          "ver": "1.0.0",
+          "imported": true,
+          "files": [
+            ".jpg",
             ".json"
           ],
           "subMetas": {}
@@ -100,7 +100,7 @@
           "ver": "1.0.0",
           "imported": true,
           "files": [
-            ".png",
+            ".jpg",
             ".json"
           ],
           "subMetas": {}
@@ -115,7 +115,7 @@
           "ver": "1.0.0",
           "imported": true,
           "files": [
-            ".png",
+            ".jpg",
             ".json"
           ],
           "subMetas": {}
@@ -126,6 +126,7 @@
   "userData": {
     "hasAlpha": false,
     "type": "texture cube",
-    "redirect": "5af201b5-5951-4e2c-a81f-ac4aad9132cb@b47c0"
+    "redirect": "5af201b5-5951-4e2c-a81f-ac4aad9132cb@b47c0",
+    "fixAlphaTransparencyArtifacts": false
   }
 }

@@ -1,5 +1,5 @@
 {
-  "ver": "2.0.12",
+  "ver": "2.3.8",
   "importer": "fbx",
   "imported": true,
   "uuid": "0ab3142a-6968-4073-95af-026bc3b23623",
@@ -11,7 +11,7 @@
       "displayName": "",
       "id": "71919",
       "name": "tree1-6.mesh",
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -19,7 +19,8 @@
       ],
       "subMetas": {},
       "userData": {
-        "gltfIndex": 6
+        "gltfIndex": 6,
+        "triangleCount": 586
       }
     },
     "2b0a8": {
@@ -28,7 +29,7 @@
       "displayName": "",
       "id": "2b0a8",
       "name": "plane01-0.mesh",
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -36,7 +37,8 @@
       ],
       "subMetas": {},
       "userData": {
-        "gltfIndex": 0
+        "gltfIndex": 0,
+        "triangleCount": 168
       }
     },
     "4a7d8": {
@@ -45,7 +47,7 @@
       "displayName": "",
       "id": "4a7d8",
       "name": "stone1-1.mesh",
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -53,7 +55,8 @@
       ],
       "subMetas": {},
       "userData": {
-        "gltfIndex": 1
+        "gltfIndex": 1,
+        "triangleCount": 878
       }
     },
     "0e750": {
@@ -62,7 +65,7 @@
       "displayName": "",
       "id": "0e750",
       "name": "tree1-2.mesh",
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -70,7 +73,8 @@
       ],
       "subMetas": {},
       "userData": {
-        "gltfIndex": 2
+        "gltfIndex": 2,
+        "triangleCount": 586
       }
     },
     "ef86b": {
@@ -79,7 +83,7 @@
       "displayName": "",
       "id": "ef86b",
       "name": "tree1-3.mesh",
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -87,7 +91,8 @@
       ],
       "subMetas": {},
       "userData": {
-        "gltfIndex": 3
+        "gltfIndex": 3,
+        "triangleCount": 437
       }
     },
     "426f2": {
@@ -96,7 +101,7 @@
       "displayName": "",
       "id": "426f2",
       "name": "tree1-4.mesh",
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -104,7 +109,8 @@
       ],
       "subMetas": {},
       "userData": {
-        "gltfIndex": 4
+        "gltfIndex": 4,
+        "triangleCount": 436
       }
     },
     "754a2": {
@@ -113,7 +119,7 @@
       "displayName": "",
       "id": "754a2",
       "name": "tree1-5.mesh",
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -121,7 +127,8 @@
       ],
       "subMetas": {},
       "userData": {
-        "gltfIndex": 5
+        "gltfIndex": 5,
+        "triangleCount": 586
       }
     },
     "1332c": {
@@ -130,7 +137,7 @@
       "displayName": "",
       "id": "1332c",
       "name": "tree1-7.mesh",
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -138,7 +145,8 @@
       ],
       "subMetas": {},
       "userData": {
-        "gltfIndex": 7
+        "gltfIndex": 7,
+        "triangleCount": 586
       }
     },
     "4d16f": {
@@ -147,7 +155,7 @@
       "displayName": "",
       "id": "4d16f",
       "name": "tree1-8.mesh",
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -155,7 +163,8 @@
       ],
       "subMetas": {},
       "userData": {
-        "gltfIndex": 8
+        "gltfIndex": 8,
+        "triangleCount": 436
       }
     },
     "efe84": {
@@ -164,7 +173,7 @@
       "displayName": "",
       "id": "efe84",
       "name": "tree1-9.mesh",
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -172,8 +181,29 @@
       ],
       "subMetas": {},
       "userData": {
-        "gltfIndex": 9
+        "gltfIndex": 9,
+        "triangleCount": 437
       }
+    },
+    "baeab": {
+      "importer": "gltf-embeded-image",
+      "uuid": "0ab3142a-6968-4073-95af-026bc3b23623@baeab",
+      "displayName": "",
+      "id": "baeab",
+      "name": "seafloor.jpg.image",
+      "userData": {
+        "gltfIndex": 0,
+        "fixAlphaTransparencyArtifacts": true,
+        "hasAlpha": false,
+        "type": "texture"
+      },
+      "ver": "1.0.3",
+      "imported": true,
+      "files": [
+        ".jpg",
+        ".json"
+      ],
+      "subMetas": {}
     },
     "eeccb": {
       "importer": "gltf-embeded-image",
@@ -182,7 +212,10 @@
       "id": "eeccb",
       "name": "stone.jpg.image",
       "userData": {
-        "gltfIndex": 1
+        "gltfIndex": 1,
+        "fixAlphaTransparencyArtifacts": true,
+        "hasAlpha": false,
+        "type": "texture"
       },
       "ver": "1.0.3",
       "imported": true,
@@ -199,13 +232,16 @@
       "id": "3b6f8",
       "name": "tree.png.image",
       "userData": {
-        "gltfIndex": 2
+        "gltfIndex": 2,
+        "fixAlphaTransparencyArtifacts": true,
+        "hasAlpha": false,
+        "type": "texture"
       },
       "ver": "1.0.3",
       "imported": true,
       "files": [
-        ".png",
-        ".json"
+        ".json",
+        ".png"
       ],
       "subMetas": {}
     },
@@ -223,10 +259,10 @@
         "mipfilter": "none",
         "premultiplyAlpha": false,
         "anisotropy": 1,
-        "isUuid": false,
-        "imageUuidOrDatabaseUri": "db://assets/model/helloWorld/seafloor.jpg"
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "0ab3142a-6968-4073-95af-026bc3b23623@baeab"
       },
-      "ver": "1.0.21",
+      "ver": "1.0.22",
       "imported": true,
       "files": [
         ".json"
@@ -250,7 +286,7 @@
         "isUuid": true,
         "imageUuidOrDatabaseUri": "0ab3142a-6968-4073-95af-026bc3b23623@eeccb"
       },
-      "ver": "1.0.21",
+      "ver": "1.0.22",
       "imported": true,
       "files": [
         ".json"
@@ -274,7 +310,7 @@
         "isUuid": true,
         "imageUuidOrDatabaseUri": "0ab3142a-6968-4073-95af-026bc3b23623@3b6f8"
       },
-      "ver": "1.0.21",
+      "ver": "1.0.22",
       "imported": true,
       "files": [
         ".json"
@@ -287,7 +323,7 @@
       "displayName": "",
       "id": "cc8e5",
       "name": "islands.prefab",
-      "ver": "1.0.12",
+      "ver": "1.0.13",
       "imported": true,
       "files": [
         ".json"
@@ -301,8 +337,8 @@
   "userData": {
     "imageMetas": [
       {
-        "name": "seafloor",
-        "uri": "db://assets/model/helloWorld/seafloor.jpg"
+        "name": "seafloor.jpg",
+        "uri": "0ab3142a-6968-4073-95af-026bc3b23623@baeab"
       },
       {
         "name": "stone.jpg",
@@ -344,6 +380,29 @@
     },
     "dumpMaterials": true,
     "materialDumpDir": "db://assets/material",
-    "legacyFbxImporter": true
+    "legacyFbxImporter": true,
+    "fbx": {
+      "smartMaterialEnabled": false,
+      "matchMeshNames": false
+    },
+    "mountAllAnimationsOnPrefab": true,
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
   }
 }
