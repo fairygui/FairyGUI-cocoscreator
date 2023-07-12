@@ -11782,8 +11782,6 @@ class GTextInput extends GTextField {
 class MyEditBox extends EditBox {
     _registerEvent() {
         //取消掉原来的事件处理
-        this.placeholderLabel.getComponent(UITransform).setAnchorPoint(0, 1);
-        this.textLabel.getComponent(UITransform).setAnchorPoint(0, 1);
     }
     // _syncSize() {
     //     let size = this.node._uiProps.uiTransformComp.contentSize;
