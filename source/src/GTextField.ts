@@ -1,4 +1,4 @@
-import { BitmapFont, Color, Font, HorizontalTextAlignment, Label, LabelOutline, LabelShadow, Node, SystemEventType, Vec2, VerticalTextAlignment } from "cc";
+import { BitmapFont, Color, Font, HorizontalTextAlignment, Label, LabelOutline, LabelShadow, Node, SystemEventType, UITransform, Vec2, VerticalTextAlignment } from "cc";
 import { Event as FUIEvent } from "./event/Event";
 import { AutoSizeType, ObjectPropID } from "./FieldTypes";
 import { GObject } from "./GObject";
@@ -52,6 +52,7 @@ export class GTextField extends GObject {
     protected createRenderer() {
         this._label = this._node.addComponent(Label);
         this._label.string = "";
+        // this._label.getComponent(UITransform).setAnchorPoint(0, 1);
         this.autoSize = AutoSizeType.Both;
     }
 

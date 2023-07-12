@@ -25,6 +25,7 @@ export class GTextField extends GObject {
     createRenderer() {
         this._label = this._node.addComponent(Label);
         this._label.string = "";
+        // this._label.getComponent(UITransform).setAnchorPoint(0, 1);
         this.autoSize = AutoSizeType.Both;
     }
     set text(value) {
