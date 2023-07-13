@@ -1,4 +1,4 @@
-import { gfx, UIRenderer, Event as Event$1, Vec2, Node, game, director, macro, Color, Layers, Font, resources, Vec3, Rect, UITransform, UIOpacity, Component, Graphics, misc, Sprite, Size, view, ImageAsset, AudioClip, BufferAsset, AssetManager, Asset, assetManager, Texture2D, SpriteFrame, BitmapFont, sp, dragonBones, path, Label, LabelOutline, LabelShadow, SpriteAtlas, RichText, sys, EventMouse, EventTarget, Mask, math, isValid, View, AudioSourceComponent, EditBox } from 'cc';
+import { gfx, UIRenderer, Event as Event$1, Vec2, Node, game, director, macro, Color, Layers, Font, resources, Vec3, Rect, UITransform, UIOpacity, Component, Graphics, misc, Sprite, Size, view, ImageAsset, AudioClip, BufferAsset, AssetManager, Asset, assetManager, Texture2D, SpriteFrame, BitmapFont, sp, dragonBones, path, Label, LabelOutline, LabelShadow, SpriteAtlas, RichText, sys, EventMouse, EventTarget, Mask, math, isValid, View, AudioSourceComponent, EditBox, Overflow } from 'cc';
 import { EDITOR } from 'cc/env';
 
 var ButtonMode;
@@ -11782,6 +11782,10 @@ class GTextInput extends GTextField {
 class MyEditBox extends EditBox {
     _registerEvent() {
         //取消掉原来的事件处理
+        this.placeholderLabel.getComponent(UITransform).setAnchorPoint(0, 1);
+        this.textLabel.getComponent(UITransform).setAnchorPoint(0, 1);
+        this.placeholderLabel.overflow = Overflow.CLAMP;
+        this.textLabel.overflow = Overflow.CLAMP;
     }
     // _syncSize() {
     //     let size = this.node._uiProps.uiTransformComp.contentSize;
