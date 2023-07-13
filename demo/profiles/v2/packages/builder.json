@@ -5,5 +5,10 @@
   },
   "log": {
     "level": 4
+  },
+  "common": {
+    "polyfills": {
+      "asyncFunctions": true
+    }
   }
 }
