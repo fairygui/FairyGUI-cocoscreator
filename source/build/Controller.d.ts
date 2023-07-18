@@ -1,3 +1,4 @@
+import { ControllerAction } from "./action/ControllerAction";
 import { ByteBuffer } from "./utils/ByteBuffer";
 export declare class Controller extends EventTarget {
     private _selectedIndex;
@@ -39,6 +40,8 @@ export declare class Controller extends EventTarget {
     get previousPageId(): string | null;
     runActions(): void;
     setup(buffer: ByteBuffer): void;
+    addAction(action: ControllerAction): void;
 }
 import { EventTarget } from "cc";
 import { GComponent } from "./GComponent";
+export declare function createAction(type: number): ControllerAction;

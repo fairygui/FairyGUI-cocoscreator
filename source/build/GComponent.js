@@ -1,5 +1,5 @@
 import { Mask, Vec2, Node, UITransform } from "cc";
-import { Controller } from "./Controller";
+import { Controller, createAction } from "./Controller";
 import { Event as FUIEvent } from "./event/Event";
 import { PixelHitTest, ChildHitArea } from "./event/HitTest";
 import { ChildrenRenderOrder, OverflowType, ObjectType } from "./FieldTypes";
@@ -1026,6 +1026,35 @@ export class GComponent extends GObject {
         let cnt = this._transitions.length;
         for (let i = 0; i < cnt; ++i)
             this._transitions[i].onDisable();
+    }
+    addTransition(transition, newName) {
+        let trans = new Transition(this);
+        trans.copyFrom(transition);
+        if (newName) {
+            trans.name = newName;
+        }
+        this._transitions.push(trans);
+    }
+    addControllerAction(controlName, transition, fromPages, toPages) {
+        let ctrl = this.getController(controlName);
+        if (!ctrl)
+            return;
+        this.addTransition(transition);
+        var action = createAction(0);
+        action.transitionName = transition.name;
+        if (fromPages) {
+            fromPages = fromPages.map((it) => {
+                return ctrl.getPageIdByName(it);
+            });
+        }
+        if (toPages) {
+            toPages = toPages.map((it) => {
+                return ctrl.getPageIdByName(it);
+            });
+        }
+        action.fromPage = fromPages;
+        action.toPage = toPages;
+        ctrl.addAction(action);
     }
 }
 var s_vec2 = new Vec2();

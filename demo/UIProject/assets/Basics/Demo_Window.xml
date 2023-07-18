@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <component size="640,400">
   <displayList>
-    <component id="n0" name="n0" src="poiq7e" xy="62,58" size="121,36">
+    <component id="n0" name="n0" src="poiq7e" fileName="components/Button1.xml" xy="62,58" size="121,36">
       <Button title="WindowA"/>
     </component>
-    <component id="n1" name="n1" src="poiq7e" xy="223,58" size="127,36">
+    <component id="n1" name="n1" src="poiq7e" fileName="components/Button1.xml" xy="223,58" size="127,36">
       <Button title="WindowB"/>
+    </component>
+    <component id="n2_pyal" name="b1" src="rpmb13" fileName="components/Button5.xml" xy="425,75">
+      <Button icon="ui://9leh0eyfrpmbu"/>
     </component>
   </displayList>
 </component>

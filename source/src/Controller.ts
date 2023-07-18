@@ -289,6 +289,13 @@ export class Controller extends EventTarget {
         else
             this._selectedIndex = -1;
     }
+
+    addAction(action: ControllerAction): void {
+        if (!this._actions)
+            this._actions = new Array<ControllerAction>();
+        
+        this._actions.push(action);
+    }
 }
 
 
@@ -297,7 +304,7 @@ import { ChangePageAction } from "./action/ChangePageAction"
 import { EventTarget } from "cc";
 import { GComponent } from "./GComponent";
 
-function createAction(type: number): ControllerAction {
+export function createAction(type: number): ControllerAction {
     switch (type) {
         case 0:
             return new PlayTransitionAction();

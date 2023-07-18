@@ -108,4 +108,6 @@ export declare class GComponent extends GObject {
     setup_afterAdd(buffer: ByteBuffer, beginPos: number): void;
     protected onEnable(): void;
     protected onDisable(): void;
+    addTransition(transition: Transition, newName?: string): void;
+    addControllerAction(controlName: string, transition: Transition, fromPages: string[], toPages: string[]): void;
 }

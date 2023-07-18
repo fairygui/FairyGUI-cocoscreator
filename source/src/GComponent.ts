@@ -1,5 +1,5 @@
 import { Mask, Vec2, Size, Node, UITransform, Constructor } from "cc";
-import { Controller } from "./Controller";
+import { Controller, createAction } from "./Controller";
 import { Event as FUIEvent } from "./event/Event";
 import { IHitTest, PixelHitTest, ChildHitArea } from "./event/HitTest";
 import { ChildrenRenderOrder, OverflowType, ObjectType } from "./FieldTypes";
@@ -16,6 +16,7 @@ import { UIConfig } from "./UIConfig";
 import { UIContentScaler } from "./UIContentScaler";
 import { Decls, IObjectFactoryType, UIPackage } from "./UIPackage";
 import { ByteBuffer } from "./utils/ByteBuffer";
+import { PlayTransitionAction } from "./action/PlayTransitionAction";
 
 export class GComponent extends GObject {
     public hitArea?: IHitTest;
@@ -1274,6 +1275,42 @@ export class GComponent extends GObject {
         let cnt: number = this._transitions.length;
         for (let i: number = 0; i < cnt; ++i)
             this._transitions[i].onDisable();
+    }
+
+    addTransition(transition: Transition, newName?: string): void {
+        let trans = new Transition(this);
+        trans.copyFrom(transition);
+        if(newName) {
+            trans.name = newName;
+        }
+        this._transitions.push(trans);
+    }
+
+    addControllerAction(controlName: string, transition: Transition, fromPages: string[], toPages: string[]): void {
+        let ctrl = this.getController(controlName);
+        if (!ctrl)
+            return;
+
+        this.addTransition(transition);
+
+        var action = createAction(0) as PlayTransitionAction;
+        action.transitionName = transition.name;
+
+        if(fromPages) {
+            fromPages = fromPages.map((it) => {
+                return ctrl.getPageIdByName(it);
+            });
+        }
+        if(toPages) {
+            toPages = toPages.map((it) => {
+                return ctrl.getPageIdByName(it);
+            });
+        }
+
+        action.fromPage = fromPages;
+        action.toPage = toPages;
+
+        ctrl.addAction(action);
     }
 }
 

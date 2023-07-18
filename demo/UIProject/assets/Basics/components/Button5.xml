@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<component size="180,70" extention="Button">
-  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+<component size="180,70" pivot="0.5,0.5" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="1">
+    <action type="play_transition" fromPage="1" toPage="0,2" transition="up"/>
+    <action type="play_transition" fromPage="0,2" toPage="1" transition="down"/>
+  </controller>
   <displayList>
-    <image id="n0" name="bg" src="rpmb1" xy="2,3" size="181,70" aspect="true">
+    <image id="n0" name="bg" src="rpmb1" fileName="images/VIP_png.png" xy="2,3" size="181,70" aspect="true">
       <relation target="" sidePair="width-width,height-height"/>
     </image>
     <text id="n1" name="title" xy="10,10" size="157,46" fontSize="22" color="#ffff00" align="center" vAlign="middle" autoSize="none" text="">
@@ -12,5 +15,12 @@
       <relation target="" sidePair="width-width,height-height"/>
     </loader>
   </displayList>
-  <Button downEffect="scale" downEffectValue="0.80"/>
+  <Button/>
+  <transition name="down">
+    <item time="0" type="Scale" tween="true" startValue="1,1" endValue="1.2,1.2" duration="9"/>
+  </transition>
+  <transition name="up">
+    <item time="0" type="Scale" tween="true" startValue="1.2,1.2" endValue="1.1,1" duration="6"/>
+    <item time="6" type="Scale" tween="true" startValue="1.1,1" endValue="1,1" duration="6"/>
+  </transition>
 </component>

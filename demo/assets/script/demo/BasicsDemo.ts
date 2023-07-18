@@ -143,7 +143,14 @@ export default class BasicDemo extends Component {
     private playWindow(): void {
         var obj: fgui.GComponent = this._demoObjects["Window"];
         obj.getChild("n0").onClick(this.__clickWindowA, this);
-        obj.getChild("n1").onClick(this.__clickWindowB, this);
+        obj.getChild("n1").onClick(this.__clickWindowB, this);        
+
+        var b1 = obj.getChild("b1").asCom;
+        var b2 = obj.getChild("n1").asCom;
+        let downT = b1.getTransition("down");
+        let upT = b1.getTransition("up");
+        b2.addControllerAction("button", upT, ["down", "selectedOver"], ["up", "over"]);
+        b2.addControllerAction("button", downT, ["up", "over"], ["down", "selectedOver"]);        
     }
 
     private __clickWindowA(): void {

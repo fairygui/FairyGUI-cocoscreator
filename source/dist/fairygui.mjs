@@ -7195,6 +7195,11 @@ class Controller extends EventTarget {
         else
             this._selectedIndex = -1;
     }
+    addAction(action) {
+        if (!this._actions)
+            this._actions = new Array();
+        this._actions.push(action);
+    }
 }
 function createAction(type) {
     switch (type) {
@@ -10014,6 +10019,18 @@ class Transition {
                 break;
         }
     }
+    copyFrom(source) {
+        let cnt = source._items.length;
+        this.name = source.name;
+        this._options = source._options;
+        this._autoPlay = source._autoPlay;
+        this._autoPlayTimes = source._autoPlayTimes;
+        this._autoPlayDelay = source._autoPlayDelay;
+        this._totalDuration = source._totalDuration;
+        for (let i = 0; i < cnt; i++) {
+            this._items.push(source._items[i].clone());
+        }
+    }
 }
 const OPTION_IGNORE_DISPLAY_CONTROLLER = 1;
 const OPTION_AUTO_STOP_DISABLED = 2;
@@ -10044,12 +10061,39 @@ class Item {
         this.value = {};
         this.displayLockToken = 0;
     }
+    clone() {
+        let item = new Item(this.type);
+        item.time = this.time;
+        item.targetId = this.targetId;
+        if (this.tweenConfig)
+            item.tweenConfig = this.tweenConfig.clone();
+        item.label = this.label;
+        item.value = Object.assign({}, this.value);
+        return item;
+    }
 }
 class TweenConfig {
     constructor() {
         this.easeType = EaseType.QuadOut;
         this.startValue = { b1: true, b2: true };
         this.endValue = { b1: true, b2: true };
+    }
+    clone() {
+        let keys = Object.keys(this);
+        let tc = new TweenConfig();
+        for (let i = 0; i < keys.length; i++) {
+            let k = keys[i];
+            // @ts-ignore
+            let value = this[k];
+            if (value == null) {
+                continue;
+            }
+            if (k == "endHook") {
+                continue;
+            }
+            tc[k] = value;
+        }
+        return tc;
     }
 }
 
@@ -11066,6 +11110,35 @@ class GComponent extends GObject {
         let cnt = this._transitions.length;
         for (let i = 0; i < cnt; ++i)
             this._transitions[i].onDisable();
+    }
+    addTransition(transition, newName) {
+        let trans = new Transition(this);
+        trans.copyFrom(transition);
+        if (newName) {
+            trans.name = newName;
+        }
+        this._transitions.push(trans);
+    }
+    addControllerAction(controlName, transition, fromPages, toPages) {
+        let ctrl = this.getController(controlName);
+        if (!ctrl)
+            return;
+        this.addTransition(transition);
+        var action = createAction(0);
+        action.transitionName = transition.name;
+        if (fromPages) {
+            fromPages = fromPages.map((it) => {
+                return ctrl.getPageIdByName(it);
+            });
+        }
+        if (toPages) {
+            toPages = toPages.map((it) => {
+                return ctrl.getPageIdByName(it);
+            });
+        }
+        action.fromPage = fromPages;
+        action.toPage = toPages;
+        ctrl.addAction(action);
     }
 }
 var s_vec2$2 = new Vec2();
@@ -12929,6 +13002,12 @@ class GButton extends GComponent {
         this._changeStateOnClick = true;
         this._downEffect = 0;
         this._downEffectValue = 0.8;
+    }
+    get downEffect() {
+        return this._downEffect;
+    }
+    set downEffect(value) {
+        this._downEffect = value;
     }
     get icon() {
         return this._icon;

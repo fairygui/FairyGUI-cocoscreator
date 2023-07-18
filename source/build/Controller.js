@@ -227,11 +227,16 @@ export class Controller extends EventTarget {
         else
             this._selectedIndex = -1;
     }
+    addAction(action) {
+        if (!this._actions)
+            this._actions = new Array();
+        this._actions.push(action);
+    }
 }
 import { PlayTransitionAction } from "./action/PlayTransitionAction";
 import { ChangePageAction } from "./action/ChangePageAction";
 import { EventTarget } from "cc";
-function createAction(type) {
+export function createAction(type) {
     switch (type) {
         case 0:
             return new PlayTransitionAction();
