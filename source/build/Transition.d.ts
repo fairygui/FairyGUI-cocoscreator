@@ -57,5 +57,5 @@ export declare class Transition {
     private applyValue;
     setup(buffer: ByteBuffer): void;
     private decodeValue;
-    copyFrom(source: Transition): void;
+    copyFrom(source: Transition, applyBaseValue?: boolean): void;
 }

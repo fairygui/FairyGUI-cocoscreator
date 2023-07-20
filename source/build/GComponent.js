@@ -1027,19 +1027,19 @@ export class GComponent extends GObject {
         for (let i = 0; i < cnt; ++i)
             this._transitions[i].onDisable();
     }
-    addTransition(transition, newName) {
+    addTransition(transition, newName, applyBaseValue = true) {
         let trans = new Transition(this);
-        trans.copyFrom(transition);
+        trans.copyFrom(transition, applyBaseValue);
         if (newName) {
             trans.name = newName;
         }
         this._transitions.push(trans);
     }
-    addControllerAction(controlName, transition, fromPages, toPages) {
+    addControllerAction(controlName, transition, fromPages, toPages, applyBaseValue = true) {
         let ctrl = this.getController(controlName);
         if (!ctrl)
             return;
-        this.addTransition(transition);
+        this.addTransition(transition, null, applyBaseValue);
         var action = createAction(0);
         action.transitionName = transition.name;
         if (fromPages) {

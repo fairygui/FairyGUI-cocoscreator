@@ -983,7 +983,7 @@ export class Transition {
                 break;
         }
     }
-    copyFrom(source) {
+    copyFrom(source, applyBaseValue = true) {
         let cnt = source._items.length;
         this.name = source.name;
         this._options = source._options;
@@ -992,7 +992,33 @@ export class Transition {
         this._autoPlayDelay = source._autoPlayDelay;
         this._totalDuration = source._totalDuration;
         for (let i = 0; i < cnt; i++) {
-            this._items.push(source._items[i].clone());
+            let item = source._items[i].clone();
+            if (applyBaseValue) {
+                let config = item.tweenConfig;
+                if (item.type == ActionType.Scale) {
+                    if (config) {
+                        if (config.startValue) {
+                            config.startValue.f1 *= this._owner.scaleX;
+                            config.startValue.f2 *= this._owner.scaleY;
+                        }
+                        if (item.tweenConfig.endValue) {
+                            config.endValue.f1 *= this._owner.scaleX;
+                            config.endValue.f2 *= this._owner.scaleY;
+                        }
+                    }
+                }
+                else if (item.type == ActionType.Alpha) {
+                    if (config) {
+                        if (config.startValue) {
+                            config.startValue.f1 *= this._owner.alpha;
+                        }
+                        if (item.tweenConfig.endValue) {
+                            config.endValue.f1 *= this._owner.alpha;
+                        }
+                    }
+                }
+            }
+            this._items.push(item);
         }
     }
 }

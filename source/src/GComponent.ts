@@ -1277,21 +1277,21 @@ export class GComponent extends GObject {
             this._transitions[i].onDisable();
     }
 
-    addTransition(transition: Transition, newName?: string): void {
+    addTransition(transition: Transition, newName?: string, applyBaseValue = true): void {
         let trans = new Transition(this);
-        trans.copyFrom(transition);
+        trans.copyFrom(transition, applyBaseValue);
         if(newName) {
             trans.name = newName;
         }
         this._transitions.push(trans);
     }
 
-    addControllerAction(controlName: string, transition: Transition, fromPages: string[], toPages: string[]): void {
+    addControllerAction(controlName: string, transition: Transition, fromPages: string[], toPages: string[], applyBaseValue = true): void {
         let ctrl = this.getController(controlName);
         if (!ctrl)
             return;
 
-        this.addTransition(transition);
+        this.addTransition(transition, null, applyBaseValue);
 
         var action = createAction(0) as PlayTransitionAction;
         action.transitionName = transition.name;

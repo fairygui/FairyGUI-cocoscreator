@@ -800,8 +800,8 @@ declare module 'fairygui-cc/GComponent' {
         setup_afterAdd(buffer: ByteBuffer, beginPos: number): void;
         protected onEnable(): void;
         protected onDisable(): void;
-        addTransition(transition: Transition, newName?: string): void;
-        addControllerAction(controlName: string, transition: Transition, fromPages: string[], toPages: string[]): void;
+        addTransition(transition: Transition, newName?: string, applyBaseValue?: boolean): void;
+        addControllerAction(controlName: string, transition: Transition, fromPages: string[], toPages: string[], applyBaseValue?: boolean): void;
     }
 }
 
@@ -1320,7 +1320,7 @@ declare module 'fairygui-cc/Transition' {
         onEnable(): void;
         onDisable(): void;
         setup(buffer: ByteBuffer): void;
-        copyFrom(source: Transition): void;
+        copyFrom(source: Transition, applyBaseValue?: boolean): void;
     }
 }
 
