@@ -1176,27 +1176,26 @@ export class Transition {
             let item = source._items[i].clone();
 
             if(applyBaseValue) {
-                let config = item.tweenConfig;
-                if(item.type == ActionType.Scale) {
-                    if(config) {
+                let config = item.tweenConfig;     
+                let rawConfig = source._items[i].tweenConfig;           
+                if(config) {
+                    if(item.type == ActionType.Scale) {
                         if(config.startValue) {
-                            config.startValue.f1 *= this._owner.scaleX;
-                            config.startValue.f2 *= this._owner.scaleY;
+                            config.startValue.f1 = rawConfig.startValue.f1 * this._owner.scaleX;
+                            config.startValue.f2 = rawConfig.startValue.f2 * this._owner.scaleY;
+                        }
+
+                        if(config.endValue) {
+                            config.endValue.f1 = rawConfig.endValue.f1 * this._owner.scaleX;
+                            config.endValue.f2 = rawConfig.endValue.f2 * this._owner.scaleY;
+                        }
+                    }else if(item.type == ActionType.Alpha) {
+                        if(config.startValue) {
+                            config.startValue.f1 = rawConfig.startValue.f1 * this._owner.alpha;
                         }
     
-                        if(item.tweenConfig.endValue) {
-                            config.endValue.f1 *= this._owner.scaleX;
-                            config.endValue.f2 *= this._owner.scaleY;
-                        }
-                    }
-                }else if(item.type == ActionType.Alpha) {
-                    if(config) {
-                        if(config.startValue) {
-                            config.startValue.f1 *= this._owner.alpha;
-                        }
-    
-                        if(item.tweenConfig.endValue) {
-                            config.endValue.f1 *= this._owner.alpha;
+                        if(config.endValue) {
+                            config.endValue.f1 = rawConfig.endValue.f1 * this._owner.alpha;
                         }
                     }
                 }
@@ -1292,6 +1291,10 @@ class TweenConfig {
 
             if(k == "endHook") {
                 continue;
+            }
+
+            if(typeof value == "object") {
+                value = Object.assign({}, value);
             }
 
             tc[k] = value;
