@@ -20,6 +20,7 @@ export class GComponent extends GObject {
         this._childrenRenderOrder = ChildrenRenderOrder.Ascent;
         this._apexIndex = 0;
         this._invertedMask = false;
+        this._excludeInvisibles = false;
         this._node.name = "GComponent";
         this._children = new Array();
         this._controllers = new Array();
@@ -30,6 +31,15 @@ export class GComponent extends GObject {
         this._container.layer = UIConfig.defaultUILayer;
         this._container.addComponent(UITransform).setAnchorPoint(0, 1);
         this._node.addChild(this._container);
+    }
+    get excludeInvisibles() {
+        return this._excludeInvisibles;
+    }
+    set excludeInvisibles(value) {
+        if (this._excludeInvisibles != value) {
+            this._excludeInvisibles = value;
+            this.setBoundsChangedFlag();
+        }
     }
     dispose() {
         var i;
@@ -705,6 +715,8 @@ export class GComponent extends GObject {
             var i = 0;
             for (var i = 0; i < len; i++) {
                 var child = this._children[i];
+                if (this._excludeInvisibles && !child.internalVisible3)
+                    continue;
                 tmp = child.x;
                 if (tmp < ax)
                     ax = tmp;

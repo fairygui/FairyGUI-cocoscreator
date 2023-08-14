@@ -729,6 +729,8 @@ declare module 'fairygui-cc/GComponent' {
         _alignOffset: Vec2;
         _customMask?: Mask;
         constructor();
+        get excludeInvisibles(): boolean;
+        set excludeInvisibles(value: boolean);
         dispose(): void;
         get displayListContainer(): Node;
         addChild(child: GObject): GObject;
