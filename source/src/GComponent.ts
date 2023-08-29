@@ -41,6 +41,8 @@ export class GComponent extends GObject {
     public _alignOffset: Vec2;
     public _customMask?: Mask
 
+    private _excludeInvisibles: boolean = false;
+
     public constructor() {
         super();
 
@@ -55,6 +57,17 @@ export class GComponent extends GObject {
         this._container.layer = UIConfig.defaultUILayer;
         this._container.addComponent(UITransform).setAnchorPoint(0, 1);
         this._node.addChild(this._container);
+    }
+
+    public get excludeInvisibles(): boolean {
+        return this._excludeInvisibles;
+    }
+
+    public set excludeInvisibles(value: boolean) {
+        if (this._excludeInvisibles != value) {
+            this._excludeInvisibles = value;
+            this.setBoundsChangedFlag();
+        }
     }
 
     public dispose(): void {
@@ -874,6 +887,9 @@ export class GComponent extends GObject {
 
             for (var i: number = 0; i < len; i++) {
                 var child: GObject = this._children[i];
+                if (this._excludeInvisibles && !child.internalVisible3)
+                    continue;
+                
                 tmp = child.x;
                 if (tmp < ax)
                     ax = tmp;
