@@ -767,19 +767,19 @@ namespace fgui {
         }
 
         public onClick(listener: Function, target?: any): void {
-            this._node.on(Event.CLICK, listener, target);
+            this._node?.on(Event.CLICK, listener, target);
         }
 
         public onceClick(listener: Function, target?: any): void {
-            this._node.once(Event.CLICK, listener, target);
+            this._node?.once(Event.CLICK, listener, target);
         }
 
         public offClick(listener: Function, target?: any): void {
-            this._node.off(Event.CLICK, listener, target);
+            this._node?.off(Event.CLICK, listener, target);
         }
 
         public clearClick(): void {
-            this._node.off(Event.CLICK);
+            this._node?.off(Event.CLICK);
         }
 
         public hasClickListener(): boolean {
@@ -790,18 +790,18 @@ namespace fgui {
             if (type == Event.DISPLAY || type == Event.UNDISPLAY)
                 this._partner._emitDisplayEvents = true;
 
-            this._node.on(type, listener, target);
+            this._node?.on(type, listener, target);
         }
 
         public once(type: string, listener: Function, target?: any): void {
             if (type == Event.DISPLAY || type == Event.UNDISPLAY)
                 this._partner._emitDisplayEvents = true;
 
-            this._node.once(type, listener, target);
+            this._node?.once(type, listener, target);
         }
 
         public off(type: string, listener?: Function, target?: any): void {
-            this._node.off(type, listener, target);
+            this._node?.off(type, listener, target);
         }
 
         public get draggable(): boolean {

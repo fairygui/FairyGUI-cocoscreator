@@ -290,6 +290,7 @@ declare namespace fgui {
         _partner: GObjectPartner;
         _treeNode?: GTreeNode;
         private _hitTestPt?;
+        protected _inited?: boolean;
         static _defaultGroupIndex: number;
         constructor();
         get id(): string;
@@ -398,9 +399,13 @@ declare namespace fgui {
         set icon(value: string);
         get treeNode(): GTreeNode;
         dispose(): void;
+        init(): void;
+        protected onInit(): void;
+        protected onShown(): void;
+        protected onHide(): void;
         protected onEnable(): void;
         protected onDisable(): void;
-        protected onUpdate(): void;
+        protected onUpdate(dt?: number): void;
         protected onDestroy(): void;
         onClick(listener: Function, target?: any): void;
         onceClick(listener: Function, target?: any): void;
@@ -1984,7 +1989,6 @@ declare namespace fgui {
         private _frame;
         private _modal;
         private _uiSources?;
-        private _inited?;
         private _loading?;
         protected _requestingCmd: number;
         bringToFontOnClick: boolean;
@@ -2015,9 +2019,6 @@ declare namespace fgui {
         closeModalWait(requestingCmd?: number): boolean;
         get modalWaiting(): boolean;
         init(): void;
-        protected onInit(): void;
-        protected onShown(): void;
-        protected onHide(): void;
         protected doShowAnimation(): void;
         protected doHideAnimation(): void;
         private __uiLoadComplete;
