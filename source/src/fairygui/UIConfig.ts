@@ -62,6 +62,11 @@ namespace fgui {
 
         public static linkUnderline: boolean = true;
 
+        //对cocosEditBox做兼容处理
+        //默认设置editbox的编辑模式为SINGLE_LINE 否则若是任意输入情况下，输入框垂直居中对齐会无效，引擎会强制改为顶对齐，除非手动设置。
+        //注意：改为Single_Line后，因为cocos的输入框策略，可以输入除换行符外的任意字符，如果要输入换行符，cocos引擎内部仍然会改为顶对齐
+        public static gInputFieldSingle:false = false;
+
         /** !#en
 		Default group name of UI node.<br/>
 		!#zh
