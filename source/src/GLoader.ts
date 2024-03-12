@@ -27,6 +27,7 @@ export class GLoader extends GObject {
     private _errorSign?: GObject;
     private _content2?: GComponent;
     private _updatingLayout: boolean;
+    private _assetBundle: string;
 
     private static _errorSignPool: GObjectPool = new GObjectPool();
 
@@ -74,6 +75,26 @@ export class GLoader extends GObject {
         this._url = value;
         this.loadContent();
         this.updateGear(7);
+    }
+    /**
+     * 设置图片
+     * @param url 
+     * @param bundleStr 远程包名称
+     */
+    public setUrlWithBundle(url: string, bundleStr: string = ''): void {
+        this.bundle = bundleStr
+        this.url = url;
+    }
+
+    public set bundle(val: string) {
+        this._assetBundle = val;
+    }
+
+    public get bundle(): string {
+        if (this._assetBundle) {
+            return this._assetBundle;
+        }
+        return UIConfig.loaderAssetsBundleName;
     }
 
     public get icon(): string | null {
@@ -333,13 +354,36 @@ export class GLoader extends GObject {
                 sf.texture = texture;
                 this.onExternalLoadSuccess(sf);
             }
+            else {
+                console.warn("GLoader:cant load", this.url);
+            }
         };
         if (this._url.startsWith("http://")
             || this._url.startsWith("https://")
             || this._url.startsWith('/'))
             assetManager.loadRemote(this._url, callback);
-        else
-            resources.load(this._url + "/spriteFrame", Asset, callback);
+        else if (this._url.startsWith('data:image/')) {
+            const img = new Image();
+            img.src = this._url;
+            img.onload = () => {
+                const tex = new Texture2D();
+                tex.reset({
+                    width: img.width,
+                    height: img.height,
+                });
+                tex.uploadData(img, 0, 0);
+                tex.loaded = true;
+                callback(null, tex);
+            }
+        }
+        else {
+            let bundle = resources;
+            //如果有设置远程包 从远程包加载
+            if (this.bundle && assetManager.bundles.has(this.bundle)) {
+                bundle = assetManager.getBundle(this.bundle);
+            }
+            bundle.load(this._url + "/spriteFrame", Asset, callback);
+        }
     }
 
     protected freeExternal(texture: SpriteFrame): void {
@@ -348,8 +392,11 @@ export class GLoader extends GObject {
     protected onExternalLoadSuccess(texture: SpriteFrame): void {
         this._content.spriteFrame = texture;
         this._content.type = Sprite.Type.SIMPLE;
-        this.sourceWidth = texture.getRect().width;
-        this.sourceHeight = texture.getRect().height;
+        //如果裁剪掉透明像素会导致 有空白边的图片 跟编辑器不一致。
+        // this.sourceWidth = texture.getRect().width;
+        // this.sourceHeight = texture.getRect().height;
+        this.sourceWidth = texture.width;
+        this.sourceHeight = texture.height;
         if (this._autoSize)
             this.setSize(this.sourceWidth, this.sourceHeight);
         this.updateLayout();

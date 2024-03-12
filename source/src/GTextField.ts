@@ -579,7 +579,11 @@ export class GTextField extends GObject {
         buffer.seek(beginPos, 6);
 
         var str: string = buffer.readS();
-        if (str != null)
+        if (str != null) {
             this.text = str;
+        }
+        else {
+            this.text = "";
+        }
     }
 }
