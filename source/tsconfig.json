@@ -6,7 +6,7 @@
     "strict": true,
     "strictNullChecks": false,
     "moduleResolution": "Node",
-    "skipLibCheck": true
+    "skipLibCheck": true,
   },
   "include": [
     "./src/**/*",

@@ -1,3 +1,4 @@
+/// <reference path="../lib/cc.d.ts" />
 import { Asset, dragonBones, Rect, Vec2 } from "cc";
 import { Frame } from "./display/MovieClip";
 import { PixelHitTestData } from "./event/HitTest";

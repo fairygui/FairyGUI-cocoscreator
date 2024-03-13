@@ -17,6 +17,7 @@ export class GComponent extends GObject {
     constructor() {
         super();
         this._sortingChildCount = 0;
+        this._invertedMask = false;
         this._childrenRenderOrder = ChildrenRenderOrder.Ascent;
         this._apexIndex = 0;
         this._node.name = "GComponent";
@@ -27,7 +28,8 @@ export class GComponent extends GObject {
         this._alignOffset = new Vec2();
         this._container = new Node("Container");
         this._container.layer = UIConfig.defaultUILayer;
-        this._container.addComponent(UITransform).setAnchorPoint(0, 1);
+        this._containerUITrans = this._container.addComponent(UITransform);
+        this._containerUITrans.setAnchorPoint(0, 1);
         this._node.addChild(this._container);
     }
     dispose() {
@@ -63,7 +65,7 @@ export class GComponent extends GObject {
     }
     addChildAt(child, index) {
         if (!child)
-            throw "child is null";
+            throw new Error("child is null");
         var numChildren = this._children.length;
         if (index >= 0 && index <= numChildren) {
             if (child.parent == this) {
@@ -91,7 +93,7 @@ export class GComponent extends GObject {
             return child;
         }
         else {
-            throw "Invalid child index";
+            throw new Error("Invalid child index");
         }
     }
     getInsertPosForSortingChild(target) {
@@ -132,7 +134,7 @@ export class GComponent extends GObject {
             return child;
         }
         else {
-            throw "Invalid child index";
+            throw new Error("Invalid child index");
         }
     }
     removeChildren(beginIndex, endIndex, dispose) {
@@ -149,7 +151,7 @@ export class GComponent extends GObject {
         if (index >= 0 && index < this.numChildren)
             return this._children[index];
         else
-            throw "Invalid child index";
+            throw new Error("Invalid child index");
     }
     getChild(name, classType) {
         var cnt = this._children.length;
@@ -211,7 +213,7 @@ export class GComponent extends GObject {
     setChildIndex(child, index) {
         var oldIndex = this._children.indexOf(child);
         if (oldIndex == -1)
-            throw "Not a child of this container";
+            throw new Error("Not a child of this container");
         if (child.sortingOrder != 0) //no effect
             return;
         var cnt = this._children.length;
@@ -224,7 +226,7 @@ export class GComponent extends GObject {
     setChildIndexBefore(child, index) {
         var oldIndex = this._children.indexOf(child);
         if (oldIndex == -1)
-            throw "Not a child of this container";
+            throw new Error("Not a child of this container");
         if (child.sortingOrder != 0) //no effect
             return oldIndex;
         var cnt = this._children.length;
@@ -258,7 +260,7 @@ export class GComponent extends GObject {
         var index1 = this._children.indexOf(child1);
         var index2 = this._children.indexOf(child2);
         if (index1 == -1 || index2 == -1)
-            throw "Not a child of this container";
+            throw new Error("Not a child of this container");
         this.swapChildrenAt(index1, index2);
     }
     swapChildrenAt(index1, index2) {
@@ -301,7 +303,7 @@ export class GComponent extends GObject {
     removeController(c) {
         var index = this._controllers.indexOf(c);
         if (index == -1)
-            throw "controller not exists";
+            throw new Error("controller not exists");
         c.parent = null;
         this._controllers.splice(index, 1);
         var length = this._children.length;
@@ -507,7 +509,7 @@ export class GComponent extends GObject {
             value.node.on(Node.EventType.TRANSFORM_CHANGED, this.onMaskContentChanged, this);
             value.node.on(Node.EventType.SIZE_CHANGED, this.onMaskContentChanged, this);
             value.node.on(Node.EventType.ANCHOR_CHANGED, this.onMaskContentChanged, this);
-            this._customMask.inverted = inverted;
+            this._invertedMask = inverted;
             if (this._node.activeInHierarchy)
                 this.onMaskReady();
             else
@@ -534,16 +536,17 @@ export class GComponent extends GObject {
     onMaskReady() {
         this.off(FUIEvent.DISPLAY, this.onMaskReady, this);
         if (this._maskContent instanceof GImage) {
-            this._customMask.type = Mask.Type.IMAGE_STENCIL;
+            this._customMask.type = Mask.Type.SPRITE_STENCIL;
             this._customMask.alphaThreshold = 0.0001;
             this._customMask.spriteFrame = this._maskContent._content.spriteFrame;
         }
         else if (this._maskContent instanceof GGraph) {
             if (this._maskContent.type == 2)
-                this._customMask.type = Mask.Type.ELLIPSE;
+                this._customMask.type = Mask.Type.GRAPHICS_ELLIPSE;
             else
-                this._customMask.type = Mask.Type.RECT;
+                this._customMask.type = Mask.Type.GRAPHICS_RECT;
         }
+        this._customMask.inverted = this._invertedMask;
     }
     onMaskContentChanged() {
         let maskNode = this._customMask.node;
@@ -597,7 +600,7 @@ export class GComponent extends GObject {
         if (this._scrollPane)
             this._scrollPane.onOwnerSizeChanged();
         else
-            this._container._uiProps.uiTransformComp.setContentSize(this.viewWidth, this.viewHeight);
+            this._containerUITrans.setContentSize(this.viewWidth, this.viewHeight);
     }
     handleGrayedChanged() {
         var c = this.getController("grayed");
@@ -632,7 +635,7 @@ export class GComponent extends GObject {
             s_vec2.set(pt);
             s_vec2.x += this._container.position.x;
             s_vec2.y += this._container.position.y;
-            let clippingSize = this._container._uiProps.uiTransformComp.contentSize;
+            let clippingSize = this._containerUITrans.contentSize;
             if (s_vec2.x < 0 || s_vec2.y < 0 || s_vec2.x >= clippingSize.width || s_vec2.y >= clippingSize.height)
                 return null;
         }

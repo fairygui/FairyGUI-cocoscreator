@@ -30,7 +30,7 @@ export class ByteBuffer {
     }
 
     public set position(value: number) {
-        if (value > this._length) throw "Out of bounds";
+        if (value > this._length) throw new Error("Out of bounds");
         this._pos = value;
     }
 
@@ -39,7 +39,7 @@ export class ByteBuffer {
     }
 
     private validate(forward: number): void {
-        if (this._pos + forward > this._length) throw "Out of bounds";
+        if (this._pos + forward > this._length) throw new Error("Out of bounds");
     }
 
     public readByte(): number {

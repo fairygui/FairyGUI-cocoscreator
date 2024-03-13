@@ -3,6 +3,11 @@ import { AlignType, VertAlignType } from "./FieldTypes";
 import { GLoader } from "./GLoader";
 import { GRoot } from "./GRoot";
 export class DragDropManager {
+    static get inst() {
+        if (!DragDropManager._inst)
+            DragDropManager._inst = new DragDropManager();
+        return DragDropManager._inst;
+    }
     constructor() {
         this._agent = new GLoader();
         this._agent.draggable = true;
@@ -13,11 +18,6 @@ export class DragDropManager {
         this._agent.verticalAlign = VertAlignType.Middle;
         this._agent.sortingOrder = 1000000;
         this._agent.on(FUIEvent.DRAG_END, this.onDragEnd, this);
-    }
-    static get inst() {
-        if (!DragDropManager._inst)
-            DragDropManager._inst = new DragDropManager();
-        return DragDropManager._inst;
     }
     get dragAgent() {
         return this._agent;

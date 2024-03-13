@@ -1,3 +1,4 @@
+/// <reference path="../../lib/cc.d.ts" />
 import { Node } from "cc";
 export declare enum BlendMode {
     Normal = 0,

@@ -1,3 +1,4 @@
+/// <reference path="../../lib/cc.d.ts" />
 import { Vec2 } from "cc";
 import { GPathPoint } from "./GPathPoint";
 export declare class GPath {

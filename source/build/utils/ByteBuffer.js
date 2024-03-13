@@ -18,7 +18,7 @@ export class ByteBuffer {
     }
     set position(value) {
         if (value > this._length)
-            throw "Out of bounds";
+            throw new Error("Out of bounds");
         this._pos = value;
     }
     skip(count) {
@@ -26,7 +26,7 @@ export class ByteBuffer {
     }
     validate(forward) {
         if (this._pos + forward > this._length)
-            throw "Out of bounds";
+            throw new Error("Out of bounds");
     }
     readByte() {
         this.validate(1);

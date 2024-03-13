@@ -1,4 +1,5 @@
-import { Color, Font, HorizontalTextAlignment, Label, LabelOutline, LabelShadow, Vec2, VerticalTextAlignment } from "cc";
+/// <reference path="../lib/cc.d.ts" />
+import { Color, Font, HorizontalTextAlignment, Label, Vec2, VerticalTextAlignment } from "cc";
 import { AutoSizeType } from "./FieldTypes";
 import { GObject } from "./GObject";
 import { ByteBuffer } from "./utils/ByteBuffer";
@@ -20,8 +21,6 @@ export declare class GTextField extends GObject {
     protected _autoSize: AutoSizeType;
     protected _updatingSize: boolean;
     protected _sizeDirty: boolean;
-    protected _outline?: LabelOutline;
-    protected _shadow?: LabelShadow;
     constructor();
     protected createRenderer(): void;
     set text(value: string | null);

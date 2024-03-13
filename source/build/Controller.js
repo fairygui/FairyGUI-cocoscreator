@@ -17,7 +17,7 @@ export class Controller extends EventTarget {
     set selectedIndex(value) {
         if (this._selectedIndex != value) {
             if (value > this._pageIds.length - 1)
-                throw "index out of bounds: " + value;
+                throw new Error("index out of bounds: " + value);
             this.changing = true;
             this._previousIndex = this._selectedIndex;
             this._selectedIndex = value;
@@ -36,7 +36,7 @@ export class Controller extends EventTarget {
     setSelectedIndex(value) {
         if (this._selectedIndex != value) {
             if (value > this._pageIds.length - 1)
-                throw "index out of bounds: " + value;
+                throw new Error("index out of bounds: " + value);
             this.changing = true;
             this._previousIndex = this._selectedIndex;
             this._selectedIndex = value;

@@ -1,4 +1,4 @@
-import { Component, director, game, Node } from "cc";
+import { Component, game, Node } from "cc";
 import { PackageItemType, ObjectType } from "./FieldTypes";
 import { constructingDepth } from "./GObject";
 import { UIConfig } from "./UIConfig";
@@ -141,7 +141,7 @@ class AsyncOperationRunner extends Component {
         var di;
         var poolStart;
         var k;
-        var t = director.getTotalTime() / 1000;
+        var t = game.totalTime / 1000;
         var frameTime = UIConfig.frameTimeForAsyncUIConstruction;
         var totalItems = this._itemList.length;
         while (this._index < totalItems) {
@@ -171,7 +171,7 @@ class AsyncOperationRunner extends Component {
                 }
             }
             this._index++;
-            if ((this._index % 5 == 0) && director.getTotalTime() / 1000 - t >= frameTime)
+            if ((this._index % 5 == 0) && game.totalTime / 1000 - t >= frameTime)
                 return;
         }
         var result = this._objectPool[0];

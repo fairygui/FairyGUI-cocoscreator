@@ -1,3 +1,4 @@
+/// <reference path="../lib/cc.d.ts" />
 import { EditBox, HorizontalTextAlignment, VerticalTextAlignment } from "cc";
 import { GTextField } from "./GTextField";
 import { ByteBuffer } from "./utils/ByteBuffer";

@@ -1,3 +1,4 @@
+/// <reference path="../../lib/cc.d.ts" />
 import { Color } from "cc";
 export declare class ByteBuffer {
     stringTable: Array<string>;

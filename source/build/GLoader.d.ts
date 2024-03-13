@@ -1,3 +1,4 @@
+/// <reference path="../lib/cc.d.ts" />
 import { Color, SpriteFrame, Vec2 } from "cc";
 import { MovieClip } from "./display/MovieClip";
 import { AlignType, VertAlignType, LoaderFillType, FillMethod, FillOrigin } from "./FieldTypes";
@@ -21,11 +22,21 @@ export declare class GLoader extends GObject {
     private _errorSign?;
     private _content2?;
     private _updatingLayout;
+    private _assetBundle;
+    private _containerUITrans;
     private static _errorSignPool;
     constructor();
     dispose(): void;
     get url(): string | null;
     set url(value: string | null);
+    /**
+     * 设置图片
+     * @param url
+     * @param bundleStr 远程包名称
+     */
+    setUrlWithBundle(url: string, bundleStr?: string): void;
+    set bundle(val: string);
+    get bundle(): string;
     get icon(): string | null;
     set icon(value: string | null);
     get align(): AlignType;

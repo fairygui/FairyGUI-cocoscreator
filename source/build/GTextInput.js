@@ -1,4 +1,4 @@
-import { Color, EditBox } from "cc";
+import { Color, EditBox, Overflow, UITransform } from "cc";
 import { Event as FUIEvent } from "./event/Event";
 import { AutoSizeType } from "./FieldTypes";
 import { GTextField } from "./GTextField";
@@ -128,6 +128,7 @@ export class GTextInput extends GTextField {
     }
     onTouchEnd1(evt) {
         this._editBox.openKeyboard();
+        evt.propagationStopped = true;
     }
     setup_beforeAdd(buffer, beginPos) {
         super.setup_beforeAdd(buffer, beginPos);
@@ -158,18 +159,16 @@ export class GTextInput extends GTextField {
     }
 }
 class MyEditBox extends EditBox {
+    _init() {
+        super._init();
+        this.placeholderLabel.getComponent(UITransform).setAnchorPoint(0, 1);
+        this.textLabel.getComponent(UITransform).setAnchorPoint(0, 1);
+        this.placeholderLabel.overflow = Overflow.CLAMP;
+        this.textLabel.overflow = Overflow.CLAMP;
+    }
     _registerEvent() {
         //取消掉原来的事件处理
     }
-    // _syncSize() {
-    //     let size = this.node._uiProps.uiTransformComp.contentSize;
-    //     let impl = this["_impl"];
-    //     impl.setSize(size.width, size.height);
-    //     if (this.textLabel)
-    //         this.textLabel.node._uiProps.uiTransformComp.setContentSize(size.width, size.height);
-    //     if (this.placeholderLabel)
-    //         this.placeholderLabel.node._uiProps.uiTransformComp.setContentSize(size.width, size.height);
-    // }
     openKeyboard() {
         let impl = this["_impl"];
         if (impl) {

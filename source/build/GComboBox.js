@@ -320,9 +320,9 @@ export class GComboBox extends GComponent {
         if (this._itemsUpdated) {
             this._itemsUpdated = false;
             this._list.removeChildrenToPool();
-            var cnt = this._items.length;
-            for (var i = 0; i < cnt; i++) {
-                var item = this._list.addItemFromPool();
+            let cnt = this._items.length;
+            for (let i = 0; i < cnt; i++) {
+                let item = this._list.addItemFromPool();
                 item.name = i < this._values.length ? this._values[i] : "";
                 item.text = this._items[i];
                 item.icon = (this._icons && i < this._icons.length) ? this._icons[i] : null;

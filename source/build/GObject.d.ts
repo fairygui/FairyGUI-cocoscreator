@@ -1,3 +1,4 @@
+/// <reference path="../lib/cc.d.ts" />
 import { Vec2, Rect, Component, Node, UITransform, UIOpacity } from "cc";
 import { Controller } from "./Controller";
 import { BlendMode } from "./display/BlendMode";

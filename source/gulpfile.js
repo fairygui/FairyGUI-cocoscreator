@@ -19,18 +19,16 @@ gulp.task('buildJs', () => {
 })
 
 gulp.task("rollup", async function () {
-    let config = {
+    const subTask = await rollup.rollup({
         input: "build/FairyGUI.js",
-        external: ['cc', 'cc/env'],
-        output: {
-            file: 'dist/fairygui.mjs',
-            format: 'esm',
-            extend: true,
-            name: 'fgui',
-        }
-    };
-    const subTask = await rollup.rollup(config);
-    await subTask.write(config);
+        external: ['cc', 'cc/env']
+    });
+    await subTask.write({
+        file: 'dist/fairygui.mjs',
+        format: 'esm',
+        extend: true,
+        name: 'fgui',
+    });
 });
 
 gulp.task("uglify", function () {

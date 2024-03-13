@@ -51,7 +51,7 @@ export default class BasicDemo extends Component {
     }
 
     private runDemo(evt: fgui.Event): void {
-        var type: string = evt.sender!.name.substr(4);
+        var type: string = evt.sender!.name.substring(4);
         var obj: fgui.GComponent = this._demoObjects[type];
         if (obj == null) {
             obj = fgui.UIPackage.createObject("Basics", "Demo_" + type).asCom;

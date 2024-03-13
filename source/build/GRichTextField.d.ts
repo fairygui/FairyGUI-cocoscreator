@@ -1,3 +1,4 @@
+/// <reference path="../lib/cc.d.ts" />
 import { HorizontalTextAlignment, RichText, SpriteAtlas, SpriteFrame } from "cc";
 import { GTextField } from "./GTextField";
 export declare class RichTextImageAtlas extends SpriteAtlas {

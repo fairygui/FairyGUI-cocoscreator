@@ -1,3 +1,4 @@
+/// <reference path="../../lib/cc.d.ts" />
 import { Sprite } from "cc";
 import { FillMethod, FillOrigin, FlipType } from "../FieldTypes";
 export declare class Image extends Sprite {

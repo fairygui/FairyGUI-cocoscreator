@@ -1,3 +1,4 @@
+/// <reference path="../lib/cc.d.ts" />
 import { Size, Vec2 } from "cc";
 import { Controller } from "./Controller";
 import { Event as FUIEvent } from "./event/Event";
@@ -6,7 +7,7 @@ import { GComponent } from "./GComponent";
 import { GObject } from "./GObject";
 import { GObjectPool } from "./GObjectPool";
 import { ByteBuffer } from "./utils/ByteBuffer";
-export declare type ListItemRenderer = (index: number, item: GObject) => void;
+export type ListItemRenderer = (index: number, item: GObject) => void;
 export declare class GList extends GComponent {
     itemRenderer: ListItemRenderer;
     itemProvider: (index: number) => string;

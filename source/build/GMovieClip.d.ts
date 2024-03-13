@@ -1,3 +1,4 @@
+/// <reference path="../lib/cc.d.ts" />
 import { Color } from "cc";
 import { MovieClip } from "./display/MovieClip";
 import { GObject } from "./GObject";

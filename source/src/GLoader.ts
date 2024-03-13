@@ -28,6 +28,7 @@ export class GLoader extends GObject {
     private _content2?: GComponent;
     private _updatingLayout: boolean;
     private _assetBundle: string;
+    private _containerUITrans: UITransform;
 
     private static _errorSignPool: GObjectPool = new GObjectPool();
 
@@ -45,7 +46,8 @@ export class GLoader extends GObject {
 
         this._container = new Node("Image");
         this._container.layer = UIConfig.defaultUILayer;
-        this._container.addComponent(UITransform).setAnchorPoint(0, 1);
+        this._containerUITrans = this._container.addComponent(UITransform);
+        this._containerUITrans.setAnchorPoint(0, 1);
         this._node.addChild(this._container);
 
         this._content = this._container.addComponent(MovieClip);
@@ -250,8 +252,8 @@ export class GLoader extends GObject {
         this._content.spriteFrame = value;
         this._content.type = Sprite.Type.SIMPLE;
         if (value != null) {
-            this.sourceWidth = value.getRect().width;
-            this.sourceHeight = value.getRect().height;
+            this.sourceWidth = value.rect.width;
+            this.sourceHeight = value.rect.height;
         }
         else {
             this.sourceWidth = this.sourceHeight = 0;
@@ -273,57 +275,62 @@ export class GLoader extends GObject {
     }
 
     protected loadFromPackage(itemURL: string) {
-        this._contentItem = UIPackage.getItemByURL(itemURL);
-        if (this._contentItem) {
-            this._contentItem = this._contentItem.getBranch();
-            this.sourceWidth = this._contentItem.width;
-            this.sourceHeight = this._contentItem.height;
-            this._contentItem = this._contentItem.getHighResolution();
-            this._contentItem.load();
+        let contentItem = UIPackage.getItemByURL(itemURL);
+        this._contentItem = contentItem;
+        if (!contentItem) {
+            this.setErrorState();
+            return;
+        }
 
-            if (this._autoSize)
-                this.setSize(this.sourceWidth, this.sourceHeight);
+        contentItem = contentItem.getBranch();
+        this.sourceWidth = contentItem.width;
+        this.sourceHeight = contentItem.height;
+        contentItem = contentItem.getHighResolution();
+        contentItem.load();
 
-            if (this._contentItem.type == PackageItemType.Image) {
-                if (!this._contentItem.asset) {
-                    this.setErrorState();
+        if (this._autoSize)
+            this.setSize(this.sourceWidth, this.sourceHeight);
+
+        if (contentItem.type == PackageItemType.Image) {
+            if (!contentItem.asset) {
+                this.setErrorState();
+            }
+            else {
+                this._content.spriteFrame = <SpriteFrame>contentItem.asset;
+                if (this._content.fillMethod == 0) {
+                    if (contentItem.scale9Grid)
+                        this._content.type = Sprite.Type.SLICED;
+                    else if (contentItem.scaleByTile)
+                        this._content.type = Sprite.Type.TILED;
+                    else
+                        this._content.type = Sprite.Type.SIMPLE;
                 }
                 else {
-                    this._content.spriteFrame = <SpriteFrame>this._contentItem.asset;
-                    if (this._content.fillMethod == 0) {
-                        if (this._contentItem.scale9Grid)
-                            this._content.type = Sprite.Type.SLICED;
-                        else if (this._contentItem.scaleByTile)
-                            this._content.type = Sprite.Type.TILED;
-                        else
-                            this._content.type = Sprite.Type.SIMPLE;
-                    }
-                    this.updateLayout();
+                    this._content.type = Sprite.Type.FILLED;
                 }
-            }
-            else if (this._contentItem.type == PackageItemType.MovieClip) {
-                this._content.interval = this._contentItem.interval;
-                this._content.swing = this._contentItem.swing;
-                this._content.repeatDelay = this._contentItem.repeatDelay;
-                this._content.frames = this._contentItem.frames;
                 this.updateLayout();
             }
-            else if (this._contentItem.type == PackageItemType.Component) {
-                var obj: GObject = UIPackage.createObjectFromURL(itemURL);
-                if (!obj)
-                    this.setErrorState();
-                else if (!(obj instanceof GComponent)) {
-                    obj.dispose();
-                    this.setErrorState();
-                }
-                else {
-                    this._content2 = obj;
-                    this._container.addChild(this._content2.node);
-                    this.updateLayout();
-                }
-            }
-            else
+        }
+        else if (contentItem.type == PackageItemType.MovieClip) {
+            this._content.interval = contentItem.interval;
+            this._content.swing = contentItem.swing;
+            this._content.repeatDelay = contentItem.repeatDelay;
+            this._content.frames = contentItem.frames;
+            this.updateLayout();
+        }
+        else if (contentItem.type == PackageItemType.Component) {
+            var obj: GObject = UIPackage.createObjectFromURL(itemURL);
+            if (!obj)
                 this.setErrorState();
+            else if (!(obj instanceof GComponent)) {
+                obj.dispose();
+                this.setErrorState();
+            }
+            else {
+                this._content2 = obj;
+                this._container.addChild(this._content2.node);
+                this.updateLayout();
+            }
         }
         else
             this.setErrorState();
@@ -348,9 +355,9 @@ export class GLoader extends GObject {
                 this.onExternalLoadSuccess(sf);
             }
             else if (asset instanceof ImageAsset) {
-                let sf = new SpriteFrame();
                 let texture = new Texture2D();
                 texture.image = asset;
+                let sf = new SpriteFrame();
                 sf.texture = texture;
                 this.onExternalLoadSuccess(sf);
             }
@@ -372,7 +379,6 @@ export class GLoader extends GObject {
                     height: img.height,
                 });
                 tex.uploadData(img, 0, 0);
-                tex.loaded = true;
                 callback(null, tex);
             }
         }
@@ -392,11 +398,8 @@ export class GLoader extends GObject {
     protected onExternalLoadSuccess(texture: SpriteFrame): void {
         this._content.spriteFrame = texture;
         this._content.type = Sprite.Type.SIMPLE;
-        //如果裁剪掉透明像素会导致 有空白边的图片 跟编辑器不一致。
-        // this.sourceWidth = texture.getRect().width;
-        // this.sourceHeight = texture.getRect().height;
-        this.sourceWidth = texture.width;
-        this.sourceHeight = texture.height;
+        this.sourceWidth = texture.originalSize.width;
+        this.sourceHeight = texture.originalSize.height;
         if (this._autoSize)
             this.setSize(this.sourceWidth, this.sourceHeight);
         this.updateLayout();
@@ -456,7 +459,7 @@ export class GLoader extends GObject {
             this.setSize(cw, ch);
             this._updatingLayout = false;
 
-            this._container._uiProps.uiTransformComp.setContentSize(this._width, this._height);
+            this._containerUITrans.setContentSize(this._width, this._height);
             this._container.setPosition(pivotCorrectX, pivotCorrectY);
             if (this._content2) {
                 this._content2.setPosition(pivotCorrectX + this._width * this.pivotX, pivotCorrectY - this._height * this.pivotY);
@@ -499,7 +502,7 @@ export class GLoader extends GObject {
             }
         }
 
-        this._container._uiProps.uiTransformComp.setContentSize(cw, ch);
+        this._containerUITrans.setContentSize(cw, ch);
         if (this._content2) {
             this._content2.setPosition(pivotCorrectX + this._width * this.pivotX, pivotCorrectY - this._height * this.pivotY);
             this._content2.setScale(sx, sy);

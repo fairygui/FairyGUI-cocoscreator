@@ -1,3 +1,4 @@
+/// <reference path="../../lib/cc.d.ts" />
 import { Component, Vec2 } from "cc";
 import { GObject } from "../GObject";
 import { Event as FUIEvent } from "./Event";

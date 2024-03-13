@@ -21,8 +21,8 @@ export class TranslationHelper {
                 if (i == -1)
                     continue;
 
-                var key2: string = key.substr(0, i);
-                var key3: string = key.substr(i + 1);
+                var key2: string = key.substring(0, i);
+                var key3: string = key.substring(i + 1);
                 var col: { [index: string]: string } = strings[key2];
                 if (!col) {
                     col = {};

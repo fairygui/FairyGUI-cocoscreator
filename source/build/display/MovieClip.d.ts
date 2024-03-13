@@ -1,3 +1,4 @@
+/// <reference path="../../lib/cc.d.ts" />
 import { Rect, SpriteFrame } from "cc";
 import { Image } from "./Image";
 export interface Frame {

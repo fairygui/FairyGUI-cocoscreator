@@ -1,3 +1,4 @@
+/// <reference path="../lib/cc.d.ts" />
 import { Color } from "cc";
 import { Controller } from "./Controller";
 import { ButtonMode } from "./FieldTypes";

@@ -108,6 +108,7 @@ export class GScrollBar extends GComponent {
             this._target.scrollRight();
     }
     onBarTouchBegin(evt) {
+        evt.propagationStopped = true;
         var pt = this._grip.globalToLocal(evt.pos.x, evt.pos.y, s_vec2);
         if (this._vertical) {
             if (pt.y < 0)

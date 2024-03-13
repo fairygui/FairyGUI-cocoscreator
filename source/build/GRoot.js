@@ -1,4 +1,4 @@
-import { director, Color, Vec2, View, AudioSourceComponent } from "cc";
+import { director, Color, Vec2, View, AudioSourceComponent, UITransform } from "cc";
 import { EDITOR } from "cc/env";
 import { InputProcessor } from "./event/InputProcessor";
 import { RelationType, PopupDirection } from "./FieldTypes";
@@ -10,6 +10,17 @@ import { UIContentScaler, updateScaler } from "./UIContentScaler";
 import { UIPackage } from "./UIPackage";
 import { Window } from "./Window";
 export class GRoot extends GComponent {
+    static get inst() {
+        if (!GRoot._inst)
+            throw 'Call GRoot.create first!';
+        return GRoot._inst;
+    }
+    static create() {
+        GRoot._inst = new GRoot();
+        director.getScene().getChildByName('Canvas').addChild(GRoot._inst.node);
+        GRoot._inst.onWinResize();
+        return GRoot._inst;
+    }
     constructor() {
         super();
         this._node.name = "GRoot";
@@ -29,17 +40,6 @@ export class GRoot extends GComponent {
             View.instance.on('canvas-resize', this._thisOnResized);
             window.addEventListener('orientationchange', this._thisOnResized);
         }
-    }
-    static get inst() {
-        if (!GRoot._inst)
-            throw 'Call GRoot.create first!';
-        return GRoot._inst;
-    }
-    static create() {
-        GRoot._inst = new GRoot();
-        director.getScene().getChildByName('Canvas').addChild(GRoot._inst.node);
-        GRoot._inst.onWinResize();
-        return GRoot._inst;
     }
     onDestroy() {
         View.instance.off('design-resolution-changed', this.onWinResize, this);
@@ -153,7 +153,9 @@ export class GRoot extends GComponent {
         var sizeW = 0, sizeH = 0;
         if (target) {
             pos = target.localToGlobal();
+            this.globalToLocal(pos.x, pos.y, pos);
             let pos2 = target.localToGlobal(target.width, target.height);
+            this.globalToLocal(pos2.x, pos2.y, pos2);
             sizeW = pos2.x - pos.x;
             sizeH = pos2.y - pos.y;
         }
@@ -336,7 +338,7 @@ export class GRoot extends GComponent {
     onWinResize() {
         updateScaler();
         this.setSize(UIContentScaler.rootSize.width, UIContentScaler.rootSize.height);
-        let anchorPoint = this.node.getParent()._uiProps.uiTransformComp.anchorPoint;
+        let anchorPoint = this.node.getParent().getComponent(UITransform).anchorPoint;
         this.node.setPosition(-this._width * anchorPoint.x, this._height * (1 - anchorPoint.y));
     }
     handlePositionChanged() {

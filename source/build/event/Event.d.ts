@@ -1,3 +1,4 @@
+/// <reference path="../../lib/cc.d.ts" />
 import { Event as CCEvent, Vec2 } from 'cc';
 import { GObject } from '../GObject';
 import { InputProcessor } from './InputProcessor';

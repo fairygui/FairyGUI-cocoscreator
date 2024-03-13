@@ -1,3 +1,4 @@
+/// <reference path="../lib/cc.d.ts" />
 import { Vec2, AudioClip } from "cc";
 import { InputProcessor } from "./event/InputProcessor";
 import { PopupDirection } from "./FieldTypes";

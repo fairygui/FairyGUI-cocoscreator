@@ -18,7 +18,7 @@ export class PopupMenu {
         if (!url) {
             url = UIConfig.popupMenu;
             if (!url)
-                throw "UIConfig.popupMenu not defined";
+                throw new Error("UIConfig.popupMenu not defined");
         }
         this._contentPane = <GComponent>UIPackage.createObjectFromURL(url);
         this._contentPane.on(FUIEvent.DISPLAY, this.onDisplay, this);
@@ -59,7 +59,7 @@ export class PopupMenu {
 
     public addSeperator() {
         if (UIConfig.popupMenu_seperator == null)
-            throw "UIConfig.popupMenu_seperator not defined";
+            throw new Error("UIConfig.popupMenu_seperator not defined");
         this.list.addItemFromPool(UIConfig.popupMenu_seperator);
     }
 

@@ -1,3 +1,4 @@
+/// <reference path="../lib/cc.d.ts" />
 import { ByteBuffer } from "./utils/ByteBuffer";
 export declare class Controller extends EventTarget {
     private _selectedIndex;

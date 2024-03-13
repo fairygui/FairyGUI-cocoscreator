@@ -166,7 +166,7 @@ export class UBBParser {
         }
 
         if (pos1 < this._text.length)
-            result += this._text.substr(pos1);
+            result += this._text.substring(pos1);
 
         this._text = null;
 

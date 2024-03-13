@@ -1,4 +1,4 @@
-import { BitmapFont, Color, Font, HorizontalTextAlignment, Label, LabelOutline, LabelShadow, Node, SystemEventType, Vec2, VerticalTextAlignment } from "cc";
+import { BitmapFont, Color, Font, HorizontalTextAlignment, Label, Node, Vec2, VerticalTextAlignment } from "cc";
 import { Event as FUIEvent } from "./event/Event";
 import { AutoSizeType, ObjectPropID } from "./FieldTypes";
 import { GObject } from "./GObject";
@@ -26,8 +26,6 @@ export class GTextField extends GObject {
     protected _autoSize: AutoSizeType;
     protected _updatingSize: boolean;
     protected _sizeDirty: boolean;
-    protected _outline?: LabelOutline;
-    protected _shadow?: LabelShadow;
 
     public constructor() {
         super();
@@ -193,23 +191,17 @@ export class GTextField extends GObject {
     }
 
     public get stroke(): number {
-        return (this._outline && this._outline.enabled) ? this._outline.width : 0;
+        return this._label ? this._label.outlineWidth : 0;
     }
 
     public set stroke(value: number) {
-        if (value == 0) {
-            if (this._outline)
-                this._outline.enabled = false;
-        }
-        else {
-            if (!this._outline) {
-                this._outline = this._node.addComponent(LabelOutline);
-                this.updateStrokeColor();
-            }
-            else
-                this._outline.enabled = true;
-            this._outline.width = value;
-        }
+        if (!this._label)
+            return;
+
+        this._label.outlineWidth = value;
+        this._label.enableOutline = value > 0;
+        if (value > 0)
+            this.updateStrokeColor();
     }
 
     public get strokeColor(): Color {
@@ -232,18 +224,13 @@ export class GTextField extends GObject {
         if (!this._shadowOffset)
             this._shadowOffset = new Vec2();
         this._shadowOffset.set(value);
-        if (this._shadowOffset.x != 0 || this._shadowOffset.y != 0) {
-            if (!this._shadow) {
-                this._shadow = this._node.addComponent(LabelShadow);
-                this.updateShadowColor();
-            }
-            else
-                this._shadow.enabled = true;
-            this._shadow.offset.x = value.x;
-            this._shadow.offset.y = -value.y;
-        }
-        else if (this._shadow)
-            this._shadow.enabled = false;
+
+        if (!this._label)
+            return;
+        this._label.shadowOffset = new Vec2(this._shadowOffset.x, -this._shadowOffset.y);
+        this._label.enableShadow = value.x != 0 || value.y != 0;
+        if (this._label.enableShadow)
+            this.updateShadowColor();
     }
 
     public get shadowColor(): Color {
@@ -304,7 +291,7 @@ export class GTextField extends GObject {
                 break;
 
             if (pos2 == pos1 + 1) {
-                result += template.substr(pos1, 2);
+                result += template.substring(pos1, pos1 + 2);
                 pos1 = pos2 + 1;
                 continue;
             }
@@ -327,7 +314,7 @@ export class GTextField extends GObject {
         }
 
         if (pos1 < template.length)
-            result += template.substr(pos1);
+            result += template.substring(pos1);
 
         return result;
     }
@@ -360,7 +347,7 @@ export class GTextField extends GObject {
     public get textWidth(): number {
         this.ensureSizeCorrect();
 
-        return this._node._uiProps.uiTransformComp.width;
+        return this._uiTrans.width;
     }
 
     public ensureSizeCorrect(): void {
@@ -414,25 +401,25 @@ export class GTextField extends GObject {
     }
 
     protected updateStrokeColor() {
-        if (!this._outline)
+        if (!this._label || !this._label.enableOutline)
             return;
         if (!this._strokeColor)
             this._strokeColor = new Color();
         if (this._grayed)
-            this._outline.color = toGrayedColor(this._strokeColor);
+            this._label.outlineColor = toGrayedColor(this._strokeColor);
         else
-            this._outline.color = this._strokeColor;
+            this._label.outlineColor = this._strokeColor;
     }
 
     protected updateShadowColor() {
-        if (!this._shadow)
+        if (!this._label || !this._label.enableShadow)
             return;
         if (!this._shadowColor)
             this._shadowColor = new Color();
         if (this._grayed)
-            this._shadow.color = toGrayedColor(this._shadowColor)
+            this._label.shadowColor = toGrayedColor(this._shadowColor);
         else
-            this._shadow.color = this._shadowColor;
+            this._label.shadowColor = this._shadowColor;
     }
 
     protected updateFontSize() {
@@ -456,15 +443,15 @@ export class GTextField extends GObject {
             this._label.overflow = Label.Overflow.NONE;
         else if (this._autoSize == AutoSizeType.Height) {
             this._label.overflow = Label.Overflow.RESIZE_HEIGHT;
-            this._node._uiProps.uiTransformComp.width = this._width;
+            this._uiTrans.width = this._width;
         }
         else if (this._autoSize == AutoSizeType.Shrink) {
             this._label.overflow = Label.Overflow.SHRINK;
-            this._node._uiProps.uiTransformComp.setContentSize(this._width, this._height);
+            this._uiTrans.setContentSize(this._width, this._height);
         }
         else {
             this._label.overflow = Label.Overflow.CLAMP;
-            this._node._uiProps.uiTransformComp.setContentSize(this._width, this._height);
+            this._uiTrans.setContentSize(this._width, this._height);
         }
     }
 
@@ -488,7 +475,7 @@ export class GTextField extends GObject {
 
         if (this._autoSize == AutoSizeType.Both || this._autoSize == AutoSizeType.Height) {
             this._updatingSize = true;
-            this.setSize(this._node._uiProps.uiTransformComp.width, this._node._uiProps.uiTransformComp.height);
+            this.setSize(this._uiTrans.width, this._uiTrans.height);
             this._updatingSize = false;
         }
     }
@@ -498,10 +485,10 @@ export class GTextField extends GObject {
             return;
 
         if (this._autoSize == AutoSizeType.None || this._autoSize == AutoSizeType.Shrink) {
-            this._node._uiProps.uiTransformComp.setContentSize(this._width, this._height);
+            this._uiTrans.setContentSize(this._width, this._height);
         }
         else if (this._autoSize == AutoSizeType.Height)
-            this._node._uiProps.uiTransformComp.width = this._width;
+            this._uiTrans.width = this._width;
     }
 
     protected handleGrayedChanged(): void {

@@ -107,7 +107,7 @@ export class GTreeNode {
             return child;
         }
         else {
-            throw "Invalid child index";
+            throw new Error("Invalid child index");
         }
     }
     removeChildren(beginIndex, endIndex) {
@@ -123,7 +123,7 @@ export class GTreeNode {
         if (index >= 0 && index < this.numChildren)
             return this._children[index];
         else
-            throw "Invalid child index";
+            throw new Error("Invalid child index");
     }
     getChildIndex(child) {
         return this._children.indexOf(child);
@@ -147,7 +147,7 @@ export class GTreeNode {
     setChildIndex(child, index) {
         var oldIndex = this._children.indexOf(child);
         if (oldIndex == -1)
-            throw "Not a child of this container";
+            throw new Error("Not a child of this container");
         var cnt = this._children.length;
         if (index < 0)
             index = 0;
@@ -164,7 +164,7 @@ export class GTreeNode {
         var index1 = this._children.indexOf(child1);
         var index2 = this._children.indexOf(child2);
         if (index1 == -1 || index2 == -1)
-            throw "Not a child of this container";
+            throw new Error("Not a child of this container");
         this.swapChildrenAt(index1, index2);
     }
     swapChildrenAt(index1, index2) {

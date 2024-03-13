@@ -50,12 +50,13 @@ export class UIPackage {
             return pkg;
         let asset = resources.get(path, BufferAsset);
         if (!asset)
-            throw "Resource '" + path + "' not ready";
-        if (!asset._buffer)
-            throw "Missing asset data.";
+            throw new Error("Resource '" + path + "' not ready");
+        const buffer = asset.buffer();
+        if (!buffer)
+            throw new Error("Missing asset data.");
         pkg = new UIPackage();
         pkg._bundle = resources;
-        pkg.loadPackage(new ByteBuffer(asset._buffer), path);
+        pkg.loadPackage(new ByteBuffer(buffer), path);
         _instById[pkg.id] = pkg;
         _instByName[pkg.name] = pkg;
         _instById[pkg._path] = pkg;
@@ -136,7 +137,7 @@ export class UIPackage {
         if (!pkg)
             pkg = _instByName[packageIdOrName];
         if (!pkg)
-            throw "No package found: " + packageIdOrName;
+            throw new Error("No package found: " + packageIdOrName);
         pkg.dispose();
         delete _instById[pkg.id];
         delete _instByName[pkg.name];
@@ -173,19 +174,19 @@ export class UIPackage {
         var pos2 = url.indexOf("/", pos1 + 2);
         if (pos2 == -1) {
             if (url.length > 13) {
-                var pkgId = url.substr(5, 8);
+                var pkgId = url.substring(5, 13);
                 var pkg = UIPackage.getById(pkgId);
                 if (pkg != null) {
-                    var srcId = url.substr(13);
+                    var srcId = url.substring(13);
                     return pkg.getItemById(srcId);
                 }
             }
         }
         else {
-            var pkgName = url.substr(pos1 + 2, pos2 - pos1 - 2);
+            var pkgName = url.substring(pos1 + 2, pos2);
             pkg = UIPackage.getByName(pkgName);
             if (pkg != null) {
-                var srcName = url.substr(pos2 + 1);
+                var srcName = url.substring(pos2 + 1);
                 return pkg.getItemByName(srcName);
             }
         }
@@ -200,8 +201,8 @@ export class UIPackage {
         var pos2 = url.indexOf("/", pos1 + 2);
         if (pos2 == -1)
             return url;
-        var pkgName = url.substr(pos1 + 2, pos2 - pos1 - 2);
-        var srcName = url.substr(pos2 + 1);
+        var pkgName = url.substring(pos1 + 2, pos2);
+        var srcName = url.substring(pos2 + 1);
         return UIPackage.getItemURL(pkgName, srcName);
     }
     static setStringsSource(source) {
@@ -209,7 +210,7 @@ export class UIPackage {
     }
     loadPackage(buffer, path) {
         if (buffer.readUint() != 0x46475549)
-            throw "FairyGUI: old package format found in '" + path + "'";
+            throw new Error("FairyGUI: old package format found in '" + path + "'");
         this._path = path;
         buffer.version = buffer.readInt();
         var ver2 = buffer.version >= 2;
@@ -253,7 +254,7 @@ export class UIPackage {
         buffer.seek(indexTablePos, 1);
         var pi;
         let pos = path.lastIndexOf('/');
-        let shortPath = pos == -1 ? "" : path.substr(0, pos + 1);
+        let shortPath = pos == -1 ? "" : path.substring(0, pos + 1);
         path = path + "_";
         cnt = buffer.readShort();
         for (i = 0; i < cnt; i++) {
@@ -432,7 +433,7 @@ export class UIPackage {
     getItemAssetByName(resName) {
         var pi = this._itemsByName[resName];
         if (pi == null) {
-            throw "Resource not found -" + resName;
+            throw new Error("Resource not found -" + resName);
         }
         return this.getItemAsset(pi);
     }
@@ -678,7 +679,7 @@ export class UIPackage {
             let atlasFile = item.file.replace("_ske", "_tex");
             let pos = atlasFile.lastIndexOf('.');
             if (pos != -1)
-                atlasFile = atlasFile.substr(0, pos + 1) + "json";
+                atlasFile = atlasFile.substring(0, pos + 1) + "json";
             this._bundle.load(atlasFile, dragonBones.DragonBonesAtlasAsset, (err, asset) => {
                 item.decoded = true;
                 item.atlasAsset = asset;

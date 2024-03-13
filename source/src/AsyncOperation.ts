@@ -187,7 +187,7 @@ class AsyncOperationRunner extends Component {
         var di: DisplayListItem;
         var poolStart: number;
         var k: number;
-        var t: number = director.getTotalTime() / 1000;
+        var t: number = game.totalTime / 1000;
         var frameTime: number = UIConfig.frameTimeForAsyncUIConstruction;
         var totalItems: number = this._itemList.length;
 
@@ -225,7 +225,7 @@ class AsyncOperationRunner extends Component {
             }
 
             this._index++;
-            if ((this._index % 5 == 0) && director.getTotalTime() / 1000 - t >= frameTime)
+            if ((this._index % 5 == 0) && game.totalTime / 1000 - t >= frameTime)
                 return;
         }
 

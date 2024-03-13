@@ -72,16 +72,17 @@ export class UIPackage {
         if (pkg)
             return pkg;
 
-        let asset: any = resources.get(path, BufferAsset);
+        let asset = resources.get(path, BufferAsset);
         if (!asset)
-            throw "Resource '" + path + "' not ready";
+            throw new Error("Resource '" + path + "' not ready");
 
-        if (!asset._buffer)
-            throw "Missing asset data.";
+        const buffer = asset.buffer();
+        if (!buffer)
+            throw new Error("Missing asset data.");
 
         pkg = new UIPackage();
         pkg._bundle = resources;
-        pkg.loadPackage(new ByteBuffer(asset._buffer), path);
+        pkg.loadPackage(new ByteBuffer(buffer), path);
         _instById[pkg.id] = pkg;
         _instByName[pkg.name] = pkg;
         _instById[pkg._path] = pkg;
@@ -198,7 +199,7 @@ export class UIPackage {
         if (!pkg)
             pkg = _instByName[packageIdOrName];
         if (!pkg)
-            throw "No package found: " + packageIdOrName;
+            throw new Error("No package found: " + packageIdOrName);
         pkg.dispose();
         delete _instById[pkg.id];
         delete _instByName[pkg.name];
@@ -242,19 +243,19 @@ export class UIPackage {
         var pos2: number = url.indexOf("/", pos1 + 2);
         if (pos2 == -1) {
             if (url.length > 13) {
-                var pkgId: string = url.substr(5, 8);
+                var pkgId: string = url.substring(5, 13);
                 var pkg: UIPackage = UIPackage.getById(pkgId);
                 if (pkg != null) {
-                    var srcId: string = url.substr(13);
+                    var srcId: string = url.substring(13);
                     return pkg.getItemById(srcId);
                 }
             }
         }
         else {
-            var pkgName: string = url.substr(pos1 + 2, pos2 - pos1 - 2);
+            var pkgName: string = url.substring(pos1 + 2, pos2);
             pkg = UIPackage.getByName(pkgName);
             if (pkg != null) {
-                var srcName: string = url.substr(pos2 + 1);
+                var srcName: string = url.substring(pos2 + 1);
                 return pkg.getItemByName(srcName);
             }
         }
@@ -274,8 +275,8 @@ export class UIPackage {
         if (pos2 == -1)
             return url;
 
-        var pkgName: string = url.substr(pos1 + 2, pos2 - pos1 - 2);
-        var srcName: string = url.substr(pos2 + 1);
+        var pkgName: string = url.substring(pos1 + 2, pos2);
+        var srcName: string = url.substring(pos2 + 1);
         return UIPackage.getItemURL(pkgName, srcName);
     }
 
@@ -285,7 +286,7 @@ export class UIPackage {
 
     private loadPackage(buffer: ByteBuffer, path: string): void {
         if (buffer.readUint() != 0x46475549)
-            throw "FairyGUI: old package format found in '" + path + "'";
+            throw new Error("FairyGUI: old package format found in '" + path + "'");
 
         this._path = path;
         buffer.version = buffer.readInt();
@@ -340,7 +341,7 @@ export class UIPackage {
 
         var pi: PackageItem;
         let pos = path.lastIndexOf('/');
-        let shortPath = pos == -1 ? "" : path.substr(0, pos + 1);
+        let shortPath = pos == -1 ? "" : path.substring(0, pos + 1);
         path = path + "_";
 
         cnt = buffer.readShort();
@@ -555,7 +556,7 @@ export class UIPackage {
     public getItemAssetByName(resName: string): Asset {
         var pi: PackageItem = this._itemsByName[resName];
         if (pi == null) {
-            throw "Resource not found -" + resName;
+            throw new Error("Resource not found -" + resName);
         }
 
         return this.getItemAsset(pi);
@@ -846,7 +847,7 @@ export class UIPackage {
             let atlasFile = item.file.replace("_ske", "_tex");
             let pos = atlasFile.lastIndexOf('.');
             if (pos != -1)
-                atlasFile = atlasFile.substr(0, pos + 1) + "json";
+                atlasFile = atlasFile.substring(0, pos + 1) + "json";
             this._bundle.load(atlasFile, dragonBones.DragonBonesAtlasAsset, (err: Error | null, asset: dragonBones.DragonBonesAtlasAsset) => {
                 item.decoded = true;
                 item.atlasAsset = asset;

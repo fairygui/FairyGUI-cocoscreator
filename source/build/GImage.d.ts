@@ -1,3 +1,4 @@
+/// <reference path="../lib/cc.d.ts" />
 import { Color } from "cc";
 import { Image } from "./display/Image";
 import { FlipType, FillMethod, FillOrigin } from "./FieldTypes";

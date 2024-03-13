@@ -1,3 +1,4 @@
+/// <reference path="../lib/cc.d.ts" />
 import { Mask, Vec2, Node, Constructor } from "cc";
 import { Controller } from "./Controller";
 import { IHitTest } from "./event/HitTest";
@@ -15,6 +16,8 @@ export declare class GComponent extends GObject {
     private _applyingController?;
     private _rectMask?;
     private _maskContent?;
+    private _invertedMask?;
+    private _containerUITrans;
     protected _margin: Margin;
     protected _trackBounds: boolean;
     protected _boundsChanged: boolean;

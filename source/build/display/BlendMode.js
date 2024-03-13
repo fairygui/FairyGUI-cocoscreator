@@ -1,4 +1,4 @@
-import { gfx, RenderComponent } from "cc";
+import { gfx, UIRenderer } from "cc";
 export var BlendMode;
 (function (BlendMode) {
     BlendMode[BlendMode["Normal"] = 0] = "Normal";
@@ -17,7 +17,7 @@ export var BlendMode;
 export class BlendModeUtils {
     static apply(node, blendMode) {
         let f = factors[blendMode];
-        let renderers = node.getComponentsInChildren(RenderComponent);
+        let renderers = node.getComponentsInChildren(UIRenderer);
         renderers.forEach(element => {
             element.srcBlendFactor = f[0];
             element.dstBlendFactor = f[1];
@@ -29,16 +29,16 @@ export class BlendModeUtils {
     }
 }
 const factors = [
-    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA],
-    [gfx.BlendFactor.ONE, gfx.BlendFactor.ONE],
-    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE],
-    [gfx.BlendFactor.DST_COLOR, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA],
-    [gfx.BlendFactor.ONE, gfx.BlendFactor.ONE_MINUS_SRC_COLOR],
-    [gfx.BlendFactor.ZERO, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA],
-    [gfx.BlendFactor.ZERO, gfx.BlendFactor.SRC_ALPHA],
-    [gfx.BlendFactor.ONE_MINUS_DST_ALPHA, gfx.BlendFactor.DST_ALPHA],
-    [gfx.BlendFactor.ONE, gfx.BlendFactor.ZERO],
-    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA],
-    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA],
-    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA],
+    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA], //normal
+    [gfx.BlendFactor.ONE, gfx.BlendFactor.ONE], //none
+    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE], //add
+    [gfx.BlendFactor.DST_COLOR, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA], //mul
+    [gfx.BlendFactor.ONE, gfx.BlendFactor.ONE_MINUS_SRC_COLOR], //screen
+    [gfx.BlendFactor.ZERO, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA], //erase
+    [gfx.BlendFactor.ZERO, gfx.BlendFactor.SRC_ALPHA], //mask
+    [gfx.BlendFactor.ONE_MINUS_DST_ALPHA, gfx.BlendFactor.DST_ALPHA], //below
+    [gfx.BlendFactor.ONE, gfx.BlendFactor.ZERO], //off
+    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA], //custom1
+    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA], //custom2
+    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA], //custom2
 ];

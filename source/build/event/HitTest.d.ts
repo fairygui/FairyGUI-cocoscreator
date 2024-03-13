@@ -1,3 +1,4 @@
+/// <reference path="../../lib/cc.d.ts" />
 import { Vec2 } from "cc";
 import { GObject } from "../GObject";
 import { ByteBuffer } from "../utils/ByteBuffer";

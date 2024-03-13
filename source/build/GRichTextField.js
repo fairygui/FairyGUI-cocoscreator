@@ -91,7 +91,7 @@ export class GRichTextField extends GTextField {
             if (this._richText.maxWidth != 0)
                 this._richText["_maxWidth"] = 0;
             this._richText.string = text2;
-            if (this.maxWidth != 0 && this._node._uiProps.uiTransformComp.contentSize.width > this.maxWidth)
+            if (this.maxWidth != 0 && this._uiTrans.contentSize.width > this.maxWidth)
                 this._richText.maxWidth = this.maxWidth;
         }
         else

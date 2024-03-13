@@ -1,4 +1,4 @@
-import { Color, EditBox, HorizontalTextAlignment, VerticalTextAlignment } from "cc";
+import { Color, EditBox, HorizontalTextAlignment, Overflow, UITransform, VerticalTextAlignment } from "cc";
 import { Event as FUIEvent } from "./event/Event";
 import { AutoSizeType } from "./FieldTypes";
 import { GTextField } from "./GTextField";
@@ -167,6 +167,7 @@ export class GTextInput extends GTextField {
 
     private onTouchEnd1(evt: FUIEvent) {
         (<MyEditBox>this._editBox).openKeyboard();
+        evt.propagationStopped = true
     }
 
     public setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void {
@@ -206,21 +207,18 @@ export class GTextInput extends GTextField {
 }
 
 class MyEditBox extends EditBox {
-    _registerEvent() {
-        //取消掉原来的事件处理
+    protected _init(): void {
+        super._init();
+
+        this.placeholderLabel.getComponent(UITransform).setAnchorPoint(0, 1);
+        this.textLabel.getComponent(UITransform).setAnchorPoint(0, 1);
+        this.placeholderLabel.overflow = Overflow.CLAMP;
+        this.textLabel.overflow = Overflow.CLAMP;
     }
 
-    // _syncSize() {
-    //     let size = this.node._uiProps.uiTransformComp.contentSize;
-    //     let impl = this["_impl"];
-
-    //     impl.setSize(size.width, size.height);
-
-    //     if (this.textLabel)
-    //         this.textLabel.node._uiProps.uiTransformComp.setContentSize(size.width, size.height);
-    //     if (this.placeholderLabel)
-    //         this.placeholderLabel.node._uiProps.uiTransformComp.setContentSize(size.width, size.height);
-    // }
+    protected _registerEvent() {
+        //取消掉原来的事件处理
+    }
 
     public openKeyboard() {
         let impl = this["_impl"];

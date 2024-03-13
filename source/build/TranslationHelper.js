@@ -14,8 +14,8 @@ export class TranslationHelper {
                 var i = key.indexOf("-");
                 if (i == -1)
                     continue;
-                var key2 = key.substr(0, i);
-                var key3 = key.substr(i + 1);
+                var key2 = key.substring(0, i);
+                var key3 = key.substring(i + 1);
                 var col = strings[key2];
                 if (!col) {
                     col = {};

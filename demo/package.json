@@ -1,8 +1,9 @@
 {
   "name": "NewCocosProject",
-  "type": "3d",
   "uuid": "c30b28da-749e-479b-bcb6-cecd8d7be9e3",
-  "version": "3.0.1",
+  "creator": {
+    "version": "3.8.2"
+  },
   "dependencies": {
     "fairygui-cc": "latest"
   }

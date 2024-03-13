@@ -1,4 +1,4 @@
-import { gfx, RenderComponent, Event as Event$1, Vec2, Node, game, director, macro, Color, Layers, Font, resources, UITransform, UIOpacity, Rect, Component, Vec3, Graphics, misc, Sprite, Size, view, BufferAsset, AssetManager, Asset, assetManager, Texture2D, SpriteFrame, BitmapFont, sp, dragonBones, ImageAsset, AudioClip, path, Label, LabelOutline, LabelShadow, RichText, SpriteAtlas, sys, EventMouse, EventTarget, Mask, math, isValid, View, AudioSourceComponent, EditBox } from 'cc';
+import { gfx, UIRenderer, Event as Event$1, Vec2, Node, game, director, macro, Color, Layers, Font, resources, Vec3, Rect, UITransform, UIOpacity, Component, Graphics, misc, Sprite, Size, screen, view, ImageAsset, AudioClip, BufferAsset, AssetManager, Asset, assetManager, Texture2D, SpriteFrame, BitmapFont, sp, dragonBones, path, Label, SpriteAtlas, RichText, sys, EventMouse, EventTarget, Mask, math, isValid, View, AudioSourceComponent, EditBox, Overflow } from 'cc';
 import { EDITOR } from 'cc/env';
 
 var ButtonMode;
@@ -213,7 +213,7 @@ var BlendMode;
 class BlendModeUtils {
     static apply(node, blendMode) {
         let f = factors[blendMode];
-        let renderers = node.getComponentsInChildren(RenderComponent);
+        let renderers = node.getComponentsInChildren(UIRenderer);
         renderers.forEach(element => {
             element.srcBlendFactor = f[0];
             element.dstBlendFactor = f[1];
@@ -225,18 +225,18 @@ class BlendModeUtils {
     }
 }
 const factors = [
-    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA],
-    [gfx.BlendFactor.ONE, gfx.BlendFactor.ONE],
-    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE],
-    [gfx.BlendFactor.DST_COLOR, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA],
-    [gfx.BlendFactor.ONE, gfx.BlendFactor.ONE_MINUS_SRC_COLOR],
-    [gfx.BlendFactor.ZERO, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA],
-    [gfx.BlendFactor.ZERO, gfx.BlendFactor.SRC_ALPHA],
-    [gfx.BlendFactor.ONE_MINUS_DST_ALPHA, gfx.BlendFactor.DST_ALPHA],
-    [gfx.BlendFactor.ONE, gfx.BlendFactor.ZERO],
-    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA],
-    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA],
-    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA],
+    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA], //normal
+    [gfx.BlendFactor.ONE, gfx.BlendFactor.ONE], //none
+    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE], //add
+    [gfx.BlendFactor.DST_COLOR, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA], //mul
+    [gfx.BlendFactor.ONE, gfx.BlendFactor.ONE_MINUS_SRC_COLOR], //screen
+    [gfx.BlendFactor.ZERO, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA], //erase
+    [gfx.BlendFactor.ZERO, gfx.BlendFactor.SRC_ALPHA], //mask
+    [gfx.BlendFactor.ONE_MINUS_DST_ALPHA, gfx.BlendFactor.DST_ALPHA], //below
+    [gfx.BlendFactor.ONE, gfx.BlendFactor.ZERO], //off
+    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA], //custom1
+    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA], //custom2
+    [gfx.BlendFactor.SRC_ALPHA, gfx.BlendFactor.ONE_MINUS_SRC_ALPHA], //custom2
 ];
 
 class Event extends Event$1 {
@@ -658,6 +658,42 @@ class Pool {
 }
 
 // Author: Daniele Giardini - http://www.demigiant.com
+// Created: 2014/07/19 14:11
+// 
+// License Copyright (c) Daniele Giardini.
+// This work is subject to the terms at http://dotween.demigiant.com/license.php
+// 
+// =============================================================
+// Contains Daniele Giardini's C# port of the easing equations created by Robert Penner
+// (all easing equations except for Flash, InFlash, OutFlash, InOutFlash,
+// which use some parts of Robert Penner's equations but were created by Daniele Giardini)
+// http://robertpenner.com/easing, see license below:
+// =============================================================
+//
+// TERMS OF USE - EASING EQUATIONS
+//
+// Open source under the BSD License.
+//
+// Copyright ? 2001 Robert Penner
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without modification,
+// are permitted provided that the following conditions are met:
+//
+// - Redistributions of source code must retain the above copyright notice,
+// this list of conditions and the following disclaimer.
+// - Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+// - Neither the name of the author nor the names of contributors may be used to endorse
+// or promote products derived} from this software without specific prior written permission.
+// - THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+// STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+// EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 const _PiOver2 = Math.PI * 0.5;
 const _TwoPi = Math.PI * 2;
 function evaluateEase(easeType, time, duration, overshootOrAmplitude, period) {
@@ -2506,6 +2542,7 @@ class GObject {
     }
     set name(value) {
         this._name = value;
+        this._node.name = value || "";
     }
     get x() {
         return this._x;
@@ -3161,7 +3198,7 @@ class GObject {
         var f1;
         var f2;
         this._id = buffer.readS();
-        this._name = buffer.readS();
+        this.name = buffer.readS();
         f1 = buffer.readInt();
         f2 = buffer.readInt();
         this.setPosition(f1, f2);
@@ -3971,7 +4008,7 @@ class GGraph extends GObject {
     }
 }
 
-class Image extends Sprite {
+let Image$1 = class Image extends Sprite {
     constructor() {
         super();
         this._flip = FlipType.None;
@@ -4077,14 +4114,14 @@ class Image extends Sprite {
             }
         }
     }
-}
+};
 
 class GImage extends GObject {
     constructor() {
         super();
         this._node.name = "GImage";
         this._touchDisabled = true;
-        this._content = this._node.addComponent(Image);
+        this._content = this._node.addComponent(Image$1);
         this._content.sizeMode = Sprite.SizeMode.CUSTOM;
         this._content.trim = false;
     }
@@ -4170,7 +4207,7 @@ class GImage extends GObject {
     }
 }
 
-class MovieClip extends Image {
+class MovieClip extends Image$1 {
     constructor() {
         super();
         this.interval = 0;
@@ -4534,7 +4571,7 @@ UIContentScaler.scaleFactor = 1;
 UIContentScaler.scaleLevel = 0;
 UIContentScaler.rootSize = new Size();
 function updateScaler() {
-    let size = view.getCanvasSize();
+    let size = screen.windowSize;
     size.width /= view.getScaleX();
     size.height /= view.getScaleY();
     UIContentScaler.rootSize.set(size);
@@ -4594,8 +4631,8 @@ class TranslationHelper {
                 var i = key.indexOf("-");
                 if (i == -1)
                     continue;
-                var key2 = key.substr(0, i);
-                var key3 = key.substr(i + 1);
+                var key2 = key.substring(0, i);
+                var key3 = key.substring(i + 1);
                 var col = strings[key2];
                 if (!col) {
                     col = {};
@@ -4797,7 +4834,7 @@ class ByteBuffer {
     }
     set position(value) {
         if (value > this._length)
-            throw "Out of bounds";
+            throw new Error("Out of bounds");
         this._pos = value;
     }
     skip(count) {
@@ -4805,7 +4842,7 @@ class ByteBuffer {
     }
     validate(forward) {
         if (this._pos + forward > this._length)
-            throw "Out of bounds";
+            throw new Error("Out of bounds");
     }
     readByte() {
         this.validate(1);
@@ -5029,12 +5066,13 @@ class UIPackage {
             return pkg;
         let asset = resources.get(path, BufferAsset);
         if (!asset)
-            throw "Resource '" + path + "' not ready";
-        if (!asset._buffer)
-            throw "Missing asset data.";
+            throw new Error("Resource '" + path + "' not ready");
+        const buffer = asset.buffer();
+        if (!buffer)
+            throw new Error("Missing asset data.");
         pkg = new UIPackage();
         pkg._bundle = resources;
-        pkg.loadPackage(new ByteBuffer(asset._buffer), path);
+        pkg.loadPackage(new ByteBuffer(buffer), path);
         _instById[pkg.id] = pkg;
         _instByName[pkg.name] = pkg;
         _instById[pkg._path] = pkg;
@@ -5113,7 +5151,7 @@ class UIPackage {
         if (!pkg)
             pkg = _instByName[packageIdOrName];
         if (!pkg)
-            throw "No package found: " + packageIdOrName;
+            throw new Error("No package found: " + packageIdOrName);
         pkg.dispose();
         delete _instById[pkg.id];
         delete _instByName[pkg.name];
@@ -5150,19 +5188,19 @@ class UIPackage {
         var pos2 = url.indexOf("/", pos1 + 2);
         if (pos2 == -1) {
             if (url.length > 13) {
-                var pkgId = url.substr(5, 8);
+                var pkgId = url.substring(5, 13);
                 var pkg = UIPackage.getById(pkgId);
                 if (pkg != null) {
-                    var srcId = url.substr(13);
+                    var srcId = url.substring(13);
                     return pkg.getItemById(srcId);
                 }
             }
         }
         else {
-            var pkgName = url.substr(pos1 + 2, pos2 - pos1 - 2);
+            var pkgName = url.substring(pos1 + 2, pos2);
             pkg = UIPackage.getByName(pkgName);
             if (pkg != null) {
-                var srcName = url.substr(pos2 + 1);
+                var srcName = url.substring(pos2 + 1);
                 return pkg.getItemByName(srcName);
             }
         }
@@ -5177,8 +5215,8 @@ class UIPackage {
         var pos2 = url.indexOf("/", pos1 + 2);
         if (pos2 == -1)
             return url;
-        var pkgName = url.substr(pos1 + 2, pos2 - pos1 - 2);
-        var srcName = url.substr(pos2 + 1);
+        var pkgName = url.substring(pos1 + 2, pos2);
+        var srcName = url.substring(pos2 + 1);
         return UIPackage.getItemURL(pkgName, srcName);
     }
     static setStringsSource(source) {
@@ -5186,7 +5224,7 @@ class UIPackage {
     }
     loadPackage(buffer, path) {
         if (buffer.readUint() != 0x46475549)
-            throw "FairyGUI: old package format found in '" + path + "'";
+            throw new Error("FairyGUI: old package format found in '" + path + "'");
         this._path = path;
         buffer.version = buffer.readInt();
         var ver2 = buffer.version >= 2;
@@ -5230,7 +5268,7 @@ class UIPackage {
         buffer.seek(indexTablePos, 1);
         var pi;
         let pos = path.lastIndexOf('/');
-        let shortPath = pos == -1 ? "" : path.substr(0, pos + 1);
+        let shortPath = pos == -1 ? "" : path.substring(0, pos + 1);
         path = path + "_";
         cnt = buffer.readShort();
         for (i = 0; i < cnt; i++) {
@@ -5409,7 +5447,7 @@ class UIPackage {
     getItemAssetByName(resName) {
         var pi = this._itemsByName[resName];
         if (pi == null) {
-            throw "Resource not found -" + resName;
+            throw new Error("Resource not found -" + resName);
         }
         return this.getItemAsset(pi);
     }
@@ -5653,7 +5691,7 @@ class UIPackage {
             let atlasFile = item.file.replace("_ske", "_tex");
             let pos = atlasFile.lastIndexOf('.');
             if (pos != -1)
-                atlasFile = atlasFile.substr(0, pos + 1) + "json";
+                atlasFile = atlasFile.substring(0, pos + 1) + "json";
             this._bundle.load(atlasFile, dragonBones.DragonBonesAtlasAsset, (err, asset) => {
                 item.decoded = true;
                 item.atlasAsset = asset;
@@ -5821,7 +5859,7 @@ class UBBParser {
             pos1 = this._readPos;
         }
         if (pos1 < this._text.length)
-            result += this._text.substr(pos1);
+            result += this._text.substring(pos1);
         this._text = null;
         return result;
     }
@@ -5846,6 +5884,7 @@ class GTextField extends GObject {
     }
     createRenderer() {
         this._label = this._node.addComponent(Label);
+        this._label.string = "";
         this.autoSize = AutoSizeType.Both;
     }
     set text(value) {
@@ -5960,22 +5999,15 @@ class GTextField extends GObject {
             this._label.enableWrapText = !value;
     }
     get stroke() {
-        return (this._outline && this._outline.enabled) ? this._outline.width : 0;
+        return this._label ? this._label.outlineWidth : 0;
     }
     set stroke(value) {
-        if (value == 0) {
-            if (this._outline)
-                this._outline.enabled = false;
-        }
-        else {
-            if (!this._outline) {
-                this._outline = this._node.addComponent(LabelOutline);
-                this.updateStrokeColor();
-            }
-            else
-                this._outline.enabled = true;
-            this._outline.width = value;
-        }
+        if (!this._label)
+            return;
+        this._label.outlineWidth = value;
+        this._label.enableOutline = value > 0;
+        if (value > 0)
+            this.updateStrokeColor();
     }
     get strokeColor() {
         return this._strokeColor;
@@ -5994,18 +6026,12 @@ class GTextField extends GObject {
         if (!this._shadowOffset)
             this._shadowOffset = new Vec2();
         this._shadowOffset.set(value);
-        if (this._shadowOffset.x != 0 || this._shadowOffset.y != 0) {
-            if (!this._shadow) {
-                this._shadow = this._node.addComponent(LabelShadow);
-                this.updateShadowColor();
-            }
-            else
-                this._shadow.enabled = true;
-            this._shadow.offset.x = value.x;
-            this._shadow.offset.y = -value.y;
-        }
-        else if (this._shadow)
-            this._shadow.enabled = false;
+        if (!this._label)
+            return;
+        this._label.shadowOffset = new Vec2(this._shadowOffset.x, -this._shadowOffset.y);
+        this._label.enableShadow = value.x != 0 || value.y != 0;
+        if (this._label.enableShadow)
+            this.updateShadowColor();
     }
     get shadowColor() {
         return this._shadowColor;
@@ -6055,7 +6081,7 @@ class GTextField extends GObject {
             if (pos2 == -1)
                 break;
             if (pos2 == pos1 + 1) {
-                result += template.substr(pos1, 2);
+                result += template.substring(pos1, pos1 + 2);
                 pos1 = pos2 + 1;
                 continue;
             }
@@ -6076,7 +6102,7 @@ class GTextField extends GObject {
             pos1 = pos2 + 1;
         }
         if (pos1 < template.length)
-            result += template.substr(pos1);
+            result += template.substring(pos1);
         return result;
     }
     get templateVars() {
@@ -6100,7 +6126,7 @@ class GTextField extends GObject {
     }
     get textWidth() {
         this.ensureSizeCorrect();
-        return this._node._uiProps.uiTransformComp.width;
+        return this._uiTrans.width;
     }
     ensureSizeCorrect() {
         if (this._sizeDirty) {
@@ -6144,24 +6170,24 @@ class GTextField extends GObject {
         this.assignFontColor(this._label, this._color);
     }
     updateStrokeColor() {
-        if (!this._outline)
+        if (!this._label || !this._label.enableOutline)
             return;
         if (!this._strokeColor)
             this._strokeColor = new Color();
         if (this._grayed)
-            this._outline.color = toGrayedColor(this._strokeColor);
+            this._label.outlineColor = toGrayedColor(this._strokeColor);
         else
-            this._outline.color = this._strokeColor;
+            this._label.outlineColor = this._strokeColor;
     }
     updateShadowColor() {
-        if (!this._shadow)
+        if (!this._label || !this._label.enableShadow)
             return;
         if (!this._shadowColor)
             this._shadowColor = new Color();
         if (this._grayed)
-            this._shadow.color = toGrayedColor(this._shadowColor);
+            this._label.shadowColor = toGrayedColor(this._shadowColor);
         else
-            this._shadow.color = this._shadowColor;
+            this._label.shadowColor = this._shadowColor;
     }
     updateFontSize() {
         let font = this._label.font;
@@ -6183,15 +6209,15 @@ class GTextField extends GObject {
             this._label.overflow = Label.Overflow.NONE;
         else if (this._autoSize == AutoSizeType.Height) {
             this._label.overflow = Label.Overflow.RESIZE_HEIGHT;
-            this._node._uiProps.uiTransformComp.width = this._width;
+            this._uiTrans.width = this._width;
         }
         else if (this._autoSize == AutoSizeType.Shrink) {
             this._label.overflow = Label.Overflow.SHRINK;
-            this._node._uiProps.uiTransformComp.setContentSize(this._width, this._height);
+            this._uiTrans.setContentSize(this._width, this._height);
         }
         else {
             this._label.overflow = Label.Overflow.CLAMP;
-            this._node._uiProps.uiTransformComp.setContentSize(this._width, this._height);
+            this._uiTrans.setContentSize(this._width, this._height);
         }
     }
     markSizeChanged() {
@@ -6210,7 +6236,7 @@ class GTextField extends GObject {
             return;
         if (this._autoSize == AutoSizeType.Both || this._autoSize == AutoSizeType.Height) {
             this._updatingSize = true;
-            this.setSize(this._node._uiProps.uiTransformComp.width, this._node._uiProps.uiTransformComp.height);
+            this.setSize(this._uiTrans.width, this._uiTrans.height);
             this._updatingSize = false;
         }
     }
@@ -6218,10 +6244,10 @@ class GTextField extends GObject {
         if (this._updatingSize)
             return;
         if (this._autoSize == AutoSizeType.None || this._autoSize == AutoSizeType.Shrink) {
-            this._node._uiProps.uiTransformComp.setContentSize(this._width, this._height);
+            this._uiTrans.setContentSize(this._width, this._height);
         }
         else if (this._autoSize == AutoSizeType.Height)
-            this._node._uiProps.uiTransformComp.width = this._width;
+            this._uiTrans.width = this._width;
     }
     handleGrayedChanged() {
         this.updateFontColor();
@@ -6288,8 +6314,12 @@ class GTextField extends GObject {
         super.setup_afterAdd(buffer, beginPos);
         buffer.seek(beginPos, 6);
         var str = buffer.readS();
-        if (str != null)
+        if (str != null) {
             this.text = str;
+        }
+        else {
+            this.text = "";
+        }
     }
 }
 
@@ -6379,7 +6409,7 @@ class GRichTextField extends GTextField {
             if (this._richText.maxWidth != 0)
                 this._richText["_maxWidth"] = 0;
             this._richText.string = text2;
-            if (this.maxWidth != 0 && this._node._uiProps.uiTransformComp.contentSize.width > this.maxWidth)
+            if (this.maxWidth != 0 && this._uiTrans.contentSize.width > this.maxWidth)
                 this._richText.maxWidth = this.maxWidth;
         }
         else
@@ -6738,7 +6768,7 @@ class InputProcessor extends Component {
     }
     setEnd(ti) {
         ti.began = false;
-        let now = director.getTotalTime() / 1000;
+        let now = game.totalTime / 1000;
         let elapsed = now - ti.lastClickTime;
         if (elapsed < 0.45) {
             if (ti.clickCount == 2)
@@ -6947,7 +6977,7 @@ class Controller extends EventTarget {
     set selectedIndex(value) {
         if (this._selectedIndex != value) {
             if (value > this._pageIds.length - 1)
-                throw "index out of bounds: " + value;
+                throw new Error("index out of bounds: " + value);
             this.changing = true;
             this._previousIndex = this._selectedIndex;
             this._selectedIndex = value;
@@ -6966,7 +6996,7 @@ class Controller extends EventTarget {
     setSelectedIndex(value) {
         if (this._selectedIndex != value) {
             if (value > this._pageIds.length - 1)
-                throw "index out of bounds: " + value;
+                throw new Error("index out of bounds: " + value);
             this.changing = true;
             this._previousIndex = this._selectedIndex;
             this._selectedIndex = value;
@@ -7195,7 +7225,8 @@ class ScrollPane extends Component {
         const o = this._owner = GObject.cast(this.node);
         this._maskContainer = new Node("ScrollPane");
         this._maskContainer.layer = UIConfig.defaultUILayer;
-        this._maskContainer.addComponent(UITransform).setAnchorPoint(0, 1);
+        this._maskContainerUITrans = this._maskContainer.addComponent(UITransform);
+        this._maskContainerUITrans.setAnchorPoint(0, 1);
         this._maskContainer.parent = o.node;
         this._container = o._container;
         this._container.parent = this._maskContainer;
@@ -7277,7 +7308,7 @@ class ScrollPane extends Component {
                 if (res) {
                     this._vtScrollBar = (UIPackage.createObjectFromURL(res));
                     if (!this._vtScrollBar)
-                        throw "cannot create scrollbar from " + res;
+                        throw new Error("cannot create scrollbar from " + res);
                     this._vtScrollBar.setScrollPane(this, true);
                     this._vtScrollBar.node.parent = o.node;
                 }
@@ -7287,7 +7318,7 @@ class ScrollPane extends Component {
                 if (res) {
                     this._hzScrollBar = (UIPackage.createObjectFromURL(res));
                     if (!this._hzScrollBar)
-                        throw "cannot create scrollbar from " + res;
+                        throw new Error("cannot create scrollbar from " + res);
                     this._hzScrollBar.setScrollPane(this, false);
                     this._hzScrollBar.node.parent = o.node;
                 }
@@ -7306,14 +7337,14 @@ class ScrollPane extends Component {
         if (headerRes) {
             this._header = (UIPackage.createObjectFromURL(headerRes));
             if (this._header == null)
-                throw "cannot create scrollPane header from " + headerRes;
+                throw new Error("cannot create scrollPane header from " + headerRes);
             else
                 this._maskContainer.insertChild(this._header.node, 0);
         }
         if (footerRes) {
             this._footer = (UIPackage.createObjectFromURL(footerRes));
             if (this._footer == null)
-                throw "cannot create scrollPane footer from " + footerRes;
+                throw new Error("cannot create scrollPane footer from " + footerRes);
             else
                 this._maskContainer.insertChild(this._footer.node, 0);
         }
@@ -7353,11 +7384,7 @@ class ScrollPane extends Component {
             if (target)
                 return target;
         }
-        if (pt.x >= this._owner.margin.left && pt.y >= this._owner.margin.top
-            && pt.x < this._owner.margin.left + this._viewSize.x && pt.y < this._owner.margin.top + this._viewSize.y)
-            return this._owner;
-        else
-            return null;
+        return this._owner;
     }
     get owner() {
         return this._owner;
@@ -7736,9 +7763,9 @@ class ScrollPane extends Component {
             mx = this._vtScrollBar.width;
         const o = this._owner;
         if (this._dontClipMargin)
-            this._maskContainer._uiProps.uiTransformComp.setAnchorPoint((o.margin.left + o._alignOffset.x) / o.width, 1 - (o.margin.top + o._alignOffset.y) / o.height);
+            this._maskContainerUITrans.setAnchorPoint((o.margin.left + o._alignOffset.x) / o.width, 1 - (o.margin.top + o._alignOffset.y) / o.height);
         else
-            this._maskContainer._uiProps.uiTransformComp.setAnchorPoint(o._alignOffset.x / this._viewSize.x, 1 - o._alignOffset.y / this._viewSize.y);
+            this._maskContainerUITrans.setAnchorPoint(o._alignOffset.x / this._viewSize.x, 1 - o._alignOffset.y / this._viewSize.y);
         if (o._customMask)
             this._maskContainer.setPosition(mx + o._alignOffset.x, -o._alignOffset.y);
         else
@@ -7876,7 +7903,7 @@ class ScrollPane extends Component {
             maskWidth += (this._owner.margin.left + this._owner.margin.right);
             maskHeight += (this._owner.margin.top + this._owner.margin.bottom);
         }
-        this._maskContainer._uiProps.uiTransformComp.setContentSize(maskWidth, maskHeight);
+        this._maskContainerUITrans.setContentSize(maskWidth, maskHeight);
         if (this._vtScrollBar)
             this._vtScrollBar.handlePositionChanged();
         if (this._hzScrollBar)
@@ -8009,7 +8036,7 @@ class ScrollPane extends Component {
         this._isHoldAreaDone = false;
         this._velocity.set(Vec2.ZERO);
         this._velocityScale = 1;
-        this._lastMoveTime = director.getTotalTime() / 1000;
+        this._lastMoveTime = game.totalTime / 1000;
     }
     onTouchMove(evt) {
         if (!isValid(this._owner.node))
@@ -8109,7 +8136,7 @@ class ScrollPane extends Component {
                 this._container.setPosition(newPosX, this._container.position.y);
         }
         //更新速度
-        var now = director.getTotalTime() / 1000;
+        var now = game.totalTime / 1000;
         var deltaTime = Math.max(now - this._lastMoveTime, 1 / 60);
         var deltaPositionX = pt.x - this._lastTouchPos.x;
         var deltaPositionY = pt.y - this._lastTouchPos.y;
@@ -8226,7 +8253,7 @@ class ScrollPane extends Component {
             //更新速度
             if (!this._inertiaDisabled) {
                 var frameRate = 60;
-                var elapsed = (director.getTotalTime() / 1000 - this._lastMoveTime) * frameRate - 1;
+                var elapsed = (game.totalTime / 1000 - this._lastMoveTime) * frameRate - 1;
                 if (elapsed > 1) {
                     var factor = Math.pow(0.833, elapsed);
                     this._velocity.x = this._velocity.x * factor;
@@ -8505,7 +8532,7 @@ class ScrollPane extends Component {
             //以屏幕像素为基准
             var isMobile = sys.isMobile;
             var v2 = Math.abs(v) * this._velocityScale;
-            const winSize = View.instance.getCanvasSize();
+            const winSize = screen.windowSize;
             //在移动设备上，需要对不同分辨率做一个适配，我们的速度判断以1136分辨率为基准
             if (isMobile)
                 v2 *= 1136 / Math.max(winSize.width, winSize.height);
@@ -10019,6 +10046,7 @@ class GComponent extends GObject {
     constructor() {
         super();
         this._sortingChildCount = 0;
+        this._invertedMask = false;
         this._childrenRenderOrder = ChildrenRenderOrder.Ascent;
         this._apexIndex = 0;
         this._node.name = "GComponent";
@@ -10029,7 +10057,8 @@ class GComponent extends GObject {
         this._alignOffset = new Vec2();
         this._container = new Node("Container");
         this._container.layer = UIConfig.defaultUILayer;
-        this._container.addComponent(UITransform).setAnchorPoint(0, 1);
+        this._containerUITrans = this._container.addComponent(UITransform);
+        this._containerUITrans.setAnchorPoint(0, 1);
         this._node.addChild(this._container);
     }
     dispose() {
@@ -10065,7 +10094,7 @@ class GComponent extends GObject {
     }
     addChildAt(child, index) {
         if (!child)
-            throw "child is null";
+            throw new Error("child is null");
         var numChildren = this._children.length;
         if (index >= 0 && index <= numChildren) {
             if (child.parent == this) {
@@ -10093,7 +10122,7 @@ class GComponent extends GObject {
             return child;
         }
         else {
-            throw "Invalid child index";
+            throw new Error("Invalid child index");
         }
     }
     getInsertPosForSortingChild(target) {
@@ -10134,7 +10163,7 @@ class GComponent extends GObject {
             return child;
         }
         else {
-            throw "Invalid child index";
+            throw new Error("Invalid child index");
         }
     }
     removeChildren(beginIndex, endIndex, dispose) {
@@ -10151,7 +10180,7 @@ class GComponent extends GObject {
         if (index >= 0 && index < this.numChildren)
             return this._children[index];
         else
-            throw "Invalid child index";
+            throw new Error("Invalid child index");
     }
     getChild(name, classType) {
         var cnt = this._children.length;
@@ -10213,7 +10242,7 @@ class GComponent extends GObject {
     setChildIndex(child, index) {
         var oldIndex = this._children.indexOf(child);
         if (oldIndex == -1)
-            throw "Not a child of this container";
+            throw new Error("Not a child of this container");
         if (child.sortingOrder != 0) //no effect
             return;
         var cnt = this._children.length;
@@ -10226,7 +10255,7 @@ class GComponent extends GObject {
     setChildIndexBefore(child, index) {
         var oldIndex = this._children.indexOf(child);
         if (oldIndex == -1)
-            throw "Not a child of this container";
+            throw new Error("Not a child of this container");
         if (child.sortingOrder != 0) //no effect
             return oldIndex;
         var cnt = this._children.length;
@@ -10260,7 +10289,7 @@ class GComponent extends GObject {
         var index1 = this._children.indexOf(child1);
         var index2 = this._children.indexOf(child2);
         if (index1 == -1 || index2 == -1)
-            throw "Not a child of this container";
+            throw new Error("Not a child of this container");
         this.swapChildrenAt(index1, index2);
     }
     swapChildrenAt(index1, index2) {
@@ -10303,7 +10332,7 @@ class GComponent extends GObject {
     removeController(c) {
         var index = this._controllers.indexOf(c);
         if (index == -1)
-            throw "controller not exists";
+            throw new Error("controller not exists");
         c.parent = null;
         this._controllers.splice(index, 1);
         var length = this._children.length;
@@ -10509,7 +10538,7 @@ class GComponent extends GObject {
             value.node.on(Node.EventType.TRANSFORM_CHANGED, this.onMaskContentChanged, this);
             value.node.on(Node.EventType.SIZE_CHANGED, this.onMaskContentChanged, this);
             value.node.on(Node.EventType.ANCHOR_CHANGED, this.onMaskContentChanged, this);
-            this._customMask.inverted = inverted;
+            this._invertedMask = inverted;
             if (this._node.activeInHierarchy)
                 this.onMaskReady();
             else
@@ -10536,16 +10565,17 @@ class GComponent extends GObject {
     onMaskReady() {
         this.off(Event.DISPLAY, this.onMaskReady, this);
         if (this._maskContent instanceof GImage) {
-            this._customMask.type = Mask.Type.IMAGE_STENCIL;
+            this._customMask.type = Mask.Type.SPRITE_STENCIL;
             this._customMask.alphaThreshold = 0.0001;
             this._customMask.spriteFrame = this._maskContent._content.spriteFrame;
         }
         else if (this._maskContent instanceof GGraph) {
             if (this._maskContent.type == 2)
-                this._customMask.type = Mask.Type.ELLIPSE;
+                this._customMask.type = Mask.Type.GRAPHICS_ELLIPSE;
             else
-                this._customMask.type = Mask.Type.RECT;
+                this._customMask.type = Mask.Type.GRAPHICS_RECT;
         }
+        this._customMask.inverted = this._invertedMask;
     }
     onMaskContentChanged() {
         let maskNode = this._customMask.node;
@@ -10599,7 +10629,7 @@ class GComponent extends GObject {
         if (this._scrollPane)
             this._scrollPane.onOwnerSizeChanged();
         else
-            this._container._uiProps.uiTransformComp.setContentSize(this.viewWidth, this.viewHeight);
+            this._containerUITrans.setContentSize(this.viewWidth, this.viewHeight);
     }
     handleGrayedChanged() {
         var c = this.getController("grayed");
@@ -10634,7 +10664,7 @@ class GComponent extends GObject {
             s_vec2$2.set(pt);
             s_vec2$2.x += this._container.position.x;
             s_vec2$2.y += this._container.position.y;
-            let clippingSize = this._container._uiProps.uiTransformComp.contentSize;
+            let clippingSize = this._containerUITrans.contentSize;
             if (s_vec2$2.x < 0 || s_vec2$2.y < 0 || s_vec2$2.x >= clippingSize.width || s_vec2$2.y >= clippingSize.height)
                 return null;
         }
@@ -11253,6 +11283,17 @@ class Window extends GComponent {
 }
 
 class GRoot extends GComponent {
+    static get inst() {
+        if (!GRoot._inst)
+            throw 'Call GRoot.create first!';
+        return GRoot._inst;
+    }
+    static create() {
+        GRoot._inst = new GRoot();
+        director.getScene().getChildByName('Canvas').addChild(GRoot._inst.node);
+        GRoot._inst.onWinResize();
+        return GRoot._inst;
+    }
     constructor() {
         super();
         this._node.name = "GRoot";
@@ -11272,17 +11313,6 @@ class GRoot extends GComponent {
             View.instance.on('canvas-resize', this._thisOnResized);
             window.addEventListener('orientationchange', this._thisOnResized);
         }
-    }
-    static get inst() {
-        if (!GRoot._inst)
-            throw 'Call GRoot.create first!';
-        return GRoot._inst;
-    }
-    static create() {
-        GRoot._inst = new GRoot();
-        director.getScene().getChildByName('Canvas').addChild(GRoot._inst.node);
-        GRoot._inst.onWinResize();
-        return GRoot._inst;
     }
     onDestroy() {
         View.instance.off('design-resolution-changed', this.onWinResize, this);
@@ -11396,7 +11426,9 @@ class GRoot extends GComponent {
         var sizeW = 0, sizeH = 0;
         if (target) {
             pos = target.localToGlobal();
+            this.globalToLocal(pos.x, pos.y, pos);
             let pos2 = target.localToGlobal(target.width, target.height);
+            this.globalToLocal(pos2.x, pos2.y, pos2);
             sizeW = pos2.x - pos.x;
             sizeH = pos2.y - pos.y;
         }
@@ -11579,7 +11611,7 @@ class GRoot extends GComponent {
     onWinResize() {
         updateScaler();
         this.setSize(UIContentScaler.rootSize.width, UIContentScaler.rootSize.height);
-        let anchorPoint = this.node.getParent()._uiProps.uiTransformComp.anchorPoint;
+        let anchorPoint = this.node.getParent().getComponent(UITransform).anchorPoint;
         this.node.setPosition(-this._width * anchorPoint.x, this._height * (1 - anchorPoint.y));
     }
     handlePositionChanged() {
@@ -11712,6 +11744,7 @@ class GTextInput extends GTextField {
     }
     onTouchEnd1(evt) {
         this._editBox.openKeyboard();
+        evt.propagationStopped = true;
     }
     setup_beforeAdd(buffer, beginPos) {
         super.setup_beforeAdd(buffer, beginPos);
@@ -11740,18 +11773,16 @@ class GTextInput extends GTextField {
     }
 }
 class MyEditBox extends EditBox {
+    _init() {
+        super._init();
+        this.placeholderLabel.getComponent(UITransform).setAnchorPoint(0, 1);
+        this.textLabel.getComponent(UITransform).setAnchorPoint(0, 1);
+        this.placeholderLabel.overflow = Overflow.CLAMP;
+        this.textLabel.overflow = Overflow.CLAMP;
+    }
     _registerEvent() {
         //取消掉原来的事件处理
     }
-    // _syncSize() {
-    //     let size = this.node._uiProps.uiTransformComp.contentSize;
-    //     let impl = this["_impl"];
-    //     impl.setSize(size.width, size.height);
-    //     if (this.textLabel)
-    //         this.textLabel.node._uiProps.uiTransformComp.setContentSize(size.width, size.height);
-    //     if (this.placeholderLabel)
-    //         this.placeholderLabel.node._uiProps.uiTransformComp.setContentSize(size.width, size.height);
-    // }
     openKeyboard() {
         let impl = this["_impl"];
         if (impl) {
@@ -11818,7 +11849,8 @@ class GLoader extends GObject {
         this._color = new Color(255, 255, 255, 255);
         this._container = new Node("Image");
         this._container.layer = UIConfig.defaultUILayer;
-        this._container.addComponent(UITransform).setAnchorPoint(0, 1);
+        this._containerUITrans = this._container.addComponent(UITransform);
+        this._containerUITrans.setAnchorPoint(0, 1);
         this._node.addChild(this._container);
         this._content = this._container.addComponent(MovieClip);
         this._content.sizeMode = Sprite.SizeMode.CUSTOM;
@@ -11843,6 +11875,24 @@ class GLoader extends GObject {
         this._url = value;
         this.loadContent();
         this.updateGear(7);
+    }
+    /**
+     * 设置图片
+     * @param url
+     * @param bundleStr 远程包名称
+     */
+    setUrlWithBundle(url, bundleStr = '') {
+        this.bundle = bundleStr;
+        this.url = url;
+    }
+    set bundle(val) {
+        this._assetBundle = val;
+    }
+    get bundle() {
+        if (this._assetBundle) {
+            return this._assetBundle;
+        }
+        return UIConfig.loaderAssetsBundleName;
     }
     get icon() {
         return this._url;
@@ -11966,8 +12016,8 @@ class GLoader extends GObject {
         this._content.spriteFrame = value;
         this._content.type = Sprite.Type.SIMPLE;
         if (value != null) {
-            this.sourceWidth = value.getRect().width;
-            this.sourceHeight = value.getRect().height;
+            this.sourceWidth = value.rect.width;
+            this.sourceHeight = value.rect.height;
         }
         else {
             this.sourceWidth = this.sourceHeight = 0;
@@ -11984,55 +12034,59 @@ class GLoader extends GObject {
             this.loadExternal();
     }
     loadFromPackage(itemURL) {
-        this._contentItem = UIPackage.getItemByURL(itemURL);
-        if (this._contentItem) {
-            this._contentItem = this._contentItem.getBranch();
-            this.sourceWidth = this._contentItem.width;
-            this.sourceHeight = this._contentItem.height;
-            this._contentItem = this._contentItem.getHighResolution();
-            this._contentItem.load();
-            if (this._autoSize)
-                this.setSize(this.sourceWidth, this.sourceHeight);
-            if (this._contentItem.type == PackageItemType.Image) {
-                if (!this._contentItem.asset) {
-                    this.setErrorState();
+        let contentItem = UIPackage.getItemByURL(itemURL);
+        this._contentItem = contentItem;
+        if (!contentItem) {
+            this.setErrorState();
+            return;
+        }
+        contentItem = contentItem.getBranch();
+        this.sourceWidth = contentItem.width;
+        this.sourceHeight = contentItem.height;
+        contentItem = contentItem.getHighResolution();
+        contentItem.load();
+        if (this._autoSize)
+            this.setSize(this.sourceWidth, this.sourceHeight);
+        if (contentItem.type == PackageItemType.Image) {
+            if (!contentItem.asset) {
+                this.setErrorState();
+            }
+            else {
+                this._content.spriteFrame = contentItem.asset;
+                if (this._content.fillMethod == 0) {
+                    if (contentItem.scale9Grid)
+                        this._content.type = Sprite.Type.SLICED;
+                    else if (contentItem.scaleByTile)
+                        this._content.type = Sprite.Type.TILED;
+                    else
+                        this._content.type = Sprite.Type.SIMPLE;
                 }
                 else {
-                    this._content.spriteFrame = this._contentItem.asset;
-                    if (this._content.fillMethod == 0) {
-                        if (this._contentItem.scale9Grid)
-                            this._content.type = Sprite.Type.SLICED;
-                        else if (this._contentItem.scaleByTile)
-                            this._content.type = Sprite.Type.TILED;
-                        else
-                            this._content.type = Sprite.Type.SIMPLE;
-                    }
-                    this.updateLayout();
+                    this._content.type = Sprite.Type.FILLED;
                 }
-            }
-            else if (this._contentItem.type == PackageItemType.MovieClip) {
-                this._content.interval = this._contentItem.interval;
-                this._content.swing = this._contentItem.swing;
-                this._content.repeatDelay = this._contentItem.repeatDelay;
-                this._content.frames = this._contentItem.frames;
                 this.updateLayout();
             }
-            else if (this._contentItem.type == PackageItemType.Component) {
-                var obj = UIPackage.createObjectFromURL(itemURL);
-                if (!obj)
-                    this.setErrorState();
-                else if (!(obj instanceof GComponent)) {
-                    obj.dispose();
-                    this.setErrorState();
-                }
-                else {
-                    this._content2 = obj;
-                    this._container.addChild(this._content2.node);
-                    this.updateLayout();
-                }
-            }
-            else
+        }
+        else if (contentItem.type == PackageItemType.MovieClip) {
+            this._content.interval = contentItem.interval;
+            this._content.swing = contentItem.swing;
+            this._content.repeatDelay = contentItem.repeatDelay;
+            this._content.frames = contentItem.frames;
+            this.updateLayout();
+        }
+        else if (contentItem.type == PackageItemType.Component) {
+            var obj = UIPackage.createObjectFromURL(itemURL);
+            if (!obj)
                 this.setErrorState();
+            else if (!(obj instanceof GComponent)) {
+                obj.dispose();
+                this.setErrorState();
+            }
+            else {
+                this._content2 = obj;
+                this._container.addChild(this._content2.node);
+                this.updateLayout();
+            }
         }
         else
             this.setErrorState();
@@ -12053,27 +12107,49 @@ class GLoader extends GObject {
                 this.onExternalLoadSuccess(sf);
             }
             else if (asset instanceof ImageAsset) {
-                let sf = new SpriteFrame();
                 let texture = new Texture2D();
                 texture.image = asset;
+                let sf = new SpriteFrame();
                 sf.texture = texture;
                 this.onExternalLoadSuccess(sf);
+            }
+            else {
+                console.warn("GLoader:cant load", this.url);
             }
         };
         if (this._url.startsWith("http://")
             || this._url.startsWith("https://")
             || this._url.startsWith('/'))
             assetManager.loadRemote(this._url, callback);
-        else
-            resources.load(this._url + "/spriteFrame", Asset, callback);
+        else if (this._url.startsWith('data:image/')) {
+            const img = new Image();
+            img.src = this._url;
+            img.onload = () => {
+                const tex = new Texture2D();
+                tex.reset({
+                    width: img.width,
+                    height: img.height,
+                });
+                tex.uploadData(img, 0, 0);
+                callback(null, tex);
+            };
+        }
+        else {
+            let bundle = resources;
+            //如果有设置远程包 从远程包加载
+            if (this.bundle && assetManager.bundles.has(this.bundle)) {
+                bundle = assetManager.getBundle(this.bundle);
+            }
+            bundle.load(this._url + "/spriteFrame", Asset, callback);
+        }
     }
     freeExternal(texture) {
     }
     onExternalLoadSuccess(texture) {
         this._content.spriteFrame = texture;
         this._content.type = Sprite.Type.SIMPLE;
-        this.sourceWidth = texture.getRect().width;
-        this.sourceHeight = texture.getRect().height;
+        this.sourceWidth = texture.originalSize.width;
+        this.sourceHeight = texture.originalSize.height;
         if (this._autoSize)
             this.setSize(this.sourceWidth, this.sourceHeight);
         this.updateLayout();
@@ -12122,7 +12198,7 @@ class GLoader extends GObject {
                 ch = 30;
             this.setSize(cw, ch);
             this._updatingLayout = false;
-            this._container._uiProps.uiTransformComp.setContentSize(this._width, this._height);
+            this._containerUITrans.setContentSize(this._width, this._height);
             this._container.setPosition(pivotCorrectX, pivotCorrectY);
             if (this._content2) {
                 this._content2.setPosition(pivotCorrectX + this._width * this.pivotX, pivotCorrectY - this._height * this.pivotY);
@@ -12162,7 +12238,7 @@ class GLoader extends GObject {
                 ch = this.sourceHeight * sy;
             }
         }
-        this._container._uiProps.uiTransformComp.setContentSize(cw, ch);
+        this._containerUITrans.setContentSize(cw, ch);
         if (this._content2) {
             this._content2.setPosition(pivotCorrectX + this._width * this.pivotX, pivotCorrectY - this._height * this.pivotY);
             this._content2.setScale(sx, sy);
@@ -12459,8 +12535,7 @@ class GLoader3D extends GObject {
             this.setDragonBones(this._contentItem.asset, this._contentItem.atlasAsset, this._contentItem.skeletonAnchor);
     }
     setSpine(asset, anchor, pma) {
-        this.url = null;
-        this.clearContent();
+        this.freeSpine();
         let node = new Node();
         this._container.addChild(node);
         node.layer = UIConfig.defaultUILayer;
@@ -12472,9 +12547,13 @@ class GLoader3D extends GObject {
         this.onChangeSpine();
         this.updateLayout();
     }
+    freeSpine() {
+        if (this._content) {
+            this._content.destroy();
+        }
+    }
     setDragonBones(asset, atlasAsset, anchor, pma) {
-        this.url = null;
-        this.clearContent();
+        this.freeDragonBones();
         let node = new Node();
         node.layer = UIConfig.defaultUILayer;
         this._container.addChild(node);
@@ -12490,11 +12569,23 @@ class GLoader3D extends GObject {
         this.onChangeDragonBones();
         this.updateLayout();
     }
+    freeDragonBones() {
+        if (this._content) {
+            this._content.destroy();
+        }
+    }
     onChange() {
-        this.onChangeSpine();
-        this.onChangeDragonBones();
+        if (this._contentItem == null)
+            return;
+        if (this._contentItem.type == PackageItemType.Spine) {
+            this.onChangeSpine();
+        }
+        if (this._contentItem.type == PackageItemType.DragonBones) {
+            this.onChangeDragonBones();
+        }
     }
     onChangeSpine() {
+        var _a;
         if (!(this._content instanceof sp.Skeleton))
             return;
         if (this._animationName) {
@@ -12513,7 +12604,7 @@ class GLoader3D extends GObject {
         else
             this._content.clearTrack(0);
         let skin = this._skinName || this._content.skeletonData.getRuntimeData().skins[0].name;
-        if (this._content["_skeleton"].skin != skin)
+        if (((_a = this._content["_skeleton"].skin) === null || _a === void 0 ? void 0 : _a.name) != skin)
             this._content.setSkin(skin);
     }
     onChangeDragonBones() {
@@ -12836,6 +12927,24 @@ class GLabel extends GComponent {
             }
             else
                 buffer.skip(13);
+        }
+        str = buffer.readS();
+        if (str != null) {
+            this._sound = str;
+            if (buffer.readBool()) {
+                this._soundVolumeScale = buffer.readFloat();
+            }
+            this._node.on(Event.CLICK, this.onClick_1, this);
+        }
+    }
+    onClick_1() {
+        if (this._sound) {
+            var pi = UIPackage.getItemByURL(this._sound);
+            if (pi) {
+                var sound = pi.owner.getItemAsset(pi);
+                if (sound)
+                    GRoot.inst.playOneShotSound(sound, this._soundVolumeScale);
+            }
         }
     }
 }
@@ -14002,7 +14111,7 @@ class GList extends GComponent {
                 return;
             this.checkVirtualList();
             if (index >= this._virtualItems.length)
-                throw "Invalid child index: " + index + ">" + this._virtualItems.length;
+                throw new Error("Invalid child index: " + index + ">" + this._virtualItems.length);
             if (this._loop)
                 index = Math.floor(this._firstIndex / this._numItems) * this._numItems + index;
             var rect;
@@ -14093,10 +14202,10 @@ class GList extends GComponent {
     _setVirtual(loop) {
         if (!this._virtual) {
             if (!this._scrollPane)
-                throw "Virtual list must be scrollable!";
+                throw new Error("Virtual list must be scrollable!");
             if (loop) {
                 if (this._layout == ListLayoutType.FlowHorizontal || this._layout == ListLayoutType.FlowVertical)
-                    throw "Loop list is not supported for FlowHorizontal or FlowVertical layout!";
+                    throw new Error("Loop list is not supported for FlowHorizontal or FlowVertical layout!");
                 this._scrollPane.bouncebackEffect = false;
             }
             this._virtual = true;
@@ -14107,7 +14216,7 @@ class GList extends GComponent {
                 this._itemSize = new Size(0, 0);
                 var obj = this.getFromPool(null);
                 if (!obj) {
-                    throw "Virtual List must have a default list item resource.";
+                    throw new Error("Virtual List must have a default list item resource.");
                 }
                 else {
                     this._itemSize.width = obj.width;
@@ -14143,7 +14252,7 @@ class GList extends GComponent {
     set numItems(value) {
         if (this._virtual) {
             if (this.itemRenderer == null)
-                throw "Set itemRenderer first!";
+                throw new Error("Set itemRenderer first!");
             this._numItems = value;
             if (this._loop)
                 this._realNumItems = this._numItems * 6; //设置6倍数量，用于循环滚动
@@ -15639,9 +15748,9 @@ class GComboBox extends GComponent {
         if (this._itemsUpdated) {
             this._itemsUpdated = false;
             this._list.removeChildrenToPool();
-            var cnt = this._items.length;
-            for (var i = 0; i < cnt; i++) {
-                var item = this._list.addItemFromPool();
+            let cnt = this._items.length;
+            for (let i = 0; i < cnt; i++) {
+                let item = this._list.addItemFromPool();
                 item.name = i < this._values.length ? this._values[i] : "";
                 item.text = this._items[i];
                 item.icon = (this._icons && i < this._icons.length) ? this._icons[i] : null;
@@ -16197,6 +16306,7 @@ class GScrollBar extends GComponent {
             this._target.scrollRight();
     }
     onBarTouchBegin(evt) {
+        evt.propagationStopped = true;
         var pt = this._grip.globalToLocal(evt.pos.x, evt.pos.y, s_vec2);
         if (this._vertical) {
             if (pt.y < 0)
@@ -16323,7 +16433,7 @@ class GTreeNode {
             return child;
         }
         else {
-            throw "Invalid child index";
+            throw new Error("Invalid child index");
         }
     }
     removeChildren(beginIndex, endIndex) {
@@ -16339,7 +16449,7 @@ class GTreeNode {
         if (index >= 0 && index < this.numChildren)
             return this._children[index];
         else
-            throw "Invalid child index";
+            throw new Error("Invalid child index");
     }
     getChildIndex(child) {
         return this._children.indexOf(child);
@@ -16363,7 +16473,7 @@ class GTreeNode {
     setChildIndex(child, index) {
         var oldIndex = this._children.indexOf(child);
         if (oldIndex == -1)
-            throw "Not a child of this container";
+            throw new Error("Not a child of this container");
         var cnt = this._children.length;
         if (index < 0)
             index = 0;
@@ -16380,7 +16490,7 @@ class GTreeNode {
         var index1 = this._children.indexOf(child1);
         var index2 = this._children.indexOf(child2);
         if (index1 == -1 || index2 == -1)
-            throw "Not a child of this container";
+            throw new Error("Not a child of this container");
         this.swapChildrenAt(index1, index2);
     }
     swapChildrenAt(index1, index2) {
@@ -16732,7 +16842,7 @@ class PopupMenu {
         if (!url) {
             url = UIConfig.popupMenu;
             if (!url)
-                throw "UIConfig.popupMenu not defined";
+                throw new Error("UIConfig.popupMenu not defined");
         }
         this._contentPane = UIPackage.createObjectFromURL(url);
         this._contentPane.on(Event.DISPLAY, this.onDisplay, this);
@@ -16769,7 +16879,7 @@ class PopupMenu {
     }
     addSeperator() {
         if (UIConfig.popupMenu_seperator == null)
-            throw "UIConfig.popupMenu_seperator not defined";
+            throw new Error("UIConfig.popupMenu_seperator not defined");
         this.list.addItemFromPool(UIConfig.popupMenu_seperator);
     }
     getItemName(index) {
@@ -16963,6 +17073,11 @@ UIObjectFactory.extensions = {};
 Decls.UIObjectFactory = UIObjectFactory;
 
 class DragDropManager {
+    static get inst() {
+        if (!DragDropManager._inst)
+            DragDropManager._inst = new DragDropManager();
+        return DragDropManager._inst;
+    }
     constructor() {
         this._agent = new GLoader();
         this._agent.draggable = true;
@@ -16973,11 +17088,6 @@ class DragDropManager {
         this._agent.verticalAlign = VertAlignType.Middle;
         this._agent.sortingOrder = 1000000;
         this._agent.on(Event.DRAG_END, this.onDragEnd, this);
-    }
-    static get inst() {
-        if (!DragDropManager._inst)
-            DragDropManager._inst = new DragDropManager();
-        return DragDropManager._inst;
     }
     get dragAgent() {
         return this._agent;
@@ -17158,7 +17268,7 @@ class AsyncOperationRunner extends Component {
         var di;
         var poolStart;
         var k;
-        var t = director.getTotalTime() / 1000;
+        var t = game.totalTime / 1000;
         var frameTime = UIConfig.frameTimeForAsyncUIConstruction;
         var totalItems = this._itemList.length;
         while (this._index < totalItems) {
@@ -17188,7 +17298,7 @@ class AsyncOperationRunner extends Component {
                 }
             }
             this._index++;
-            if ((this._index % 5 == 0) && director.getTotalTime() / 1000 - t >= frameTime)
+            if ((this._index % 5 == 0) && game.totalTime / 1000 - t >= frameTime)
                 return;
         }
         var result = this._objectPool[0];
@@ -17198,4 +17308,4 @@ class AsyncOperationRunner extends Component {
     }
 }
 
-export { AlignType, AsyncOperation, AutoSizeType, BlendMode, ButtonMode, ByteBuffer, ChildrenRenderOrder, Controller, DragDropManager, EaseType, Event, FillMethod, FillOrigin, FlipType, GButton, GComboBox, GComponent, GGraph, GGroup, GImage, GLabel, GList, GLoader, GLoader3D, GMovieClip, GObject, GObjectPool, GProgressBar, GRichTextField, GRoot, GScrollBar, GSlider, GTextField, GTextInput, GTree, GTreeNode, GTween, GTweener, GearAnimation, GearBase, GearColor, GearDisplay, GearDisplay2, GearFontSize, GearIcon, GearLook, GearSize, GearText, GearXY, GroupLayoutType, Image, ListLayoutType, ListSelectionMode, LoaderFillType, MovieClip, ObjectPropID, ObjectType, OverflowType, PackageItem, PackageItemType, PopupDirection, PopupMenu, ProgressTitleType, RelationType, ScrollBarDisplayType, ScrollPane, ScrollType, Transition, TranslationHelper, UBBParser, UIConfig, UIObjectFactory, UIPackage, VertAlignType, Window, registerFont };
+export { AlignType, AsyncOperation, AutoSizeType, BlendMode, ButtonMode, ByteBuffer, ChildrenRenderOrder, Controller, DragDropManager, EaseType, Event, FillMethod, FillOrigin, FlipType, GButton, GComboBox, GComponent, GGraph, GGroup, GImage, GLabel, GList, GLoader, GLoader3D, GMovieClip, GObject, GObjectPool, GProgressBar, GRichTextField, GRoot, GScrollBar, GSlider, GTextField, GTextInput, GTree, GTreeNode, GTween, GTweener, GearAnimation, GearBase, GearColor, GearDisplay, GearDisplay2, GearFontSize, GearIcon, GearLook, GearSize, GearText, GearXY, GroupLayoutType, Image$1 as Image, ListLayoutType, ListSelectionMode, LoaderFillType, MovieClip, ObjectPropID, ObjectType, OverflowType, PackageItem, PackageItemType, PopupDirection, PopupMenu, ProgressTitleType, RelationType, ScrollBarDisplayType, ScrollPane, ScrollType, Transition, TranslationHelper, UBBParser, UIConfig, UIObjectFactory, UIPackage, VertAlignType, Window, registerFont };

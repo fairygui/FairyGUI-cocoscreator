@@ -1,3 +1,4 @@
+/// <reference path="../lib/cc.d.ts" />
 import { sp, dragonBones, Color, Vec2 } from "cc";
 import { AlignType, LoaderFillType, VertAlignType } from "./FieldTypes";
 import { GObject } from "./GObject";
@@ -52,7 +53,9 @@ export declare class GLoader3D extends GObject {
     protected loadFromPackage(itemURL: string): void;
     private onLoaded;
     setSpine(asset: sp.SkeletonData, anchor: Vec2, pma?: boolean): void;
+    freeSpine(): void;
     setDragonBones(asset: dragonBones.DragonBonesAsset, atlasAsset: dragonBones.DragonBonesAtlasAsset, anchor: Vec2, pma?: boolean): void;
+    freeDragonBones(): void;
     private onChange;
     private onChangeSpine;
     private onChangeDragonBones;
