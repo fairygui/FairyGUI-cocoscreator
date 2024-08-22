@@ -1,1 +1,8 @@
+node_modules
 .DS_Store
+demo/UIProject/.objs
+.prettierignore
+*.tgz
+.env
+dist
+source/build

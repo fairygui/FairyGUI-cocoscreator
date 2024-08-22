@@ -673,7 +673,7 @@ export class ScrollPane extends Component {
             this._tweenStart.y = cy;
             this._tweenChange.set(Vec2.ZERO);
             this._tweenChange[this._refreshBarAxis] = this._headerLockedSize - this._tweenStart[this._refreshBarAxis];
-            this._tweenDuration.x = this._tweenDuration.y = TWEEN_TIME_DEFAULT;
+            this._tweenDuration.x = this._tweenDuration.y = UIConfig.SCROLLPANE_TWEEN_TIME_DEFAULT;
             this.startTween(2);
         }
     }
@@ -698,7 +698,7 @@ export class ScrollPane extends Component {
             else
                 max += this._footerLockedSize;
             this._tweenChange[this._refreshBarAxis] = -max - this._tweenStart[this._refreshBarAxis];
-            this._tweenDuration.x = this._tweenDuration.y = TWEEN_TIME_DEFAULT;
+            this._tweenDuration.x = this._tweenDuration.y = UIConfig.SCROLLPANE_TWEEN_TIME_DEFAULT;
             this.startTween(2);
         }
     }
@@ -1016,7 +1016,7 @@ export class ScrollPane extends Component {
             }
 
             if (posX != this._container.position.x || posY != (-this._container.position.y)) {
-                this._tweenDuration.x = this._tweenDuration.y = TWEEN_TIME_GO;
+                this._tweenDuration.x = this._tweenDuration.y = UIConfig.SCROLLPANE_TWEEN_TIME_GO;
                 this._tweenStart.x = this._container.position.x;
                 this._tweenStart.y = (-this._container.position.y);
                 this._tweenChange.x = posX - this._tweenStart.x;
@@ -1146,7 +1146,7 @@ export class ScrollPane extends Component {
                 else if (this._header && this._header.maxHeight != 0)
                     this._container.setPosition(this._container.position.x, - Math.floor(Math.min(newPosY * 0.5, this._header.maxHeight)));
                 else
-                    this._container.setPosition(this._container.position.x, - Math.floor(Math.min(newPosY * 0.5, this._viewSize.y * PULL_RATIO)));
+                    this._container.setPosition(this._container.position.x, - Math.floor(Math.min(newPosY * 0.5, this._viewSize.y * UIConfig.SCROLLPANE_PULL_RATIO)));
             }
             else if (newPosY < -this._overlapSize.y) {
                 if (!this._bouncebackEffect)
@@ -1154,7 +1154,7 @@ export class ScrollPane extends Component {
                 else if (this._footer && this._footer.maxHeight > 0)
                     this._container.setPosition(this._container.position.x, - Math.floor(Math.max((newPosY + this._overlapSize.y) * 0.5, -this._footer.maxHeight) - this._overlapSize.y));
                 else
-                    this._container.setPosition(this._container.position.x, - Math.floor(Math.max((newPosY + this._overlapSize.y) * 0.5, -this._viewSize.y * PULL_RATIO) - this._overlapSize.y));
+                    this._container.setPosition(this._container.position.x, - Math.floor(Math.max((newPosY + this._overlapSize.y) * 0.5, -this._viewSize.y * UIConfig.SCROLLPANE_PULL_RATIO) - this._overlapSize.y));
             }
             else
                 this._container.setPosition(this._container.position.x, - newPosY);
@@ -1167,7 +1167,7 @@ export class ScrollPane extends Component {
                 else if (this._header && this._header.maxWidth != 0)
                     this._container.setPosition(Math.floor(Math.min(newPosX * 0.5, this._header.maxWidth)), this._container.position.y);
                 else
-                    this._container.setPosition(Math.floor(Math.min(newPosX * 0.5, this._viewSize.x * PULL_RATIO)), this._container.position.y);
+                    this._container.setPosition(Math.floor(Math.min(newPosX * 0.5, this._viewSize.x * UIConfig.SCROLLPANE_PULL_RATIO)), this._container.position.y);
             }
             else if (newPosX < 0 - this._overlapSize.x) {
                 if (!this._bouncebackEffect)
@@ -1175,7 +1175,7 @@ export class ScrollPane extends Component {
                 else if (this._footer && this._footer.maxWidth > 0)
                     this._container.setPosition(Math.floor(Math.max((newPosX + this._overlapSize.x) * 0.5, -this._footer.maxWidth) - this._overlapSize.x), this._container.position.y);
                 else
-                    this._container.setPosition(Math.floor(Math.max((newPosX + this._overlapSize.x) * 0.5, -this._viewSize.x * PULL_RATIO) - this._overlapSize.x), this._container.position.y);
+                    this._container.setPosition(Math.floor(Math.max((newPosX + this._overlapSize.x) * 0.5, -this._viewSize.x * UIConfig.SCROLLPANE_PULL_RATIO) - this._overlapSize.x), this._container.position.y);
             }
             else
                 this._container.setPosition(newPosX, this._container.position.y);
@@ -1309,7 +1309,7 @@ export class ScrollPane extends Component {
                 this._tweenChange.y = sEndPos.y - this._tweenStart.y;
             }
 
-            this._tweenDuration.x = this._tweenDuration.y = TWEEN_TIME_DEFAULT;
+            this._tweenDuration.x = this._tweenDuration.y = UIConfig.SCROLLPANE_TWEEN_TIME_DEFAULT;
         }
         else {
             //更新速度
@@ -1325,7 +1325,7 @@ export class ScrollPane extends Component {
                 this.updateTargetAndDuration(this._tweenStart, sEndPos);
             }
             else
-                this._tweenDuration.x = this._tweenDuration.y = TWEEN_TIME_DEFAULT;
+                this._tweenDuration.x = this._tweenDuration.y = UIConfig.SCROLLPANE_TWEEN_TIME_DEFAULT;
             sOldChange.x = sEndPos.x - this._tweenStart.x;
             sOldChange.y = sEndPos.y - this._tweenStart.y;
 
@@ -1581,8 +1581,10 @@ export class ScrollPane extends Component {
                     page++;
             }
             else //否则只需要页面的1/3，当然，需要考虑到左移和右移的情况
-            {
-                if (delta > testPageSize * (change < 0 ? 0.3 : 0.7))
+            {   
+                // @terran
+                let ratio = UIConfig.SCROLLPANE_PAGE_RATIO;
+                if (delta > testPageSize * (change < 0 ? ratio : 1-ratio))
                     page++;
             }
 
@@ -1665,8 +1667,8 @@ export class ScrollPane extends Component {
             }
         }
 
-        if (duration < TWEEN_TIME_DEFAULT)
-            duration = TWEEN_TIME_DEFAULT;
+        if (duration < UIConfig.SCROLLPANE_TWEEN_TIME_DEFAULT)
+            duration = UIConfig.SCROLLPANE_TWEEN_TIME_DEFAULT;
         this._tweenDuration[axis] = duration;
 
         return pos;
@@ -1677,8 +1679,8 @@ export class ScrollPane extends Component {
             return;
 
         var newDuration: number = Math.abs(this._tweenChange[axis] / oldChange) * this._tweenDuration[axis];
-        if (newDuration < TWEEN_TIME_DEFAULT)
-            newDuration = TWEEN_TIME_DEFAULT;
+        if (newDuration < UIConfig.SCROLLPANE_TWEEN_TIME_DEFAULT)
+            newDuration = UIConfig.SCROLLPANE_TWEEN_TIME_DEFAULT;
 
         this._tweenDuration[axis] = newDuration;
     }
@@ -1820,7 +1822,7 @@ export class ScrollPane extends Component {
                     || newValue > threshold1 && this._tweenChange[axis] == 0)//开始回弹
                 {
                     this._tweenTime[axis] = 0;
-                    this._tweenDuration[axis] = TWEEN_TIME_DEFAULT;
+                    this._tweenDuration[axis] = UIConfig.SCROLLPANE_TWEEN_TIME_DEFAULT;
                     this._tweenChange[axis] = -newValue + threshold1;
                     this._tweenStart[axis] = newValue;
                 }
@@ -1828,7 +1830,7 @@ export class ScrollPane extends Component {
                     || newValue < threshold2 && this._tweenChange[axis] == 0)//开始回弹
                 {
                     this._tweenTime[axis] = 0;
-                    this._tweenDuration[axis] = TWEEN_TIME_DEFAULT;
+                    this._tweenDuration[axis] = UIConfig.SCROLLPANE_TWEEN_TIME_DEFAULT;
                     this._tweenChange[axis] = threshold2 - newValue;
                     this._tweenStart[axis] = newValue;
                 }
@@ -1852,10 +1854,6 @@ export class ScrollPane extends Component {
 }
 
 var _gestureFlag: number = 0;
-
-const TWEEN_TIME_GO: number = 0.5; //调用SetPos(ani)时使用的缓动时间
-const TWEEN_TIME_DEFAULT: number = 0.3; //惯性滚动的最小缓动时间
-const PULL_RATIO: number = 0.5; //下拉过顶或者上拉过底时允许超过的距离占显示区域的比例
 
 var s_vec2: Vec2 = new Vec2();
 var s_rect: Rect = new Rect();

@@ -67,6 +67,11 @@ export class UIConfig {
 
     //Default group name of UI node.<br/>
     public static defaultUILayer: number = Layers.Enum.UI_2D;
+
+    public static SCROLLPANE_TWEEN_TIME_GO: number = 0.5; //调用SetPos(ani)时使用的缓动时间
+    public static SCROLLPANE_TWEEN_TIME_DEFAULT: number = 0.3; //惯性滚动的最小缓动时间
+    public static SCROLLPANE_PULL_RATIO: number = 0.5; //下拉过顶或者上拉过底时允许超过的距离占显示区域的比例
+    public static SCROLLPANE_PAGE_RATIO = .3;//运行翻页的比例
 }
 
 let _fontRegistry: { [index: string]: Font } = {};

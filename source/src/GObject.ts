@@ -23,6 +23,17 @@ import { UIConfig } from "./UIConfig";
 import { ByteBuffer } from "./utils/ByteBuffer";
 
 export class GObject {
+    get root(){
+        let p = this.parent;
+        while (p) {
+            if (p.node.name == "GRoot") {
+                return p;
+            }
+            p = p.parent;
+        }
+        return Decls.GRoot.inst;   
+    }
+
     public data?: any;
     public packageItem?: PackageItem;
     public static draggingObject: GObject | null;

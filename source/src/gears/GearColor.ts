@@ -24,8 +24,8 @@ export class GearColor extends GearBase {
             this._storage[pageId] = gv;
         }
 
-        gv.color = buffer.readColor();
-        gv.strokeColor = buffer.readColor();
+        gv.color = buffer.readColor(true);
+        gv.strokeColor = buffer.readColor(true);
     }
 
     public apply(): void {

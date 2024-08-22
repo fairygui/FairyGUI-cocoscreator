@@ -410,7 +410,7 @@ export class GComboBox extends GComponent {
         this.dropdown.width = this.width;
         this._list.ensureBoundsCorrect();
 
-        GRoot.inst.togglePopup(this.dropdown, this, this._popupDirection);
+        this.root.togglePopup(this.dropdown, this, this._popupDirection);
         if (this.dropdown.parent)
             this.setState(GButton.DOWN);
     }

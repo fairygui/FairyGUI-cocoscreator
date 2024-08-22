@@ -123,10 +123,7 @@ export class Window extends GComponent {
     }
 
     public hideImmediately(): void {
-        var r: GRoot = (this.parent instanceof GRoot) ? this.parent : null;
-        if (!r)
-            r = GRoot.inst;
-        r.hideWindowImmediately(this);
+        this.root.hideWindowImmediately(this);
     }
 
     public centerOn(r: GRoot, restraint?: boolean) {
@@ -161,7 +158,7 @@ export class Window extends GComponent {
     }
 
     public bringToFront(): void {
-        GRoot.inst.bringToFront(this);
+        this.root.bringToFront(this);
     }
 
     public showModalWait(requestingCmd?: number): void {
@@ -235,7 +232,9 @@ export class Window extends GComponent {
     protected onShown(): void {
     }
 
+    __onHide:()=>void = null;
     protected onHide(): void {
+        this.__onHide && this.__onHide();
     }
 
     protected doShowAnimation(): void {

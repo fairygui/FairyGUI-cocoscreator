@@ -45,6 +45,9 @@ export class GRichTextField extends GTextField {
 
     protected createRenderer() {
         this._richText = this._node.addComponent(RichText);
+        
+        this._richText.string = ""; 
+
         this._richText.handleTouchEvent = false;
         this.autoSize = AutoSizeType.None;
         this._richText.imageAtlas = imageAtlas;

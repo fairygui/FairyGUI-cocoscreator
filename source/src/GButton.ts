@@ -239,7 +239,7 @@ export class GButton extends GComponent {
     }
 
     public fireClick(): void {
-        GRoot.inst.inputProcessor.simulateClick(this);
+        this.root.inputProcessor.simulateClick(this);
     }
 
     protected setState(val: string): void {
@@ -488,7 +488,7 @@ export class GButton extends GComponent {
             if (this._linkedPopup instanceof Window)
                 this._linkedPopup.toggleStatus();
             else
-                GRoot.inst.togglePopup(this._linkedPopup, this);
+                this.root.togglePopup(this._linkedPopup, this);
         }
     }
 
