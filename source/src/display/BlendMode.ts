@@ -1,4 +1,4 @@
-import { gfx, Node, UIRenderer } from "cc";
+import {gfx, Node, UIRenderer} from "cc";
 
 export enum BlendMode {
     Normal,
@@ -18,11 +18,14 @@ export enum BlendMode {
 export class BlendModeUtils {
     public static apply(node: Node, blendMode: BlendMode) {
         let f = factors[<number>blendMode];
-        let renderers = node.getComponentsInChildren(UIRenderer);
-        renderers.forEach(element => {
-            (<any>element).srcBlendFactor = f[0];
-            (<any>element).dstBlendFactor = f[1];
-        });
+        node.components.forEach(component => {
+            if (component instanceof UIRenderer) {
+                // protected属性，cocos源码：
+                // https://github.com/cocos/cocos-engine/blob/10ec595/cocos/2d/framework/ui-renderer.ts#L241
+                component["_srcBlendFactor"] = f[0];
+                component["_dstBlendFactor"] = f[1];
+            }
+        })
     }
 
     public static override(blendMode: BlendMode, srcFactor: number, dstFactor: number) {
